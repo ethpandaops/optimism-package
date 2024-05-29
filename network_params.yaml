@@ -1,0 +1,12 @@
+participants:
+  - el_type: geth
+    el_image: ethereum/client-go:latest
+    cl_type: lighthouse
+    cl_image: sigp/lighthouse:latest
+network_params:
+  network: kurtosis
+  network_id: "3151908"
+additional_services: []
+snooper_enabled: false
+
+
