@@ -1,12 +1,14 @@
-participants:
-  - el_type: geth
-    el_image: ethereum/client-go:latest
-    cl_type: lighthouse
-    cl_image: sigp/lighthouse:latest
-network_params:
-  network: kurtosis
-  network_id: "3151908"
-additional_services: []
-snooper_enabled: false
+optimism_package:
+  participants:
+    - el_type: op-geth
+      el_image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
+      cl_type: op-node
+      cl_image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop
 
-
+ethereum_package:
+  participants:
+    - count: 2
+  network_params:
+    additional_preloaded_contracts: '{"0x123463a4B065722E99115D6c222f267d9cABb524": {"balance": "2ETH","code": "0x1234","storage": {}}}'
+  additional_services:
+    - dora
