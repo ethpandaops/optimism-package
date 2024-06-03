@@ -1,7 +1,7 @@
-# Stage 1: Builder
-FROM debian:latest AS builder
+# Use the Debian base image for broader compatibility
+FROM debian:latest
 
-# Install dependencies
+# Install dependencies using apt
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     make \
@@ -49,39 +49,6 @@ RUN git clone https://github.com/ethereum-optimism/optimism.git && \
     #make op-node op-batcher op-proposer && \
     pnpm build
 
-# Stage 2: Runner
-FROM debian:latest
-
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash \
-    ca-certificates \
-    jq \
-    direnv \
-    curl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Copy Go from the builder stage
-COPY --from=builder /usr/local/go/ /usr/local/go/
-ENV PATH="/usr/local/go/bin:${PATH}"
-
-# Copy pnpm from the builder stage
-COPY --from=builder /usr/local/lib/node_modules/pnpm /usr/local/lib/node_modules/pnpm
-COPY --from=builder /usr/local/bin/pnpm /usr/local/bin/pnpm
-
-# Copy web3 cli from the builder stage
-COPY --from=builder /usr/local/bin/web3 /usr/local/bin/web3
-
-# Copy Rust and Foundry from the builder stage
-COPY --from=builder /root/.cargo /root/.cargo
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Copy the built application from the builder stage
-COPY --from=builder /workspace/optimism /workspace/optimism
-
-# Set the working directory
-WORKDIR /workspace/optimism
-
 # Verify installed versions
 RUN git --version && \
     go version && \
@@ -92,6 +59,9 @@ RUN git --version && \
     make --version && \
     jq --version && \
     direnv --version
+
+# Set the working directory
+WORKDIR /workspace/optimism
 
 # Default command
 CMD ["bash"]
