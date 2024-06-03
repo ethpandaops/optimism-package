@@ -1,5 +1,6 @@
-# Use the Debian base image for broader compatibility
-FROM debian:latest
+FROM debian:latest as builder
+
+WORKDIR /workspace
 
 # Install dependencies using apt
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -20,48 +21,54 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libusb-1.0-0-dev \
     libssl-dev \
     ca-certificates \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install pnpm
+RUN npm install -g pnpm@9
 
 # Install Go from the official golang image
 COPY --from=golang:alpine /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 
-# Install pnpm
-RUN npm install -g pnpm@9
-
 # Install web3 cli
 RUN curl -LSs https://raw.githubusercontent.com/gochain/web3/master/install.sh | sh
 
 # Install Rust and Foundry
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    . $HOME/.cargo/env && \
-    cargo install --git https://github.com/foundry-rs/foundry --profile local --locked forge cast chisel anvil
+RUN curl -L https://foundry.paradigm.xyz | bash
+ENV PATH="/root/.foundry/bin:${PATH}"
+RUN foundryup
 
-# Ensure Foundry binaries are in PATH
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Clone the Optimism repository and set up the environment
-WORKDIR /workspace
 RUN git clone https://github.com/ethereum-optimism/optimism.git && \
     cd optimism && \
     git checkout tutorials/chain && \
     pnpm install && \
-    #make op-node op-batcher op-proposer && \
     pnpm build
 
-# Verify installed versions
-RUN git --version && \
-    go version && \
-    node --version && \
-    pnpm --version && \
-    forge --version && \
-    cast --version && \
-    make --version && \
-    jq --version && \
-    direnv --version
 
-# Set the working directory
+# Use multi-stage build to keep the final image lean
+FROM debian:stable-slim
+
+WORKDIR /workspace
+
+# Install dependencies using apt
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    jq \
+    direnv \
+    bash \
+    curl \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/local /usr/local
+COPY --from=builder /workspace/optimism /workspace/optimism
+COPY --from=builder /root/.foundry /root/.foundry
+
+# Set up environment variables
+ENV PATH="/root/.foundry/bin:/usr/local/go/bin:${PATH}"
+
+
+# Set the working directory and default command
 WORKDIR /workspace/optimism
-
-# Default command
 CMD ["bash"]
