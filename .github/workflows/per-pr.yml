@@ -8,22 +8,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  run_starlark:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Kurtosis
-        run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-          kurtosis analytics disable
-
-      - name: Run Starlark
-        run: kurtosis run ${{ github.workspace }} --args-file network_params.yaml
-
   run_with_args:
     strategy:
       matrix:
