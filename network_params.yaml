@@ -7,8 +7,10 @@ optimism_package:
 
 ethereum_package:
   participants:
-    - count: 2
+    - el_type: geth
+    - el_type: reth
   network_params:
-    additional_preloaded_contracts: '{"0x123463a4B065722E99115D6c222f267d9cABb524": {"balance": "2ETH","code": "0x1234","storage": {}}}'
+    preset: minimal
   additional_services:
     - dora
+    - blockscout

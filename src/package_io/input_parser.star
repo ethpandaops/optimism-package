@@ -1,4 +1,6 @@
-ethereum_package_input_parser = import_module("github.com/kurtosis-tech/ethereum-package/src/package_io/input_parser.star")
+ethereum_package_input_parser = import_module(
+    "github.com/kurtosis-tech/ethereum-package/src/package_io/input_parser.star"
+)
 
 DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
@@ -21,6 +23,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "participants",
 )
 
+
 def input_parser(plan, input_args):
     result = parse_network_params(plan, input_args)
 
@@ -39,6 +42,7 @@ def input_parser(plan, input_args):
             network=result["network_params"]["network"],
         ),
     )
+
 
 def parse_network_params(plan, input_args):
     result = default_input_args(input_args)
@@ -60,7 +64,11 @@ def parse_network_params(plan, input_args):
                     # if the value is set in input we set it in participant
                     new_participant[sub_attr] = sub_value
                 for _ in range(0, new_participant["count"]):
-                    participant_copy = ethereum_package_input_parser.deep_copy_participant(new_participant)
+                    participant_copy = (
+                        ethereum_package_input_parser.deep_copy_participant(
+                            new_participant
+                        )
+                    )
                     participants.append(participant_copy)
             result["participants"] = participants
 
@@ -72,6 +80,7 @@ def parse_network_params(plan, input_args):
 
     return result
 
+
 def default_input_args(input_args):
     network_params = default_network_params()
     participants = [default_participant()]
@@ -80,10 +89,12 @@ def default_input_args(input_args):
         "network_params": network_params,
     }
 
+
 def default_network_params():
     return {
         "network": "kurtosis",
     }
+
 
 def default_participant():
     return {
