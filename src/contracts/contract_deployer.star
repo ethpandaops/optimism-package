@@ -1,4 +1,4 @@
-IMAGE = "parithoshj/op-test:v3"
+IMAGE = "bbusa/op:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 
@@ -11,6 +11,10 @@ def launch_contract_deployer(
     el_rpc_http_url,
     cl_rpc_http_url,
     priv_key,
+    l1_chain_id,
+    l2_chain_id,
+    l1_block_time,
+    l2_block_time,
 ):
     op_genesis = plan.run_sh(
         description="Deploying L2 contracts (takes a few minutes (30 mins for mainnet preset - 4 mins for minimal preset) -- L1 has to be finalized first)",
@@ -20,6 +24,15 @@ def launch_contract_deployer(
             "WEB3_PRIVATE_KEY": str(priv_key),
             "CL_RPC_URL": str(cl_rpc_http_url),
             "FUND_VALUE": "10",
+            "DEPLOYMENT_OUTFILE": "deployments/artifact.json",
+            "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deployments/getting-started/",
+            "L1_RPC_KIND": "any",
+            "L1_RPC_URL": str(el_rpc_http_url),
+            "L1_CHAIN_ID": str(l1_chain_id),
+            "L2_CHAIN_ID": str(l2_chain_id),
+            "L1_BLOCK_TIME": str(l1_block_time),
+            "L2_BLOCK_TIME": str(l2_block_time),
+            "DEPLOYMENT_CONTEXT": "getting-started",
         },
         store=[
             StoreSpec(src="/network-configs", name="op-genesis-configs"),
@@ -32,17 +45,11 @@ def launch_contract_deployer(
                 "sed -i '1d' {0}".format(
                     ENVRC_PATH
                 ),  # Remove the first line (not commented out)
-                "echo 'export L1_RPC_KIND=any' >> {0}".format(ENVRC_PATH),
-                "echo 'export L1_RPC_URL={0}' >> {1}".format(
-                    el_rpc_http_url, ENVRC_PATH
-                ),
                 "echo 'export IMPL_SALT=$(openssl rand -hex 32)' >> {0}".format(
                     ENVRC_PATH
                 ),
-                "echo 'export DEPLOYMENT_CONTEXT=getting-started' >> {0}".format(
-                    ENVRC_PATH
-                ),
                 ". {0}".format(ENVRC_PATH),
+                "mkdir -p /network-configs",
                 "web3 transfer $FUND_VALUE to $GS_ADMIN_ADDRESS",  # Fund Admin
                 "sleep 3",
                 "web3 transfer $FUND_VALUE to $GS_BATCHER_ADDRESS",  # Fund Batcher
@@ -65,7 +72,6 @@ def launch_contract_deployer(
                 "sleep 3",
                 "cd /workspace/optimism/op-node",
                 "go run cmd/main.go genesis l2 --deploy-config ../packages/contracts-bedrock/deploy-config/getting-started.json --l1-deployments ../packages/contracts-bedrock/deployments/getting-started/.deploy --outfile.l2 genesis.json --outfile.rollup rollup.json --l1-rpc $L1_RPC_URL",
-                "mkdir -p /network-configs",
                 "mv /workspace/optimism/op-node/genesis.json /network-configs/genesis.json",
                 "mv /workspace/optimism/op-node/rollup.json /network-configs/rollup.json",
                 "mv /workspace/optimism/packages/contracts-bedrock/deployments/getting-started/.deploy /network-configs/.deploy",
