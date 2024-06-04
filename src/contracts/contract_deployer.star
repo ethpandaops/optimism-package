@@ -27,6 +27,9 @@ def launch_contract_deployer(
             "DEPLOYMENT_OUTFILE": "/workspace/optimism/packages/contracts-bedrock/deployments/"
             + str(l1_chain_id)
             + "/kurtosis.json",
+            # "CONTRACT_ADDRESSES_PATH": "/workspace/optimism/packages/contracts-bedrock/deployments/"
+            # + str(l1_chain_id)
+            # + "/kurtosis.json",
             "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
             "STATE_DUMP_PATH": "/workspace/optimism/packages/contracts-bedrock/deployments/"
             + str(l1_chain_id)
@@ -75,12 +78,18 @@ def launch_contract_deployer(
                 "sleep 12",
                 "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "sleep 3",
-                "forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID"
+                "CONTRACT_ADDRESSES_PATH=$DEPLOYMENT_OUTFILE forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID",
                 "cd /workspace/optimism/op-node",
-                "go run cmd/main.go genesis l2 --deploy-config ../packages/contracts-bedrock/deploy-config/getting-started.json --l1-deployments $DEPLOYMENT_OUTFILE --outfile.l2 genesis.json --outfile.rollup rollup.json --l1-rpc $L1_RPC_URL",
-                "mv /workspace/optimism/op-node/genesis.json /network-configs/genesis.json",
-                "mv /workspace/optimism/op-node/rollup.json /network-configs/rollup.json",
-                "mv /workspace/optimism/packages/contracts-bedrock/deployments/getting-started/.deploy /network-configs/.deploy",
+                "go run cmd/main.go genesis l2 \
+                            --l1-rpc $L1_RPC_URL \
+                            --deploy-config $DEPLOY_CONFIG_PATH \
+                            --l2-allocs $STATE_DUMP_PATH \
+                            --l1-deployments $DEPLOYMENT_OUTFILE \
+                            --outfile.l2 /network-configs/genesis.json \
+                            --outfile.rollup /network-configs/rollup.json",
+                "mv $DEPLOY_CONFIG_PATH /network-configs/getting-started.json",
+                "mv $DEPLOYMENT_OUTFILE /network-configs/kurtosis.json",
+                "mv $STATE_DUMP_PATH /network-configs/state-dump.json",
             ]
         ),
         wait="2000s",
