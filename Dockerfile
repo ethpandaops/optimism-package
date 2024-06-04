@@ -41,7 +41,7 @@ RUN foundryup
 
 RUN git clone https://github.com/ethereum-optimism/optimism.git && \
     cd optimism && \
-    git checkout tutorials/chain && \
+    git checkout develop && \
     pnpm install && \
     pnpm build
 

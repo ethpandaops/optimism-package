@@ -12,7 +12,7 @@ def launch_contract_deployer(
     cl_rpc_http_url,
     priv_key,
 ):
-    plan.run_sh(
+    op_genesis = plan.run_sh(
         description="Deploying L2 contracts (takes a few minutes (30 mins for mainnet preset - 4 mins for minimal preset) -- L1 has to be finalized first)",
         image=IMAGE,
         env_vars={
@@ -73,3 +73,4 @@ def launch_contract_deployer(
         ),
         wait="2000s",
     )
+    return op_genesis.files_artifacts[0]

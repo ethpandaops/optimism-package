@@ -40,6 +40,7 @@ def input_parser(plan, input_args):
         ],
         network_params=struct(
             network=result["network_params"]["network"],
+            network_id=result["network_params"]["network_id"],
         ),
     )
 
@@ -93,6 +94,7 @@ def default_input_args(input_args):
 def default_network_params():
     return {
         "network": "kurtosis",
+        "network_id": "2151908",
     }
 
 
