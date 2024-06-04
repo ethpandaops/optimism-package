@@ -1,10 +1,11 @@
-constants = import_module("github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star")
-shared_utils = import_module("github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star")
+constants = import_module(
+    "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
+)
+shared_utils = import_module(
+    "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
+)
 
 op_geth = import_module("./op-geth/op_geth_launcher.star")
-
-
-
 
 
 def launch(

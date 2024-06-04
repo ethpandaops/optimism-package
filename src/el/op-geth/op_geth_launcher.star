@@ -210,7 +210,6 @@ def get_config(
         "--rollup.disabletxpoolgossip=true",
     ]
 
-
     if len(existing_el_clients) > 0:
         cmd.append(
             "--bootnodes="
@@ -221,7 +220,6 @@ def get_config(
                 ]
             )
         )
-
 
     # if len(extra_params) > 0:
     #     # this is a repeated<proto type>, we convert it into Starlark
