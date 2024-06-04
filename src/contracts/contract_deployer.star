@@ -24,8 +24,13 @@ def launch_contract_deployer(
             "WEB3_PRIVATE_KEY": str(priv_key),
             "CL_RPC_URL": str(cl_rpc_http_url),
             "FUND_VALUE": "10",
-            "DEPLOYMENT_OUTFILE": "deployments/artifact.json",
-            "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deployments/getting-started/",
+            "DEPLOYMENT_OUTFILE": "/workspace/optimism/packages/contracts-bedrock/deployments/"
+            + str(l1_chain_id)
+            + "/kurtosis.json",
+            "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
+            "STATE_DUMP_PATH": "/workspace/optimism/packages/contracts-bedrock/deployments/"
+            + str(l1_chain_id)
+            + "/state-dump.json",
             "L1_RPC_KIND": "any",
             "L1_RPC_URL": str(el_rpc_http_url),
             "L1_CHAIN_ID": str(l1_chain_id),
@@ -70,8 +75,9 @@ def launch_contract_deployer(
                 "sleep 12",
                 "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "sleep 3",
+                "forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID"
                 "cd /workspace/optimism/op-node",
-                "go run cmd/main.go genesis l2 --deploy-config ../packages/contracts-bedrock/deploy-config/getting-started.json --l1-deployments ../packages/contracts-bedrock/deployments/getting-started/.deploy --outfile.l2 genesis.json --outfile.rollup rollup.json --l1-rpc $L1_RPC_URL",
+                "go run cmd/main.go genesis l2 --deploy-config ../packages/contracts-bedrock/deploy-config/getting-started.json --l1-deployments $DEPLOYMENT_OUTFILE --outfile.l2 genesis.json --outfile.rollup rollup.json --l1-rpc $L1_RPC_URL",
                 "mv /workspace/optimism/op-node/genesis.json /network-configs/genesis.json",
                 "mv /workspace/optimism/op-node/rollup.json /network-configs/rollup.json",
                 "mv /workspace/optimism/packages/contracts-bedrock/deployments/getting-started/.deploy /network-configs/.deploy",

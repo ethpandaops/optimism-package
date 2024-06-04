@@ -42,6 +42,7 @@ RUN foundryup
 RUN git clone https://github.com/barnabasbusa/optimism.git && \
     cd optimism && \
     git checkout bbusa/customize-chain-info && \
+    git pull origin bbusa/customize-chain-info && \
     pnpm install && \
     pnpm build
 
