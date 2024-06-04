@@ -1,9 +1,3 @@
-# The min/max CPU/memory that mev-flood can use
-MIN_CPU = 100
-MAX_CPU = 2000
-MIN_MEMORY = 128
-MAX_MEMORY = 1024
-
 IMAGE = "parithoshj/op-test:v3"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
