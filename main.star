@@ -48,7 +48,7 @@ def run(plan, args={}):
     l1 = ethereum_package.run(plan, ethereum_args)
     all_l1_participants = l1.all_participants
     l1_network_params = l1.network_params
-    priv_key = l1.pre_funded_accounts[
+    l1_priv_key = l1.pre_funded_accounts[
         12
     ].private_key  # reserved for L2 contract deployer
     # Deploy L2 smart contracts
@@ -65,9 +65,9 @@ def run(plan, args={}):
     l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
     l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
 
-    el_cl_data, gs_sequencer_private_key = contract_deployer.launch_contract_deployer(
+    el_cl_data, gs_private_keys = contract_deployer.launch_contract_deployer(
         plan,
-        priv_key,
+        l1_priv_key,
         l1_config_env_vars,
         l2_config_env_vars,
     )
@@ -86,7 +86,7 @@ def run(plan, args={}):
         jwt_file,
         network_params,
         el_cl_data,
-        gs_sequencer_private_key,
+        gs_private_keys,
         l1_config_env_vars,
     )
 

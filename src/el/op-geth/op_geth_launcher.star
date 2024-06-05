@@ -9,7 +9,6 @@ el_admin_node_info = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/el/el_admin_node_info.star"
 )
 
-
 node_metrics = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/node_metrics_info.star"
 )
