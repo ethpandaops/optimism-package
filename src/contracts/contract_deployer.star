@@ -27,9 +27,6 @@ def launch_contract_deployer(
             "DEPLOYMENT_OUTFILE": "/workspace/optimism/packages/contracts-bedrock/deployments/"
             + str(l1_chain_id)
             + "/kurtosis.json",
-            # "CONTRACT_ADDRESSES_PATH": "/workspace/optimism/packages/contracts-bedrock/deployments/"
-            # + str(l1_chain_id)
-            # + "/kurtosis.json",
             "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
             "STATE_DUMP_PATH": "/workspace/optimism/packages/contracts-bedrock/deployments/"
             + str(l1_chain_id)

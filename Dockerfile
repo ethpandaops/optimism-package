@@ -39,10 +39,10 @@ RUN curl -L https://foundry.paradigm.xyz | bash
 ENV PATH="/root/.foundry/bin:${PATH}"
 RUN foundryup
 
-RUN git clone https://github.com/barnabasbusa/optimism.git && \
+RUN git clone https://github.com/ethereum-optimism/optimism.git && \
     cd optimism && \
-    git checkout bbusa/customize-chain-info && \
-    git pull origin bbusa/customize-chain-info && \
+    git checkout develop && \
+    git pull origin develop && \
     pnpm install && \
     pnpm build
 
