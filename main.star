@@ -8,11 +8,25 @@ participant_network = import_module("./src/participant_network.star")
 
 
 def get_l1_stuff(all_l1_participants, l1_network_params):
-    first_l1_el_node = all_l1_participants[0].el_context.rpc_http_url
-    first_l1_cl_node = all_l1_participants[0].cl_context.beacon_http_url
-    l1_chain_id = l1_network_params.network_id
-    l1_block_time = l1_network_params.seconds_per_slot
-    return first_l1_el_node, first_l1_cl_node, l1_chain_id, l1_block_time
+    env_vars = {}
+    env_vars["L1_RPC_KIND"] = "any"
+    env_vars["WEB3_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
+    env_vars["L1_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
+    env_vars["CL_RPC_URL"] = str(all_l1_participants[0].cl_context.beacon_http_url)
+    env_vars["L1_CHAIN_ID"] = str(l1_network_params.network_id)
+    env_vars["L1_BLOCK_TIME"] = str(l1_network_params.seconds_per_slot)
+    env_vars["DEPLOYMENT_OUTFILE"] = (
+        "/workspace/optimism/packages/contracts-bedrock/deployments/"
+        + str(l1_network_params.network_id)
+        + "/kurtosis.json"
+    )
+    env_vars["STATE_DUMP_PATH"] = (
+        "/workspace/optimism/packages/contracts-bedrock/deployments/"
+        + str(l1_network_params.network_id)
+        + "/state-dump.json"
+    )
+
+    return env_vars
 
 
 def run(plan, args={}):
@@ -42,25 +56,20 @@ def run(plan, args={}):
     plan.print("Parsing the L2 input args")
     optimism_args = args["optimism_package"]
 
-    first_l1_el_node, first_l1_cl_node, l1_chain_id, l1_block_time = get_l1_stuff(
-        all_l1_participants, l1_network_params
-    )
+    l1_config_env_vars = get_l1_stuff(all_l1_participants, l1_network_params)
 
     args_with_right_defaults = input_parser.input_parser(plan, optimism_args)
     network_params = args_with_right_defaults.network_params
 
-    l2_block_time = network_params.seconds_per_slot
-    l2_chain_id = network_params.network_id
+    l2_config_env_vars = {}
+    l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
+    l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
 
-    el_cl_data = contract_deployer.launch_contract_deployer(
+    el_cl_data, gs_sequencer_private_key = contract_deployer.launch_contract_deployer(
         plan,
-        first_l1_el_node,
-        first_l1_cl_node,
         priv_key,
-        l1_chain_id,
-        l2_chain_id,
-        l1_block_time,
-        l2_block_time,
+        l1_config_env_vars,
+        l2_config_env_vars,
     )
 
     # Deploy the L2
@@ -77,6 +86,8 @@ def run(plan, args={}):
         jwt_file,
         network_params,
         el_cl_data,
+        gs_sequencer_private_key,
+        l1_config_env_vars,
     )
 
     plan.print(all_participants)
