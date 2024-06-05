@@ -8,9 +8,9 @@ optimism_package:
 ethereum_package:
   participants:
     - el_type: geth
-    - el_type: reth
+    #- el_type: reth
   network_params:
     preset: minimal
   additional_services:
     - dora
-    - blockscout
+    #- blockscout

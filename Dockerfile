@@ -41,7 +41,8 @@ RUN foundryup
 
 RUN git clone https://github.com/ethereum-optimism/optimism.git && \
     cd optimism && \
-    git checkout tutorials/chain && \
+    git checkout develop && \
+    git pull origin develop && \
     pnpm install && \
     pnpm build
 
@@ -55,6 +56,7 @@ WORKDIR /workspace
 RUN apt-get update && apt-get install -y --no-install-recommends \
     jq \
     direnv \
+    git \
     bash \
     curl \
     ca-certificates \
