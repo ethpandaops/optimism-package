@@ -7,7 +7,7 @@ DEFAULT_EL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES = {
-    "op-node": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+    "op-node": "parithoshj/op-node:v1",
 }
 
 DEFAULT_BATCHER_IMAGES = {
@@ -78,7 +78,27 @@ def parse_network_params(plan, input_args):
         el_type = participant["el_type"]
         cl_type = participant["cl_type"]
         el_image = participant["el_image"]
+        if el_image == "":
+            default_image = DEFAULT_EL_IMAGES.get(el_type, "")
+            if default_image == "":
+                fail(
+                    "{0} received an empty image name and we don't have a default for it".format(
+                        el_type
+                    )
+                )
+            participant["el_image"] = default_image
+
         cl_image = participant["cl_image"]
+        if cl_image == "":
+            if cl_image == "":
+                default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
+            if default_image == "":
+                fail(
+                    "{0} received an empty image name and we don't have a default for it".format(
+                        cl_type
+                    )
+                )
+            participant["cl_image"] = default_image
 
     return result
 

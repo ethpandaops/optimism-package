@@ -9,9 +9,8 @@ el_admin_node_info = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/el/el_admin_node_info.star"
 )
 
-
 node_metrics = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src//node_metrics_info.star"
+    "github.com/kurtosis-tech/ethereum-package/src/node_metrics_info.star"
 )
 constants = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
@@ -143,7 +142,7 @@ def launch(
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
     return el_context.new_el_context(
-        "geth",
+        "op-geth",
         enr,
         enode,
         service.ip_address,
@@ -171,7 +170,6 @@ def get_config(
         constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
 
-    public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
     used_ports = get_used_ports(discovery_port)
 

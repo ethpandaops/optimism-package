@@ -8,37 +8,21 @@ FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806
 
 def launch_contract_deployer(
     plan,
-    el_rpc_http_url,
-    cl_rpc_http_url,
     priv_key,
-    l1_chain_id,
-    l2_chain_id,
-    l1_block_time,
-    l2_block_time,
+    l1_config_env_vars,
+    l2_config_env_vars,
 ):
     op_genesis = plan.run_sh(
         description="Deploying L2 contracts (takes a few minutes (30 mins for mainnet preset - 4 mins for minimal preset) -- L1 has to be finalized first)",
         image=IMAGE,
         env_vars={
-            "WEB3_RPC_URL": str(el_rpc_http_url),
             "WEB3_PRIVATE_KEY": str(priv_key),
-            "CL_RPC_URL": str(cl_rpc_http_url),
             "FUND_VALUE": "10",
-            "DEPLOYMENT_OUTFILE": "/workspace/optimism/packages/contracts-bedrock/deployments/"
-            + str(l1_chain_id)
-            + "/kurtosis.json",
             "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
-            "STATE_DUMP_PATH": "/workspace/optimism/packages/contracts-bedrock/deployments/"
-            + str(l1_chain_id)
-            + "/state-dump.json",
-            "L1_RPC_KIND": "any",
-            "L1_RPC_URL": str(el_rpc_http_url),
-            "L1_CHAIN_ID": str(l1_chain_id),
-            "L2_CHAIN_ID": str(l2_chain_id),
-            "L1_BLOCK_TIME": str(l1_block_time),
-            "L2_BLOCK_TIME": str(l2_block_time),
             "DEPLOYMENT_CONTEXT": "getting-started",
-        },
+        }
+        | l1_config_env_vars
+        | l2_config_env_vars,
         store=[
             StoreSpec(src="/network-configs", name="op-genesis-configs"),
         ],
@@ -69,9 +53,7 @@ def launch_contract_deployer(
                 "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
-                "cast publish --rpc-url $WEB3_RPC_URL {0}".format(
-                    FACTORY_DEPLOYER_CODE
-                ),
+                "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
                 "sleep 12",
                 "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "sleep 3",
@@ -87,8 +69,36 @@ def launch_contract_deployer(
                 "mv $DEPLOY_CONFIG_PATH /network-configs/getting-started.json",
                 "mv $DEPLOYMENT_OUTFILE /network-configs/kurtosis.json",
                 "mv $STATE_DUMP_PATH /network-configs/state-dump.json",
+                "echo -n $GS_SEQUENCER_PRIVATE_KEY >> /network-configs/GS_SEQUENCER_PRIVATE_KEY",
+                "echo -n $GS_BATCHER_PRIVATE_KEY >> /network-configs/GS_BATCHER_PRIVATE_KEY",
+                "echo -n $GS_PROPOSER_PRIVATE_KEY >> /network-configs/GS_PROPOSER_PRIVATE_KEY",
             ]
         ),
         wait="2000s",
     )
-    return op_genesis.files_artifacts[0]
+
+    gs_sequencer_private_key = plan.run_sh(
+        description="Getting the sequencer private key",
+        run="cat /network-configs/GS_SEQUENCER_PRIVATE_KEY ",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
+    gs_batcher_private_key = plan.run_sh(
+        description="Getting the batcher private key",
+        run="cat /network-configs/GS_BATCHER_PRIVATE_KEY ",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
+    gs_proposer_private_key = plan.run_sh(
+        description="Getting the proposer private key",
+        run="cat /network-configs/GS_PROPOSER_PRIVATE_KEY ",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
+    private_keys = {
+        "GS_SEQUENCER_PRIVATE_KEY": gs_sequencer_private_key.output,
+        "GS_BATCHER_PRIVATE_KEY": gs_batcher_private_key.output,
+        "GS_PROPOSER_PRIVATE_KEY": gs_proposer_private_key.output,
+    }
+
+    return op_genesis.files_artifacts[0], private_keys

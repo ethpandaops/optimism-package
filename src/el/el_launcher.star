@@ -58,10 +58,6 @@ def launch(
             participant.el_image,
             all_el_contexts,
         )
-        # # Add participant el additional prometheus metrics
-        # for metrics_info in el_context.el_metrics_info:
-        #     if metrics_info != None:
-        #         metrics_info["config"] = participant.prometheus_config
 
         all_el_contexts.append(el_context)
 

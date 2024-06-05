@@ -28,7 +28,7 @@ jobs:
           kurtosis analytics disable
 
       - name: Run Starlark
-        run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
+        run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }} --verbosity detailed
 
   lint:
     runs-on: ubuntu-latest
