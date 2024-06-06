@@ -69,9 +69,10 @@ def launch_contract_deployer(
                 "mv $DEPLOY_CONFIG_PATH /network-configs/getting-started.json",
                 "mv $DEPLOYMENT_OUTFILE /network-configs/kurtosis.json",
                 "mv $STATE_DUMP_PATH /network-configs/state-dump.json",
-                "echo -n $GS_SEQUENCER_PRIVATE_KEY >> /network-configs/GS_SEQUENCER_PRIVATE_KEY",
-                "echo -n $GS_BATCHER_PRIVATE_KEY >> /network-configs/GS_BATCHER_PRIVATE_KEY",
-                "echo -n $GS_PROPOSER_PRIVATE_KEY >> /network-configs/GS_PROPOSER_PRIVATE_KEY",
+                "echo -n $GS_SEQUENCER_PRIVATE_KEY > /network-configs/GS_SEQUENCER_PRIVATE_KEY",
+                "echo -n $GS_BATCHER_PRIVATE_KEY > /network-configs/GS_BATCHER_PRIVATE_KEY",
+                "echo -n $GS_PROPOSER_PRIVATE_KEY > /network-configs/GS_PROPOSER_PRIVATE_KEY",
+                "cat $DEPLOYMENT_OUTFILE | jq -r .L2OutputOracleProxy > /network-configs/L2OutputOracleProxy.json",
             ]
         ),
         wait="2000s",
@@ -95,10 +96,16 @@ def launch_contract_deployer(
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
+    l2oo_address = plan.run_sh(
+        description="Getting the L2OutputOracleProxy address",
+        run="cat /network-configs/L2OutputOracleProxy.json",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
     private_keys = {
         "GS_SEQUENCER_PRIVATE_KEY": gs_sequencer_private_key.output,
         "GS_BATCHER_PRIVATE_KEY": gs_batcher_private_key.output,
         "GS_PROPOSER_PRIVATE_KEY": gs_proposer_private_key.output,
     }
 
-    return op_genesis.files_artifacts[0], private_keys
+    return op_genesis.files_artifacts[0], private_keys, l2oo_address.output

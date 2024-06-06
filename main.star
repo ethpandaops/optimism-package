@@ -65,7 +65,11 @@ def run(plan, args={}):
     l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
     l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
 
-    el_cl_data, gs_private_keys = contract_deployer.launch_contract_deployer(
+    (
+        el_cl_data,
+        gs_private_keys,
+        l2oo_address,
+    ) = contract_deployer.launch_contract_deployer(
         plan,
         l1_priv_key,
         l1_config_env_vars,
@@ -88,6 +92,7 @@ def run(plan, args={}):
         el_cl_data,
         gs_private_keys,
         l1_config_env_vars,
+        l2oo_address,
     )
 
     plan.print(all_participants)

@@ -11,11 +11,11 @@ DEFAULT_CL_IMAGES = {
 }
 
 DEFAULT_BATCHER_IMAGES = {
-    "op-batcher": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
+    "op-batcher": "parithoshj/op-batcher:v1",
 }
 
 DEFAULT_PROPOSER_IMAGES = {
-    "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
+    "op-proposer": "parithoshj/op-proposer:v1",
 }
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
