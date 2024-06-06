@@ -5,8 +5,6 @@ shared_utils = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
 )
 
-cl_context_BOOTNODE = None
-
 op_node = import_module("./op-node/op_node_launcher.star")
 
 
@@ -71,4 +69,4 @@ def launch(
         )
 
         all_cl_contexts.append(cl_context)
-    return (all_cl_contexts,)
+    return all_cl_contexts

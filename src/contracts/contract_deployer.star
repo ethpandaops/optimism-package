@@ -58,20 +58,22 @@ def launch_contract_deployer(
                 "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "sleep 3",
                 "CONTRACT_ADDRESSES_PATH=$DEPLOYMENT_OUTFILE forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID",
-                "cd /workspace/optimism/op-node",
-                "go run cmd/main.go genesis l2 \
-                            --l1-rpc $L1_RPC_URL \
-                            --deploy-config $DEPLOY_CONFIG_PATH \
-                            --l2-allocs $STATE_DUMP_PATH \
-                            --l1-deployments $DEPLOYMENT_OUTFILE \
-                            --outfile.l2 /network-configs/genesis.json \
-                            --outfile.rollup /network-configs/rollup.json",
+                "cd /workspace/optimism/op-node/bin",
+                "./op-node genesis l2 \
+                    --l1-rpc $L1_RPC_URL \
+                    --deploy-config $DEPLOY_CONFIG_PATH \
+                    --l2-allocs $STATE_DUMP_PATH \
+                    --l1-deployments $DEPLOYMENT_OUTFILE \
+                    --outfile.l2 /network-configs/genesis.json \
+                    --outfile.rollup /network-configs/rollup.json",
                 "mv $DEPLOY_CONFIG_PATH /network-configs/getting-started.json",
                 "mv $DEPLOYMENT_OUTFILE /network-configs/kurtosis.json",
                 "mv $STATE_DUMP_PATH /network-configs/state-dump.json",
-                "echo -n $GS_SEQUENCER_PRIVATE_KEY >> /network-configs/GS_SEQUENCER_PRIVATE_KEY",
-                "echo -n $GS_BATCHER_PRIVATE_KEY >> /network-configs/GS_BATCHER_PRIVATE_KEY",
-                "echo -n $GS_PROPOSER_PRIVATE_KEY >> /network-configs/GS_PROPOSER_PRIVATE_KEY",
+                "echo -n $GS_SEQUENCER_PRIVATE_KEY > /network-configs/GS_SEQUENCER_PRIVATE_KEY",
+                "echo -n $GS_BATCHER_PRIVATE_KEY > /network-configs/GS_BATCHER_PRIVATE_KEY",
+                "echo -n $GS_PROPOSER_PRIVATE_KEY > /network-configs/GS_PROPOSER_PRIVATE_KEY",
+                "cat /network-configs/kurtosis.json  | jq -r .L2OutputOracleProxy > /network-configs/L2OutputOracleProxy.json",
+                "cat /network-configs/kurtosis.json  | jq -r .L1StandardBridgeProxy > /network-configs/L1StandardBridgeProxy.json",
             ]
         ),
         wait="2000s",
@@ -95,10 +97,16 @@ def launch_contract_deployer(
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
+    l2oo_address = plan.run_sh(
+        description="Getting the L2OutputOracleProxy address",
+        run="cat /network-configs/L2OutputOracleProxy.json | tr -d '\n'",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
     private_keys = {
         "GS_SEQUENCER_PRIVATE_KEY": gs_sequencer_private_key.output,
         "GS_BATCHER_PRIVATE_KEY": gs_batcher_private_key.output,
         "GS_PROPOSER_PRIVATE_KEY": gs_proposer_private_key.output,
     }
 
-    return op_genesis.files_artifacts[0], private_keys
+    return op_genesis.files_artifacts[0], private_keys, l2oo_address.output
