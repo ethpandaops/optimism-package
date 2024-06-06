@@ -44,7 +44,10 @@ RUN git clone https://github.com/ethereum-optimism/optimism.git && \
     git checkout develop && \
     git pull origin develop && \
     pnpm install && \
-    pnpm build
+    pnpm build && \
+    cd op-node && \
+    make
+
 
 
 # Use multi-stage build to keep the final image lean
