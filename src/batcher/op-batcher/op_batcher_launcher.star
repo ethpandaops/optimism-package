@@ -86,6 +86,7 @@ def get_batcher_config(
         "--max-channel-duration=1",
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--private-key=" + gs_batcher_private_key,
+        "--data-availability-type=blobs",
     ]
 
     ports = get_used_ports()
