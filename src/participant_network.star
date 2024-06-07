@@ -1,5 +1,4 @@
-el_client_launcher = import_module("./el/el_launcher.star")
-cl_client_launcher = import_module("./cl/cl_launcher.star")
+el_cl_client_launcher = import_module("./el_cl_launcher.star")
 participant_module = import_module("./participant.star")
 input_parser = import_module("./package_io/input_parser.star")
 op_batcher_launcher = import_module("./batcher/op-batcher/op_batcher_launcher.star")
@@ -17,24 +16,15 @@ def launch_participant_network(
     l2oo_address,
 ):
     num_participants = len(participants)
-    # Launch all execution layer clients
-    all_el_contexts = el_client_launcher.launch(
+    sequencer_enabled = True
+    # First EL and sequencer CL
+    all_el_contexts, all_cl_contexts = el_cl_client_launcher.launch(
         plan,
         jwt_file,
         network_params,
         el_cl_data,
         participants,
         num_participants,
-    )
-
-    all_cl_contexts = cl_client_launcher.launch(
-        plan,
-        jwt_file,
-        network_params,
-        el_cl_data,
-        participants,
-        num_participants,
-        all_el_contexts,
         l1_config_env_vars,
         gs_private_keys["GS_SEQUENCER_PRIVATE_KEY"],
     )

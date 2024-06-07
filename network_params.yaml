@@ -2,6 +2,8 @@ optimism_package:
   participants:
     - el_type: op-geth
       cl_type: op-node
+      count: 3
+    - el_type: op-reth
 ethereum_package:
   participants:
     - el_type: geth
