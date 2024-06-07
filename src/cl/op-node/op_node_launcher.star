@@ -196,3 +196,11 @@ def get_beacon_config(
             timeout="1m",
         ),
     )
+
+
+def new_op_node_launcher(el_cl_genesis_data, jwt_file, network_params):
+    return struct(
+        el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network_params.network,
+    )

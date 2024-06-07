@@ -183,7 +183,6 @@ def get_config(
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port),
         "--port={0}".format(discovery_port),
-        "--rollup.disabletxpoolgossip=true",
     ]
 
     if not sequencer_enabled:
