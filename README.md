@@ -33,7 +33,7 @@ optimism_package:
       # The Docker image that should be used for the EL client; leave blank to use the default for the client type
       # Defaults by client:
       # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
-      # - op-reth: parithoshj/op-reth:v0.2.0-beta.9
+      # - op-reth: parithoshj/op-reth:latest
       el_image: ""
 
     # CL(Consensus Layer) Specific flags
