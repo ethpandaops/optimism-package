@@ -19,12 +19,12 @@ constants = import_module(
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
-ENGINE_RPC_PORT_NUM = 8551
+ENGINE_RPC_PORT_NUM = 9551
 METRICS_PORT_NUM = 9001
 
 # The min/max CPU/memory that the execution node can use
-EXECUTION_MIN_CPU = 300
-EXECUTION_MIN_MEMORY = 512
+EXECUTION_MIN_CPU = 100
+EXECUTION_MIN_MEMORY = 256
 
 # Port IDs
 RPC_PORT_ID = "rpc"
@@ -32,16 +32,13 @@ WS_PORT_ID = "ws"
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
-ENGINE_WS_PORT_ID = "engineWs"
 METRICS_PORT_ID = "metrics"
 
-# TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
-NUM_MINING_THREADS = 1
-
-METRICS_PATH = "/debug/metrics/prometheus"
+# Paths
+METRICS_PATH = "/metrics"
 
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
+EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/op-reth/execution-data"
 
 
 def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
@@ -59,8 +56,7 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
             discovery_port, shared_utils.UDP_PROTOCOL
         ),
         ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-            ENGINE_RPC_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
+            ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
         ),
         METRICS_PORT_ID: shared_utils.new_port_spec(
             METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
@@ -69,18 +65,13 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
     return used_ports
 
 
-ENTRYPOINT_ARGS = ["sh", "-c"]
-
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_LOG_LEVEL.error: "1",
-    constants.GLOBAL_LOG_LEVEL.warn: "2",
-    constants.GLOBAL_LOG_LEVEL.info: "3",
-    constants.GLOBAL_LOG_LEVEL.debug: "4",
-    constants.GLOBAL_LOG_LEVEL.trace: "5",
+    constants.GLOBAL_LOG_LEVEL.error: "v",
+    constants.GLOBAL_LOG_LEVEL.warn: "vv",
+    constants.GLOBAL_LOG_LEVEL.info: "vvv",
+    constants.GLOBAL_LOG_LEVEL.debug: "vvvv",
+    constants.GLOBAL_LOG_LEVEL.trace: "vvvvv",
 }
-
-BUILDER_IMAGE_STR = "builder"
-SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
 
 
 def launch(
@@ -93,6 +84,8 @@ def launch(
     sequencer_context,
 ):
     network_name = shared_utils.get_network_name(launcher.network)
+
+    cl_client_name = service_name.split("-")[3]
 
     config = get_config(
         plan,
@@ -109,20 +102,18 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, RPC_PORT_ID
-    )
+    enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
-    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    geth_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metrics_url
+    metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+    op_reth_metrics_info = node_metrics.new_node_metrics_info(
+        service_name, METRICS_PATH, metric_url
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
     return el_context.new_el_context(
-        "op-geth",
-        enr,
+        "reth",
+        "",  # reth has no enr
         enode,
         service.ip_address,
         RPC_PORT_NUM,
@@ -130,7 +121,7 @@ def launch(
         ENGINE_RPC_PORT_NUM,
         http_url,
         service_name,
-        [geth_metrics_info],
+        [op_reth_metrics_info],
     )
 
 
@@ -146,41 +137,35 @@ def get_config(
     sequencer_enabled,
     sequencer_context,
 ):
-    init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
-        EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-    )
-
+    public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
     used_ports = get_used_ports(discovery_port)
 
     cmd = [
-        "geth",
-        "--networkid={0}".format(network_id),
-        # "--verbosity=" + verbosity_level,
+        "node",
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--gcmode=archive",
+        "--chain={0}".format(
+            network
+            if network in constants.PUBLIC_NETWORKS
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+        ),
         "--http",
+        "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
-        "--http.vhosts=*",
         "--http.corsdomain=*",
-        "--http.api=admin,engine,net,eth,web3,debug",
+        # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
+        #  that users should NOT store private information in these Kurtosis nodes!
+        "--http.api=admin,net,eth,web3,debug,trace",
         "--ws",
         "--ws.addr=0.0.0.0",
         "--ws.port={0}".format(WS_PORT_NUM),
-        "--ws.api=admin,engine,net,eth,web3,debug",
+        "--ws.api=net,eth",
         "--ws.origins=*",
-        "--allow-insecure-unlock",
-        "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
-        "--authrpc.addr=0.0.0.0",
-        "--authrpc.vhosts=*",
-        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--syncmode=full",
         "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "--rpc.allow-unprotected-txs",
-        "--metrics",
-        "--metrics.addr=0.0.0.0",
-        "--metrics.port={0}".format(METRICS_PORT_NUM),
+        "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
+        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--authrpc.addr=0.0.0.0",
+        "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port),
         "--port={0}".format(discovery_port),
         "--rollup.disabletxpoolgossip=true",
@@ -188,7 +173,7 @@ def get_config(
 
     if not sequencer_enabled:
         cmd.append(
-            "--rollup.sequencerhttp={0}".format(sequencer_context.beacon_http_url)
+            "--rollup.sequencer-http={0}".format(sequencer_context.beacon_http_url)
         )
 
     if len(existing_el_clients) > 0:
@@ -202,16 +187,6 @@ def get_config(
             )
         )
 
-    cmd_str = " ".join(cmd)
-    if network not in constants.PUBLIC_NETWORKS:
-        subcommand_strs = [
-            init_datadir_cmd_str,
-            cmd_str,
-        ]
-        command_str = " && ".join(subcommand_strs)
-    else:
-        command_str = cmd_str
-
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
@@ -220,14 +195,14 @@ def get_config(
     return ServiceConfig(
         image=image,
         ports=used_ports,
-        cmd=[command_str],
+        public_ports=public_ports,
+        cmd=cmd,
         files=files,
-        entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
 
 
-def new_op_geth_launcher(
+def new_op_reth_launcher(
     el_cl_genesis_data,
     jwt_file,
     network,

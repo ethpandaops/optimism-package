@@ -65,6 +65,7 @@ def launch(
     existing_cl_clients,
     l1_config_env_vars,
     gs_sequencer_private_key,
+    sequencer_enabled,
 ):
     network_name = shared_utils.get_network_name(launcher.network)
 
@@ -91,6 +92,7 @@ def launch(
         l1_config_env_vars,
         gs_sequencer_private_key,
         beacon_node_identity_recipe,
+        sequencer_enabled,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -132,6 +134,7 @@ def get_beacon_config(
     l1_config_env_vars,
     gs_sequencer_private_key,
     beacon_node_identity_recipe,
+    sequencer_enabled,
 ):
     EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -148,27 +151,27 @@ def get_beacon_config(
         "--rpc.addr=0.0.0.0",
         "--rpc.port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rpc.enable-admin",
-        "--p2p.sequencer.key=" + gs_sequencer_private_key,
         "--l1={0}".format(l1_config_env_vars["L1_RPC_URL"]),
         "--l1.rpckind={0}".format(l1_config_env_vars["L1_RPC_KIND"]),
         "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
+        "--p2p.advertise.ip=" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--p2p.advertise.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        "--p2p.advertise.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--p2p.listen.ip=0.0.0.0",
         "--p2p.listen.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--p2p.listen.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
     ]
 
-    if len(existing_cl_clients) == 0:
+    if sequencer_enabled:
+        cmd.append("--p2p.sequencer.key=" + gs_sequencer_private_key)
         cmd.append("--sequencer.enabled")
         cmd.append("--sequencer.l1-confs=5")
 
     if len(existing_cl_clients) > 0:
         cmd.append(
-            "--p2p.static="
+            "--p2p.bootnodes="
             + ",".join(
-                [
-                    ctx.beacon_multiaddr
-                    for ctx in existing_cl_clients[: constants.MAX_ENR_ENTRIES]
-                ]
+                [ctx.enr for ctx in existing_cl_clients[: constants.MAX_ENR_ENTRIES]]
             )
         )
 
@@ -195,9 +198,4 @@ def get_beacon_config(
     )
 
 
-def new_op_node_launcher(el_cl_genesis_data, jwt_file, network_params):
-    return struct(
-        el_cl_genesis_data=el_cl_genesis_data,
-        jwt_file=jwt_file,
-        network=network_params.network,
-    )
+de
