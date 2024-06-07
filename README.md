@@ -63,6 +63,12 @@ optimism_package:
 
     # Seconds per slots
     seconds_per_slot: 2
+
+  # Additional services to run alongside the network
+  # Defaults to []
+  # Available services:
+  # - blockscout
+  additional_services: []
 ```
 
 ### Additional configuration recommendations
@@ -74,6 +80,8 @@ optimism_package:
   participants:
     - el_type: op-geth
       cl_type: op-node
+  additional_services:
+    - blockscout
 ethereum_package:
   participants:
     - el_type: geth

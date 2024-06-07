@@ -103,10 +103,21 @@ def launch_contract_deployer(
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
+    l1_bridge_address = plan.run_sh(
+        description="Getting the L1StandardBridgeProxy address",
+        run="cat /network-configs/L1StandardBridgeProxy.json | tr -d '\n'",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
     private_keys = {
         "GS_SEQUENCER_PRIVATE_KEY": gs_sequencer_private_key.output,
         "GS_BATCHER_PRIVATE_KEY": gs_batcher_private_key.output,
         "GS_PROPOSER_PRIVATE_KEY": gs_proposer_private_key.output,
     }
 
-    return op_genesis.files_artifacts[0], private_keys, l2oo_address.output
+    return (
+        op_genesis.files_artifacts[0],
+        private_keys,
+        l2oo_address.output,
+        l1_bridge_address.output,
+    )

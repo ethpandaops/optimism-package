@@ -25,6 +25,9 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 
+DEFAULT_ADDITIONAL_SERVICES = []
+
+
 def input_parser(plan, input_args):
     result = parse_network_params(plan, input_args)
 
@@ -43,6 +46,9 @@ def input_parser(plan, input_args):
             network=result["network_params"]["network"],
             network_id=result["network_params"]["network_id"],
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
+        ),
+        additional_services=result.get(
+            "additional_services", DEFAULT_ADDITIONAL_SERVICES
         ),
     )
 
