@@ -49,8 +49,8 @@ def launch_blockscout(
 ):
     postgres_output = postgres.run(
         plan,
-        service_name="op-{}-postgres".format(SERVICE_NAME_BLOCKSCOUT),
-        database="op-blockscout",
+        service_name="{0}-postgres".format(SERVICE_NAME_BLOCKSCOUT),
+        database="blockscout",
         extra_configs=["max_connections=1000"],
     )
 
