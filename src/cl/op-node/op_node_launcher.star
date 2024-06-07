@@ -196,6 +196,3 @@ def get_beacon_config(
             timeout="1m",
         ),
     )
-
-
-de
