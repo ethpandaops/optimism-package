@@ -72,8 +72,6 @@ def launch_contract_deployer(
                 "echo -n $GS_SEQUENCER_PRIVATE_KEY > /network-configs/GS_SEQUENCER_PRIVATE_KEY",
                 "echo -n $GS_BATCHER_PRIVATE_KEY > /network-configs/GS_BATCHER_PRIVATE_KEY",
                 "echo -n $GS_PROPOSER_PRIVATE_KEY > /network-configs/GS_PROPOSER_PRIVATE_KEY",
-                "cat /network-configs/kurtosis.json  | jq -r .L2OutputOracleProxy > /network-configs/L2OutputOracleProxy.json",
-                "cat /network-configs/kurtosis.json  | jq -r .L1StandardBridgeProxy > /network-configs/L1StandardBridgeProxy.json",
             ]
         ),
         wait="2000s",
@@ -99,7 +97,26 @@ def launch_contract_deployer(
 
     l2oo_address = plan.run_sh(
         description="Getting the L2OutputOracleProxy address",
-        run="cat /network-configs/L2OutputOracleProxy.json | tr -d '\n'",
+        run="jq -r .L2OutputOracleProxy /network-configs/kurtosis.json | tr -d '\n'",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
+    l1_bridge_address = plan.run_sh(
+        description="Getting the L1StandardBridgeProxy address",
+        run="jq -r .L1StandardBridgeProxy /network-configs/kurtosis.json | tr -d '\n'",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
+    l1_deposit_start_block = plan.run_sh(
+        description="Getting the L1StandardBridgeProxy address",
+        image="badouralix/curl-jq",
+        run="jq -r .genesis.l1.number  /network-configs/rollup.json | tr -d '\n'",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
+    l1_portal_contract = plan.run_sh(
+        description="Getting the L1 portal contract",
+        run="jq -r .OptimismPortal  /network-configs/kurtosis.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
@@ -109,4 +126,18 @@ def launch_contract_deployer(
         "GS_PROPOSER_PRIVATE_KEY": gs_proposer_private_key.output,
     }
 
-    return op_genesis.files_artifacts[0], private_keys, l2oo_address.output
+    blockscout_env_variables = {
+        "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": l1_portal_contract.output,
+        "INDEXER_OPTIMISM_L1_DEPOSITS_START_BLOCK": l1_deposit_start_block.output,
+        "INDEXER_OPTIMISM_L1_WITHDRAWALS_START_BLOCK": l1_deposit_start_block.output,
+        "INDEXER_OPTIMISM_L1_BATCH_START_BLOCK": l1_deposit_start_block.output,
+        "INDEXER_OPTIMISM_L1_OUTPUT_ORACLE_CONTRACT": l2oo_address.output,
+    }
+
+    return (
+        op_genesis.files_artifacts[0],
+        private_keys,
+        l2oo_address.output,
+        l1_bridge_address.output,
+        blockscout_env_variables,
+    )

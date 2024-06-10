@@ -5,6 +5,7 @@ static_files = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/static_files/static_files.star"
 )
 participant_network = import_module("./src/participant_network.star")
+blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 
 
 def get_l1_stuff(all_l1_participants, l1_network_params):
@@ -69,6 +70,8 @@ def run(plan, args={}):
         el_cl_data,
         gs_private_keys,
         l2oo_address,
+        l1_bridge_address,
+        blockscout_env_variables,
     ) = contract_deployer.launch_contract_deployer(
         plan,
         l1_priv_key,
@@ -84,7 +87,7 @@ def run(plan, args={}):
         name="op_jwt_file",
     )
 
-    all_participants = participant_network.launch_participant_network(
+    all_l2_participants = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults.participants,
         jwt_file,
@@ -95,4 +98,26 @@ def run(plan, args={}):
         l2oo_address,
     )
 
-    plan.print(all_participants)
+    all_el_contexts = []
+    all_cl_contexts = []
+    for participant in all_l2_participants:
+        all_el_contexts.append(participant.el_context)
+        all_cl_contexts.append(participant.cl_context)
+
+    for additional_service in args_with_right_defaults.additional_services:
+        if additional_service == "blockscout":
+            plan.print("Launching op-blockscout")
+            blockscout_launcher = blockscout.launch_blockscout(
+                plan,
+                all_l1_participants[0].el_context,  # first L1 EL url,
+                l2oo_address,
+                blockscout_env_variables,
+            )
+            plan.print("Successfully launched op-blockscout")
+
+    plan.print(all_l2_participants)
+    plan.print(
+        "Begin your L2 adventures by depositing some L1 Kurtosis ETH to: {0}".format(
+            l1_bridge_address
+        )
+    )

@@ -1,9 +1,9 @@
 optimism_package:
   participants:
     - el_type: op-geth
-      cl_type: op-node
-      count: 3
     - el_type: op-reth
+  additional_services:
+   - blockscout
 ethereum_package:
   participants:
     - el_type: geth
