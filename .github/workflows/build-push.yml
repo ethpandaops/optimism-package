@@ -1,6 +1,7 @@
 name: Build docker image
 on:
-  workflow_dispatch:
+  push:
+    workflow_dispatch:
 
 jobs:
   build-push:
@@ -27,7 +28,6 @@ jobs:
           images: ethpandaops/optimism-contract-deployer
           flavor: latest=true
           tags: |
-            type=semver,pattern=verkle-gen-{{version}}
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
