@@ -71,6 +71,7 @@ def run(plan, args={}):
         gs_private_keys,
         l2oo_address,
         l1_bridge_address,
+        blockscout_env_variables,
     ) = contract_deployer.launch_contract_deployer(
         plan,
         l1_priv_key,
@@ -107,7 +108,10 @@ def run(plan, args={}):
         if additional_service == "blockscout":
             plan.print("Launching op-blockscout")
             blockscout_launcher = blockscout.launch_blockscout(
-                plan, all_l1_participants[0].el_context  # first L1 EL url,
+                plan,
+                all_l1_participants[0].el_context,  # first L1 EL url,
+                l2oo_address,
+                blockscout_env_variables,
             )
             plan.print("Successfully launched op-blockscout")
 

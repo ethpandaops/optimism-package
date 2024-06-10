@@ -7,8 +7,8 @@ constants = import_module(
 
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
-IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout:6.6.0"
-IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.6.0"
+IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout-optimism:latest"
+IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.7.0"
 
 SERVICE_NAME_BLOCKSCOUT = "op-blockscout"
 
@@ -46,6 +46,8 @@ VERIF_USED_PORTS = {
 def launch_blockscout(
     plan,
     el_context,
+    l2oo_address,
+    additional_env_vars,
 ):
     postgres_output = postgres.run(
         plan,
@@ -65,6 +67,8 @@ def launch_blockscout(
         postgres_output,
         el_context,
         verif_url,
+        l2oo_address,
+        additional_env_vars,
     )
     blockscout_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT, config_backend)
     plan.print(blockscout_service)
@@ -92,7 +96,9 @@ def get_config_verif():
     )
 
 
-def get_config_backend(postgres_output, el_context, verif_url):
+def get_config_backend(
+    postgres_output, el_context, verif_url, l2oo_address, additional_env_vars
+):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
         user=postgres_output.user,
@@ -105,21 +111,21 @@ def get_config_backend(postgres_output, el_context, verif_url):
     optimism_env_vars = {
         "CHAIN_TYPE": "optimism",
         "INDEXER_OPTIMISM_L1_RPC": el_context.rpc_http_url,
-        "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": "",
-        "INDEXER_OPTIMISM_L1_BATCH_START_BLOCK": "",
+        # "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": "",
+        # "INDEXER_OPTIMISM_L1_BATCH_START_BLOCK": "",
         "INDEXER_OPTIMISM_L1_BATCH_INBOX": "0xff00000000000000000000000000000000042069",
         "INDEXER_OPTIMISM_L1_BATCH_SUBMITTER": "0x776463f498A63a42Ac1AFc7c64a4e5A9ccBB4d32",
         "INDEXER_OPTIMISM_L1_BATCH_BLOCKSCOUT_BLOBS_API_URL": verif_url + "/blobs",
         "INDEXER_OPTIMISM_L1_BATCH_BLOCKS_CHUNK_SIZE": "4",
-        "INDEXER_OPTIMISM_L2_BATCH_GENESIS_BLOCK_NUMBER": "",
-        "INDEXER_OPTIMISM_L1_OUTPUT_ROOTS_START_BLOCK": "",
-        "INDEXER_OPTIMISM_L1_OUTPUT_ORACLE_CONTRACT": "",
-        "INDEXER_OPTIMISM_L1_DEPOSITS_START_BLOCK": "",
+        "INDEXER_OPTIMISM_L2_BATCH_GENESIS_BLOCK_NUMBER": "0",
+        "INDEXER_OPTIMISM_L1_OUTPUT_ROOTS_START_BLOCK": "0",
+        # "INDEXER_OPTIMISM_L1_OUTPUT_ORACLE_CONTRACT": l2oo_address,
+        # "INDEXER_OPTIMISM_L1_DEPOSITS_START_BLOCK": l1_deposit_start_block,
         "INDEXER_OPTIMISM_L1_DEPOSITS_BATCH_SIZE": "500",
-        "INDEXER_OPTIMISM_L1_WITHDRAWALS_START_BLOCK": "",
-        "INDEXER_OPTIMISM_L2_WITHDRAWALS_START_BLOCK": "",
-        "INDEXER_OPTIMISM_L2_MESSAGE_PASSER_CONTRACT": "",
-    }
+        # "INDEXER_OPTIMISM_L1_WITHDRAWALS_START_BLOCK": l1_deposit_start_block,
+        "INDEXER_OPTIMISM_L2_WITHDRAWALS_START_BLOCK": "1",
+        "INDEXER_OPTIMISM_L2_MESSAGE_PASSER_CONTRACT": "0xC0D3C0d3C0d3c0d3C0d3C0D3c0D3c0d3c0D30016",
+    } | additional_env_vars
 
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT,
