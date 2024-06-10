@@ -1,4 +1,4 @@
-IMAGE = "bbusa/op:latest"
+IMAGE = "ethpandaops/optimism-contract-deployer:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 
