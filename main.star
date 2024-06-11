@@ -23,9 +23,7 @@ def run(plan, args={}):
     # Get L1 info
     all_l1_participants = l1.all_participants
     l1_network_params = l1.network_params
-    l2_num = 0
-    num_l2s = len(args["l2s"])
-    l1_priv_key = l1.pre_funded_accounts[12 + l2_num].private_key  # reserved for L2 contract deployers
+    l1_priv_key = l1.pre_funded_accounts[12].private_key  # reserved for L2 contract deployers
     l1_config_env_vars = get_l1_config(all_l1_participants, l1_network_params)
 
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
