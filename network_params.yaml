@@ -5,24 +5,19 @@ l1:
   network_params:
     preset: minimal
 l2s:
-  - name: "tedis_rollup"
+  - name: "rollup_two"
     participants:
     - el_type: op-geth
-    - el_type: op-reth
     additional_services:
     - blockscout
     network_params:
       preset: minimal
-      network: "tedi"
       network_id: "3151909"
-  - name: "sarahs_rollup"
+  - name: "rollup_one"
     participants:
     - el_type: op-geth
-    - el_type: op-reth
     network_params:
       preset: minimal
-      network: "sarah"
       network_id: "3151910"
     additional_services:
     - blockscout
-  
