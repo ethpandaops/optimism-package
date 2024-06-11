@@ -1,16 +1,28 @@
-optimism_package:
-  participants:
-    - el_type: op-geth
-    - el_type: op-reth
-  additional_services:
-   - blockscout
-ethereum_package:
+l1:
   participants:
     - el_type: geth
     - el_type: reth
   network_params:
     preset: minimal
-  additional_services:
-    - dora
+l2s:
+  - name: "tedis_rollup"
+    participants:
+    - el_type: op-geth
+    - el_type: op-reth
+    additional_services:
     - blockscout
-
+    network_params:
+      preset: minimal
+      network: "tedi"
+      network_id: "3151909"
+  - name: "sarahs_rollup"
+    participants:
+    - el_type: op-geth
+    - el_type: op-reth
+    network_params:
+      preset: minimal
+      network: "sarah"
+      network_id: "3151910"
+    additional_services:
+    - blockscout
+  
