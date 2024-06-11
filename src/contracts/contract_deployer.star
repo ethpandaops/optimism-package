@@ -44,8 +44,6 @@ def deploy_factory_contract(
             "sleep 3",
             # sleep till chain is finalized
             "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
-            "cd /workspace/optimism/packages/contracts-bedrock",
-            # "./scripts/getting-started/config.sh",
             "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
             "sleep 12",
             "cast codesize {0} --rpc-url $L1_RPC_URL".format(FACTORY_DEPLOYER_ADDRESS),
@@ -88,21 +86,9 @@ def deploy_l2_contracts(
                 ),
                 ". {0}".format(ENVRC_PATH),
                 "mkdir -p /network-configs",
-                "web3 transfer $FUND_VALUE to $GS_ADMIN_ADDRESS",  # Fund Admin
-                "sleep 3",
-                "web3 transfer $FUND_VALUE to $GS_BATCHER_ADDRESS",  # Fund Batcher
-                "sleep 3",
-                "web3 transfer $FUND_VALUE to $GS_PROPOSER_ADDRESS",  # Fund Proposer
-                "sleep 3",
-                "web3 transfer $FUND_VALUE to {0}".format(
-                    FACTORY_DEPLOYER_ADDRESS
-                ),  # Fund Factory deployer
-                "sleep 3",
-                # sleep till chain is finalized
-                "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
-                "sleep 12",
+                "sleep 5",
                 "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "sleep 3",
                 "CONTRACT_ADDRESSES_PATH=$DEPLOYMENT_OUTFILE forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID",
