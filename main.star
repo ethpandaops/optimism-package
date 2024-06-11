@@ -1,4 +1,5 @@
 ethereum_package = import_module("github.com/kurtosis-tech/ethereum-package/main.star")
+contract_deployer = import_module("./src/contracts/contract_deployer.star")
 static_files = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/static_files/static_files.star"
 )
@@ -33,12 +34,15 @@ def run(plan, args={}):
         l2_num += 1
     plan.print("l1 private keys for contract deployers {0}".format(l1_priv_keys))
 
-    # l1_config_env_vars = get_l1_config(all_l1_participants, l1_network_params)
+    l1_config_env_vars = get_l1_config(all_l1_participants, l1_network_params)
+
+    # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
+    contract_deployer.deploy_factory_contract(plan, l1_priv_keys[0], l1_config_env_vars)
 
     # Deploy L2s
     for l2_num, l2_args in enumerate(args["l2s"]):
-        plan.print("deploying l2 with name {0} and l1 private key {1}".format(l2_args["name"], l1_priv_keys[12 + l2_num]))
-        l2_launcher.launch_l2(plan, l2_args, l1_config_env_vars, l1_priv_key[12 + l2_num], all_l1_participants[0].el_context)
+        plan.print("deploying l2 with name {0} and l1 private key {1}".format(l2_args["name"], l1_priv_keys[l2_num]))
+        l2_launcher.launch_l2(plan, l2_args, l1_config_env_vars, l1_priv_keys[l2_num], all_l1_participants[0].el_context)
 
 def get_l1_config(all_l1_participants, l1_network_params):
     env_vars = {}

@@ -12,7 +12,6 @@ def launch_l2(plan, l2_args, l1_config, l1_priv_key, l1_bootnode_context):
     plan.print("Parsing the L2 input args")
     args_with_right_defaults = input_parser.input_parser(plan, l2_args)
     network_params = args_with_right_defaults.network_params
-
     l2_config_env_vars = {}
     l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
     l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
@@ -23,7 +22,7 @@ def launch_l2(plan, l2_args, l1_config, l1_priv_key, l1_bootnode_context):
         l2oo_address,
         l1_bridge_address,
         blockscout_env_variables,
-    ) = contract_deployer.launch_contract_deployer(
+    ) = contract_deployer.deploy_l2_contracts(
         plan,
         l1_priv_key, # get private key of contract deployer for this l2
         l1_config,
@@ -32,7 +31,6 @@ def launch_l2(plan, l2_args, l1_config, l1_priv_key, l1_bootnode_context):
 
     # Deploy the L2
     plan.print("Deploying a local L2")
-
     jwt_file = plan.upload_files(
         src=static_files.JWT_PATH_FILEPATH,
         name="op_jwt_file-{0}".format(network_params.network_id),
