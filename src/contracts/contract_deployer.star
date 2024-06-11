@@ -1,12 +1,61 @@
 IMAGE = "ethpandaops/optimism-contract-deployer:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
-
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
+# raw tx data for deploying Create2Factory contract to L1
 FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222"
 
+def deploy_factory_contract(
+    plan,
+    priv_key,
+    l1_config_env_vars,
+):
+    factory_deployment_result = plan.run_sh(
+        description="Deploying L2 factory contract to L1",
+        image=IMAGE,
+        env_vars={
+            "WEB3_PRIVATE_KEY": str(priv_key),
+            "FUND_VALUE": "10",
+            "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
+            "DEPLOYMENT_CONTEXT": "getting-started",
+        }
+        | l1_config_env_vars,
+        run=" && ".join([
+            "./packages/contracts-bedrock/scripts/getting-started/wallets.sh >> {0}".format(
+                ENVRC_PATH
+            ),
+            "sed -i '1d' {0}".format(
+                ENVRC_PATH
+            ),  # Remove the first line (not commented out)
+            "echo 'export IMPL_SALT=$(openssl rand -hex 32)' >> {0}".format(
+                ENVRC_PATH
+            ),
+            ". {0}".format(ENVRC_PATH),
+            "mkdir -p /network-configs",
+            "web3 transfer $FUND_VALUE to $GS_ADMIN_ADDRESS",  # Fund Admin
+            "sleep 3",
+            "web3 transfer $FUND_VALUE to $GS_BATCHER_ADDRESS",  # Fund Batcher
+            "sleep 3",
+            "web3 transfer $FUND_VALUE to $GS_PROPOSER_ADDRESS",  # Fund Proposer
+            "sleep 3",
+            "web3 transfer $FUND_VALUE to {0}".format(
+                FACTORY_DEPLOYER_ADDRESS
+            ),  # Fund Factory deployer
+            "sleep 3",
+            # sleep till chain is finalized
+            "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
+            "cd /workspace/optimism/packages/contracts-bedrock",
+            # "./scripts/getting-started/config.sh",
+            "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
+            "sleep 12",
+            "cast codesize {0} --rpc-url $L1_RPC_URL".format(FACTORY_DEPLOYER_ADDRESS),
+        ]),
+        wait="2000s",
+    )
+    plan.print(factory_deployment_result)
+    plan.print(factory_deployment_result.output)
 
-def launch_contract_deployer(
+def deploy_l2_contracts(
     plan,
     priv_key,
     l1_config_env_vars,
@@ -53,7 +102,6 @@ def launch_contract_deployer(
                 "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
-                "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
                 "sleep 12",
                 "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "sleep 3",

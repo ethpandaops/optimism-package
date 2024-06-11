@@ -48,7 +48,7 @@ def launch_participant_network(
 
     op_batcher_launcher.launch(
         plan,
-        "op-batcher",
+        "op-batcher-{0}".format(network_params.network_id),
         input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"],
         all_el_contexts[0],
         all_cl_contexts[0],
@@ -58,7 +58,7 @@ def launch_participant_network(
 
     op_proposer_launcher.launch(
         plan,
-        "op-proposer",
+        "op-proposer-{0}".format(network_params.network_id),
         input_parser.DEFAULT_PROPOSER_IMAGES["op-proposer"],
         all_cl_contexts[0],
         l1_config_env_vars,

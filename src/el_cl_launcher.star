@@ -84,8 +84,8 @@ def launch(
         # Zero-pad the index using the calculated zfill value
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
-        el_service_name = "op-el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
-        cl_service_name = "op-cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
+        el_service_name = "op-el-{0}-{1}-{2}-{3}".format(index_str, el_type, cl_type, network_params.network_id)
+        cl_service_name = "op-cl-{0}-{1}-{2}-{3}".format(index_str, cl_type, el_type, network_params.network_id)
 
         el_context = el_launch_method(
             plan,
