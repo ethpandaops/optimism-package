@@ -11,7 +11,7 @@ def deploy_factory_contract(
     l1_config_env_vars,
 ):
     factory_deployment_result = plan.run_sh(
-        description="Deploying L2 factory contract to L1",
+        description="Deploying L2 factory contract to L1 (will take a second, need to wait for L1 to finalize)",
         image=IMAGE,
         env_vars={
             "WEB3_PRIVATE_KEY": str(priv_key),
@@ -45,13 +45,11 @@ def deploy_factory_contract(
             # sleep till chain is finalized
             "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
             "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
-            "sleep 12",
+            "sleep 10",
             "cast codesize {0} --rpc-url $L1_RPC_URL".format(FACTORY_DEPLOYER_ADDRESS),
         ]),
         wait="2000s",
     )
-    plan.print(factory_deployment_result)
-    plan.print(factory_deployment_result.output)
 
 def deploy_l2_contracts(
     plan,
@@ -86,6 +84,16 @@ def deploy_l2_contracts(
                 ),
                 ". {0}".format(ENVRC_PATH),
                 "mkdir -p /network-configs",
+                "web3 transfer $FUND_VALUE to $GS_ADMIN_ADDRESS",  # Fund Admin
+                "sleep 3",
+                "web3 transfer $FUND_VALUE to $GS_BATCHER_ADDRESS",  # Fund Batcher
+                "sleep 3",
+                "web3 transfer $FUND_VALUE to $GS_PROPOSER_ADDRESS",  # Fund Proposer
+                "sleep 3",
+                "web3 transfer $FUND_VALUE to {0}".format(
+                    FACTORY_DEPLOYER_ADDRESS
+                ),
+                "sleep 3",
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
                 "sleep 5",
