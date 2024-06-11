@@ -25,24 +25,16 @@ def run(plan, args={}):
     l1_network_params = l1.network_params
     l2_num = 0
     num_l2s = len(args["l2s"])
-    l1_priv_keys = []
-    for i in range(0, num_l2s):
-        if 12 + l2_num > len(l1.pre_funded_accounts) - 1:
-            fail("cannot support this many l2s yet")
-        l1_priv_key = l1.pre_funded_accounts[12 + l2_num].private_key  # reserved for L2 contract deployers
-        l1_priv_keys.append(l1_priv_key)
-        l2_num += 1
-    plan.print("l1 private keys for contract deployers {0}".format(l1_priv_keys))
-
+    l1_priv_key = l1.pre_funded_accounts[12 + l2_num].private_key  # reserved for L2 contract deployers
     l1_config_env_vars = get_l1_config(all_l1_participants, l1_network_params)
 
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
-    contract_deployer.deploy_factory_contract(plan, l1_priv_keys[0], l1_config_env_vars)
+    contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
 
     # Deploy L2s
     for l2_num, l2_args in enumerate(args["l2s"]):
-        plan.print("deploying l2 with name {0} and l1 private key {1}".format(l2_args["name"], l1_priv_keys[l2_num]))
-        l2_launcher.launch_l2(plan, l2_args, l1_config_env_vars, l1_priv_keys[l2_num], all_l1_participants[0].el_context)
+        plan.print("deploying l2 with name {0}".format(l2_args["name"]))
+        l2_launcher.launch_l2(plan, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
 
 def get_l1_config(all_l1_participants, l1_network_params):
     env_vars = {}
