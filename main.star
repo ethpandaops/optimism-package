@@ -1,8 +1,6 @@
 ethereum_package = import_module("github.com/kurtosis-tech/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
-static_files = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/static_files/static_files.star"
-)
+static_files = import_module("github.com/kurtosis-tech/ethereum-package/src/static_files/static_files.star")
 l2_launcher = import_module("./src/l2.star")
 
 def run(plan, args={}): 
@@ -32,7 +30,7 @@ def run(plan, args={}):
     # Deploy L2s
     for l2_num, l2_args in enumerate(args["l2s"]):
         plan.print("deploying l2 with name {0}".format(l2_args["name"]))
-        l2_launcher.launch_l2(plan, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
+        l2_launcher.launch_l2(plan, l2_num, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
 
 def get_l1_config(all_l1_participants, l1_network_params):
     env_vars = {}
