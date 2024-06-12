@@ -12,7 +12,7 @@ def deploy_factory_contract(
     l1_config_env_vars,
 ):
     factory_deployment_result = plan.run_sh(
-        description="Deploying L2 factory contract to L1 (needs to wait for L1 to finalize so may take a while)",
+        description="Deploying L2 factory contract to L1 (needs to wait for l1 to finalize, about 4 min for minimal preset, 30 min for mainnet),
         image=IMAGE,
         env_vars={
             "WEB3_PRIVATE_KEY": str(priv_key),
