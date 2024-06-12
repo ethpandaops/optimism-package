@@ -8,8 +8,6 @@ static_files = import_module(
 
 
 def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context):
-    # Deploy L2 smart contracts
-    # Parse the values for the args
     plan.print("Parsing the L2 input args")
     args_with_right_defaults = input_parser.input_parser(plan, l2_args)
 
@@ -18,9 +16,8 @@ def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context
     l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
     l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
     l2_services_suffix = "-{}".format(network_params.network_id)
-    if (
-        l2_num == 0
-    ):  # if only deploying on l2, don't add a suffix to distinguish l2 services
+    # dont add suffix to distinguish services for first l2, in case only one is being deployed
+    if l2_num == 0:
         l2_services_suffix = ""
 
     (
@@ -36,7 +33,6 @@ def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context
         l2_config_env_vars,
     )
 
-    # Deploy the L2
     plan.print("Deploying a local L2")
     jwt_file = plan.upload_files(
         src=static_files.JWT_PATH_FILEPATH,
