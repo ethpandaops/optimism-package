@@ -1,8 +1,8 @@
 shared_utils = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
+    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
 constants = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
+    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")

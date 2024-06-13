@@ -1,8 +1,6 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
-static_files = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/static_files/static_files.star"
-)
+static_files = import_module("github.com/ethpandaops/ethereum-package/src/static_files/static_files.star")
 l2_launcher = import_module("./src/l2.star")
 
 def run(plan, args={}): 
