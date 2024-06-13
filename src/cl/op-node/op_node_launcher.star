@@ -1,16 +1,16 @@
 shared_utils = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
+    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
 
 cl_context = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/cl/cl_context.star"
+    "github.com/ethpandaops/ethereum-package/src/cl/cl_context.star"
 )
 
 cl_node_ready_conditions = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/cl/cl_node_ready_conditions.star"
+    "github.com/ethpandaops/ethereum-package/src/cl/cl_node_ready_conditions.star"
 )
 constants = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
+    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
 #  ---------------------------------- Beacon client -------------------------------------
