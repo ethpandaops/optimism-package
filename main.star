@@ -3,11 +3,11 @@ contract_deployer = import_module("./src/contracts/contract_deployer.star")
 static_files = import_module("github.com/ethpandaops/ethereum-package/src/static_files/static_files.star")
 l2_launcher = import_module("./src/l2.star")
 
-def run(plan, args={}): 
+def run(plan, args): 
     """Deploy Optimism L2s on an Ethereum L1.
 
     Args:
-        args(yaml): Configures other aspects of the environment.
+        args(json): Configures other aspects of the environment.
     Returns:
         Full Optimism L2s. 
     """
