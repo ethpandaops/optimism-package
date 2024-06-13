@@ -1,8 +1,8 @@
 input_parser = import_module("./src/package_io/input_parser.star")
-ethereum_package = import_module("github.com/kurtosis-tech/ethereum-package/main.star")
+ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 static_files = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/static_files/static_files.star"
+    "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
 )
 participant_network = import_module("./src/participant_network.star")
 blockscout = import_module("./src/blockscout/blockscout_launcher.star")
