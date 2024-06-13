@@ -1,4 +1,4 @@
-ethereum_package = import_module("github.com/kurtosis-tech/ethereum-package/main.star")
+ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 static_files = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/static_files/static_files.star"
