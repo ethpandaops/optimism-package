@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - master
+      - main
 
 permissions:
   contents: write
@@ -15,4 +15,5 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v4
         with:
-          release-type: simple
+          token: ${{ secrets.PAT }}
+          manifest-file: .release-please-manifest.json
