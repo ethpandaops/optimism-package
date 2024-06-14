@@ -62,6 +62,7 @@ def deploy_l2_contracts(
     priv_key,
     l1_config_env_vars,
     l2_config_env_vars,
+    l2_services_suffix,
 ):
     op_genesis = plan.run_sh(
         description="Deploying L2 contracts (takes a few minutes (30 mins for mainnet preset - 4 mins for minimal preset) -- L1 has to be finalized first)",
@@ -75,7 +76,7 @@ def deploy_l2_contracts(
         | l1_config_env_vars
         | l2_config_env_vars,
         store=[
-            StoreSpec(src="/network-configs", name="op-genesis-configs"),
+            StoreSpec(src="/network-configs", name="op-genesis-configs-{0}".format(l2_services_suffix)),
         ],
         run=" && ".join(
             [

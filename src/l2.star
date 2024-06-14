@@ -31,6 +31,7 @@ def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context
         l1_priv_key,  # get private key of contract deployer for this l2
         l1_config,
         l2_config_env_vars,
+        l2_services_suffix,
     )
 
     plan.print("Deploying a local L2")
