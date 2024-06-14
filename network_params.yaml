@@ -7,17 +7,16 @@ l1:
 l2s:
   - name: "rollup_two"
     participants:
-    - el_type: op-geth
+      - el_type: op-geth
     additional_services:
-    - blockscout
+      - blockscout
     network_params:
       preset: minimal
       network_id: "3151909"
   - name: "rollup_one"
     participants:
-    - el_type: op-geth
+      - el_type: op-geth
     network_params:
-      preset: minimal
       network_id: "3151910"
     additional_services:
-    - blockscout
+      - blockscout

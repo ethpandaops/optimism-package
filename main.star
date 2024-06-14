@@ -30,7 +30,7 @@ def run(plan, args):
     # Deploy L2s
     for l2_num, l2_args in enumerate(args["l2s"]):
         plan.print("deploying l2 with name {0}".format(l2_args["name"]))
-        l2_launcher.launch_l2(plan, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
+        l2_launcher.launch_l2(plan, l2_num, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
 
 def get_l1_config(all_l1_participants, l1_network_params):
     env_vars = {}

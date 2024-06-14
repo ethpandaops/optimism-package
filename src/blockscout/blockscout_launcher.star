@@ -42,22 +42,27 @@ VERIF_USED_PORTS = {
     )
 }
 
+
 def launch_blockscout(
     plan,
-    network_id, 
+    l2_services_suffix,
     el_context,
     l2oo_address,
     additional_env_vars,
 ):
     postgres_output = postgres.run(
         plan,
-        service_name="{0}-{1}-postgres".format(SERVICE_NAME_BLOCKSCOUT, network_id),
+        service_name="{0}-postgres{1}".format(
+            SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
+        ),
         database="blockscout",
         extra_configs=["max_connections=1000"],
     )
 
     config_verif = get_config_verif()
-    verif_service_name = "{0}-{1}-verif".format(SERVICE_NAME_BLOCKSCOUT, network_id)
+    verif_service_name = "{0}-verif{1}".format(
+        SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
+    )
     verif_service = plan.add_service(verif_service_name, config_verif)
     verif_url = "http://{}:{}/api".format(
         verif_service.hostname, verif_service.ports["http"].number
@@ -70,7 +75,9 @@ def launch_blockscout(
         l2oo_address,
         additional_env_vars,
     )
-    blockscout_service = plan.add_service("{0}-{1}".format(SERVICE_NAME_BLOCKSCOUT, network_id) , config_backend)
+    blockscout_service = plan.add_service(
+        "{0}{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_services_suffix), config_backend
+    )
     plan.print(blockscout_service)
 
     blockscout_url = "http://{}:{}".format(
