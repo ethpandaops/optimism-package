@@ -31,7 +31,7 @@ def run(plan, args):
     if type(args["optimism-package"]) == "dict":
         plan.print("deploying l2 with name {0}".format(l2_args["name"]))
         l2_launcher.launch_l2(plan, 0, args["optimism-package"], l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
-    else if type(args["optimism-package"]) == "list":
+    elif type(args["optimism-package"]) == "list":
         for l2_num, l2_args in enumerate(args["optimism-package"]):
             l2_launcher.launch_l2(plan, l2_num, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
     else:
