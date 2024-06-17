@@ -11,7 +11,7 @@ def run(plan, args):
     Args:
         args(json): Configures other aspects of the environment.
     Returns:
-        Full Optimism L2s. 
+        A full deployment of Optimism L2(s)
     """
     plan.print("Parsing the L1 input args")
     ethereum_args = args["ethereum_package"]
