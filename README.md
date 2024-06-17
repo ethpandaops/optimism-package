@@ -92,3 +92,34 @@ ethereum_package:
     - dora
     - blockscout
 ```
+
+Additionally, you can spin up multipl L2 networks by providing a list of L2 configuration parameters like so:
+
+```yaml
+optimism_package:
+  - participants:
+      - el_type: op-geth
+    additional_services:
+      - blockscout
+    network_params:
+      preset: minimal
+      network_id: "3151909"
+      name: op_rollup_one
+  - participants:
+      - el_type: op-geth
+    network_params:
+      network_id: "3151910"
+      name: op_rollup_two
+    additional_services:
+      - blockscout
+ethereum_package:
+  participants:
+    - el_type: geth
+    - el_type: reth
+  network_params:
+    preset: minimal
+  additional_services:
+    - dora
+    - blockscout
+```
+Note: if configuring multiple L2s, make sure that the `network_id` is set to differentiate networks.
