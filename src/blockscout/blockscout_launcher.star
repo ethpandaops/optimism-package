@@ -147,9 +147,6 @@ def get_config_backend(
             'bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()" && bin/blockscout start',
         ],
         env_vars={
-            # "ETHEREUM_JSONRPC_VARIANT": "erigon"
-            # if l2_el_context.client_name == "erigon" or l2_el_context.client_name == "reth"
-            # else l2_el_context.client_name,
             "ETHEREUM_JSONRPC_VARIANT": "geth",
             "ETHEREUM_JSONRPC_HTTP_URL": l2_el_context.rpc_http_url,
             "ETHEREUM_JSONRPC_TRACE_URL": l2_el_context.rpc_http_url,
