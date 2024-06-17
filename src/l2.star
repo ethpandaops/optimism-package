@@ -65,6 +65,7 @@ def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context
                 plan,
                 network_params.network_id,
                 l1_bootnode_context,  # first l1 EL url
+                all_el_contexts[0], # first l2 El url
                 l2oo_address,
                 blockscout_env_variables,
             )

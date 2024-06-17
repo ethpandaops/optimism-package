@@ -46,7 +46,8 @@ VERIF_USED_PORTS = {
 def launch_blockscout(
     plan,
     l2_services_suffix,
-    el_context,
+    l1_el_context,
+    l2_el_context,
     l2oo_address,
     additional_env_vars,
 ):
@@ -70,7 +71,8 @@ def launch_blockscout(
 
     config_backend = get_config_backend(
         postgres_output,
-        el_context,
+        l1_el_context,
+        l2_el_context,
         verif_url,
         l2oo_address,
         additional_env_vars,
@@ -104,7 +106,7 @@ def get_config_verif():
 
 
 def get_config_backend(
-    postgres_output, el_context, verif_url, l2oo_address, additional_env_vars
+    postgres_output, l1_el_context, l2_el_context, verif_url, l2oo_address, additional_env_vars
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
@@ -117,7 +119,7 @@ def get_config_backend(
 
     optimism_env_vars = {
         "CHAIN_TYPE": "optimism",
-        "INDEXER_OPTIMISM_L1_RPC": el_context.rpc_http_url,
+        "INDEXER_OPTIMISM_L1_RPC": l1_el_context.rpc_http_url,
         # "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": "",
         # "INDEXER_OPTIMISM_L1_BATCH_START_BLOCK": "",
         "INDEXER_OPTIMISM_L1_BATCH_INBOX": "0xff00000000000000000000000000000000042069",
@@ -144,10 +146,10 @@ def get_config_backend(
         ],
         env_vars={
             "ETHEREUM_JSONRPC_VARIANT": "erigon"
-            if el_context.client_name == "erigon" or el_context.client_name == "reth"
-            else el_context.client_name,
-            "ETHEREUM_JSONRPC_HTTP_URL": el_context.rpc_http_url,
-            "ETHEREUM_JSONRPC_TRACE_URL": el_context.rpc_http_url,
+            if l2_el_context.client_name == "erigon" or l2_el_context.client_name == "reth"
+            else l2_el_context.client_name,
+            "ETHEREUM_JSONRPC_HTTP_URL": l2_el_context.rpc_http_url,
+            "ETHEREUM_JSONRPC_TRACE_URL": l2_el_context.rpc_http_url,
             "DATABASE_URL": database_url,
             "COIN": "opETH",
             "MICROSERVICE_SC_VERIFIER_ENABLED": "true",
