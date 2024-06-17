@@ -123,6 +123,7 @@ def default_network_params():
     return {
         "network": "kurtosis",
         "network_id": "2151908",
+        "name": "op-kurtosis",
         "seconds_per_slot": 2,
     }
 

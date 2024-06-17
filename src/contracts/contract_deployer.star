@@ -76,7 +76,7 @@ def deploy_l2_contracts(
         | l1_config_env_vars
         | l2_config_env_vars,
         store=[
-            StoreSpec(src="/network-configs", name="op-genesis-configs-{0}".format(l2_services_suffix)),
+            StoreSpec(src="/network-configs", name="op-genesis-configs{0}".format(l2_services_suffix)),
         ],
         run=" && ".join(
             [

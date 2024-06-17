@@ -10,12 +10,14 @@ static_files = import_module(
 def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context):
     plan.print("Parsing the L2 input args")
     args_with_right_defaults = input_parser.input_parser(plan, l2_args)
-
     network_params = args_with_right_defaults.network_params
+
+
     l2_config_env_vars = {}
     l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
     l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
-    l2_services_suffix = "-{}".format(network_params.network_id)
+
+    l2_services_suffix = "-{0}-{1}".format(network_params.name, l2_num)
     # dont add suffix to distinguish services for first l2, in case only one is being deployed
     if l2_num == 0:
         l2_services_suffix = ""
@@ -34,7 +36,7 @@ def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context
         l2_services_suffix,
     )
 
-    plan.print("Deploying a local L2")
+    plan.print("Deploying L2 with name {0}".format(network_params.name))
     jwt_file = plan.upload_files(
         src=static_files.JWT_PATH_FILEPATH,
         name="op_jwt_file{0}".format(l2_services_suffix),
@@ -67,6 +69,7 @@ def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context
                 l1_bootnode_context,  # first l1 EL url
                 all_el_contexts[0], # first l2 El url
                 l2oo_address,
+                network_params.name,
                 blockscout_env_variables,
             )
             plan.print("Successfully launched op-blockscout")

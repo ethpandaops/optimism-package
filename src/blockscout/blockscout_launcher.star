@@ -49,6 +49,7 @@ def launch_blockscout(
     l1_el_context,
     l2_el_context,
     l2oo_address,
+    l2_network_name,
     additional_env_vars,
 ):
     postgres_output = postgres.run(
@@ -75,6 +76,7 @@ def launch_blockscout(
         l2_el_context,
         verif_url,
         l2oo_address,
+        l2_network_name,
         additional_env_vars,
     )
     blockscout_service = plan.add_service(
@@ -106,7 +108,7 @@ def get_config_verif():
 
 
 def get_config_backend(
-    postgres_output, l1_el_context, l2_el_context, verif_url, l2oo_address, additional_env_vars
+    postgres_output, l1_el_context, l2_el_context, verif_url, l2oo_address, l2_network_name, additional_env_vars
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
@@ -157,8 +159,8 @@ def get_config_backend(
             "MICROSERVICE_SC_VERIFIER_TYPE": "sc_verifier",
             "INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER": "true",
             "ECTO_USE_SSL": "false",
-            "NETWORK": "Kurtosis",
-            "SUBNETWORK": "Kurtosis",
+            "NETWORK": l2_network_name,
+            "SUBNETWORK": l2_network_name,
             "API_V2_ENABLED": "true",
             "PORT": "{}".format(HTTP_PORT_NUMBER),
             "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",

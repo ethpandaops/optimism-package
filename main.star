@@ -12,7 +12,7 @@ def run(plan, args):
         Full Optimism L2s. 
     """
     plan.print("Parsing the L1 input args")
-    ethereum_args = args["l1"]
+    ethereum_args = args["ethereum-package"]
 
     # Deploy the L1
     plan.print("Deploying a local L1")
@@ -28,9 +28,14 @@ def run(plan, args):
     contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
 
     # Deploy L2s
-    for l2_num, l2_args in enumerate(args["l2s"]):
+    if type(args["optimism-package"]) == "dict":
         plan.print("deploying l2 with name {0}".format(l2_args["name"]))
-        l2_launcher.launch_l2(plan, l2_num, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
+        l2_launcher.launch_l2(plan, 0, args["optimism-package"], l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
+    else if type(args["optimism-package"]) == "list":
+        for l2_num, l2_args in enumerate(args["optimism-package"]):
+            l2_launcher.launch_l2(plan, l2_num, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
+    else:
+        fail("invalid type provided for param: `optimism-package`")
 
 def get_l1_config(all_l1_participants, l1_network_params):
     env_vars = {}
