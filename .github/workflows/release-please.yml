@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-
 permissions:
   contents: write
   pull-requests: write
@@ -13,18 +12,10 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug configuration
-        run: |
-          ls -la 
-          echo "GITHUB_REF: $GITHUB_REF"
-          echo "GITHUB_SHA: $GITHUB_SHA"
-          echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
-          echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-
       - name: Run Release Please
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v3
         with:
           token: ${{ secrets.PAT }}
-          config-file: .github/workflows/release-please-config.json
-          manifest-file: .github/workflows/.release-please-manifest.json
+          release-type: simple
+          include-v-in-tag: false
+          package-name: optimism-package
