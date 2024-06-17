@@ -93,7 +93,7 @@ ethereum_package:
     - blockscout
 ```
 
-Additionally, you can spin up multipl L2 networks by providing a list of L2 configuration parameters like so:
+Additionally, you can spin up multiple L2 networks by providing a list of L2 configuration parameters like so:
 
 ```yaml
 optimism_package:
@@ -102,7 +102,6 @@ optimism_package:
     network_params:
       name: op_rollup_one
       network_id: "3151909"
-      preset: minimal
     additional_services:
       - blockscout
   - participants:
