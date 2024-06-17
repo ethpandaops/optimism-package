@@ -1,10 +1,10 @@
-ethereum-package:
+ethereum_package:
   participants:
     - el_type: geth
     - el_type: reth
   network_params:
     preset: minimal
-optimism-package:
+optimism_package:
   - participants:
       - el_type: op-geth
     additional_services:

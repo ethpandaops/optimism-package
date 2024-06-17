@@ -14,7 +14,7 @@ def run(plan, args):
         Full Optimism L2s. 
     """
     plan.print("Parsing the L1 input args")
-    ethereum_args = args["ethereum-package"]
+    ethereum_args = args["ethereum_package"]
 
     # Deploy the L1
     plan.print("Deploying a local L1")
@@ -30,10 +30,10 @@ def run(plan, args):
     l2_private_keys = contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
 
     # Deploy L2s
-    if type(args["optimism-package"]) == "dict":
+    if type(args["optimism_package"]) == "dict":
         l2_services_suffix = "" # no suffix if one l2
-        l2_launcher.launch_l2(plan, l2_services_suffix, args["optimism-package"], l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context, l2_private_keys)
-    elif type(args["optimism-package"]) == "list":
+        l2_launcher.launch_l2(plan, l2_services_suffix, args["optimism_package"], l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context, l2_private_keys)
+    elif type(args["optimism_package"]) == "list":
         for l2_num, l2_args in enumerate(args["optimism-package"]):
             l2_services_suffix = "-{0}".format(l2_args["network_params"]["name"]) # suffix with rollup name, and enforce a name is provided to distinguish them
             l2_launcher.launch_l2(plan, l2_num, l2_services_suffix, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context, l2_private_keys)
