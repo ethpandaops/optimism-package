@@ -2,6 +2,8 @@ ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.s
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 static_files = import_module("github.com/ethpandaops/ethereum-package/src/static_files/static_files.star")
 l2_launcher = import_module("./src/l2.star")
+input_parser = import_module("./src/package_io/input_parser.star")
+
 
 def run(plan, args): 
     """Deploy Optimism L2s on an Ethereum L1.
@@ -35,6 +37,7 @@ def run(plan, args):
             l2_launcher.launch_l2(plan, l2_num, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context, private_keys)
     else:
         fail("invalid type provided for param: `optimism-package`")
+
 
 def get_l1_config(all_l1_participants, l1_network_params):
     env_vars = {}
