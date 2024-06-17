@@ -2,6 +2,7 @@ optimism_package:
   participants:
     - el_type: op-geth
     - el_type: op-reth
+    - el_type: op-erigon
   additional_services:
    - blockscout
 ethereum_package:
