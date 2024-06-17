@@ -7,7 +7,7 @@ static_files = import_module(
 )
 
 
-def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context, l2_private_keys):
+def launch_l2(plan, l2_services_suffix, l2_args, l1_config, l1_priv_key, l1_bootnode_context, l2_private_keys):
     plan.print("Parsing the L2 input args")
     args_with_right_defaults = input_parser.input_parser(plan, l2_args)
     network_params = args_with_right_defaults.network_params
@@ -15,13 +15,7 @@ def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context
     l2_config_env_vars = {}
     l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
     l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
-
-    plan.print(network_params)
-    l2_services_suffix = "-{0}".format(network_params.name)
-    # dont add suffix to distinguish services for first l2, in case only one is being deployed
-    if l2_num == 0:
-        l2_services_suffix = ""
-
+    
     (
         el_cl_data,
         gs_private_keys,

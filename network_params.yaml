@@ -1,22 +1,15 @@
-ethereum-package:
+optimism_package:
+  participants:
+    - el_type: op-geth
+    - el_type: op-reth
+  additional_services:
+   - blockscout
+ethereum_package:
   participants:
     - el_type: geth
     - el_type: reth
   network_params:
     preset: minimal
-optimism-package:
-  - participants:
-      - el_type: op-geth
-    additional_services:
-      - blockscout
-    network_params:
-      preset: minimal
-      network_id: "3151909"
-      name: op-kurtosis
-  - participants:
-      - el_type: op-geth
-    network_params:
-      network_id: "3151910"
-      name: op-kurtosis
-    additional_services:
-      - blockscout
+  additional_services:
+    - dora
+    - blockscout
