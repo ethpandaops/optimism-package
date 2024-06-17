@@ -16,6 +16,24 @@ ethereum_package:
     - blockscout
 ```
 
+## Quickstart
+#### Run with your own configuration
+
+Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
+
+```bash
+kurtosis run github.com/ethpandaops/ethereum-package --args-file https://raw.githubusercontent.com/ethpandaops/optimism-package/main/network_params.yaml
+```
+
+For `--args-file` you can pass a local file path or a URL to a file.
+
+To clean up running enclaves and data, you can run:
+
+```bash
+kurtosis clean -a
+```
+
+This will stop and remove all running enclaves and **delete all data**.
 
 ## Configuration
 
