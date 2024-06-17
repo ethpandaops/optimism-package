@@ -99,17 +99,17 @@ Additionally, you can spin up multipl L2 networks by providing a list of L2 conf
 optimism_package:
   - participants:
       - el_type: op-geth
+    network_params:
+      name: op_rollup_one
+      network_id: "3151909"
+      preset: minimal
     additional_services:
       - blockscout
-    network_params:
-      preset: minimal
-      network_id: "3151909"
-      name: op_rollup_one
   - participants:
       - el_type: op-geth
     network_params:
-      network_id: "3151910"
       name: op_rollup_two
+      network_id: "3151910"
     additional_services:
       - blockscout
 ethereum_package:
