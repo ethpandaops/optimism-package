@@ -13,11 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Release Please
-        uses: google-github-actions/release-please-action@v3
+        uses: googleapis/release-please-action@v3
         with:
           token: ${{ secrets.PAT }}
           release-type: simple
           include-v-in-tag: false
-          package-name: optimism-package
-          #config-file: .github/workflows/release-please-config.json
-          #manifest-file: .github/workflows/.release-please-manifest.json
+          package-name: kurtosis
