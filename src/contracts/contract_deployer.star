@@ -154,18 +154,21 @@ def deploy_l2_contracts(
     )
 
     l2oo_address = plan.run_sh(
+        name="read_l2oo_address",
         description="Getting the L2OutputOracleProxy address",
         run="jq -r .L2OutputOracleProxy /network-configs/kurtosis.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     l1_bridge_address = plan.run_sh(
+        name="read_l1_bridge_address",
         description="Getting the L1StandardBridgeProxy address",
         run="jq -r .L1StandardBridgeProxy /network-configs/kurtosis.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     l1_deposit_start_block = plan.run_sh(
+        name="read_l1_deposit_start_block",
         description="Getting the L1StandardBridgeProxy address",
         image="badouralix/curl-jq",
         run="jq -r .genesis.l1.number  /network-configs/rollup.json | tr -d '\n'",
@@ -173,6 +176,7 @@ def deploy_l2_contracts(
     )
 
     l1_portal_contract = plan.run_sh(
+        name="read_l1_portal_contract",
         description="Getting the L1 portal contract",
         run="jq -r .OptimismPortal  /network-configs/kurtosis.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
