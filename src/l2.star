@@ -7,7 +7,7 @@ static_files = import_module(
 )
 
 
-def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context, private_keys):
+def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context, l2_private_keys):
     plan.print("Parsing the L2 input args")
     args_with_right_defaults = input_parser.input_parser(plan, l2_args)
     network_params = args_with_right_defaults.network_params
@@ -34,7 +34,7 @@ def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context
         l1_config,
         l2_config_env_vars,
         l2_services_suffix,
-          private_keys,
+        l2_private_keys,
     )
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))
@@ -66,9 +66,9 @@ def launch_l2(plan, l2_num, l2_args, l1_config, l1_priv_key, l1_bootnode_context
             plan.print("Launching op-blockscout")
             blockscout_launcher = blockscout.launch_blockscout(
                 plan,
-                network_params.network_id,
-                l1_bootnode_context,  # first l1 EL url
-                all_el_contexts[0], # first l2 El url
+                l2_services_suffix,
+                l1_bootnode_context, # first l1 EL url
+                all_el_contexts[0], # first l2 EL url
                 l2oo_address,
                 network_params.name,
                 blockscout_env_variables,

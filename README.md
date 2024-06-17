@@ -122,4 +122,4 @@ ethereum_package:
     - dora
     - blockscout
 ```
-Note: if configuring multiple L2s, make sure that the `network_id` is set to differentiate networks.
+Note: if configuring multiple L2s, make sure that the `network_id` and `name` are set to differentiate networks.

@@ -50,10 +50,13 @@ def deploy_factory_contract(
                 # sleep till chain is finalized
                 "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
                 "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
-                "sleep 10",
+                "sleep 5",
                 "cast codesize {0} --rpc-url $L1_RPC_URL".format(
                     FACTORY_DEPLOYER_ADDRESS
                 ),
+                "echo -n $GS_SEQUENCER_PRIVATE_KEY > /network-configs/GS_SEQUENCER_PRIVATE_KEY",
+                "echo -n $GS_BATCHER_PRIVATE_KEY > /network-configs/GS_BATCHER_PRIVATE_KEY",
+                "echo -n $GS_PROPOSER_PRIVATE_KEY > /network-configs/GS_PROPOSER_PRIVATE_KEY",
             ]
         ),
         wait="2000s",
