@@ -55,6 +55,7 @@ def input_parser(plan, input_args):
 
 def parse_network_params(plan, input_args):
     result = default_input_args(input_args)
+    plan.print("result inside parse network params: {0}".format(result))
 
     for attr in input_args:
         value = input_args[attr]

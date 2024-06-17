@@ -25,15 +25,14 @@ def run(plan, args):
     l1_config_env_vars = get_l1_config(all_l1_participants, l1_network_params)
 
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
-    contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
+    private_keys = contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
 
     # Deploy L2s
     if type(args["optimism-package"]) == "dict":
-        plan.print("deploying l2 with name {0}".format(l2_args["name"]))
-        l2_launcher.launch_l2(plan, 0, args["optimism-package"], l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
+        l2_launcher.launch_l2(plan, 0, args["optimism-package"], l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context, private_keys)
     elif type(args["optimism-package"]) == "list":
         for l2_num, l2_args in enumerate(args["optimism-package"]):
-            l2_launcher.launch_l2(plan, l2_num, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context)
+            l2_launcher.launch_l2(plan, l2_num, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context, private_keys)
     else:
         fail("invalid type provided for param: `optimism-package`")
 

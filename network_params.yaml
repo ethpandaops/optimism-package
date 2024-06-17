@@ -1,22 +1,22 @@
-l1:
+ethereum-package:
   participants:
     - el_type: geth
     - el_type: reth
   network_params:
     preset: minimal
-l2s:
-  - name: "rollup_two"
-    participants:
+optimism-package:
+  - participants:
       - el_type: op-geth
     additional_services:
       - blockscout
     network_params:
       preset: minimal
       network_id: "3151909"
-  - name: "rollup_one"
-    participants:
+      name: op-kurtosis
+  - participants:
       - el_type: op-geth
     network_params:
       network_id: "3151910"
+      name: op-kurtosis
     additional_services:
       - blockscout
