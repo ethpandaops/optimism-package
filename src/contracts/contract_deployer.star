@@ -1,20 +1,18 @@
 IMAGE = "ethpandaops/optimism-contract-deployer:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
-
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
+# raw tx data for deploying Create2Factory contract to L1
 FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222"
 
 
-def launch_contract_deployer(
+def deploy_factory_contract(
     plan,
     priv_key,
     l1_config_env_vars,
-    l2_config_env_vars,
 ):
-    op_genesis = plan.run_sh(
-        name="op_genesis",
-        description="Deploying L2 contracts (takes a few minutes (30 mins for mainnet preset - 4 mins for minimal preset) -- L1 has to be finalized first)",
+    factory_deployment_result = plan.run_sh(
+        description="Deploying L2 factory contract to L1 (needs to wait for l1 to finalize, about 4 min for minimal preset, 30 min for mainnet)",
         image=IMAGE,
         env_vars={
             "WEB3_PRIVATE_KEY": str(priv_key),
@@ -22,10 +20,9 @@ def launch_contract_deployer(
             "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
             "DEPLOYMENT_CONTEXT": "getting-started",
         }
-        | l1_config_env_vars
-        | l2_config_env_vars,
+        | l1_config_env_vars,
         store=[
-            StoreSpec(src="/network-configs", name="op-genesis-configs"),
+            StoreSpec(src="/network-configs", name="network-configs"),
         ],
         run=" && ".join(
             [
@@ -52,10 +49,94 @@ def launch_contract_deployer(
                 "sleep 3",
                 # sleep till chain is finalized
                 "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
+                "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
+                "sleep 5",
+                "cast codesize {0} --rpc-url $L1_RPC_URL".format(
+                    FACTORY_DEPLOYER_ADDRESS
+                ),
+                "echo -n $GS_SEQUENCER_PRIVATE_KEY > /network-configs/GS_SEQUENCER_PRIVATE_KEY",
+                "echo -n $GS_BATCHER_PRIVATE_KEY > /network-configs/GS_BATCHER_PRIVATE_KEY",
+                "echo -n $GS_PROPOSER_PRIVATE_KEY > /network-configs/GS_PROPOSER_PRIVATE_KEY",
+            ]
+        ),
+        wait="2000s",
+    )
+
+    gs_sequencer_private_key = plan.run_sh(
+        description="Getting the sequencer private key",
+        run="cat /network-configs/GS_SEQUENCER_PRIVATE_KEY ",
+        files={"/network-configs": factory_deployment_result.files_artifacts[0]},
+    )
+
+    gs_batcher_private_key = plan.run_sh(
+        description="Getting the batcher private key",
+        run="cat /network-configs/GS_BATCHER_PRIVATE_KEY ",
+        files={"/network-configs": factory_deployment_result.files_artifacts[0]},
+    )
+
+    gs_proposer_private_key = plan.run_sh(
+        description="Getting the proposer private key",
+        run="cat /network-configs/GS_PROPOSER_PRIVATE_KEY ",
+        files={"/network-configs": factory_deployment_result.files_artifacts[0]},
+    )
+
+    return struct(
+        sequencer_private_key=gs_sequencer_private_key.output,
+        batcher_private_key=gs_batcher_private_key.output,
+        proposer_private_key=gs_proposer_private_key.output,
+    )
+
+
+def deploy_l2_contracts(
+    plan,
+    priv_key,
+    l1_config_env_vars,
+    l2_config_env_vars,
+    l2_services_suffix,
+    private_keys,
+):
+    op_genesis = plan.run_sh(
+        description="Deploying L2 contracts (takes a few minutes (30 mins for mainnet preset - 4 mins for minimal preset) -- L1 has to be finalized first)",
+        image=IMAGE,
+        env_vars={
+            "WEB3_PRIVATE_KEY": str(priv_key),
+            "FUND_VALUE": "10",
+            "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
+            "DEPLOYMENT_CONTEXT": "getting-started",
+        }
+        | l1_config_env_vars
+        | l2_config_env_vars,
+        store=[
+            StoreSpec(
+                src="/network-configs",
+                name="op-genesis-configs{0}".format(l2_services_suffix),
+            ),
+        ],
+        run=" && ".join(
+            [
+                "./packages/contracts-bedrock/scripts/getting-started/wallets.sh >> {0}".format(
+                    ENVRC_PATH
+                ),
+                "sed -i '1d' {0}".format(
+                    ENVRC_PATH
+                ),  # Remove the first line (not commented out)
+                "echo 'export IMPL_SALT=$(openssl rand -hex 32)' >> {0}".format(
+                    ENVRC_PATH
+                ),
+                ". {0}".format(ENVRC_PATH),
+                "mkdir -p /network-configs",
+                "web3 transfer $FUND_VALUE to $GS_ADMIN_ADDRESS",  # Fund Admin
+                "sleep 3",
+                "web3 transfer $FUND_VALUE to $GS_BATCHER_ADDRESS",  # Fund Batcher
+                "sleep 3",
+                "web3 transfer $FUND_VALUE to $GS_PROPOSER_ADDRESS",  # Fund Proposer
+                "sleep 3",
+                "web3 transfer $FUND_VALUE to {0}".format(FACTORY_DEPLOYER_ADDRESS),
+                "sleep 3",
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
-                "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
-                "sleep 12",
+                "sleep 5",
+                'jq \'. + {"fundDevAccounts": true, "useInterop": true}\' $DEPLOY_CONFIG_PATH > tmp.$$.json && mv tmp.$$.json $DEPLOY_CONFIG_PATH',
                 "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "sleep 3",
                 "CONTRACT_ADDRESSES_PATH=$DEPLOYMENT_OUTFILE forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID",
@@ -76,27 +157,6 @@ def launch_contract_deployer(
             ]
         ),
         wait="2000s",
-    )
-
-    gs_sequencer_private_key = plan.run_sh(
-        name="read_sequencer_private_key",
-        description="Getting the sequencer private key",
-        run="cat /network-configs/GS_SEQUENCER_PRIVATE_KEY ",
-        files={"/network-configs": op_genesis.files_artifacts[0]},
-    )
-
-    gs_batcher_private_key = plan.run_sh(
-        name="read_batcher_private_key",
-        description="Getting the batcher private key",
-        run="cat /network-configs/GS_BATCHER_PRIVATE_KEY ",
-        files={"/network-configs": op_genesis.files_artifacts[0]},
-    )
-
-    gs_proposer_private_key = plan.run_sh(
-        name="read_proposer_private_key",
-        description="Getting the proposer private key",
-        run="cat /network-configs/GS_PROPOSER_PRIVATE_KEY ",
-        files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     l2oo_address = plan.run_sh(
@@ -129,9 +189,9 @@ def launch_contract_deployer(
     )
 
     private_keys = {
-        "GS_SEQUENCER_PRIVATE_KEY": gs_sequencer_private_key.output,
-        "GS_BATCHER_PRIVATE_KEY": gs_batcher_private_key.output,
-        "GS_PROPOSER_PRIVATE_KEY": gs_proposer_private_key.output,
+        "GS_SEQUENCER_PRIVATE_KEY": private_keys.sequencer_private_key,
+        "GS_BATCHER_PRIVATE_KEY": private_keys.batcher_private_key,
+        "GS_PROPOSER_PRIVATE_KEY": private_keys.proposer_private_key,
     }
 
     blockscout_env_variables = {
