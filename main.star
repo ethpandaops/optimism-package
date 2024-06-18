@@ -34,9 +34,9 @@ def run(plan, args):
         l2_services_suffix = "" # no suffix if one l2
         l2_launcher.launch_l2(plan, l2_services_suffix, args["optimism_package"], l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context, l2_private_keys)
     elif type(args["optimism_package"]) == "list":
-        for l2_num, l2_args in enumerate(args["optimism-package"]):
+        for l2_num, l2_args in enumerate(args["optimism_package"]):
             l2_services_suffix = "-{0}".format(l2_args["network_params"]["name"]) # suffix with rollup name, and enforce a name is provided to distinguish them
-            l2_launcher.launch_l2(plan, l2_num, l2_services_suffix, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context, l2_private_keys)
+            l2_launcher.launch_l2(plan, l2_services_suffix, l2_args, l1_config_env_vars, l1_priv_key, all_l1_participants[0].el_context, l2_private_keys)
     else:
         fail("invalid type provided for param: `optimism-package`")
 
