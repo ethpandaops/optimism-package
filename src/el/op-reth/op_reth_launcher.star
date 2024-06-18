@@ -1,7 +1,7 @@
 shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
-# input_parser = import_module("../../package_io/input_parser.star")
+
 el_context = import_module(
     "github.com/ethpandaops/ethereum-package/src/el/el_context.star"
 )

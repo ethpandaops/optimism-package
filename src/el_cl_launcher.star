@@ -20,6 +20,7 @@ def launch(
     num_participants,
     l1_config_env_vars,
     gs_sequencer_private_key,
+    l2_services_suffix,
 ):
     el_launchers = {
         "op-geth": {
@@ -84,8 +85,12 @@ def launch(
         # Zero-pad the index using the calculated zfill value
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
-        el_service_name = "op-el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
-        cl_service_name = "op-cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
+        el_service_name = "op-el-{0}-{1}-{2}{3}".format(
+            index_str, el_type, cl_type, l2_services_suffix
+        )
+        cl_service_name = "op-cl-{0}-{1}-{2}{3}".format(
+            index_str, cl_type, el_type, l2_services_suffix
+        )
 
         el_context = el_launch_method(
             plan,
