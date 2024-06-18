@@ -52,6 +52,7 @@ optimism_package:
       # Defaults by client:
       # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
       # - op-reth: parithoshj/op-reth:latest
+      # - op-erigon: testinprod/op-erigon:latest
       el_image: ""
 
     # CL(Consensus Layer) Specific flags
