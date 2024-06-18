@@ -100,14 +100,14 @@ optimism_package:
   - participants:
       - el_type: op-geth
     network_params:
-      name: op_rollup_one
+      name: op-rollup-one
       network_id: "3151909"
     additional_services:
       - blockscout
   - participants:
       - el_type: op-geth
     network_params:
-      name: op_rollup_two
+      name: op-rollup-two
       network_id: "3151910"
     additional_services:
       - blockscout

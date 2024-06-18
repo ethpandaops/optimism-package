@@ -108,7 +108,13 @@ def get_config_verif():
 
 
 def get_config_backend(
-    postgres_output, l1_el_context, l2_el_context, verif_url, l2oo_address, l2_network_name, additional_env_vars
+    postgres_output,
+    l1_el_context,
+    l2_el_context,
+    verif_url,
+    l2oo_address,
+    l2_network_name,
+    additional_env_vars,
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
@@ -147,7 +153,7 @@ def get_config_backend(
             'bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()" && bin/blockscout start',
         ],
         env_vars={
-            "ETHEREUM_JSONRPC_VARIANT": "geth", 
+            "ETHEREUM_JSONRPC_VARIANT": "geth",
             "ETHEREUM_JSONRPC_HTTP_URL": l2_el_context.rpc_http_url,
             "ETHEREUM_JSONRPC_TRACE_URL": l2_el_context.rpc_http_url,
             "DATABASE_URL": database_url,

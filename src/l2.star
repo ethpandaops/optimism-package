@@ -7,7 +7,15 @@ static_files = import_module(
 )
 
 
-def launch_l2(plan, l2_services_suffix, l2_args, l1_config, l1_priv_key, l1_bootnode_context, l2_private_keys):
+def launch_l2(
+    plan,
+    l2_services_suffix,
+    l2_args,
+    l1_config,
+    l1_priv_key,
+    l1_bootnode_context,
+    l2_private_keys,
+):
     plan.print("Parsing the L2 input args")
     args_with_right_defaults = input_parser.input_parser(plan, l2_args)
     network_params = args_with_right_defaults.network_params
@@ -15,7 +23,7 @@ def launch_l2(plan, l2_services_suffix, l2_args, l1_config, l1_priv_key, l1_boot
     l2_config_env_vars = {}
     l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
     l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
-    
+
     (
         el_cl_data,
         gs_private_keys,
@@ -46,7 +54,7 @@ def launch_l2(plan, l2_services_suffix, l2_args, l1_config, l1_priv_key, l1_boot
         gs_private_keys,
         l1_config,
         l2oo_address,
-        l2_services_suffix
+        l2_services_suffix,
     )
 
     all_el_contexts = []
@@ -61,8 +69,8 @@ def launch_l2(plan, l2_services_suffix, l2_args, l1_config, l1_priv_key, l1_boot
             blockscout_launcher = blockscout.launch_blockscout(
                 plan,
                 l2_services_suffix,
-                l1_bootnode_context, # first l1 EL url
-                all_el_contexts[0], # first l2 EL url
+                l1_bootnode_context,  # first l1 EL url
+                all_el_contexts[0],  # first l2 EL url
                 l2oo_address,
                 network_params.name,
                 blockscout_env_variables,

@@ -81,8 +81,8 @@ def deploy_factory_contract(
     )
 
     return struct(
-        sequencer_private_key=gs_sequencer_private_key.output, 
-        batcher_private_key=gs_batcher_private_key.output, 
+        sequencer_private_key=gs_sequencer_private_key.output,
+        batcher_private_key=gs_batcher_private_key.output,
         proposer_private_key=gs_proposer_private_key.output,
     )
 
@@ -107,7 +107,10 @@ def deploy_l2_contracts(
         | l1_config_env_vars
         | l2_config_env_vars,
         store=[
-            StoreSpec(src="/network-configs", name="op-genesis-configs{0}".format(l2_services_suffix)),
+            StoreSpec(
+                src="/network-configs",
+                name="op-genesis-configs{0}".format(l2_services_suffix),
+            ),
         ],
         run=" && ".join(
             [
@@ -133,7 +136,7 @@ def deploy_l2_contracts(
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
                 "sleep 5",
-                "jq '. + {\"fundDevAccounts\": true, \"useInterop\": true}' $DEPLOY_CONFIG_PATH > tmp.$$.json && mv tmp.$$.json $DEPLOY_CONFIG_PATH",
+                'jq \'. + {"fundDevAccounts": true, "useInterop": true}\' $DEPLOY_CONFIG_PATH > tmp.$$.json && mv tmp.$$.json $DEPLOY_CONFIG_PATH',
                 "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "sleep 3",
                 "CONTRACT_ADDRESSES_PATH=$DEPLOYMENT_OUTFILE forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID",
