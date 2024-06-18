@@ -1,5 +1,5 @@
 ## Welcome to Optimism Package
-default package for Optimism
+The default package for Optimism
 ```yaml
 optimism_package:
   participants:
