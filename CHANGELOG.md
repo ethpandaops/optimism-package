@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/ethpandaops/optimism-package/compare/1.0.0...1.0.1) (2024-06-18)
+
+
+### Bug Fixes
+
+* grammar in docs ([#33](https://github.com/ethpandaops/optimism-package/issues/33)) ([d6fb36f](https://github.com/ethpandaops/optimism-package/commit/d6fb36f8d59a54f174b1f93e5fbb47386d3e486d))
+
 ## 1.0.0 (2024-06-17)
 
 
