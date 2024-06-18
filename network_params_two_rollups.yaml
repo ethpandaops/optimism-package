@@ -1,0 +1,21 @@
+ethereum_package:
+  participants:
+    - el_type: geth
+    - el_type: reth
+  network_params:
+    preset: minimal
+optimism_package:
+  - participants:
+      - el_type: op-geth
+    additional_services:
+      - blockscout
+    network_params:
+      name: op-rollup-one
+      network_id: "3151909"
+  - participants:
+      - el_type: op-geth
+    network_params:
+      name: op-rollup-two
+      network_id: "3151910"
+    additional_services:
+      - blockscout

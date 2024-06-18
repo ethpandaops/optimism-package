@@ -1,14 +1,86 @@
-input_parser = import_module("./src/package_io/input_parser.star")
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 static_files = import_module(
     "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
 )
-participant_network = import_module("./src/participant_network.star")
-blockscout = import_module("./src/blockscout/blockscout_launcher.star")
+l2_launcher = import_module("./src/l2.star")
 
 
-def get_l1_stuff(all_l1_participants, l1_network_params):
+def run(plan, args):
+    """Deploy Optimism L2s on an Ethereum L1.
+
+    Args:
+        args(json): Configures other aspects of the environment.
+    Returns:
+        A full deployment of Optimism L2(s)
+    """
+    plan.print("Parsing the L1 input args")
+    ethereum_args = args["ethereum_package"]
+
+    # Deploy the L1
+    plan.print("Deploying a local L1")
+    l1 = ethereum_package.run(plan, ethereum_args)
+
+    # Get L1 info
+    all_l1_participants = l1.all_participants
+    l1_network_params = l1.network_params
+    l1_priv_key = l1.pre_funded_accounts[
+        12
+    ].private_key  # reserved for L2 contract deployers
+    l1_config_env_vars = get_l1_config(all_l1_participants, l1_network_params)
+
+    # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
+    l2_private_keys = contract_deployer.deploy_factory_contract(
+        plan, l1_priv_key, l1_config_env_vars
+    )
+
+    # Deploy L2s
+    if type(args["optimism_package"]) == "dict":
+        l2_services_suffix = ""  # no suffix if one l2
+        l2_launcher.launch_l2(
+            plan,
+            l2_services_suffix,
+            args["optimism_package"],
+            l1_config_env_vars,
+            l1_priv_key,
+            all_l1_participants[0].el_context,
+            l2_private_keys,
+        )
+    elif type(args["optimism_package"]) == "list":
+        seen_names = {}
+        seen_network_ids = {}
+        for l2_num, l2_args in enumerate(args["optimism_package"]):
+            name = l2_args["network_params"]["name"]
+            network_id = l2_args["network_params"]["network_id"]
+            if name in seen_names:
+                fail(
+                    "Duplicate name: {0} provided, make sure you use unique names.".format(
+                        name
+                    )
+                )
+            if network_id in seen_network_ids:
+                fail(
+                    "Duplicate network_id: {0} provided, make sure you use unique network_ids.".format(
+                        network_id
+                    )
+                )
+            seen_names[name] = True
+            seen_network_ids[network_id] = True
+            l2_services_suffix = "-{0}".format(name)
+            l2_launcher.launch_l2(
+                plan,
+                l2_services_suffix,
+                l2_args,
+                l1_config_env_vars,
+                l1_priv_key,
+                all_l1_participants[0].el_context,
+                l2_private_keys,
+            )
+    else:
+        fail("invalid type provided for param: `optimism-package`")
+
+
+def get_l1_config(all_l1_participants, l1_network_params):
     env_vars = {}
     env_vars["L1_RPC_KIND"] = "any"
     env_vars["WEB3_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
@@ -28,96 +100,3 @@ def get_l1_stuff(all_l1_participants, l1_network_params):
     )
 
     return env_vars
-
-
-def run(plan, args={}):
-    """Deploy a Optimism L2 with a local L1.
-
-    Args:
-        args(yaml): Configures other aspects of the environment.
-    Returns:
-        A full deployment of Optimism L2
-    """
-
-    # Parse the values for the args
-    plan.print("Parsing the L1 input args")
-
-    ethereum_args = args["ethereum_package"]
-
-    # Deploy the L1
-    plan.print("Deploying a local L1")
-    l1 = ethereum_package.run(plan, ethereum_args)
-    all_l1_participants = l1.all_participants
-    l1_network_params = l1.network_params
-    l1_priv_key = l1.pre_funded_accounts[
-        12
-    ].private_key  # reserved for L2 contract deployer
-    # Deploy L2 smart contracts
-    # Parse the values for the args
-    plan.print("Parsing the L2 input args")
-    optimism_args = args["optimism_package"]
-
-    l1_config_env_vars = get_l1_stuff(all_l1_participants, l1_network_params)
-
-    args_with_right_defaults = input_parser.input_parser(plan, optimism_args)
-    network_params = args_with_right_defaults.network_params
-
-    l2_config_env_vars = {}
-    l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
-    l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
-
-    (
-        el_cl_data,
-        gs_private_keys,
-        l2oo_address,
-        l1_bridge_address,
-        blockscout_env_variables,
-    ) = contract_deployer.launch_contract_deployer(
-        plan,
-        l1_priv_key,
-        l1_config_env_vars,
-        l2_config_env_vars,
-    )
-
-    # Deploy the L2
-    plan.print("Deploying a local L2")
-
-    jwt_file = plan.upload_files(
-        src=static_files.JWT_PATH_FILEPATH,
-        name="op_jwt_file",
-    )
-
-    all_l2_participants = participant_network.launch_participant_network(
-        plan,
-        args_with_right_defaults.participants,
-        jwt_file,
-        network_params,
-        el_cl_data,
-        gs_private_keys,
-        l1_config_env_vars,
-        l2oo_address,
-    )
-
-    all_el_contexts = []
-    all_cl_contexts = []
-    for participant in all_l2_participants:
-        all_el_contexts.append(participant.el_context)
-        all_cl_contexts.append(participant.cl_context)
-
-    for additional_service in args_with_right_defaults.additional_services:
-        if additional_service == "blockscout":
-            plan.print("Launching op-blockscout")
-            blockscout_launcher = blockscout.launch_blockscout(
-                plan,
-                all_l1_participants[0].el_context,  # first L1 EL url,
-                l2oo_address,
-                blockscout_env_variables,
-            )
-            plan.print("Successfully launched op-blockscout")
-
-    plan.print(all_l2_participants)
-    plan.print(
-        "Begin your L2 adventures by depositing some L1 Kurtosis ETH to: {0}".format(
-            l1_bridge_address
-        )
-    )

@@ -45,19 +45,26 @@ VERIF_USED_PORTS = {
 
 def launch_blockscout(
     plan,
-    el_context,
+    l2_services_suffix,
+    l1_el_context,
+    l2_el_context,
     l2oo_address,
+    l2_network_name,
     additional_env_vars,
 ):
     postgres_output = postgres.run(
         plan,
-        service_name="{0}-postgres".format(SERVICE_NAME_BLOCKSCOUT),
+        service_name="{0}-postgres{1}".format(
+            SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
+        ),
         database="blockscout",
         extra_configs=["max_connections=1000"],
     )
 
     config_verif = get_config_verif()
-    verif_service_name = "{}-verif".format(SERVICE_NAME_BLOCKSCOUT)
+    verif_service_name = "{0}-verif{1}".format(
+        SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
+    )
     verif_service = plan.add_service(verif_service_name, config_verif)
     verif_url = "http://{}:{}/api".format(
         verif_service.hostname, verif_service.ports["http"].number
@@ -65,12 +72,16 @@ def launch_blockscout(
 
     config_backend = get_config_backend(
         postgres_output,
-        el_context,
+        l1_el_context,
+        l2_el_context,
         verif_url,
         l2oo_address,
+        l2_network_name,
         additional_env_vars,
     )
-    blockscout_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT, config_backend)
+    blockscout_service = plan.add_service(
+        "{0}{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_services_suffix), config_backend
+    )
     plan.print(blockscout_service)
 
     blockscout_url = "http://{}:{}".format(
@@ -97,7 +108,13 @@ def get_config_verif():
 
 
 def get_config_backend(
-    postgres_output, el_context, verif_url, l2oo_address, additional_env_vars
+    postgres_output,
+    l1_el_context,
+    l2_el_context,
+    verif_url,
+    l2oo_address,
+    l2_network_name,
+    additional_env_vars,
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
@@ -110,7 +127,7 @@ def get_config_backend(
 
     optimism_env_vars = {
         "CHAIN_TYPE": "optimism",
-        "INDEXER_OPTIMISM_L1_RPC": el_context.rpc_http_url,
+        "INDEXER_OPTIMISM_L1_RPC": l1_el_context.rpc_http_url,
         # "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": "",
         # "INDEXER_OPTIMISM_L1_BATCH_START_BLOCK": "",
         "INDEXER_OPTIMISM_L1_BATCH_INBOX": "0xff00000000000000000000000000000000042069",
@@ -136,11 +153,9 @@ def get_config_backend(
             'bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()" && bin/blockscout start',
         ],
         env_vars={
-            "ETHEREUM_JSONRPC_VARIANT": "erigon"
-            if el_context.client_name == "erigon" or el_context.client_name == "reth"
-            else el_context.client_name,
-            "ETHEREUM_JSONRPC_HTTP_URL": el_context.rpc_http_url,
-            "ETHEREUM_JSONRPC_TRACE_URL": el_context.rpc_http_url,
+            "ETHEREUM_JSONRPC_VARIANT": "geth",
+            "ETHEREUM_JSONRPC_HTTP_URL": l2_el_context.rpc_http_url,
+            "ETHEREUM_JSONRPC_TRACE_URL": l2_el_context.rpc_http_url,
             "DATABASE_URL": database_url,
             "COIN": "opETH",
             "MICROSERVICE_SC_VERIFIER_ENABLED": "true",
@@ -148,8 +163,8 @@ def get_config_backend(
             "MICROSERVICE_SC_VERIFIER_TYPE": "sc_verifier",
             "INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER": "true",
             "ECTO_USE_SSL": "false",
-            "NETWORK": "Kurtosis",
-            "SUBNETWORK": "Kurtosis",
+            "NETWORK": l2_network_name,
+            "SUBNETWORK": l2_network_name,
             "API_V2_ENABLED": "true",
             "PORT": "{}".format(HTTP_PORT_NUMBER),
             "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",
