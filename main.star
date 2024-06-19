@@ -20,7 +20,7 @@ def run(plan, args):
     # Deploy the L1
     plan.print("Deploying a local L1")
     l1 = ethereum_package.run(plan, ethereum_args)
-
+    plan.print(l1.network_params)
     # Get L1 info
     all_l1_participants = l1.all_participants
     l1_network_params = l1.network_params
@@ -33,6 +33,7 @@ def run(plan, args):
     contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
 
     # Deploy L2s
+    plan.print("Deploying a local L2")
     if type(args["optimism_package"]) == "dict":
         l2_services_suffix = ""  # no suffix if one l2
         l2_launcher.launch_l2(

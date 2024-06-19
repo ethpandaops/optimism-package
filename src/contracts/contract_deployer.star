@@ -79,7 +79,7 @@ def deploy_l2_contracts(
                 "web3 transfer $FUND_VALUE to $GS_BATCHER_ADDRESS",  # Fund Batcher
                 "sleep 3",
                 "web3 transfer $FUND_VALUE to $GS_PROPOSER_ADDRESS",  # Fund Proposer
-                "sleep 3",
+                "sleep 12",
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
                 "sleep 5",

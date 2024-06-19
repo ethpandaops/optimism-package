@@ -158,10 +158,7 @@ def get_config(
         "--http.corsdomain=*",
         "--http.api=admin,engine,net,eth,web3,debug",
         "--ws",
-        "--ws.addr=0.0.0.0",
         "--ws.port={0}".format(WS_PORT_NUM),
-        "--ws.api=admin,engine,net,eth,web3,debug",
-        "--ws.origins=*",
         "--allow-insecure-unlock",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
@@ -172,7 +169,6 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--discovery.port={0}".format(discovery_port),
         "--port={0}".format(discovery_port),
     ]
 
