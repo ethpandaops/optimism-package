@@ -10,4 +10,6 @@ ethereum_package:
     - el_type: reth
   network_params:
     preset: minimal
+  additional_services:
+    - dora
 
