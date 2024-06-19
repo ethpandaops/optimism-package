@@ -14,7 +14,6 @@ def launch_l2(
     l1_config,
     l1_priv_key,
     l1_bootnode_context,
-    l2_private_keys,
 ):
     plan.print("Parsing the L2 input args")
     args_with_right_defaults = input_parser.input_parser(plan, l2_args)
@@ -36,7 +35,6 @@ def launch_l2(
         l1_config,
         l2_config_env_vars,
         l2_services_suffix,
-        l2_private_keys,
     )
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))

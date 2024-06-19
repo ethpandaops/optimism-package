@@ -1,5 +1,5 @@
 ## Welcome to Optimism Package
-default package for Optimism
+The default package for Optimism
 ```yaml
 optimism_package:
   participants:
@@ -141,3 +141,6 @@ ethereum_package:
     - blockscout
 ```
 Note: if configuring multiple L2s, make sure that the `network_id` and `name` are set to differentiate networks.
+
+### Additional configurations
+Please find examples of additional configurations in the [test folder](.github/tests/).

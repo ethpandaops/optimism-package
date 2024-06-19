@@ -30,9 +30,7 @@ def run(plan, args):
     l1_config_env_vars = get_l1_config(all_l1_participants, l1_network_params)
 
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
-    l2_private_keys = contract_deployer.deploy_factory_contract(
-        plan, l1_priv_key, l1_config_env_vars
-    )
+    contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
 
     # Deploy L2s
     if type(args["optimism_package"]) == "dict":
@@ -44,7 +42,6 @@ def run(plan, args):
             l1_config_env_vars,
             l1_priv_key,
             all_l1_participants[0].el_context,
-            l2_private_keys,
         )
     elif type(args["optimism_package"]) == "list":
         seen_names = {}
@@ -74,7 +71,6 @@ def run(plan, args):
                 l1_config_env_vars,
                 l1_priv_key,
                 all_l1_participants[0].el_context,
-                l2_private_keys,
             )
     else:
         fail("invalid type provided for param: `optimism-package`")

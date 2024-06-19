@@ -12,6 +12,7 @@ def deploy_factory_contract(
     l1_config_env_vars,
 ):
     factory_deployment_result = plan.run_sh(
+        name="op_deploy_factory_contract",
         description="Deploying L2 factory contract to L1 (needs to wait for l1 to finalize, about 4 min for minimal preset, 30 min for mainnet)",
         image=IMAGE,
         env_vars={
@@ -21,31 +22,9 @@ def deploy_factory_contract(
             "DEPLOYMENT_CONTEXT": "getting-started",
         }
         | l1_config_env_vars,
-        store=[
-            StoreSpec(src="/network-configs", name="network-configs"),
-        ],
         run=" && ".join(
             [
-                "./packages/contracts-bedrock/scripts/getting-started/wallets.sh >> {0}".format(
-                    ENVRC_PATH
-                ),
-                "sed -i '1d' {0}".format(
-                    ENVRC_PATH
-                ),  # Remove the first line (not commented out)
-                "echo 'export IMPL_SALT=$(openssl rand -hex 32)' >> {0}".format(
-                    ENVRC_PATH
-                ),
-                ". {0}".format(ENVRC_PATH),
-                "mkdir -p /network-configs",
-                "web3 transfer $FUND_VALUE to $GS_ADMIN_ADDRESS",  # Fund Admin
-                "sleep 3",
-                "web3 transfer $FUND_VALUE to $GS_BATCHER_ADDRESS",  # Fund Batcher
-                "sleep 3",
-                "web3 transfer $FUND_VALUE to $GS_PROPOSER_ADDRESS",  # Fund Proposer
-                "sleep 3",
-                "web3 transfer $FUND_VALUE to {0}".format(
-                    FACTORY_DEPLOYER_ADDRESS
-                ),  # Fund Factory deployer
+                "web3 transfer $FUND_VALUE to {0}".format(FACTORY_DEPLOYER_ADDRESS),
                 "sleep 3",
                 # sleep till chain is finalized
                 "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
@@ -54,36 +33,9 @@ def deploy_factory_contract(
                 "cast codesize {0} --rpc-url $L1_RPC_URL".format(
                     FACTORY_DEPLOYER_ADDRESS
                 ),
-                "echo -n $GS_SEQUENCER_PRIVATE_KEY > /network-configs/GS_SEQUENCER_PRIVATE_KEY",
-                "echo -n $GS_BATCHER_PRIVATE_KEY > /network-configs/GS_BATCHER_PRIVATE_KEY",
-                "echo -n $GS_PROPOSER_PRIVATE_KEY > /network-configs/GS_PROPOSER_PRIVATE_KEY",
             ]
         ),
         wait="2000s",
-    )
-
-    gs_sequencer_private_key = plan.run_sh(
-        description="Getting the sequencer private key",
-        run="cat /network-configs/GS_SEQUENCER_PRIVATE_KEY ",
-        files={"/network-configs": factory_deployment_result.files_artifacts[0]},
-    )
-
-    gs_batcher_private_key = plan.run_sh(
-        description="Getting the batcher private key",
-        run="cat /network-configs/GS_BATCHER_PRIVATE_KEY ",
-        files={"/network-configs": factory_deployment_result.files_artifacts[0]},
-    )
-
-    gs_proposer_private_key = plan.run_sh(
-        description="Getting the proposer private key",
-        run="cat /network-configs/GS_PROPOSER_PRIVATE_KEY ",
-        files={"/network-configs": factory_deployment_result.files_artifacts[0]},
-    )
-
-    return struct(
-        sequencer_private_key=gs_sequencer_private_key.output,
-        batcher_private_key=gs_batcher_private_key.output,
-        proposer_private_key=gs_proposer_private_key.output,
     )
 
 
@@ -93,10 +45,10 @@ def deploy_l2_contracts(
     l1_config_env_vars,
     l2_config_env_vars,
     l2_services_suffix,
-    private_keys,
 ):
     op_genesis = plan.run_sh(
-        description="Deploying L2 contracts (takes a few minutes (30 mins for mainnet preset - 4 mins for minimal preset) -- L1 has to be finalized first)",
+        name="op_deploy_l2_contracts",
+        description="Deploying L2 contracts (takes about a minute)",
         image=IMAGE,
         env_vars={
             "WEB3_PRIVATE_KEY": str(priv_key),
@@ -117,9 +69,6 @@ def deploy_l2_contracts(
                 "./packages/contracts-bedrock/scripts/getting-started/wallets.sh >> {0}".format(
                     ENVRC_PATH
                 ),
-                "sed -i '1d' {0}".format(
-                    ENVRC_PATH
-                ),  # Remove the first line (not commented out)
                 "echo 'export IMPL_SALT=$(openssl rand -hex 32)' >> {0}".format(
                     ENVRC_PATH
                 ),
@@ -130,8 +79,6 @@ def deploy_l2_contracts(
                 "web3 transfer $FUND_VALUE to $GS_BATCHER_ADDRESS",  # Fund Batcher
                 "sleep 3",
                 "web3 transfer $FUND_VALUE to $GS_PROPOSER_ADDRESS",  # Fund Proposer
-                "sleep 3",
-                "web3 transfer $FUND_VALUE to {0}".format(FACTORY_DEPLOYER_ADDRESS),
                 "sleep 3",
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
@@ -156,7 +103,25 @@ def deploy_l2_contracts(
                 "echo -n $GS_PROPOSER_PRIVATE_KEY > /network-configs/GS_PROPOSER_PRIVATE_KEY",
             ]
         ),
-        wait="2000s",
+        wait="300s",
+    )
+
+    gs_sequencer_private_key = plan.run_sh(
+        description="Getting the sequencer private key",
+        run="cat /network-configs/GS_SEQUENCER_PRIVATE_KEY ",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
+    gs_batcher_private_key = plan.run_sh(
+        description="Getting the batcher private key",
+        run="cat /network-configs/GS_BATCHER_PRIVATE_KEY ",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
+    )
+
+    gs_proposer_private_key = plan.run_sh(
+        description="Getting the proposer private key",
+        run="cat /network-configs/GS_PROPOSER_PRIVATE_KEY ",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     l2oo_address = plan.run_sh(
@@ -189,9 +154,9 @@ def deploy_l2_contracts(
     )
 
     private_keys = {
-        "GS_SEQUENCER_PRIVATE_KEY": private_keys.sequencer_private_key,
-        "GS_BATCHER_PRIVATE_KEY": private_keys.batcher_private_key,
-        "GS_PROPOSER_PRIVATE_KEY": private_keys.proposer_private_key,
+        "GS_SEQUENCER_PRIVATE_KEY": gs_sequencer_private_key.output,
+        "GS_BATCHER_PRIVATE_KEY": gs_batcher_private_key.output,
+        "GS_PROPOSER_PRIVATE_KEY": gs_proposer_private_key.output,
     }
 
     blockscout_env_variables = {
