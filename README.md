@@ -45,7 +45,10 @@ optimism_package:
   participants:
     # EL(Execution Layer) Specific flags
       # The type of EL client that should be started
-      # Valid values are op-geth, op-reth
+      # Valid values are:
+      # op-geth
+      # op-reth
+      # op-erigon
     - el_type: geth
 
       # The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -57,7 +60,8 @@ optimism_package:
 
     # CL(Consensus Layer) Specific flags
       # The type of CL client that should be started
-      # Valid values are op-node, ?
+      # Valid values are:
+      # op-node
       cl_type: op-node
 
       # The Docker image that should be used for the CL client; leave blank to use the default for the client type
@@ -73,15 +77,20 @@ optimism_package:
   network_params:
     # Network name, used to enable syncing of alternative networks
     # Defaults to "kurtosis"
-    # You can sync any public network by setting this to the network name (e.g. "mainnet", "sepolia", "holesky")
-    # You can sync any devnet by setting this to the network name (e.g. "dencun-devnet-12", "verkle-gen-devnet-2")
     network: "kurtosis"
 
     # The network ID of the network.
+    # Must be unique for each network (if you run multiple networks)
+    # Defaults to "2151908"
     network_id: "2151908"
 
     # Seconds per slots
     seconds_per_slot: 2
+
+    # Name of your rollup.
+    # Must be unique for each rollup (if you run multiple rollups)
+    # Defaults to "op-kurtosis"
+    name: "op-kurtosis"
 
   # Additional services to run alongside the network
   # Defaults to []
