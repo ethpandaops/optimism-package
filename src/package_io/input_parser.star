@@ -5,6 +5,7 @@ ethereum_package_input_parser = import_module(
 DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
     "op-reth": "parithoshj/op-reth:latest",
+    "op-erigon": "testinprod/op-erigon:latest",
 }
 
 DEFAULT_CL_IMAGES = {

@@ -82,8 +82,9 @@ def deploy_l2_contracts(
                 "sleep 3",
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
-                "sleep 5",
                 'jq \'. + {"fundDevAccounts": true, "useInterop": true}\' $DEPLOY_CONFIG_PATH > tmp.$$.json && mv tmp.$$.json $DEPLOY_CONFIG_PATH',
+                # sleep till gs_admin_address is funded
+                "while true; do sleep 1; echo 'GS_ADMIN_ADDRESS is not yet funded...'; if [ \"$(web3 balance $GS_ADMIN_ADDRESS)\" != \"0\" ]; then echo 'GS_ADMIN_ADDRESS is funded!'; break; fi; done",
                 "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "sleep 3",
                 "CONTRACT_ADDRESSES_PATH=$DEPLOYMENT_OUTFILE forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID",
