@@ -166,13 +166,13 @@ def get_beacon_config(
     #     cmd.append("--sequencer.enabled")
     #     cmd.append("--sequencer.l1-confs=5")
 
-    if len(existing_cl_clients) > 0:
-        # cmd.append(
-        #     "--p2p.bootnodes="
-        #     + ",".join(
-        #         [ctx.enr for ctx in existing_cl_clients[: constants.MAX_ENR_ENTRIES]]
-        #     )
-        # )
+    # if len(existing_cl_clients) > 0:
+    #     cmd.append(
+    #         "--p2p.bootnodes="
+    #         + ",".join(
+    #             [ctx.enr for ctx in existing_cl_clients[: constants.MAX_ENR_ENTRIES]]
+    #         )
+    #     )
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
