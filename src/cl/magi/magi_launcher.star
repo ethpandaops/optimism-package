@@ -69,17 +69,17 @@ def launch(
 ):
     network_name = shared_utils.get_network_name(launcher.network)
 
-    beacon_node_identity_recipe = PostHttpRequestRecipe(
-        endpoint="/",
-        content_type="application/json",
-        body='{"jsonrpc":"2.0","method":"opp2p_self","params":[],"id":1}',
-        port_id=BEACON_HTTP_PORT_ID,
-        extract={
-            "enr": ".result.ENR",
-            "multiaddr": ".result.addresses[0]",
-            "peer_id": ".result.peerID",
-        },
-    )
+    # beacon_node_identity_recipe = PostHttpRequestRecipe(
+    #     endpoint="/",
+    #     content_type="application/json",
+    #     body='{"jsonrpc":"2.0","method":"opp2p_self","params":[],"id":1}',
+    #     port_id=BEACON_HTTP_PORT_ID,
+    #     extract={
+    #         "enr": ".result.ENR",
+    #         "multiaddr": ".result.addresses[0]",
+    #         "peer_id": ".result.peerID",
+    #     },
+    # )
 
     config = get_beacon_config(
         plan,
@@ -91,7 +91,7 @@ def launch(
         existing_cl_clients,
         l1_config_env_vars,
         gs_sequencer_private_key,
-        beacon_node_identity_recipe,
+        #beacon_node_identity_recipe,
         sequencer_enabled,
     )
 
@@ -102,24 +102,27 @@ def launch(
         beacon_service.ip_address, beacon_http_port.number
     )
 
-    response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=service_name
-    )
+    # response = plan.request(
+    #     recipe=beacon_node_identity_recipe, service_name=service_name
+    # )
 
-    beacon_node_enr = response["extract.enr"]
-    beacon_multiaddr = response["extract.multiaddr"]
-    beacon_peer_id = response["extract.peer_id"]
+    # beacon_node_enr = response["extract.enr"]
+    # beacon_multiaddr = response["extract.multiaddr"]
+    # beacon_peer_id = response["extract.peer_id"]
 
     return cl_context.new_cl_context(
         "magi",
-        beacon_node_enr,
+        #beacon_node_enr,
+        None,
         beacon_service.ip_address,
         beacon_http_port.number,
         beacon_http_url,
         None,
         service_name,
-        multiaddr=beacon_multiaddr,
-        peer_id=beacon_peer_id,
+        multiaddr=None,
+        peer_id=None,
+        # multiaddr=beacon_multiaddr,
+        # peer_id=beacon_peer_id,
     )
 
 
@@ -133,7 +136,7 @@ def get_beacon_config(
     existing_cl_clients,
     l1_config_env_vars,
     gs_sequencer_private_key,
-    beacon_node_identity_recipe,
+    #beacon_node_identity_recipe,
     sequencer_enabled,
 ):
     EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
@@ -187,13 +190,13 @@ def get_beacon_config(
         cmd=cmd,
         files=files,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=ReadyCondition(
-            recipe=beacon_node_identity_recipe,
-            field="code",
-            assertion="==",
-            target_value=200,
-            timeout="1m",
-        ),
+        # ready_conditions=ReadyCondition(
+        #     recipe=beacon_node_identity_recipe,
+        #     field="code",
+        #     assertion="==",
+        #     target_value=200,
+        #     timeout="1m",
+        # ),
     )
 
 
