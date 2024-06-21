@@ -91,7 +91,7 @@ def launch(
         existing_cl_clients,
         l1_config_env_vars,
         gs_sequencer_private_key,
-        #beacon_node_identity_recipe,
+        # beacon_node_identity_recipe,
         sequencer_enabled,
     )
 
@@ -112,7 +112,7 @@ def launch(
 
     return cl_context.new_cl_context(
         "magi",
-        #beacon_node_enr,
+        # beacon_node_enr,
         None,
         beacon_service.ip_address,
         beacon_http_port.number,
@@ -136,7 +136,7 @@ def get_beacon_config(
     existing_cl_clients,
     l1_config_env_vars,
     gs_sequencer_private_key,
-    #beacon_node_identity_recipe,
+    # beacon_node_identity_recipe,
     sequencer_enabled,
 ):
     EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(

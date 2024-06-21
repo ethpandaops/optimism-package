@@ -10,7 +10,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "op-node": "parithoshj/op-node:v1",
-    #"magi": "a16zcrypto/magi:latest",
+    # "magi": "a16zcrypto/magi:latest",
     "magi": "bbusa/magi:latest",
 }
 
