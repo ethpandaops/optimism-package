@@ -165,7 +165,7 @@ def get_beacon_config(
     ]
 
     if sequencer_enabled:
-        cmd.append("--sequencer-enabled")
+        cmd.append("--sequencer-enable")
 
     # if len(existing_cl_clients) > 0:
     #     cmd.append(
