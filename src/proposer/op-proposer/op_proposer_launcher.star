@@ -1,9 +1,9 @@
 shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+    "github.com/Ethos-Works/ethereum-package/src/shared_utils/shared_utils.star"
 )
 
 constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
+    "github.com/Ethos-Works/ethereum-package/src/package_io/constants.star"
 )
 
 #

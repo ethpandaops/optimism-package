@@ -1,5 +1,5 @@
 ethereum_package_input_parser = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
+    "github.com/Ethos-Works/ethereum-package/src/package_io/input_parser.star"
 )
 
 DEFAULT_EL_IMAGES = {

@@ -3,7 +3,7 @@ blockscout = import_module("./blockscout/blockscout_launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
 input_parser = import_module("./package_io/input_parser.star")
 static_files = import_module(
-    "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
+    "github.com/Ethos-Works/ethereum-package/src/static_files/static_files.star"
 )
 
 

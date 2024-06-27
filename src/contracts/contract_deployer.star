@@ -1,4 +1,4 @@
-IMAGE = "ethpandaops/optimism-contract-deployer:latest"
+IMAGE = "Ethos-Works/optimism-contract-deployer:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
