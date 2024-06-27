@@ -10,6 +10,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "op-node": "parithoshj/op-node:v1",
+    "hildr": "ghcr.io/optimism-java/hildr:latest",
 }
 
 DEFAULT_BATCHER_IMAGES = {

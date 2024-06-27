@@ -83,6 +83,7 @@ def get_l1_config(all_l1_participants, l1_network_params):
     env_vars["WEB3_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
     env_vars["L1_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
     env_vars["CL_RPC_URL"] = str(all_l1_participants[0].cl_context.beacon_http_url)
+    env_vars["L1_WS_URL"] = str(all_l1_participants[0].el_context.ws_url)
     env_vars["L1_CHAIN_ID"] = str(l1_network_params.network_id)
     env_vars["L1_BLOCK_TIME"] = str(l1_network_params.seconds_per_slot)
     env_vars["DEPLOYMENT_OUTFILE"] = (
