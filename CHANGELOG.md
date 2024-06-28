@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0](https://github.com/ethpandaops/optimism-package/compare/1.0.0...1.1.0) (2024-06-28)
+
+
+### Features
+
+* add k8s tests ([#45](https://github.com/ethpandaops/optimism-package/issues/45)) ([168f062](https://github.com/ethpandaops/optimism-package/commit/168f062146c19a64ddc359f22f74f09ba2f5609d))
+* add op-erigon - mininny ([#38](https://github.com/ethpandaops/optimism-package/issues/38)) ([c69bf34](https://github.com/ethpandaops/optimism-package/commit/c69bf3420559d5654eef19274ee4e6870a472db9))
+* add version.txt ([#36](https://github.com/ethpandaops/optimism-package/issues/36)) ([1d10311](https://github.com/ethpandaops/optimism-package/commit/1d103111127da3f5ce279ef79ad47e5f1fa51815))
+
+
+### Bug Fixes
+
+* DNS-1035 label ([#44](https://github.com/ethpandaops/optimism-package/issues/44)) ([1bf8541](https://github.com/ethpandaops/optimism-package/commit/1bf85410d2bb4decafb2b5a2617d50cc3c2f9db1))
+* grammar in docs ([#33](https://github.com/ethpandaops/optimism-package/issues/33)) ([d6fb36f](https://github.com/ethpandaops/optimism-package/commit/d6fb36f8d59a54f174b1f93e5fbb47386d3e486d))
+* l2 contract deployment ([#35](https://github.com/ethpandaops/optimism-package/issues/35)) ([3f2b16d](https://github.com/ethpandaops/optimism-package/commit/3f2b16d0b3bb5d12d4f62315771a4d81268c75e8))
+* test k8s ([#47](https://github.com/ethpandaops/optimism-package/issues/47)) ([ac17e89](https://github.com/ethpandaops/optimism-package/commit/ac17e895073d847759887509a38265f07b1a9ae7))
+* trust l1 rpc in op-node ([#41](https://github.com/ethpandaops/optimism-package/issues/41)) ([05dcd2e](https://github.com/ethpandaops/optimism-package/commit/05dcd2eba3d17a6cf5ae4c2895494380e65b24c2))
+
 ## 1.0.0 (2024-06-17)
 
 
