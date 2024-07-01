@@ -1,14 +1,13 @@
 optimism_package:
   participants:
     - el_type: op-geth
-    - el_type: op-reth
-    - el_type: op-erigon
+    - el_type: op-nethermind
   additional_services:
    - blockscout
 ethereum_package:
   participants:
     - el_type: geth
-    - el_type: reth
+      count: 2
   network_params:
     preset: minimal
   additional_services:

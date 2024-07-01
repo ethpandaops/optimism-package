@@ -6,6 +6,8 @@ optimism_package:
       cl_type: op-node
     - el_type: op-erigon
       cl_type: op-node
+    - el_type: op-nethermind
+      cl_type: op-node
 ethereum_package:
   participants:
     - el_type: geth
