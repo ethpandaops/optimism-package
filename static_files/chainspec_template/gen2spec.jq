@@ -128,13 +128,15 @@ def optimism:
     "eip1153TransitionTimestamp": .config.cancunTime|to_hex,
     "eip5656TransitionTimestamp": .config.cancunTime|to_hex,
     "eip6780TransitionTimestamp": .config.cancunTime|to_hex,
-    
+
     #Prague
     "rip7212TransitionTimestamp": .config.pragueTime|to_hex,
 
     # Other chain parameters
     "networkID": .config.chainId|to_hex,
     "chainID": .config.chainId|to_hex,
+
+    "terminalTotalDifficulty": .config.terminalTotalDifficulty|to_hex
   },
   "genesis": {
     "seal": {
