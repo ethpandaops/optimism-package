@@ -180,11 +180,11 @@ def get_config(
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append("--config=none.cfg")
-    #        cmd.append(
-    #            "--Init.ChainSpecPath="
-    #            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-    #            + "/chainspec.json"
-    #        )
+        cmd.append(
+            "--Init.ChainSpecPath="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/chainspec.json"
+        )
     else:
         cmd.append("--config=" + network)
 
