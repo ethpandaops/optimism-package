@@ -87,7 +87,6 @@ def launch(
     sequencer_enabled,
     sequencer_context,
 ):
-
     network_name = shared_utils.get_network_name(launcher.network)
 
     config = get_config(
@@ -142,7 +141,6 @@ def get_config(
     sequencer_enabled,
     sequencer_context,
 ):
-
     discovery_port = DISCOVERY_PORT_NUM
     used_ports = get_used_ports(discovery_port)
     cmd = [
@@ -182,14 +180,13 @@ def get_config(
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append("--config=none.cfg")
-#        cmd.append(
-#            "--Init.ChainSpecPath="
-#            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-#            + "/chainspec.json"
-#        )
+    #        cmd.append(
+    #            "--Init.ChainSpecPath="
+    #            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+    #            + "/chainspec.json"
+    #        )
     else:
         cmd.append("--config=" + network)
-
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
