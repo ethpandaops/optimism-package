@@ -116,7 +116,7 @@ def launch(
 
     return el_context.new_el_context(
         "op-nethermind",
-        enr,
+        "",
         enode,
         service.ip_address,
         RPC_PORT_NUM,
