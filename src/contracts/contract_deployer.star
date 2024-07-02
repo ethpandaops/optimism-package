@@ -7,6 +7,7 @@ FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806
 
 CHAINSPEC_JQ_FILEPATH = "../../static_files/chainspec_template/gen2spec.jq"
 
+
 def deploy_factory_contract(
     plan,
     priv_key,

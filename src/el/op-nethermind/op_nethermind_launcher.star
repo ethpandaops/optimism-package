@@ -185,7 +185,6 @@ def get_config(
         + "/chainspec.json"
     )
 
-
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
