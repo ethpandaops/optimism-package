@@ -7,7 +7,6 @@ FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806
 
 CHAINSPEC_JQ_FILEPATH = "../../static_files/chainspec_template/gen2spec.jq"
 
-
 def deploy_factory_contract(
     plan,
     priv_key,
@@ -66,7 +65,7 @@ def deploy_l2_contracts(
         | l1_config_env_vars
         | l2_config_env_vars,
         files={
-            "/workspace/optimism/packages/contracts-bedrock/deploy-config/gen2spec.jq": chainspec_files_artifact,
+            "/workspace/optimism/packages/contracts-bedrock/deploy-config/chainspec-generator/": chainspec_files_artifact,
         },
         store=[
             StoreSpec(
@@ -112,7 +111,7 @@ def deploy_l2_contracts(
                 "echo -n $GS_SEQUENCER_PRIVATE_KEY > /network-configs/GS_SEQUENCER_PRIVATE_KEY",
                 "echo -n $GS_BATCHER_PRIVATE_KEY > /network-configs/GS_BATCHER_PRIVATE_KEY",
                 "echo -n $GS_PROPOSER_PRIVATE_KEY > /network-configs/GS_PROPOSER_PRIVATE_KEY",
-                "cat /network-configs/genesis.json | jq --from-file /workspace/optimism/packages/contracts-bedrock/deploy-config/gen2spec.jq > /network-configs/chainspec.json",
+                "cat /network-configs/genesis.json | jq --from-file /workspace/optimism/packages/contracts-bedrock/deploy-config/chainspec-generator/gen2spec.jq > /network-configs/chainspec.json",
             ]
         ),
         wait="300s",
