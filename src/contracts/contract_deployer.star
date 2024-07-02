@@ -58,6 +58,7 @@ def deploy_l2_contracts(
         }
         | l1_config_env_vars
         | l2_config_env_vars,
+        files={"../../static_files/chainspec_template/gen2spec.jq":"/gen2spec.jq"},
         store=[
             StoreSpec(
                 src="/network-configs",

@@ -6,7 +6,7 @@ DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
     "op-reth": "parithoshj/op-reth:latest",
     "op-erigon": "testinprod/op-erigon:latest",
-    "op-nethermind": "nethermindeth/nethermind:op-9b835cf",
+    "op-nethermind": "nethermindeth/nethermind:op-4fd53a3",
 }
 
 DEFAULT_CL_IMAGES = {
