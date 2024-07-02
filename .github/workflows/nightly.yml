@@ -41,10 +41,21 @@ jobs:
             echo "Skipping ./.github/tests/mix-with-tools-mev.yaml"
           fi
 
+      - name: Check if Discord Webhook is Set
+        id: check_discord_webhook
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "discord_webhook_set=false" >> $GITHUB_ENV
+          else
+            echo "discord_webhook_set=true" >> $GITHUB_ENV
+          fi
+
       - name: Notify
-        if: cancelled() || failure()
+        if: (cancelled() || failure()) && env.discord_webhook_set == 'true'
         uses: Ilshidur/action-discord@master
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          args: "The nightly test for ${{matrix.file_name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          args: "The nightly test for ${{matrix.file_name}} on optimism-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
