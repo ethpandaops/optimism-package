@@ -12,7 +12,7 @@ def deploy_factory_contract(
     l1_config_env_vars,
 ):
     factory_deployment_result = plan.run_sh(
-        name="op_deploy_factory_contract",
+        name="op-deploy-factory-contract",
         description="Deploying L2 factory contract to L1 (needs to wait for l1 to finalize, about 4 min for minimal preset, 30 min for mainnet)",
         image=IMAGE,
         env_vars={
@@ -47,7 +47,7 @@ def deploy_l2_contracts(
     l2_services_suffix,
 ):
     op_genesis = plan.run_sh(
-        name="op_deploy_l2_contracts",
+        name="op-deploy-l2-contracts",
         description="Deploying L2 contracts (takes about a minute)",
         image=IMAGE,
         env_vars={
@@ -108,39 +108,42 @@ def deploy_l2_contracts(
     )
 
     gs_sequencer_private_key = plan.run_sh(
+        name="read-gs-sequencer-private-key",
         description="Getting the sequencer private key",
         run="cat /network-configs/GS_SEQUENCER_PRIVATE_KEY ",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     gs_batcher_private_key = plan.run_sh(
+        name="read-gs-batcher-private-key",
         description="Getting the batcher private key",
         run="cat /network-configs/GS_BATCHER_PRIVATE_KEY ",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     gs_proposer_private_key = plan.run_sh(
+        name="read-gs-proposer-private-key",
         description="Getting the proposer private key",
         run="cat /network-configs/GS_PROPOSER_PRIVATE_KEY ",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     l2oo_address = plan.run_sh(
-        name="read_l2oo_address",
+        name="read-l2oo-address",
         description="Getting the L2OutputOracleProxy address",
         run="jq -r .L2OutputOracleProxy /network-configs/kurtosis.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     l1_bridge_address = plan.run_sh(
-        name="read_l1_bridge_address",
+        name="read-l1-bridge-address",
         description="Getting the L1StandardBridgeProxy address",
         run="jq -r .L1StandardBridgeProxy /network-configs/kurtosis.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     l1_deposit_start_block = plan.run_sh(
-        name="read_l1_deposit_start_block",
+        name="read-l1-deposit-start-block",
         description="Getting the L1StandardBridgeProxy address",
         image="badouralix/curl-jq",
         run="jq -r .genesis.l1.number  /network-configs/rollup.json | tr -d '\n'",
@@ -148,7 +151,7 @@ def deploy_l2_contracts(
     )
 
     l1_portal_contract = plan.run_sh(
-        name="read_l1_portal_contract",
+        name="read-l1-portal-contract",
         description="Getting the L1 portal contract",
         run="jq -r .OptimismPortal  /network-configs/kurtosis.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
