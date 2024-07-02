@@ -104,9 +104,7 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, RPC_PORT_ID
-    )
+    enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     nethermind_metrics_info = node_metrics.new_node_metrics_info(
@@ -114,6 +112,7 @@ def launch(
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
         "op-nethermind",
@@ -178,15 +177,14 @@ def get_config(
             )
         )
 
-    if network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--config=none.cfg")
-        cmd.append(
-            "--Init.ChainSpecPath="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/chainspec.json"
-        )
-    else:
-        cmd.append("--config=" + network)
+    # TODO: Adding the chainspec and config separately as we may want to have support for public networks and shadowforks
+    cmd.append("--config=none.cfg")
+    cmd.append(
+        "--Init.ChainSpecPath="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/chainspec.json"
+    )
+
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
