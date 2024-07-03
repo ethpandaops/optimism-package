@@ -108,6 +108,8 @@ def optimism:
 
     # London
     "eip1559Transition": .config.londonBlock|to_hex,
+    "eip1559ElasticityMultiplier": .config.optimism.eip1559Elasticity|to_hex,
+    "eip1559BaseFeeMaxChangeDenominator": .config.optimism.eip1559Denominator|to_hex,
     "eip3238Transition": .config.londonBlock|to_hex,
     "eip3529Transition": .config.londonBlock|to_hex,
     "eip3541Transition": .config.londonBlock|to_hex,
@@ -136,7 +138,7 @@ def optimism:
     "networkID": .config.chainId|to_hex,
     "chainID": .config.chainId|to_hex,
 
-    "terminalTotalDifficulty": .config.terminalTotalDifficulty|to_hex
+    "terminalTotalDifficulty": .config.terminalTotalDifficulty|to_hex,
   },
   "genesis": {
     "seal": {
