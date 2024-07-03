@@ -4,6 +4,7 @@ static_files = import_module(
     "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
 )
 l2_launcher = import_module("./src/l2.star")
+wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 
 
 def run(plan, args):
@@ -28,6 +29,9 @@ def run(plan, args):
         12
     ].private_key  # reserved for L2 contract deployers
     l1_config_env_vars = get_l1_config(all_l1_participants, l1_network_params)
+
+    if l1_network_params.network != "kurtosis":
+        wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
 
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
     contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
