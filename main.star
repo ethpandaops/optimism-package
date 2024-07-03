@@ -25,10 +25,13 @@ def run(plan, args):
     # Get L1 info
     all_l1_participants = l1.all_participants
     l1_network_params = l1.network_params
+    l1_network_id = l1.network_id
     l1_priv_key = l1.pre_funded_accounts[
         12
     ].private_key  # reserved for L2 contract deployers
-    l1_config_env_vars = get_l1_config(all_l1_participants, l1_network_params)
+    l1_config_env_vars = get_l1_config(
+        all_l1_participants, l1_network_params, l1_network_id
+    )
 
     if l1_network_params.network != "kurtosis":
         wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
@@ -81,22 +84,22 @@ def run(plan, args):
         fail("invalid type provided for param: `optimism-package`")
 
 
-def get_l1_config(all_l1_participants, l1_network_params):
+def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}
     env_vars["L1_RPC_KIND"] = "any"
     env_vars["WEB3_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
     env_vars["L1_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
     env_vars["CL_RPC_URL"] = str(all_l1_participants[0].cl_context.beacon_http_url)
-    env_vars["L1_CHAIN_ID"] = str(l1_network_params.network_id)
+    env_vars["L1_CHAIN_ID"] = str(l1_network_id)
     env_vars["L1_BLOCK_TIME"] = str(l1_network_params.seconds_per_slot)
     env_vars["DEPLOYMENT_OUTFILE"] = (
         "/workspace/optimism/packages/contracts-bedrock/deployments/"
-        + str(l1_network_params.network_id)
+        + str(l1_network_id)
         + "/kurtosis.json"
     )
     env_vars["STATE_DUMP_PATH"] = (
         "/workspace/optimism/packages/contracts-bedrock/deployments/"
-        + str(l1_network_params.network_id)
+        + str(l1_network_id)
         + "/state-dump.json"
     )
 
