@@ -2,6 +2,7 @@ IMAGE = "ethpandaops/optimism-contract-deployer:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
+FACTORY_ADDRESS = "0x4e59b44847b379578588920cA78FbF26c0B4956C"
 # raw tx data for deploying Create2Factory contract to L1
 FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222"
 
@@ -26,12 +27,14 @@ def deploy_factory_contract(
             [
                 "web3 transfer $FUND_VALUE to {0}".format(FACTORY_DEPLOYER_ADDRESS),
                 "sleep 3",
+                "if [ $(cast codesize {0} --rpc-url $L1_RPC_URL) -gt 0 ]; then echo 'Factory contract already deployed!'; exit 0; fi".format(
+                    FACTORY_ADDRESS
+                ),
                 # sleep till chain is finalized
                 "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
                 "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
-                "sleep 5",
-                "cast codesize {0} --rpc-url $L1_RPC_URL".format(
-                    FACTORY_DEPLOYER_ADDRESS
+                "while true; do sleep 3; echo 'Factory code is not yet deployed...'; if [ $(cast codesize {0} --rpc-url $L1_RPC_URL) -gt 0 ]; then echo 'Factory contract already deployed!'; break; fi; done".format(
+                    FACTORY_ADDRESS
                 ),
             ]
         ),
