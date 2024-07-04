@@ -1,17 +1,15 @@
 optimism_package:
   participants:
     - el_type: op-geth
-    - el_type: op-reth
-    - el_type: op-erigon
-    - el_type: op-nethermind
   additional_services:
    - blockscout
 ethereum_package:
   participants:
-    - el_type: geth
-    - el_type: reth
+    - el_type: nethermind
   network_params:
-    preset: minimal
+    network: helder-devnet-0
+    devnet_repo: commit-boost
+  checkpoint_sync_enabled: true
+  checkpoint_sync_url: https://bn.bootnode.helder-devnets.xyz
   additional_services:
     - dora
-    - blockscout
