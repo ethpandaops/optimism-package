@@ -16,8 +16,8 @@ def run(plan, args):
         A full deployment of Optimism L2(s)
     """
     plan.print("Parsing the L1 input args")
-    ethereum_args = args["ethereum_package"]
-    optimism_args = args["optimism_package"]
+    ethereum_args = args.get("ethereum_package", {})
+    optimism_args = args.get("optimism_package", {})
     # Deploy the L1
     plan.print("Deploying a local L1")
     l1 = ethereum_package.run(plan, ethereum_args)
