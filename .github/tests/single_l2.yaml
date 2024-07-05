@@ -1,11 +1,3 @@
 optimism_package:
   participants:
     - count: 2
-ethereum_package:
-  participants:
-    - el_type: geth
-    - el_type: reth
-  network_params:
-    preset: minimal
-  additional_services:
-    - dora

@@ -16,7 +16,10 @@ def run(plan, args):
         A full deployment of Optimism L2(s)
     """
     plan.print("Parsing the L1 input args")
-    ethereum_args = args.get("ethereum_package", {})
+    # If no args are provided, use the default values with minimal preset
+    ethereum_args = args.get(
+        "ethereum_package", {"network_params": {"preset": "minimal"}}
+    )
     optimism_args = args.get("optimism_package", {})
     # Deploy the L1
     plan.print("Deploying a local L1")
