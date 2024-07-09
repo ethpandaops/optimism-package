@@ -158,7 +158,7 @@ def get_beacon_config(
         "--l1-ws-rpc-url={0}".format(l1_config_env_vars["L1_WS_URL"]),
         "--l2-engine-url={0}".format(EXECUTION_ENGINE_ENDPOINT),
         "--l2-rpc-url={0}".format(EXECUTION_RPC_ENDPOINT),
-        # "--rpc-addr=0.0.0.0",
+        "--rpc-addr=0.0.0.0",
         "--rpc-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--sync-mode=full",
         "--network=" + ROLLUP_CONFIG_MOUNT_PATH_ON_CONTAINER,
@@ -167,13 +167,13 @@ def get_beacon_config(
     if sequencer_enabled:
         cmd.append("--sequencer-enable")
 
-    # if len(existing_cl_clients) > 0:
-    #     cmd.append(
-    #         "--p2p.bootnodes="
-    #         + ",".join(
-    #             [ctx.enr for ctx in existing_cl_clients[: constants.MAX_ENR_ENTRIES]]
-    #         )
-    #     )
+    if len(existing_cl_clients) == 1:
+        cmd.append(
+            "--disc-boot-nodes="
+            + ",".join(
+                [ctx.enr for ctx in existing_cl_clients[: constants.MAX_ENR_ENTRIES]]
+            )
+        )
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,

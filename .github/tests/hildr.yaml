@@ -8,10 +8,3 @@ optimism_package:
       cl_type: hildr
     - el_type: op-erigon
       cl_type: hildr
-ethereum_package:
-  participants:
-    - el_type: geth
-    - el_type: reth
-  network_params:
-    preset: minimal
-  additional_services: []
