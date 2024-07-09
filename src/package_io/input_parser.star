@@ -2,6 +2,8 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+sanity_check = import_module("./sanity_check.star")
+
 DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
     "op-reth": "parithoshj/op-reth:latest",
@@ -31,6 +33,7 @@ DEFAULT_ADDITIONAL_SERVICES = []
 
 
 def input_parser(plan, input_args):
+    sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
 
     return struct(

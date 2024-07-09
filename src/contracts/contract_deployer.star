@@ -53,7 +53,7 @@ def deploy_l2_contracts(
 ):
     chainspec_files_artifact = plan.upload_files(
         src=CHAINSPEC_JQ_FILEPATH,
-        name="chainspec-config",
+        name="op-chainspec-config{0}".format(l2_services_suffix),
     )
 
     op_genesis = plan.run_sh(

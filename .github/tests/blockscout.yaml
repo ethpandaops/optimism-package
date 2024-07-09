@@ -13,11 +13,3 @@ optimism_package:
       network_id: '3151910'
     additional_services:
       - blockscout
-ethereum_package:
-  participants:
-    - el_type: geth
-    - el_type: reth
-  network_params:
-    preset: minimal
-  additional_services:
-    - blockscout
