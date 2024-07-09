@@ -4,10 +4,3 @@ optimism_package:
       cl_type: op-node
     - el_type: op-geth
       cl_type: magi
-ethereum_package:
-  participants:
-    - el_type: geth
-    - el_type: reth
-  network_params:
-    preset: minimal
-  additional_services: []
