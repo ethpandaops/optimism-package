@@ -5,13 +5,4 @@ optimism_package:
     - el_type: op-erigon
     - el_type: op-nethermind
   additional_services:
-   - blockscout
-ethereum_package:
-  participants:
-    - el_type: geth
-    - el_type: reth
-  network_params:
-    preset: minimal
-  additional_services:
-    - dora
     - blockscout

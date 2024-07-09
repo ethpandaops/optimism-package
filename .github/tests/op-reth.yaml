@@ -2,11 +2,3 @@ optimism_package:
   participants:
     - el_type: op-reth
       cl_type: op-node
-ethereum_package:
-  participants:
-    - el_type: geth
-    - el_type: reth
-  network_params:
-    preset: minimal
-  additional_services:
-    - dora
