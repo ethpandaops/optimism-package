@@ -2,8 +2,11 @@ IMAGE = "ethpandaops/optimism-contract-deployer:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
+FACTORY_ADDRESS = "0x4e59b44847b379578588920cA78FbF26c0B4956C"
 # raw tx data for deploying Create2Factory contract to L1
 FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222"
+
+CHAINSPEC_JQ_FILEPATH = "../../static_files/chainspec_template/gen2spec.jq"
 
 
 def deploy_factory_contract(
@@ -12,7 +15,7 @@ def deploy_factory_contract(
     l1_config_env_vars,
 ):
     factory_deployment_result = plan.run_sh(
-        name="op_deploy_factory_contract",
+        name="op-deploy-factory-contract",
         description="Deploying L2 factory contract to L1 (needs to wait for l1 to finalize, about 4 min for minimal preset, 30 min for mainnet)",
         image=IMAGE,
         env_vars={
@@ -26,12 +29,14 @@ def deploy_factory_contract(
             [
                 "web3 transfer $FUND_VALUE to {0}".format(FACTORY_DEPLOYER_ADDRESS),
                 "sleep 3",
+                "if [ $(cast codesize {0} --rpc-url $L1_RPC_URL) -gt 0 ]; then echo 'Factory contract already deployed!'; exit 0; fi".format(
+                    FACTORY_ADDRESS
+                ),
                 # sleep till chain is finalized
                 "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
                 "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
-                "sleep 5",
-                "cast codesize {0} --rpc-url $L1_RPC_URL".format(
-                    FACTORY_DEPLOYER_ADDRESS
+                "while true; do sleep 3; echo 'Factory code is not yet deployed...'; if [ $(cast codesize {0} --rpc-url $L1_RPC_URL) -gt 0 ]; then echo 'Factory contract already deployed!'; break; fi; done".format(
+                    FACTORY_ADDRESS
                 ),
             ]
         ),
@@ -46,8 +51,13 @@ def deploy_l2_contracts(
     l2_config_env_vars,
     l2_services_suffix,
 ):
+    chainspec_files_artifact = plan.upload_files(
+        src=CHAINSPEC_JQ_FILEPATH,
+        name="op-chainspec-config{0}".format(l2_services_suffix),
+    )
+
     op_genesis = plan.run_sh(
-        name="op_deploy_l2_contracts",
+        name="op-deploy-l2-contracts",
         description="Deploying L2 contracts (takes about a minute)",
         image=IMAGE,
         env_vars={
@@ -58,6 +68,9 @@ def deploy_l2_contracts(
         }
         | l1_config_env_vars
         | l2_config_env_vars,
+        files={
+            "/workspace/optimism/packages/contracts-bedrock/deploy-config/chainspec-generator/": chainspec_files_artifact,
+        },
         store=[
             StoreSpec(
                 src="/network-configs",
@@ -102,45 +115,49 @@ def deploy_l2_contracts(
                 "echo -n $GS_SEQUENCER_PRIVATE_KEY > /network-configs/GS_SEQUENCER_PRIVATE_KEY",
                 "echo -n $GS_BATCHER_PRIVATE_KEY > /network-configs/GS_BATCHER_PRIVATE_KEY",
                 "echo -n $GS_PROPOSER_PRIVATE_KEY > /network-configs/GS_PROPOSER_PRIVATE_KEY",
+                "cat /network-configs/genesis.json | jq --from-file /workspace/optimism/packages/contracts-bedrock/deploy-config/chainspec-generator/gen2spec.jq > /network-configs/chainspec.json",
             ]
         ),
         wait="300s",
     )
 
     gs_sequencer_private_key = plan.run_sh(
+        name="read-gs-sequencer-private-key",
         description="Getting the sequencer private key",
         run="cat /network-configs/GS_SEQUENCER_PRIVATE_KEY ",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     gs_batcher_private_key = plan.run_sh(
+        name="read-gs-batcher-private-key",
         description="Getting the batcher private key",
         run="cat /network-configs/GS_BATCHER_PRIVATE_KEY ",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     gs_proposer_private_key = plan.run_sh(
+        name="read-gs-proposer-private-key",
         description="Getting the proposer private key",
         run="cat /network-configs/GS_PROPOSER_PRIVATE_KEY ",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     l2oo_address = plan.run_sh(
-        name="read_l2oo_address",
+        name="read-l2oo-address",
         description="Getting the L2OutputOracleProxy address",
         run="jq -r .L2OutputOracleProxy /network-configs/kurtosis.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     l1_bridge_address = plan.run_sh(
-        name="read_l1_bridge_address",
+        name="read-l1-bridge-address",
         description="Getting the L1StandardBridgeProxy address",
         run="jq -r .L1StandardBridgeProxy /network-configs/kurtosis.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     l1_deposit_start_block = plan.run_sh(
-        name="read_l1_deposit_start_block",
+        name="read-l1-deposit-start-block",
         description="Getting the L1StandardBridgeProxy address",
         image="badouralix/curl-jq",
         run="jq -r .genesis.l1.number  /network-configs/rollup.json | tr -d '\n'",
@@ -148,7 +165,7 @@ def deploy_l2_contracts(
     )
 
     l1_portal_contract = plan.run_sh(
-        name="read_l1_portal_contract",
+        name="read-l1-portal-contract",
         description="Getting the L1 portal contract",
         run="jq -r .OptimismPortal  /network-configs/kurtosis.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
