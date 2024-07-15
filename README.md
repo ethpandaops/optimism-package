@@ -66,12 +66,14 @@ optimism_package:
       # Valid values are:
       # op-node
       # hildr
+      # magi
       cl_type: op-node
 
       # The Docker image that should be used for the CL client; leave blank to use the default for the client type
       # Defaults by client:
       # - op-node: parithoshj/op-node:v1
       # - hildr: ghcr.io/optimism-java/hildr:latest
+      # - magi: a16zcrypto/magi:latest
       cl_image: ""
 
       # Count of nodes to spin up for this participant
