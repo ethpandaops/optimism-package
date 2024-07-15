@@ -50,6 +50,7 @@ optimism_package:
       # op-geth
       # op-reth
       # op-erigon
+      # op-nethermind
     - el_type: geth
 
       # The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -57,6 +58,7 @@ optimism_package:
       # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
       # - op-reth: parithoshj/op-reth:latest
       # - op-erigon: testinprod/op-erigon:latest
+      # - op-nethermind: nethermindeth/nethermind:op-c482d56
       el_image: ""
 
     # CL(Consensus Layer) Specific flags
