@@ -1,8 +1,16 @@
 optimism_package:
   participants:
-    - el_type: op-geth
     - el_type: op-reth
-    - el_type: op-erigon
-    - el_type: op-nethermind
-  additional_services:
-    - blockscout
+      cl_type: op-node
+      count: 1
+  network_params:
+    network_id: "64209"
+    network: infinity-local
+  additional_services: []
+ethereum_package:
+  participants:
+    - el_type: reth
+      cl_type: lighthouse
+  network_params:
+    network_id: "90246"
+  additional_services: []

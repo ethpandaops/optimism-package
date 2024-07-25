@@ -13,14 +13,15 @@ def run(plan, args):
     Args:
         args(json): Configures other aspects of the environment.
     Returns:
-        A full deployment of Optimism L2(s)
+        A full deployment of Infinity L2(s)
     """
     plan.print("Parsing the L1 input args")
     # If no args are provided, use the default values with minimal preset
     ethereum_args = args.get(
         "ethereum_package", {"network_params": {"preset": "minimal"}}
     )
-    optimism_args = args.get("optimism_package", {})
+    infinity_args = args.get("infinity_package", {})
+    
     # Deploy the L1
     plan.print("Deploying a local L1")
     l1 = ethereum_package.run(plan, ethereum_args)

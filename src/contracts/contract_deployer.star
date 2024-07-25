@@ -1,11 +1,12 @@
 IMAGE = "ethpandaops/optimism-contract-deployer:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
-FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
+DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
 FACTORY_ADDRESS = "0x4e59b44847b379578588920cA78FbF26c0B4956C"
 # raw tx data for deploying Create2Factory contract to L1
 FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222"
 
+COPROCESSOR_RELAYER_ADDRESS = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 CHAINSPEC_JQ_FILEPATH = "../../static_files/chainspec_template/gen2spec.jq"
 
 
@@ -27,7 +28,7 @@ def deploy_factory_contract(
         | l1_config_env_vars,
         run=" && ".join(
             [
-                "web3 transfer $FUND_VALUE to {0}".format(FACTORY_DEPLOYER_ADDRESS),
+                "web3 transfer $FUND_VALUE to {0}".format(DEPLOYER_ADDRESS),
                 "sleep 3",
                 "if [ $(cast codesize {0} --rpc-url $L1_RPC_URL) -gt 0 ]; then echo 'Factory contract already deployed!'; exit 0; fi".format(
                     FACTORY_ADDRESS
@@ -43,7 +44,30 @@ def deploy_factory_contract(
         wait="2000s",
     )
 
-
+# def deploy_coprocessor_contracts(
+#     plan,
+#     priv_key,
+#     l1_config_env_vars,
+# ):
+#     coprocessor_deployment_result = plan.run_sh(
+#         name="ethos-deploy-coprocessor-contracts"
+#         description="Deploy Ethos Coprocessor JobManager, abstract Consumer and Utils Contracts."
+#         image=IMAGE,
+#         env_vars={
+#             "WEB3_PRIVATE_KEY": str(priv_key),
+#             "FUND_VALUE": "10",
+#         }
+#     )
+#     | l1_config_env_vars,
+#     run=" && ".join(
+#         [
+#             "web3 transfer $FUND_VALUE to {0}".format(DEPLOYER_ADDRESS),
+#             "sleep 3",
+#             "if [ $(cast codesize {0} --rpc-url $L1_RPC_URL) -gt 0 ]; then echo 'Factory contract already deployed!'; exit 0; fi".format(
+#                 FACTORY_ADDRESS
+#             ),
+#         ]
+#     )
 def deploy_l2_contracts(
     plan,
     priv_key,

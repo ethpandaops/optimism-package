@@ -43,8 +43,8 @@ This will stop and remove all running enclaves and **delete all data**.
 To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
 
 ```yaml
-optimism_package:
-  # Specification of the optimism-participants in the network
+infinity_package:
+  # Specification of the infinity-participants in the network
   participants:
     # EL(Execution Layer) Specific flags
       # The type of EL client that should be started
