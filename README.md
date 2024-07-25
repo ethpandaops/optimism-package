@@ -9,15 +9,13 @@ optimism_package:
     - el_type: op-erigon
     - el_type: op-nethermind
 ethereum_package:
-  participants:
-    - el_type: geth
-    - el_type: reth
   network_params:
     preset: minimal
-  additional_services:
-    - dora
-    - blockscout
 ```
+
+Please note, by default your network will be running a `minimal` preset Ethereum network. Click [here](https://github.com/ethereum/consensus-specs/blob/dev/configs/minimal.yaml) to learn more about minimal preset. You can [customize](https://github.com/ethpandaops/ethereum-package) the L1 Ethereum network by modifying the `ethereum_package` configuration.
+
+You can also completely remove `ethereum_package` from your configuration in which case it will default to a `minimal` preset Ethereum network.
 
 ## Quickstart
 #### Run with your own configuration
@@ -52,6 +50,7 @@ infinity_package:
       # op-geth
       # op-reth
       # op-erigon
+      # op-nethermind
     - el_type: geth
 
       # The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -59,17 +58,20 @@ infinity_package:
       # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
       # - op-reth: parithoshj/op-reth:latest
       # - op-erigon: testinprod/op-erigon:latest
+      # - op-nethermind: nethermindeth/nethermind:op-c482d56
       el_image: ""
 
     # CL(Consensus Layer) Specific flags
       # The type of CL client that should be started
       # Valid values are:
       # op-node
+      # hildr
       cl_type: op-node
 
       # The Docker image that should be used for the CL client; leave blank to use the default for the client type
       # Defaults by client:
       # - op-node: parithoshj/op-node:v1
+      # - hildr: ghcr.io/optimism-java/hildr:latest
       cl_image: ""
 
       # Count of nodes to spin up for this participant

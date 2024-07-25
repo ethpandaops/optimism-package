@@ -11,6 +11,7 @@ op_erigon = import_module("./el/op-erigon/op_erigon_launcher.star")
 op_nethermind = import_module("./el/op-nethermind/op_nethermind_launcher.star")
 # CL
 op_node = import_module("./cl/op-node/op_node_launcher.star")
+hildr = import_module("./cl/hildr/hildr_launcher.star")
 
 
 def launch(
@@ -69,6 +70,10 @@ def launch(
                 el_cl_data, jwt_file, network_params
             ),
             "launch_method": op_node.launch,
+        },
+        "hildr": {
+            "launcher": hildr.new_hildr_launcher(el_cl_data, jwt_file, network_params),
+            "launch_method": hildr.launch,
         },
     }
 
