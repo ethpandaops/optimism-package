@@ -5,6 +5,7 @@ ethereum_package_input_parser = import_module(
 sanity_check = import_module("./sanity_check.star")
 
 DEFAULT_EL_IMAGES = {
+    "ethos-reth": "us-docker.pkg.dev/ethos-artifacts/docker/ethos-reth:17da6ee55aa45a102ff54b0832aa4fdeb909b35a",
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
     "op-reth": "parithoshj/op-reth:latest",
     "op-erigon": "testinprod/op-erigon:latest",

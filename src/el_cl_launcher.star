@@ -5,6 +5,7 @@ shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
 # EL
+ethos_reth = import_module("./el/ethos-reth/ethos_reth_launcher.star")
 op_geth = import_module("./el/op-geth/op_geth_launcher.star")
 op_reth = import_module("./el/op-reth/op_reth_launcher.star")
 op_erigon = import_module("./el/op-erigon/op_erigon_launcher.star")
@@ -25,6 +26,15 @@ def launch(
     l2_services_suffix,
 ):
     el_launchers = {
+        "ethos-reth":{
+            "launcher": ethos_reth.new_ethos_reth_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": ethos_reth.launch,
+        },
         "op-geth": {
             "launcher": op_geth.new_op_geth_launcher(
                 el_cl_data,
