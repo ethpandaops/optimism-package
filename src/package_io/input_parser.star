@@ -9,6 +9,7 @@ DEFAULT_EL_IMAGES = {
     "op-reth": "parithoshj/op-reth:latest",
     "op-erigon": "testinprod/op-erigon:latest",
     "op-nethermind": "nethermindeth/nethermind:op-c482d56",
+    "op-besu": "ghcr.io/optimism-java/op-besu:latest",
 }
 
 DEFAULT_CL_IMAGES = {
