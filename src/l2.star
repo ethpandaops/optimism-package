@@ -89,9 +89,15 @@ def get_network_fork_activation(network_params):
     env_vars = {}
     env_vars["FJORD_TIME_OFFSET"] = "0x" + "%x" % network_params.fjord_time_offset
     if network_params.granite_time_offset:
-        env_vars["GRANITE_TIME_OFFSET"] = "0x" + "%x" % network_params.granite_time_offset
+        env_vars["GRANITE_TIME_OFFSET"] = (
+            "0x" + "%x" % network_params.granite_time_offset
+        )
     if network_params.holocene_time_offset:
-        env_vars["HOLOCENE_TIME_OFFSET"] = "0x" + "%x" % network_params.holocene_time_offset
+        env_vars["HOLOCENE_TIME_OFFSET"] = (
+            "0x" + "%x" % network_params.holocene_time_offset
+        )
     if network_params.interop_time_offset:
-        env_vars["INTEROP_TIME_OFFSET"] = "0x" + "%x" % network_params.interop_time_offset
+        env_vars["INTEROP_TIME_OFFSET"] = (
+            "0x" + "%x" % network_params.interop_time_offset
+        )
     return env_vars

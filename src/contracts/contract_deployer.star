@@ -1,5 +1,5 @@
-IMAGE = "ethpandaops/optimism-contract-deployer:develop"
-#IMAGE = "bbusa/ops:latest"
+#IMAGE = "ethpandaops/optimism-contract-deployer:develop"
+IMAGE = "bbusa/ops:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
@@ -14,7 +14,6 @@ def deploy_factory_contract(
     plan,
     priv_key,
     l1_config_env_vars,
-
 ):
     factory_deployment_result = plan.run_sh(
         name="op-deploy-factory-contract",
