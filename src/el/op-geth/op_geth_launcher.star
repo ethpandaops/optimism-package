@@ -146,7 +146,7 @@ def get_config(
     sequencer_enabled,
     sequencer_context,
 ):
-    init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
+    init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
@@ -160,6 +160,7 @@ def get_config(
         # "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--gcmode=archive",
+        "--state.scheme=hash", # if you use archive, you need hashs
         "--http",
         "--http.addr=0.0.0.0",
         "--http.vhosts=*",
