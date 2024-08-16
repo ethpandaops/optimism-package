@@ -36,6 +36,12 @@ kurtosis clean -a
 
 This will stop and remove all running enclaves and **delete all data**.
 
+# L2 Contract deployer
+The enclave will automatically deploy an optimism L2 contract on the L1 network. The contract address will be printed in the logs. You can use this contract address to interact with the L2 network.
+
+Please refer to this Dockerfile if you want to see how the contract deployer image is built: [Dockerfile](https://github.com/ethpandaops/eth-client-docker-image-builder/blob/master/op-contract-deployer/Dockerfile)
+
+
 ## Configuration
 
 To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
