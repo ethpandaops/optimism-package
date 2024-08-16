@@ -160,7 +160,7 @@ def get_config(
         # "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--gcmode=archive",
-        "--state.scheme=hash", # if you use archive, you need hashs
+        "--state.scheme=hash",  # if you use archive, you need hashs
         "--http",
         "--http.addr=0.0.0.0",
         "--http.vhosts=*",
