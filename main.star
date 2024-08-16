@@ -41,7 +41,6 @@ def run(plan, args):
 
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
     contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
-
     # Deploy L2s
     plan.print("Deploying a local L2")
     if type(optimism_args) == "dict":
@@ -72,6 +71,7 @@ def run(plan, args):
                         network_id
                     )
                 )
+
             seen_names[name] = True
             seen_network_ids[network_id] = True
             l2_services_suffix = "-{0}".format(name)

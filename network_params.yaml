@@ -6,3 +6,5 @@ optimism_package:
     - el_type: op-nethermind
   additional_services:
     - blockscout
+  network_params:
+    granite_time_offset: 11

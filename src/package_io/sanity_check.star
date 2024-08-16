@@ -14,6 +14,10 @@ SUBCATEGORY_PARAMS = {
         "network_id",
         "seconds_per_slot",
         "name",
+        "fjord_time_offset",
+        "granite_time_offset",
+        "holocene_time_offset",
+        "interop_time_offset",
     ],
 }
 

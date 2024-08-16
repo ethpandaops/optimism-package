@@ -12,16 +12,16 @@ DEFAULT_EL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES = {
-    "op-node": "parithoshj/op-node:v1",
+    "op-node": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
     "hildr": "ghcr.io/optimism-java/hildr:latest",
 }
 
 DEFAULT_BATCHER_IMAGES = {
-    "op-batcher": "parithoshj/op-batcher:v1",
+    "op-batcher": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
 }
 
 DEFAULT_PROPOSER_IMAGES = {
-    "op-proposer": "parithoshj/op-proposer:v1",
+    "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
 }
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
@@ -53,6 +53,10 @@ def input_parser(plan, input_args):
             network_id=result["network_params"]["network_id"],
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
             name=result["network_params"]["name"],
+            fjord_time_offset=result["network_params"]["fjord_time_offset"],
+            granite_time_offset=result["network_params"]["granite_time_offset"],
+            holocene_time_offset=result["network_params"]["holocene_time_offset"],
+            interop_time_offset=result["network_params"]["interop_time_offset"],
         ),
         additional_services=result.get(
             "additional_services", DEFAULT_ADDITIONAL_SERVICES
@@ -132,6 +136,10 @@ def default_network_params():
         "network_id": "2151908",
         "name": "op-kurtosis",
         "seconds_per_slot": 2,
+        "fjord_time_offset": 0,
+        "granite_time_offset": None,
+        "holocene_time_offset": None,
+        "interop_time_offset": None,
     }
 
 

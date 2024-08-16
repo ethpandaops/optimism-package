@@ -70,7 +70,7 @@ optimism_package:
 
       # The Docker image that should be used for the CL client; leave blank to use the default for the client type
       # Defaults by client:
-      # - op-node: parithoshj/op-node:v1
+      # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop
       # - hildr: ghcr.io/optimism-java/hildr:latest
       cl_image: ""
 
@@ -96,6 +96,28 @@ optimism_package:
     # Must be unique for each rollup (if you run multiple rollups)
     # Defaults to "op-kurtosis"
     name: "op-kurtosis"
+
+    # Triggering future forks in the network
+    # Fjord fork
+    # Defaults to 0 (genesis activation) - decimal value
+    # Offset is in seconds
+    fjord_time_offset: 0
+
+    # Granite fork
+    # Defaults to None - not activated - decimal value
+    # Offset is in seconds
+    granite_time_offset: ""
+
+    # Holocene fork
+    # Defaults to None - not activated - decimal value
+    # Offset is in seconds
+    holocene_time_offset: ""
+
+    # Interop fork
+    # Defaults to None - not activated - decimal value
+    # Offset is in seconds
+    interop_time_offset: ""
+
 
   # Additional services to run alongside the network
   # Defaults to []

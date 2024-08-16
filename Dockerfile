@@ -14,8 +14,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
     python3 \
     python3-pip \
-    nodejs \
-    npm \
     vim \
     build-essential \
     libusb-1.0-0-dev \
@@ -24,11 +22,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install pnpm
-RUN npm install -g pnpm@9
 
 # Install Go from the official golang image
-COPY --from=golang:alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.22.6 /usr/local/go/ /usr/local/go/
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 # Install web3 cli
@@ -39,15 +35,23 @@ RUN curl -L https://foundry.paradigm.xyz | bash
 ENV PATH="/root/.foundry/bin:${PATH}"
 RUN foundryup
 
-RUN git clone https://github.com/ethereum-optimism/optimism.git && \
+# RUN git clone --recursive https://github.com/ethereum-optimism/optimism.git && \
+#     cd optimism && \
+#     git submodule update && \
+#     git checkout develop && \
+#     git pull origin develop && \
+#     git fetch --all && \
+#     cd op-node && \
+#     make
+
+RUN git clone --recursive https://github.com/barnabasbusa/optimism.git && \
     cd optimism && \
-    git checkout develop && \
-    git pull origin develop && \
-    pnpm install && \
-    pnpm build && \
+    git submodule update && \
+    git checkout getting-started-update && \
+    git pull origin getting-started-update && \
+    git fetch --all && \
     cd op-node && \
     make
-
 
 
 # Use multi-stage build to keep the final image lean

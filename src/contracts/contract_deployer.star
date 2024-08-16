@@ -1,4 +1,5 @@
-IMAGE = "ethpandaops/optimism-contract-deployer:latest"
+IMAGE = "ethpandaops/optimism-contract-deployer:develop"
+#IMAGE = "bbusa/ops:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
@@ -13,6 +14,7 @@ def deploy_factory_contract(
     plan,
     priv_key,
     l1_config_env_vars,
+
 ):
     factory_deployment_result = plan.run_sh(
         name="op-deploy-factory-contract",
@@ -50,6 +52,7 @@ def deploy_l2_contracts(
     l1_config_env_vars,
     l2_config_env_vars,
     l2_services_suffix,
+    fork_activation_env,
 ):
     chainspec_files_artifact = plan.upload_files(
         src=CHAINSPEC_JQ_FILEPATH,
@@ -67,7 +70,8 @@ def deploy_l2_contracts(
             "DEPLOYMENT_CONTEXT": "getting-started",
         }
         | l1_config_env_vars
-        | l2_config_env_vars,
+        | l2_config_env_vars
+        | fork_activation_env,
         files={
             "/workspace/optimism/packages/contracts-bedrock/deploy-config/chainspec-generator/": chainspec_files_artifact,
         },
@@ -98,8 +102,10 @@ def deploy_l2_contracts(
                 'jq \'. + {"fundDevAccounts": true, "useInterop": true}\' $DEPLOY_CONFIG_PATH > tmp.$$.json && mv tmp.$$.json $DEPLOY_CONFIG_PATH',
                 # sleep till gs_admin_address is funded
                 "while true; do sleep 1; echo 'GS_ADMIN_ADDRESS is not yet funded...'; if [ \"$(web3 balance $GS_ADMIN_ADDRESS)\" != \"0\" ]; then echo 'GS_ADMIN_ADDRESS is funded!'; break; fi; done",
-                "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
+                "echo 'Deploying scripts/deploy/Deploy.s.sol'",
+                "forge script scripts/deploy/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "sleep 3",
+                "echo 'Deploying scripts/L2Genesis.s.sol'",
                 "CONTRACT_ADDRESSES_PATH=$DEPLOYMENT_OUTFILE forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID",
                 "cd /workspace/optimism/op-node/bin",
                 "./op-node genesis l2 \
