@@ -180,6 +180,7 @@ def get_config(
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--bonsai-limit-trie-logs-enabled=false",
+        "--version-compatibility-protection=false",
     ]
 
     if not sequencer_enabled:
