@@ -1,4 +1,4 @@
-IMAGE = "ethpandaops/optimism-contract-deployer:latest"
+IMAGE = "clabby/op-contracts-deployer:latest"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
@@ -19,7 +19,7 @@ def deploy_factory_contract(
         description="Deploying L2 factory contract to L1 (takes about a minute)",
         image=IMAGE,
         env_vars={
-            "WEB3_PRIVATE_KEY": str(priv_key),
+            "PRIVATE_KEY": str(priv_key),
             "FUND_VALUE": "10ether",
             "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
             "DEPLOYMENT_CONTEXT": "getting-started",
@@ -27,7 +27,7 @@ def deploy_factory_contract(
         | l1_config_env_vars,
         run=" && ".join(
             [
-                "cast send {0} --value $FUND_VALUE --rpc-url $L1_RPC_URL --private-key $WEB3_PRIVATE_KEY".format(FACTORY_DEPLOYER_ADDRESS),
+                "cast send {0} --value $FUND_VALUE --rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY".format(FACTORY_DEPLOYER_ADDRESS),
                 "if [ $(cast codesize {0} --rpc-url $L1_RPC_URL) -gt 0 ]; then echo 'Factory contract already deployed!'; exit 0; fi".format(
                     FACTORY_ADDRESS
                 ),
@@ -55,7 +55,7 @@ def deploy_l2_contracts(
         description="Deploying L2 contracts (takes about a minute)",
         image=IMAGE,
         env_vars={
-            "WEB3_PRIVATE_KEY": str(priv_key),
+            "PRIVATE_KEY": str(priv_key),
             "FUND_VALUE": "10ether",
             "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
             "DEPLOYMENT_CONTEXT": "getting-started",
@@ -81,14 +81,13 @@ def deploy_l2_contracts(
                 ),
                 ". {0}".format(ENVRC_PATH),
                 "mkdir -p /network-configs",
-                "cast send $GS_ADMIN_ADDRESS --value $FUND_VALUE --private-key $WEB3_PRIVATE_KEY --rpc-url $L1_RPC_URL",  # Fund Admin
-                "cast send $GS_BATCHER_ADDRESS --value $FUND_VALUE --private-key $WEB3_PRIVATE_KEY --rpc-url $L1_RPC_URL",  # Fund Batcher
-                "cast send $GS_PROPOSER_ADDRESS --value $FUND_VALUE --private-key $WEB3_PRIVATE_KEY --rpc-url $L1_RPC_URL",  # Fund Proposer
+                "cast send $GS_ADMIN_ADDRESS --value $FUND_VALUE --private-key $PRIVATE_KEY --rpc-url $L1_RPC_URL",  # Fund Admin
+                "cast send $GS_BATCHER_ADDRESS --value $FUND_VALUE --private-key $PRIVATE_KEY --rpc-url $L1_RPC_URL",  # Fund Batcher
+                "cast send $GS_PROPOSER_ADDRESS --value $FUND_VALUE --private-key $PRIVATE_KEY --rpc-url $L1_RPC_URL",  # Fund Proposer
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
                 'jq \'. + {"fundDevAccounts": true, "useInterop": true}\' $DEPLOY_CONFIG_PATH > tmp.$$.json && mv tmp.$$.json $DEPLOY_CONFIG_PATH',
-                "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
-                "sleep 3",
+                "forge script scripts/deploy/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "CONTRACT_ADDRESSES_PATH=$DEPLOYMENT_OUTFILE forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID",
                 "cd /workspace/optimism/op-node/bin",
                 "./op-node genesis l2 \

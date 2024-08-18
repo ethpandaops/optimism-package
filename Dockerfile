@@ -12,10 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gcc \
     g++ \
-    python3 \
-    python3-pip \
-    nodejs \
-    npm \
     vim \
     build-essential \
     libusb-1.0-0-dev \
@@ -24,30 +20,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install pnpm
-RUN npm install -g pnpm@9
 
-# Install Go from the official golang image
-COPY --from=golang:alpine /usr/local/go/ /usr/local/go/
-ENV PATH="/usr/local/go/bin:${PATH}"
+ENV GO_VERSION=1.21.1
+RUN curl -sL https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz -o go$GO_VERSION.linux-amd64.tar.gz && \
+  tar -C /usr/local/ -xzvf go$GO_VERSION.linux-amd64.tar.gz
 
-# Install web3 cli
-RUN curl -LSs https://raw.githubusercontent.com/gochain/web3/master/install.sh | sh
+ENV GOPATH=/go
+ENV PATH=/usr/local/go/bin:$GOPATH/bin:$PATH
 
-# Install Rust and Foundry
-RUN curl -L https://foundry.paradigm.xyz | bash
-ENV PATH="/root/.foundry/bin:${PATH}"
-RUN foundryup
-
+# Clone the Optimism monorepo and build the `op-node` binary for L2 genesis generation.
 RUN git clone https://github.com/ethereum-optimism/optimism.git && \
     cd optimism && \
-    git checkout develop && \
-    git pull origin develop && \
-    pnpm install && \
-    pnpm build && \
+    git checkout cl/latest-getting-started && \
+    git pull origin cl/latest-getting-started && \
     cd op-node && \
     make
 
+# Install foundry
+RUN curl -L https://foundry.paradigm.xyz | bash
+ENV PATH="/root/.foundry/bin:${PATH}"
+RUN foundryup -v nightly-626221f5ef44b4af950a08e09bd714650d9eb77d
+
+# Build the Optimism contracts
+RUN cd optimism/packages/contracts-bedrock && forge build
 
 
 # Use multi-stage build to keep the final image lean
