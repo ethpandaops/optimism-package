@@ -28,7 +28,9 @@ def deploy_factory_contract(
         run=" && ".join(
             [
                 "while true; do sleep 1; echo 'L1 Chain is starting up'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/headers/ | jq -r '.data[0].header.message.slot')\" != \"0\" ]; then echo 'L1 Chain has started!'; break; fi; done",
-                "cast send {0} --value $FUND_VALUE --rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY".format(FACTORY_DEPLOYER_ADDRESS),
+                "cast send {0} --value $FUND_VALUE --rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY".format(
+                    FACTORY_DEPLOYER_ADDRESS
+                ),
                 "if [ $(cast codesize {0} --rpc-url $L1_RPC_URL) -gt 0 ]; then echo 'Factory contract already deployed!'; exit 0; fi".format(
                     FACTORY_ADDRESS
                 ),
