@@ -21,9 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 
-ENV GO_VERSION=1.21.1
-RUN curl -sL https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz -o go$GO_VERSION.linux-amd64.tar.gz && \
-  tar -C /usr/local/ -xzvf go$GO_VERSION.linux-amd64.tar.gz
+RUN GO_VERSION=$(curl -s https://raw.githubusercontent.com/ethereum-optimism/optimism/develop/versions.json | jq -r '.go') && curl -sL https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz -o go$GO_VERSION.linux-amd64.tar.gz &&  tar -C /usr/local/ -xzvf go$GO_VERSION.linux-amd64.tar.gz && rm go$GO_VERSION.linux-amd64.tar.gz
 
 ENV GOPATH=/go
 ENV PATH=/usr/local/go/bin:$GOPATH/bin:$PATH
@@ -31,15 +29,15 @@ ENV PATH=/usr/local/go/bin:$GOPATH/bin:$PATH
 # Clone the Optimism monorepo and build the `op-node` binary for L2 genesis generation.
 RUN git clone https://github.com/ethereum-optimism/optimism.git && \
     cd optimism && \
-    git checkout cl/latest-getting-started && \
-    git pull origin cl/latest-getting-started && \
+    git checkout develop && \
+    git pull origin develop && \
     cd op-node && \
     make
 
 # Install foundry
 RUN curl -L https://foundry.paradigm.xyz | bash
 ENV PATH="/root/.foundry/bin:${PATH}"
-RUN foundryup -v nightly-626221f5ef44b4af950a08e09bd714650d9eb77d
+RUN FOUNDRY_VERSION=$(curl -s https://raw.githubusercontent.com/ethereum-optimism/optimism/develop/versions.json | jq -r '.foundry') && foundryup -v nightly-$FOUNDRY_VERSION
 
 # Build the Optimism contracts
 RUN cd optimism/packages/contracts-bedrock && forge build
