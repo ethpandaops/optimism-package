@@ -31,8 +31,8 @@ ENV PATH=/usr/local/go/bin:$GOPATH/bin:$PATH
 # Clone the Optimism monorepo and build the `op-node` binary for L2 genesis generation.
 RUN git clone https://github.com/ethereum-optimism/optimism.git && \
     cd optimism && \
-    git checkout cl/latest-getting-started && \
-    git pull origin cl/latest-getting-started && \
+    git checkout develop && \
+    git pull origin develop && \
     cd op-node && \
     make
 
