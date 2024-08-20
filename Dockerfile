@@ -39,7 +39,7 @@ RUN git clone https://github.com/ethereum-optimism/optimism.git && \
 # Install foundry
 RUN curl -L https://foundry.paradigm.xyz | bash
 ENV PATH="/root/.foundry/bin:${PATH}"
-RUN foundryup -v nightly-626221f5ef44b4af950a08e09bd714650d9eb77d
+RUN FOUNDRY_VERSION=$(curl -s https://raw.githubusercontent.com/ethereum-optimism/optimism/develop/versions.json | jq -r '.foundry') && foundryup -v nightly-$FOUNDRY_VERSION
 
 # Build the Optimism contracts
 RUN cd optimism/packages/contracts-bedrock && forge build
