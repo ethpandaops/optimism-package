@@ -21,9 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 
-ENV GO_VERSION=1.21.1
-RUN curl -sL https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz -o go$GO_VERSION.linux-amd64.tar.gz && \
-  tar -C /usr/local/ -xzvf go$GO_VERSION.linux-amd64.tar.gz
+RUN GO_VERSION=$(curl -s https://raw.githubusercontent.com/ethereum-optimism/optimism/develop/versions.json | jq -r '.go') && curl -sL https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz -o go$GO_VERSION.linux-amd64.tar.gz &&  tar -C /usr/local/ -xzvf go$GO_VERSION.linux-amd64.tar.gz && rm go$GO_VERSION.linux-amd64.tar.gz
 
 ENV GOPATH=/go
 ENV PATH=/usr/local/go/bin:$GOPATH/bin:$PATH
