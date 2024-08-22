@@ -1,4 +1,4 @@
-IMAGE = "ethpandaops/optimism-contract-deployer:latest"
+IMAGE = "ethpandaops/optimism-contract-deployer:develop"
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
@@ -16,31 +16,28 @@ def deploy_factory_contract(
 ):
     factory_deployment_result = plan.run_sh(
         name="op-deploy-factory-contract",
-        description="Deploying L2 factory contract to L1 (needs to wait for l1 to finalize, about 4 min for minimal preset, 30 min for mainnet)",
+        description="Deploying L2 factory contract to L1 (takes about a minute)",
         image=IMAGE,
         env_vars={
-            "WEB3_PRIVATE_KEY": str(priv_key),
-            "FUND_VALUE": "10",
+            "PRIVATE_KEY": str(priv_key),
+            "FUND_VALUE": "10ether",
             "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
             "DEPLOYMENT_CONTEXT": "getting-started",
         }
         | l1_config_env_vars,
         run=" && ".join(
             [
-                "web3 transfer $FUND_VALUE to {0}".format(FACTORY_DEPLOYER_ADDRESS),
-                "sleep 3",
+                "while true; do sleep 1; echo 'L1 Chain is starting up'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/headers/ | jq -r '.data[0].header.message.slot')\" != \"0\" ]; then echo 'L1 Chain has started!'; break; fi; done",
+                "cast send {0} --value $FUND_VALUE --rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY".format(
+                    FACTORY_DEPLOYER_ADDRESS
+                ),
                 "if [ $(cast codesize {0} --rpc-url $L1_RPC_URL) -gt 0 ]; then echo 'Factory contract already deployed!'; exit 0; fi".format(
                     FACTORY_ADDRESS
                 ),
-                # sleep till chain is finalized
-                "while true; do sleep 3; echo 'Chain is not yet finalized...'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/states/head/finality_checkpoints | jq -r '.data.finalized.epoch')\" != \"0\" ]; then echo 'Chain is finalized!'; break; fi; done",
                 "cast publish --rpc-url $L1_RPC_URL {0}".format(FACTORY_DEPLOYER_CODE),
-                "while true; do sleep 3; echo 'Factory code is not yet deployed...'; if [ $(cast codesize {0} --rpc-url $L1_RPC_URL) -gt 0 ]; then echo 'Factory contract already deployed!'; break; fi; done".format(
-                    FACTORY_ADDRESS
-                ),
             ]
         ),
-        wait="2000s",
+        wait="300s",
     )
 
 
@@ -61,8 +58,8 @@ def deploy_l2_contracts(
         description="Deploying L2 contracts (takes about a minute)",
         image=IMAGE,
         env_vars={
-            "WEB3_PRIVATE_KEY": str(priv_key),
-            "FUND_VALUE": "10",
+            "PRIVATE_KEY": str(priv_key),
+            "FUND_VALUE": "10ether",
             "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
             "DEPLOYMENT_CONTEXT": "getting-started",
         }
@@ -87,19 +84,13 @@ def deploy_l2_contracts(
                 ),
                 ". {0}".format(ENVRC_PATH),
                 "mkdir -p /network-configs",
-                "web3 transfer $FUND_VALUE to $GS_ADMIN_ADDRESS",  # Fund Admin
-                "sleep 3",
-                "web3 transfer $FUND_VALUE to $GS_BATCHER_ADDRESS",  # Fund Batcher
-                "sleep 3",
-                "web3 transfer $FUND_VALUE to $GS_PROPOSER_ADDRESS",  # Fund Proposer
-                "sleep 3",
+                "cast send $GS_ADMIN_ADDRESS --value $FUND_VALUE --private-key $PRIVATE_KEY --rpc-url $L1_RPC_URL",  # Fund Admin
+                "cast send $GS_BATCHER_ADDRESS --value $FUND_VALUE --private-key $PRIVATE_KEY --rpc-url $L1_RPC_URL",  # Fund Batcher
+                "cast send $GS_PROPOSER_ADDRESS --value $FUND_VALUE --private-key $PRIVATE_KEY --rpc-url $L1_RPC_URL",  # Fund Proposer
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
                 'jq \'. + {"fundDevAccounts": true, "useInterop": true}\' $DEPLOY_CONFIG_PATH > tmp.$$.json && mv tmp.$$.json $DEPLOY_CONFIG_PATH',
-                # sleep till gs_admin_address is funded
-                "while true; do sleep 1; echo 'GS_ADMIN_ADDRESS is not yet funded...'; if [ \"$(web3 balance $GS_ADMIN_ADDRESS)\" != \"0\" ]; then echo 'GS_ADMIN_ADDRESS is funded!'; break; fi; done",
-                "forge script scripts/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
-                "sleep 3",
+                "forge script scripts/deploy/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "CONTRACT_ADDRESSES_PATH=$DEPLOYMENT_OUTFILE forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID",
                 "cd /workspace/optimism/op-node/bin",
                 "./op-node genesis l2 \
