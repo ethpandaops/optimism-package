@@ -89,7 +89,7 @@ def run(plan, args):
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}
-    env_vars["L1_RPC_KIND"] = "any"
+    env_vars["L1_RPC_KIND"] = "standard"
     env_vars["WEB3_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
     env_vars["L1_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
     env_vars["CL_RPC_URL"] = str(all_l1_participants[0].cl_context.beacon_http_url)
