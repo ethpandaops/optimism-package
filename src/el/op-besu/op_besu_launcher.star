@@ -183,10 +183,10 @@ def get_config(
         "--version-compatibility-protection=false",
     ]
 
-    if not sequencer_enabled:
-        cmd.append(
-            "--rollup.sequencerhttp={0}".format(sequencer_context.beacon_http_url)
-        )
+    # if not sequencer_enabled:
+    #     cmd.append(
+    #         "--rollup.sequencerhttp={0}".format(sequencer_context.beacon_http_url)
+    #     )
 
     if len(existing_el_clients) > 0:
         cmd.append(
