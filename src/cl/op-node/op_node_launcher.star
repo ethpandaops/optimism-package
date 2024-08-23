@@ -144,6 +144,7 @@ def get_beacon_config(
     used_ports = get_used_ports(BEACON_DISCOVERY_PORT_NUM)
 
     cmd = [
+        "op-node",
         "--l2={0}".format(EXECUTION_ENGINE_ENDPOINT),
         "--l2.jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--verifier.l1-confs=4",

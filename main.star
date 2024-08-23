@@ -41,7 +41,6 @@ def run(plan, args):
 
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
     contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
-
     # Deploy L2s
     plan.print("Deploying a local L2")
     if type(optimism_args) == "dict":
@@ -72,6 +71,7 @@ def run(plan, args):
                         network_id
                     )
                 )
+
             seen_names[name] = True
             seen_network_ids[network_id] = True
             l2_services_suffix = "-{0}".format(name)
@@ -89,7 +89,7 @@ def run(plan, args):
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}
-    env_vars["L1_RPC_KIND"] = "any"
+    env_vars["L1_RPC_KIND"] = "standard"
     env_vars["WEB3_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
     env_vars["L1_RPC_URL"] = str(all_l1_participants[0].el_context.rpc_http_url)
     env_vars["CL_RPC_URL"] = str(all_l1_participants[0].cl_context.beacon_http_url)

@@ -36,6 +36,12 @@ kurtosis clean -a
 
 This will stop and remove all running enclaves and **delete all data**.
 
+# L2 Contract deployer
+The enclave will automatically deploy an optimism L2 contract on the L1 network. The contract address will be printed in the logs. You can use this contract address to interact with the L2 network.
+
+Please refer to this Dockerfile if you want to see how the contract deployer image is built: [Dockerfile](https://github.com/ethpandaops/eth-client-docker-image-builder/blob/master/op-contract-deployer/Dockerfile)
+
+
 ## Configuration
 
 To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
@@ -70,7 +76,7 @@ optimism_package:
 
       # The Docker image that should be used for the CL client; leave blank to use the default for the client type
       # Defaults by client:
-      # - op-node: parithoshj/op-node:v1
+      # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop
       # - hildr: ghcr.io/optimism-java/hildr:latest
       cl_image: ""
 
@@ -96,6 +102,28 @@ optimism_package:
     # Must be unique for each rollup (if you run multiple rollups)
     # Defaults to "op-kurtosis"
     name: "op-kurtosis"
+
+    # Triggering future forks in the network
+    # Fjord fork
+    # Defaults to 0 (genesis activation) - decimal value
+    # Offset is in seconds
+    fjord_time_offset: 0
+
+    # Granite fork
+    # Defaults to None - not activated - decimal value
+    # Offset is in seconds
+    granite_time_offset: ""
+
+    # Holocene fork
+    # Defaults to None - not activated - decimal value
+    # Offset is in seconds
+    holocene_time_offset: ""
+
+    # Interop fork
+    # Defaults to None - not activated - decimal value
+    # Offset is in seconds
+    interop_time_offset: ""
+
 
   # Additional services to run alongside the network
   # Defaults to []
