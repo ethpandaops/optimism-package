@@ -73,6 +73,7 @@ def get_proposer_config(
     l2oo_address,
 ):
     cmd = [
+        "op-proposer",
         "--poll-interval=12s",
         "--rpc.port=" + str(PROPOSER_HTTP_PORT_NUM),
         "--rollup-rpc=" + cl_context.beacon_http_url,

@@ -47,6 +47,7 @@ def deploy_l2_contracts(
     l1_config_env_vars,
     l2_config_env_vars,
     l2_services_suffix,
+    fork_activation_env,
 ):
     chainspec_files_artifact = plan.upload_files(
         src=CHAINSPEC_JQ_FILEPATH,
@@ -64,7 +65,8 @@ def deploy_l2_contracts(
             "DEPLOYMENT_CONTEXT": "getting-started",
         }
         | l1_config_env_vars
-        | l2_config_env_vars,
+        | l2_config_env_vars
+        | fork_activation_env,
         files={
             "/workspace/optimism/packages/contracts-bedrock/deploy-config/chainspec-generator/": chainspec_files_artifact,
         },
