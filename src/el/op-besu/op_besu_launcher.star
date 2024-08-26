@@ -109,9 +109,7 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode = el_admin_node_info.get_enode_for_node(
-        plan, service_name, RPC_PORT_ID
-    )
+    enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     besu_metrics_info = node_metrics.new_node_metrics_info(
@@ -122,7 +120,7 @@ def launch(
 
     return el_context.new_el_context(
         "op-besu",
-        "", # besu has no ENR
+        "",  # besu has no ENR
         enode,
         service.ip_address,
         RPC_PORT_NUM,
