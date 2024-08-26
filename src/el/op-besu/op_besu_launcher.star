@@ -109,7 +109,7 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
+    enode = el_admin_node_info.get_enode_for_node(
         plan, service_name, RPC_PORT_ID
     )
 
@@ -122,7 +122,7 @@ def launch(
 
     return el_context.new_el_context(
         "op-besu",
-        enr,
+        "", # besu has no ENR
         enode,
         service.ip_address,
         RPC_PORT_NUM,
@@ -213,6 +213,7 @@ def get_config(
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        user=User(uid=0, gid=0),
     )
 
 
