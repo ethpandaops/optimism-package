@@ -6,3 +6,5 @@ optimism_package:
     - el_type: op-nethermind
   additional_services:
     - blockscout
+  l2_contract_deployer_params:
+    image: ethpandaops/optimism-contract-deployer:develop

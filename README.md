@@ -130,6 +130,11 @@ optimism_package:
   # Available services:
   # - blockscout
   additional_services: []
+
+  # L2 contract deployer configuration
+  # The docker image that should be used for the L2 contract deployer
+  l2_contract_deployer_params:
+    image: ethpandaops/optimism-contract-deployer:develop
 ```
 
 ### Additional configuration recommendations

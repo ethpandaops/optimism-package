@@ -37,6 +37,7 @@ def launch_l2(
         l2_config_env_vars,
         l2_services_suffix,
         fork_activation_env,
+        args_with_right_defaults.l2_contract_deployer_params.image,
     )
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))

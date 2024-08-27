@@ -1,5 +1,3 @@
-IMAGE = "ethpandaops/optimism-contract-deployer:develop"
-
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
 FACTORY_ADDRESS = "0x4e59b44847b379578588920cA78FbF26c0B4956C"
@@ -13,11 +11,12 @@ def deploy_factory_contract(
     plan,
     priv_key,
     l1_config_env_vars,
+    image,
 ):
     factory_deployment_result = plan.run_sh(
         name="op-deploy-factory-contract",
         description="Deploying L2 factory contract to L1 (takes about a minute)",
-        image=IMAGE,
+        image=image,
         env_vars={
             "PRIVATE_KEY": str(priv_key),
             "FUND_VALUE": "10ether",
@@ -48,6 +47,7 @@ def deploy_l2_contracts(
     l2_config_env_vars,
     l2_services_suffix,
     fork_activation_env,
+    image,
 ):
     chainspec_files_artifact = plan.upload_files(
         src=CHAINSPEC_JQ_FILEPATH,
@@ -57,7 +57,7 @@ def deploy_l2_contracts(
     op_genesis = plan.run_sh(
         name="op-deploy-l2-contracts",
         description="Deploying L2 contracts (takes about a minute)",
-        image=IMAGE,
+        image=image,
         env_vars={
             "PRIVATE_KEY": str(priv_key),
             "FUND_VALUE": "10ether",
