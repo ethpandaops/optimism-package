@@ -5,6 +5,7 @@ static_files = import_module(
 )
 l2_launcher = import_module("./src/l2.star")
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
+input_parser = import_module("./src/package_io/input_parser.star")
 
 
 def run(plan, args):
@@ -21,6 +22,7 @@ def run(plan, args):
         "ethereum_package", {"network_params": {"preset": "minimal"}}
     )
     optimism_args = args.get("optimism_package", {})
+    optimism_args_with_right_defaults = input_parser.input_parser(plan, optimism_args)
     # Deploy the L1
     plan.print("Deploying a local L1")
     l1 = ethereum_package.run(plan, ethereum_args)
@@ -39,8 +41,14 @@ def run(plan, args):
     if l1_network_params.network != "kurtosis":
         wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
 
+    l2_contract_deployer_image = (
+        optimism_args_with_right_defaults.op_contract_deployer_params.image
+    )
+
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
-    contract_deployer.deploy_factory_contract(plan, l1_priv_key, l1_config_env_vars)
+    contract_deployer.deploy_factory_contract(
+        plan, l1_priv_key, l1_config_env_vars, l2_contract_deployer_image
+    )
     # Deploy L2s
     plan.print("Deploying a local L2")
     if type(optimism_args) == "dict":

@@ -62,6 +62,9 @@ def input_parser(plan, input_args):
         additional_services=result.get(
             "additional_services", DEFAULT_ADDITIONAL_SERVICES
         ),
+        op_contract_deployer_params=struct(
+            image=result["op_contract_deployer_params"]["image"],
+        ),
     )
 
 
@@ -125,9 +128,11 @@ def parse_network_params(plan, input_args):
 def default_input_args(input_args):
     network_params = default_network_params()
     participants = [default_participant()]
+    op_contract_deployer_params = default_op_contract_deployer_params()
     return {
         "participants": participants,
         "network_params": network_params,
+        "op_contract_deployer_params": op_contract_deployer_params,
     }
 
 
@@ -151,4 +156,10 @@ def default_participant():
         "cl_type": "op-node",
         "cl_image": "",
         "count": 1,
+    }
+
+
+def default_op_contract_deployer_params():
+    return {
+        "image": "ethpandaops/optimism-contract-deployer:develop",
     }

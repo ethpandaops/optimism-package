@@ -7,3 +7,5 @@ optimism_package:
     - el_type: op-besu
   additional_services:
     - blockscout
+  op_contract_deployer_params:
+    image: ethpandaops/optimism-contract-deployer:develop
