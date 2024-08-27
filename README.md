@@ -57,6 +57,7 @@ optimism_package:
       # op-reth
       # op-erigon
       # op-nethermind
+      # op-besu
     - el_type: geth
 
       # The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -65,6 +66,7 @@ optimism_package:
       # - op-reth: parithoshj/op-reth:latest
       # - op-erigon: testinprod/op-erigon:latest
       # - op-nethermind: nethermindeth/nethermind:op-c482d56
+      # - op-besu: ghcr.io/optimism-java/op-besu:latest
       el_image: ""
 
     # CL(Consensus Layer) Specific flags
