@@ -19,7 +19,7 @@ SUBCATEGORY_PARAMS = {
         "holocene_time_offset",
         "interop_time_offset",
     ],
-    "l2_contract_deployer_params": ["image"],
+    "op_contract_deployer_params": ["image"],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [

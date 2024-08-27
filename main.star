@@ -42,7 +42,7 @@ def run(plan, args):
         wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
 
     l2_contract_deployer_image = (
-        optimism_args_with_right_defaults.l2_contract_deployer_params.image
+        optimism_args_with_right_defaults.op_contract_deployer_params.image
     )
 
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
