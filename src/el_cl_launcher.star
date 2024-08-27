@@ -9,6 +9,7 @@ op_geth = import_module("./el/op-geth/op_geth_launcher.star")
 op_reth = import_module("./el/op-reth/op_reth_launcher.star")
 op_erigon = import_module("./el/op-erigon/op_erigon_launcher.star")
 op_nethermind = import_module("./el/op-nethermind/op_nethermind_launcher.star")
+op_besu = import_module("./el/op-besu/op_besu_launcher.star")
 # CL
 op_node = import_module("./cl/op-node/op_node_launcher.star")
 hildr = import_module("./cl/hildr/hildr_launcher.star")
@@ -62,6 +63,15 @@ def launch(
                 network_params.network_id,
             ),
             "launch_method": op_nethermind.launch,
+        },
+        "op-besu": {
+            "launcher": op_besu.new_op_besu_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": op_besu.launch,
         },
     }
 

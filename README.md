@@ -36,6 +36,12 @@ kurtosis clean -a
 
 This will stop and remove all running enclaves and **delete all data**.
 
+# L2 Contract deployer
+The enclave will automatically deploy an optimism L2 contract on the L1 network. The contract address will be printed in the logs. You can use this contract address to interact with the L2 network.
+
+Please refer to this Dockerfile if you want to see how the contract deployer image is built: [Dockerfile](https://github.com/ethpandaops/eth-client-docker-image-builder/blob/master/op-contract-deployer/Dockerfile)
+
+
 ## Configuration
 
 To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
@@ -51,6 +57,7 @@ optimism_package:
       # op-reth
       # op-erigon
       # op-nethermind
+      # op-besu
     - el_type: geth
 
       # The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -59,6 +66,7 @@ optimism_package:
       # - op-reth: parithoshj/op-reth:latest
       # - op-erigon: testinprod/op-erigon:latest
       # - op-nethermind: nethermindeth/nethermind:op-c482d56
+      # - op-besu: ghcr.io/optimism-java/op-besu:latest
       el_image: ""
 
     # CL(Consensus Layer) Specific flags
@@ -71,7 +79,7 @@ optimism_package:
 
       # The Docker image that should be used for the CL client; leave blank to use the default for the client type
       # Defaults by client:
-      # - op-node: parithoshj/op-node:v1
+      # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop
       # - hildr: ghcr.io/optimism-java/hildr:latest
       # - magi: a16zcrypto/magi:latest
       cl_image: ""
@@ -99,11 +107,38 @@ optimism_package:
     # Defaults to "op-kurtosis"
     name: "op-kurtosis"
 
+    # Triggering future forks in the network
+    # Fjord fork
+    # Defaults to 0 (genesis activation) - decimal value
+    # Offset is in seconds
+    fjord_time_offset: 0
+
+    # Granite fork
+    # Defaults to None - not activated - decimal value
+    # Offset is in seconds
+    granite_time_offset: ""
+
+    # Holocene fork
+    # Defaults to None - not activated - decimal value
+    # Offset is in seconds
+    holocene_time_offset: ""
+
+    # Interop fork
+    # Defaults to None - not activated - decimal value
+    # Offset is in seconds
+    interop_time_offset: ""
+
+
   # Additional services to run alongside the network
   # Defaults to []
   # Available services:
   # - blockscout
   additional_services: []
+
+  # L2 contract deployer configuration
+  # The docker image that should be used for the L2 contract deployer
+  op_contract_deployer_params:
+    image: ethpandaops/optimism-contract-deployer:develop
 ```
 
 ### Additional configuration recommendations

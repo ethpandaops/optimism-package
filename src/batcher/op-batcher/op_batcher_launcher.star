@@ -73,6 +73,7 @@ def get_batcher_config(
     gs_batcher_private_key,
 ):
     cmd = [
+        "op-batcher",
         "--l2-eth-rpc=" + el_context.rpc_http_url,
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--poll-interval=1s",

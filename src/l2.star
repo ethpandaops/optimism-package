@@ -22,7 +22,8 @@ def launch_l2(
     l2_config_env_vars = {}
     l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
     l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
-
+    fork_activation_env = get_network_fork_activation(network_params)
+    plan.print(fork_activation_env)
     (
         el_cl_data,
         gs_private_keys,
@@ -35,6 +36,8 @@ def launch_l2(
         l1_config,
         l2_config_env_vars,
         l2_services_suffix,
+        fork_activation_env,
+        args_with_right_defaults.op_contract_deployer_params.image,
     )
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))
@@ -81,3 +84,21 @@ def launch_l2(
             l1_bridge_address
         )
     )
+
+
+def get_network_fork_activation(network_params):
+    env_vars = {}
+    env_vars["FJORD_TIME_OFFSET"] = "0x" + "%x" % network_params.fjord_time_offset
+    if network_params.granite_time_offset:
+        env_vars["GRANITE_TIME_OFFSET"] = (
+            "0x" + "%x" % network_params.granite_time_offset
+        )
+    if network_params.holocene_time_offset:
+        env_vars["HOLOCENE_TIME_OFFSET"] = (
+            "0x" + "%x" % network_params.holocene_time_offset
+        )
+    if network_params.interop_time_offset:
+        env_vars["INTEROP_TIME_OFFSET"] = (
+            "0x" + "%x" % network_params.interop_time_offset
+        )
+    return env_vars

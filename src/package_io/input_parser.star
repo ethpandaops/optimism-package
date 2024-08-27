@@ -6,23 +6,24 @@ sanity_check = import_module("./sanity_check.star")
 
 DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
-    "op-reth": "parithoshj/op-reth:latest",
+    "op-reth": "ghcr.io/paradigmxyz/op-reth:latest",
     "op-erigon": "testinprod/op-erigon:latest",
     "op-nethermind": "nethermindeth/nethermind:op-c482d56",
+    "op-besu": "ghcr.io/optimism-java/op-besu:latest",
 }
 
 DEFAULT_CL_IMAGES = {
-    "op-node": "parithoshj/op-node:v1",
+    "op-node": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
     "hildr": "ghcr.io/optimism-java/hildr:latest",
     "magi": "a16zcrypto/magi:master",
 }
 
 DEFAULT_BATCHER_IMAGES = {
-    "op-batcher": "parithoshj/op-batcher:v1",
+    "op-batcher": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
 }
 
 DEFAULT_PROPOSER_IMAGES = {
-    "op-proposer": "parithoshj/op-proposer:v1",
+    "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
 }
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
@@ -54,9 +55,16 @@ def input_parser(plan, input_args):
             network_id=result["network_params"]["network_id"],
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
             name=result["network_params"]["name"],
+            fjord_time_offset=result["network_params"]["fjord_time_offset"],
+            granite_time_offset=result["network_params"]["granite_time_offset"],
+            holocene_time_offset=result["network_params"]["holocene_time_offset"],
+            interop_time_offset=result["network_params"]["interop_time_offset"],
         ),
         additional_services=result.get(
             "additional_services", DEFAULT_ADDITIONAL_SERVICES
+        ),
+        op_contract_deployer_params=struct(
+            image=result["op_contract_deployer_params"]["image"],
         ),
     )
 
@@ -121,9 +129,11 @@ def parse_network_params(plan, input_args):
 def default_input_args(input_args):
     network_params = default_network_params()
     participants = [default_participant()]
+    op_contract_deployer_params = default_op_contract_deployer_params()
     return {
         "participants": participants,
         "network_params": network_params,
+        "op_contract_deployer_params": op_contract_deployer_params,
     }
 
 
@@ -133,6 +143,10 @@ def default_network_params():
         "network_id": "2151908",
         "name": "op-kurtosis",
         "seconds_per_slot": 2,
+        "fjord_time_offset": 0,
+        "granite_time_offset": None,
+        "holocene_time_offset": None,
+        "interop_time_offset": None,
     }
 
 
@@ -143,4 +157,10 @@ def default_participant():
         "cl_type": "op-node",
         "cl_image": "",
         "count": 1,
+    }
+
+
+def default_op_contract_deployer_params():
+    return {
+        "image": "ethpandaops/optimism-contract-deployer:develop",
     }

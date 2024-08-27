@@ -14,7 +14,12 @@ SUBCATEGORY_PARAMS = {
         "network_id",
         "seconds_per_slot",
         "name",
+        "fjord_time_offset",
+        "granite_time_offset",
+        "holocene_time_offset",
+        "interop_time_offset",
     ],
+    "op_contract_deployer_params": ["image"],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [

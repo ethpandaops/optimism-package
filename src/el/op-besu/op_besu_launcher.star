@@ -41,7 +41,7 @@ NUM_MINING_THREADS = 1
 METRICS_PATH = "/debug/metrics/prometheus"
 
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
+EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/besu/execution-data"
 
 
 def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
@@ -109,20 +109,18 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, RPC_PORT_ID
-    )
+    enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    geth_metrics_info = node_metrics.new_node_metrics_info(
+    besu_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
     return el_context.new_el_context(
-        "op-geth",
-        enr,
+        "op-besu",
+        "",  # besu has no ENR
         enode,
         service.ip_address,
         RPC_PORT_NUM,
@@ -130,7 +128,7 @@ def launch(
         ENGINE_RPC_PORT_NUM,
         http_url,
         service_name,
-        [geth_metrics_info],
+        [besu_metrics_info],
     )
 
 
@@ -146,50 +144,47 @@ def get_config(
     sequencer_enabled,
     sequencer_context,
 ):
-    init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
-        EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-    )
-
     discovery_port = DISCOVERY_PORT_NUM
     used_ports = get_used_ports(discovery_port)
 
     cmd = [
-        "geth",
-        "--networkid={0}".format(network_id),
-        # "--verbosity=" + verbosity_level,
-        "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--gcmode=archive",
-        "--state.scheme=hash",
-        "--http",
-        "--http.addr=0.0.0.0",
-        "--http.vhosts=*",
-        "--http.corsdomain=*",
-        "--http.api=admin,engine,net,eth,web3,debug",
-        "--ws",
-        "--ws.addr=0.0.0.0",
-        "--ws.port={0}".format(WS_PORT_NUM),
-        "--ws.api=admin,engine,net,eth,web3,debug",
-        "--ws.origins=*",
-        "--allow-insecure-unlock",
-        "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
-        "--authrpc.addr=0.0.0.0",
-        "--authrpc.vhosts=*",
-        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--syncmode=full",
-        "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "--rpc.allow-unprotected-txs",
-        "--metrics",
-        "--metrics.addr=0.0.0.0",
-        "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--discovery.port={0}".format(discovery_port),
-        "--port={0}".format(discovery_port),
+        "besu",
+        "--genesis-file="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis.json",
+        "--network-id={0}".format(network_id),
+        # "--logging=" + log_level,
+        "--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        "--host-allowlist=*",
+        "--rpc-http-enabled=true",
+        "--rpc-http-host=0.0.0.0",
+        "--rpc-http-port={0}".format(RPC_PORT_NUM),
+        "--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
+        "--rpc-http-cors-origins=*",
+        "--rpc-http-max-active-connections=300",
+        "--rpc-ws-enabled=true",
+        "--rpc-ws-host=0.0.0.0",
+        "--rpc-ws-port={0}".format(WS_PORT_NUM),
+        "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
+        "--p2p-enabled=true",
+        "--p2p-host=" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--p2p-port={0}".format(discovery_port),
+        "--engine-rpc-enabled=true",
+        "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--engine-host-allowlist=*",
+        "--engine-rpc-port={0}".format(ENGINE_RPC_PORT_NUM),
+        "--sync-mode=FULL",
+        "--metrics-enabled=true",
+        "--metrics-host=0.0.0.0",
+        "--metrics-port={0}".format(METRICS_PORT_NUM),
+        "--bonsai-limit-trie-logs-enabled=false",
+        "--version-compatibility-protection=false",
     ]
 
-    if not sequencer_enabled:
-        cmd.append(
-            "--rollup.sequencerhttp={0}".format(sequencer_context.beacon_http_url)
-        )
+    # if not sequencer_enabled:
+    #     cmd.append(
+    #         "--rollup.sequencerhttp={0}".format(sequencer_context.beacon_http_url)
+    #     )
 
     if len(existing_el_clients) > 0:
         cmd.append(
@@ -203,14 +198,6 @@ def get_config(
         )
 
     cmd_str = " ".join(cmd)
-    if network not in constants.PUBLIC_NETWORKS:
-        subcommand_strs = [
-            init_datadir_cmd_str,
-            cmd_str,
-        ]
-        command_str = " && ".join(subcommand_strs)
-    else:
-        command_str = cmd_str
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
@@ -220,14 +207,15 @@ def get_config(
     return ServiceConfig(
         image=image,
         ports=used_ports,
-        cmd=[command_str],
+        cmd=[cmd_str],
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        user=User(uid=0, gid=0),
     )
 
 
-def new_op_geth_launcher(
+def new_op_besu_launcher(
     el_cl_genesis_data,
     jwt_file,
     network,
