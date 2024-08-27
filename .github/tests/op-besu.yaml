@@ -1,0 +1,4 @@
+optimism_package:
+  participants:
+    - el_type: op-besu
+      cl_type: op-node
