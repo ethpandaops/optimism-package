@@ -122,7 +122,7 @@ def launch(
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
         rpc_http_url=http_url,
-        rpc_ws_url=ws_url,
+        ws_url=ws_url,
         service_name=service_name,
         el_metrics_info=[nethermind_metrics_info],
     )

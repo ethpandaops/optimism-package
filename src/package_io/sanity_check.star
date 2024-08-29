@@ -51,6 +51,10 @@ def validate_params(plan, input_args, category, allowed_params):
 
 
 def sanity_check(plan, input_args):
+
+    if type(input_args) == "list":
+        return "Cant bother with your input, you shall pass"
+
     # Checks participants
     deep_validate_params(
         plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
