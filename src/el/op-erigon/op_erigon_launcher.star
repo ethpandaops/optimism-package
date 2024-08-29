@@ -115,16 +115,16 @@ def launch(
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
     return el_context.new_el_context(
-        "op-erigon",
-        enr,
-        enode,
-        service.ip_address,
-        RPC_PORT_NUM,
-        WS_PORT_NUM,
-        ENGINE_RPC_PORT_NUM,
-        http_url,
-        service_name,
-        [erigon_metrics_info],
+        client_name="op-erigon",
+        enode=enode,
+        ip_addr=service.ip_address,
+        rpc_port_num=RPC_PORT_NUM,
+        ws_port_num=WS_PORT_NUM,
+        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
+        enr=enr,
+        rpc_http_url=http_url,
+        service_name=service_name,
+        el_metrics_info=[erigon_metrics_info],
     )
 
 

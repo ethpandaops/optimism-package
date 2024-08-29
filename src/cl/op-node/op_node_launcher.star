@@ -111,13 +111,13 @@ def launch(
     beacon_peer_id = response["extract.peer_id"]
 
     return cl_context.new_cl_context(
-        "op-node",
-        beacon_node_enr,
-        beacon_service.ip_address,
-        beacon_http_port.number,
-        beacon_http_url,
-        None,
-        service_name,
+        client_name="op-node",
+        enr=beacon_node_enr,
+        ip_addr=beacon_service.ip_address,
+        http_port=beacon_http_port.number,
+        beacon_http_url=beacon_http_url,
+        cl_nodes_metrics_info=None,
+        beacon_service_name=service_name,
         multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
     )
