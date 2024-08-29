@@ -35,13 +35,13 @@ ENGINE_RPC_PORT_ID = "engine-rpc"
 ENGINE_WS_PORT_ID = "engineWs"
 METRICS_PORT_ID = "metrics"
 
-# TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
+# TODO(old) Scale this dynamically based on CPUs available and Nethermind nodes mining
 NUM_MINING_THREADS = 1
 
 METRICS_PATH = "/debug/metrics/prometheus"
 
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
+EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nethermind/execution-data"
 
 
 def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
@@ -69,8 +69,6 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
     return used_ports
 
 
-ENTRYPOINT_ARGS = ["sh", "-c"]
-
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "1",
     constants.GLOBAL_LOG_LEVEL.warn: "2",
@@ -78,9 +76,6 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.debug: "4",
     constants.GLOBAL_LOG_LEVEL.trace: "5",
 }
-
-BUILDER_IMAGE_STR = "builder"
-SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
 
 
 def launch(
@@ -109,28 +104,27 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, RPC_PORT_ID
-    )
+    enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    geth_metrics_info = node_metrics.new_node_metrics_info(
+    nethermind_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
-        client_name="op-geth",
+        client_name="op-nethermind",
         enode=enode,
         ip_addr=service.ip_address,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
         rpc_http_url=http_url,
-        enr=enr,
+        rpc_ws_url=ws_url,
         service_name=service_name,
-        el_metrics_info=[geth_metrics_info],
+        el_metrics_info=[nethermind_metrics_info],
     )
 
 
@@ -146,54 +140,35 @@ def get_config(
     sequencer_enabled,
     sequencer_context,
 ):
-    init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
-        EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-    )
-
     discovery_port = DISCOVERY_PORT_NUM
     used_ports = get_used_ports(discovery_port)
-
     cmd = [
-        "geth",
-        "--networkid={0}".format(network_id),
-        # "--verbosity=" + verbosity_level,
+        "--log=debug",
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--gcmode=archive",
-        "--state.scheme=hash",
-        "--http",
-        "--http.addr=0.0.0.0",
-        "--http.vhosts=*",
-        "--http.corsdomain=*",
-        "--http.api=admin,engine,net,eth,web3,debug",
-        "--ws",
-        "--ws.addr=0.0.0.0",
-        "--ws.port={0}".format(WS_PORT_NUM),
-        "--ws.api=admin,engine,net,eth,web3,debug",
-        "--ws.origins=*",
-        "--allow-insecure-unlock",
-        "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
-        "--authrpc.addr=0.0.0.0",
-        "--authrpc.vhosts=*",
-        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--syncmode=full",
-        "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "--rpc.allow-unprotected-txs",
-        "--metrics",
-        "--metrics.addr=0.0.0.0",
-        "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--discovery.port={0}".format(discovery_port),
-        "--port={0}".format(discovery_port),
+        "--Init.WebSocketsEnabled=true",
+        "--JsonRpc.Enabled=true",
+        "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin",
+        "--JsonRpc.Host=0.0.0.0",
+        "--JsonRpc.Port={0}".format(RPC_PORT_NUM),
+        "--JsonRpc.WebSocketsPort={0}".format(WS_PORT_NUM),
+        "--JsonRpc.EngineHost=0.0.0.0",
+        "--JsonRpc.EnginePort={0}".format(ENGINE_RPC_PORT_NUM),
+        "--Network.ExternalIp=" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--Network.DiscoveryPort={0}".format(discovery_port),
+        "--Network.P2PPort={0}".format(discovery_port),
+        "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--Metrics.Enabled=true",
+        "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
+        "--Metrics.ExposeHost=0.0.0.0",
     ]
-
     if not sequencer_enabled:
         cmd.append(
-            "--rollup.sequencerhttp={0}".format(sequencer_context.beacon_http_url)
+            "--Optimism.SequencerUrl={0}".format(sequencer_context.beacon_http_url)
         )
 
     if len(existing_el_clients) > 0:
         cmd.append(
-            "--bootnodes="
+            "--Discovery.Bootnodes="
             + ",".join(
                 [
                     ctx.enode
@@ -202,15 +177,13 @@ def get_config(
             )
         )
 
-    cmd_str = " ".join(cmd)
-    if network not in constants.PUBLIC_NETWORKS:
-        subcommand_strs = [
-            init_datadir_cmd_str,
-            cmd_str,
-        ]
-        command_str = " && ".join(subcommand_strs)
-    else:
-        command_str = cmd_str
+    # TODO: Adding the chainspec and config separately as we may want to have support for public networks and shadowforks
+    cmd.append("--config=none.cfg")
+    cmd.append(
+        "--Init.ChainSpecPath="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/chainspec.json"
+    )
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
@@ -220,14 +193,13 @@ def get_config(
     return ServiceConfig(
         image=image,
         ports=used_ports,
-        cmd=[command_str],
+        cmd=cmd,
         files=files,
-        entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
 
 
-def new_op_geth_launcher(
+def new_nethermind_launcher(
     el_cl_genesis_data,
     jwt_file,
     network,

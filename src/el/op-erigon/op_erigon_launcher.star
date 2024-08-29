@@ -1,7 +1,7 @@
 shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
-
+# input_parser = import_module("../../package_io/input_parser.star")
 el_context = import_module(
     "github.com/ethpandaops/ethereum-package/src/el/el_context.star"
 )
@@ -35,13 +35,10 @@ ENGINE_RPC_PORT_ID = "engine-rpc"
 ENGINE_WS_PORT_ID = "engineWs"
 METRICS_PORT_ID = "metrics"
 
-# TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
-NUM_MINING_THREADS = 1
-
 METRICS_PATH = "/debug/metrics/prometheus"
 
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
+EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/op-erigon/execution-data"
 
 
 def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
@@ -79,9 +76,6 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.trace: "5",
 }
 
-BUILDER_IMAGE_STR = "builder"
-SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
-
 
 def launch(
     plan,
@@ -114,23 +108,23 @@ def launch(
     )
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    geth_metrics_info = node_metrics.new_node_metrics_info(
+    erigon_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
     return el_context.new_el_context(
-        client_name="op-geth",
+        client_name="op-erigon",
         enode=enode,
         ip_addr=service.ip_address,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
-        rpc_http_url=http_url,
         enr=enr,
+        rpc_http_url=http_url,
         service_name=service_name,
-        el_metrics_info=[geth_metrics_info],
+        el_metrics_info=[erigon_metrics_info],
     )
 
 
@@ -146,7 +140,7 @@ def get_config(
     sequencer_enabled,
     sequencer_context,
 ):
-    init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
+    init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
@@ -155,34 +149,26 @@ def get_config(
     used_ports = get_used_ports(discovery_port)
 
     cmd = [
-        "geth",
-        "--networkid={0}".format(network_id),
-        # "--verbosity=" + verbosity_level,
+        "erigon",
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--gcmode=archive",
-        "--state.scheme=hash",
+        "--networkid={0}".format(network_id),
         "--http",
         "--http.addr=0.0.0.0",
         "--http.vhosts=*",
         "--http.corsdomain=*",
         "--http.api=admin,engine,net,eth,web3,debug",
         "--ws",
-        "--ws.addr=0.0.0.0",
         "--ws.port={0}".format(WS_PORT_NUM),
-        "--ws.api=admin,engine,net,eth,web3,debug",
-        "--ws.origins=*",
         "--allow-insecure-unlock",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--syncmode=full",
         "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--rpc.allow-unprotected-txs",
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--discovery.port={0}".format(discovery_port),
         "--port={0}".format(discovery_port),
     ]
 
@@ -227,7 +213,7 @@ def get_config(
     )
 
 
-def new_op_geth_launcher(
+def new_op_erigon_launcher(
     el_cl_genesis_data,
     jwt_file,
     network,
