@@ -151,7 +151,7 @@ def deploy_l2_contracts(
 
     l1_deposit_start_block = plan.run_sh(
         name="read-l1-deposit-start-block",
-        description="Getting the L1StandardBridgeProxy address",
+        description="Getting l1 deposit start block",
         image="badouralix/curl-jq",
         run="jq -r .genesis.l1.number  /network-configs/rollup.json | tr -d '\n'",
         files={"/network-configs": op_genesis.files_artifacts[0]},
