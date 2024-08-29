@@ -116,7 +116,7 @@ def launch(
         ip_addr=beacon_service.ip_address,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
-        service_name=service_name,
+        beacon_service_name=service_name,
     )
 
 
