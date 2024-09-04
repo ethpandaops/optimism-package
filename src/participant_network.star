@@ -19,6 +19,7 @@ def launch_participant_network(
     global_node_selectors,
     global_tolerations,
     persistent,
+    da_server_context,
 ):
     num_participants = len(participants)
     # First EL and sequencer CL
@@ -35,6 +36,7 @@ def launch_participant_network(
         global_node_selectors,
         global_tolerations,
         persistent,
+        da_server_context,
     )
 
     all_participants = []
@@ -82,6 +84,7 @@ def launch_participant_network(
         l1_config_env_vars,
         batcher_key,
         batcher_params,
+        da_server_context,
     )
 
     # The OP Stack don't run the proposer anymore, it has been replaced with the challenger

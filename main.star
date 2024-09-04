@@ -27,6 +27,7 @@ def run(plan, args):
     global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
     global_log_level = optimism_args_with_right_defaults.global_log_level
     persistent = optimism_args_with_right_defaults.persistent
+    da_server_params = args_with_right_defaults.da_server_params
 
     # Deploy the L1
     plan.print("Deploying a local L1")
@@ -55,6 +56,7 @@ def run(plan, args):
         l1_priv_key,
         l1_config_env_vars,
         optimism_args_with_right_defaults,
+        da_server_params,
     )
 
     for chain in optimism_args_with_right_defaults.chains:

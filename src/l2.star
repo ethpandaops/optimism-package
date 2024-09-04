@@ -1,5 +1,6 @@
 participant_network = import_module("./participant_network.star")
 blockscout = import_module("./blockscout/blockscout_launcher.star")
+da_server_launcher = import_module("./alt-da/da-server/da_server_launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
 input_parser = import_module("./package_io/input_parser.star")
 ethereum_package_static_files = import_module(
@@ -30,6 +31,32 @@ def launch_l2(
         name="op_jwt_file{0}".format(l2_services_suffix),
     )
 
+    # we need to launch da-server before launching the participant network
+    # because op-node and op-batcher need to know the da-server url, if present
+    da_server_context = da_server_launcher.disabled_da_server_context()
+    if "da_server" in args_with_right_defaults.additional_services:
+        da_server_image = args_with_right_defaults.da_server_params.image
+        if args_with_right_defaults.da_server_params.build_image:
+            plan.print("Building da-server image")
+            da_server_image = ImageBuildSpec(
+                image_name=args_with_right_defaults.da_server_params.image,
+                # TODO: this doesn't work... because can't point to a dir outside of the kurtosis package
+                # also can't install optimism monorepo as a submodule because that makes the kurtosis package > 100MB, which is not allowed.
+                # Not sure how to fix this... detailed problem in https://github.com/ethpandaops/optimism-package/issues/72
+                build_context_dir="/optimism/ops/docker/op-stack-go",
+                target_stage="da-server-target",
+            )
+            plan.print("Successfully built da-server image")
+        plan.print("Launching da-server")
+        da_server_context = da_server_launcher.launch(
+            plan,
+            "da-server{0}".format(l2_services_suffix),
+            da_server_image,
+            args_with_right_defaults.da_server_params.da_server_extra_args,
+            args_with_right_defaults.da_server_params.generic_commitment,
+        )
+        plan.print("Successfully launched da-server")
+
     all_l2_participants = participant_network.launch_participant_network(
         plan,
         l2_args.participants,
@@ -43,6 +70,7 @@ def launch_l2(
         global_node_selectors,
         global_tolerations,
         persistent,
+        da_server_context,
     )
 
     all_el_contexts = []

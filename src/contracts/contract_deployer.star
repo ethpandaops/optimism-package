@@ -14,6 +14,7 @@ def deploy_contracts(
     priv_key,
     l1_config_env_vars,
     optimism_args,
+    da_server_params, # for alt-da
 ):
     l2_chain_ids = ",".join(
         [str(chain.network_params.network_id) for chain in optimism_args.chains]
@@ -23,7 +24,11 @@ def deploy_contracts(
         name="op-deployer-init",
         description="Initialize L2 contract deployments",
         image=optimism_args.op_contract_deployer_params.image,
-        env_vars=l1_config_env_vars,
+        env_vars=l1_config_env_vars
+        | {
+            "USE_ALTDA": "true" if da_server_params.enabled else "false",
+            "DA_COMMITMENT_TYPE": "GenericCommitment" if da_server_params.generic_commitment else "KeccakCommitment"
+        },
         store=[
             StoreSpec(
                 src="/network-data",
