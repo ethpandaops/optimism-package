@@ -105,6 +105,7 @@ def deploy_l2_contracts(
                 "mv $DEPLOY_CONFIG_PATH /network-configs/getting-started.json",
                 "mv $DEPLOYMENT_OUTFILE /network-configs/kurtosis.json",
                 "mv $STATE_DUMP_PATH /network-configs/state-dump.json",
+                "echo -n $GS_ADMIN_PRIVATE_KEY > /network-configs/$GS_ADMIN_PRIVATE_KEY",
                 "echo -n $GS_SEQUENCER_PRIVATE_KEY > /network-configs/GS_SEQUENCER_PRIVATE_KEY",
                 "echo -n $GS_BATCHER_PRIVATE_KEY > /network-configs/GS_BATCHER_PRIVATE_KEY",
                 "echo -n $GS_PROPOSER_PRIVATE_KEY > /network-configs/GS_PROPOSER_PRIVATE_KEY",
@@ -112,6 +113,13 @@ def deploy_l2_contracts(
             ]
         ),
         wait="300s",
+    )
+
+    gs_admin_private_key = plan.run_sh(
+        name="read-gs-admin-private-key",
+        description="Getting the admin private key",
+        run="cat /network-configs/$GS_ADMIN_PRIVATE_KEY ",
+        files={"/network-configs": op_genesis.files_artifacts[0]},
     )
 
     gs_sequencer_private_key = plan.run_sh(
@@ -165,6 +173,7 @@ def deploy_l2_contracts(
     )
 
     private_keys = {
+        "GS_ADMIN_PRIVATE_KEY": gs_admin_private_key.output,
         "GS_SEQUENCER_PRIVATE_KEY": gs_sequencer_private_key.output,
         "GS_BATCHER_PRIVATE_KEY": gs_batcher_private_key.output,
         "GS_PROPOSER_PRIVATE_KEY": gs_proposer_private_key.output,
