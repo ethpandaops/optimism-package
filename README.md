@@ -23,7 +23,7 @@ You can also completely remove `ethereum_package` from your configuration in whi
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 
 ```bash
-kurtosis run github.com/hashcashier/optimism-package --args-file https://raw.githubusercontent.com/ethpandaops/optimism-package/main/network_params.yaml
+kurtosis run github.com/ethpandaops/optimism-package --args-file https://raw.githubusercontent.com/ethpandaops/optimism-package/main/network_params.yaml
 ```
 
 For `--args-file` you can pass a local file path or a URL to a file.
