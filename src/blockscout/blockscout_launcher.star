@@ -7,6 +7,8 @@ constants = import_module(
 
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
+util = import_module("../util.star")
+
 IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout-optimism:6.6.0"
 IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.7.0"
 
@@ -48,10 +50,14 @@ def launch_blockscout(
     l2_services_suffix,
     l1_el_context,
     l2_el_context,
-    l2oo_address,
     l2_network_name,
-    additional_env_vars,
+    deployment_output,
+    network_id
 ):
+    rollup_filename = "rollup-{0}".format(network_id)
+    portal_address = util.read_network_config_value(plan, deployment_output, rollup_filename, ".deposit_contract_address")
+    l1_deposit_start_block = util.read_network_config_value(plan, deployment_output, rollup_filename, ".genesis.l1.number")
+
     postgres_output = postgres.run(
         plan,
         service_name="{0}-postgres{1}".format(
@@ -75,9 +81,15 @@ def launch_blockscout(
         l1_el_context,
         l2_el_context,
         verif_url,
-        l2oo_address,
         l2_network_name,
-        additional_env_vars,
+        {
+            "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": portal_address,
+            "INDEXER_OPTIMISM_L1_DEPOSITS_START_BLOCK": l1_deposit_start_block,
+            "INDEXER_OPTIMISM_L1_WITHDRAWALS_START_BLOCK": l1_deposit_start_block,
+            "INDEXER_OPTIMISM_L1_BATCH_START_BLOCK": l1_deposit_start_block,
+            # The L2OO is no longer deployed
+            "INDEXER_OPTIMISM_L1_OUTPUT_ORACLE_CONTRACT": "0x0000000000000000000000000000000000000000",
+        },
     )
     blockscout_service = plan.add_service(
         "{0}{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_services_suffix), config_backend
@@ -112,7 +124,6 @@ def get_config_backend(
     l1_el_context,
     l2_el_context,
     verif_url,
-    l2oo_address,
     l2_network_name,
     additional_env_vars,
 ):

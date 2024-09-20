@@ -11,3 +11,8 @@ def read_json_value(plan, json_file, json_path, mounts=None):
         run="cat {0} | jq -j '{1}'".format(json_file, json_path),
     )
     return run.output
+
+def to_hex_chain_id(chain_id):
+    out = "%x" % int(chain_id)
+    pad = 64-len(out)
+    return "0x" + "0"*pad + out
