@@ -92,16 +92,13 @@ def launch(
     sequencer_enabled,
     sequencer_context,
 ):
-    network_name = shared_utils.get_network_name(launcher.network)
-
     config = get_config(
         plan,
-        launcher.el_cl_genesis_data,
+        launcher.deployment_output,
         launcher.jwt_file,
         launcher.network,
         launcher.network_id,
         image,
-        service_name,
         existing_el_clients,
         sequencer_enabled,
         sequencer_context,
@@ -136,19 +133,18 @@ def launch(
 
 def get_config(
     plan,
-    el_cl_genesis_data,
+    deployment_output,
     jwt_file,
     network,
     network_id,
     image,
-    service_name,
     existing_el_clients,
     sequencer_enabled,
     sequencer_context,
 ):
     init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/genesis-{0}.json".format(network_id),
     )
 
     discovery_port = DISCOVERY_PORT_NUM
@@ -213,7 +209,7 @@ def get_config(
         command_str = cmd_str
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
@@ -228,13 +224,13 @@ def get_config(
 
 
 def new_op_geth_launcher(
-    el_cl_genesis_data,
+    deployment_output,
     jwt_file,
     network,
     network_id,
 ):
     return struct(
-        el_cl_genesis_data=el_cl_genesis_data,
+        deployment_output=deployment_output,
         jwt_file=jwt_file,
         network=network,
         network_id=network_id,
