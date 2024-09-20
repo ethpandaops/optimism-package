@@ -35,4 +35,6 @@ for chain_id in "${chain_ids[@]}"; do
   send "$proposer_addr"
   send "$batcher_addr"
   send "$challenger_addr"
+
+  cat "/network-data/genesis-$chain_id.json" | jq --from-file /fund-script/gen2spec.jq > "/network-data/chainspec-$chain_id.json"
 done
