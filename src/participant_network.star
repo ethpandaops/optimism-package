@@ -68,6 +68,7 @@ def launch_participant_network(
         batcher_key,
     )
 
+    # The OP Stack don't run the proposer anymore, it has been replaced with the challenger
     # op_proposer_launcher.launch(
     #     plan,
     #     "op-proposer{0}".format(l2_services_suffix),
