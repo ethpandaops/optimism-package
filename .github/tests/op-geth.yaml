@@ -1,4 +1,8 @@
 optimism_package:
-  participants:
-    - el_type: op-geth
-      cl_type: op-node
+  chains:
+    - participants:
+      - el_type: op-geth
+        cl_type: op-node
+  op_contract_deployer_params:
+    image: ethereumoptimism/op-deployer:latest
+    artifacts_url: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-4accd01f0c35c26f24d2aa71aba898dd7e5085a2ce5daadc8a84b10caf113409.tar.gz
