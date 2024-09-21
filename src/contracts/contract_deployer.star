@@ -37,7 +37,7 @@ def deploy_contracts(
     op_deployer_configure = plan.run_sh(
         name="op-deployer-configure",
         description="Configure L2 contract deployments",
-        image="ethereumoptimism/foundry-minimal:latest",
+        image="mslipper/deployment-utils:latest",
         store=[
             StoreSpec(
                 src="/network-data",
@@ -94,7 +94,7 @@ def deploy_contracts(
     collect_fund = plan.run_sh(
         name="op-deployer-fund",
         description="Collect keys, and fund addresses",
-        image="ethereumoptimism/foundry-minimal:latest",
+        image="mslipper/deployment-utils:latest",
         env_vars={"PRIVATE_KEY": str(priv_key), "FUND_VALUE": "10ether"} | l1_config_env_vars,
         store=[
             StoreSpec(

@@ -6,7 +6,7 @@ def read_json_value(plan, json_file, json_path, mounts=None):
     run = plan.run_sh(
         name="read-json-value",
         description="Read JSON value",
-        image="ethereumoptimism/foundry-minimal:latest",
+        image="mslipper/deployment-utils:latest",
         files=mounts,
         run="cat {0} | jq -j '{1}'".format(json_file, json_path),
     )
