@@ -7,7 +7,6 @@ def read_network_config_value(plan, network_config_file, json_file, json_path):
 
 def read_json_value(plan, json_file, json_path, mounts=None):
     run = plan.run_sh(
-        name="read-json-value",
         description="Read JSON value",
         image="mslipper/deployment-utils:latest",
         files=mounts,
