@@ -1,6 +1,9 @@
 def read_network_config_value(plan, network_config_file, json_file, json_path):
     mounts = {"/network-data": network_config_file}
-    return read_json_value(plan, "/network-data/{0}.json".format(json_file), json_path, mounts)
+    return read_json_value(
+        plan, "/network-data/{0}.json".format(json_file), json_path, mounts
+    )
+
 
 def read_json_value(plan, json_file, json_path, mounts=None):
     run = plan.run_sh(
@@ -12,7 +15,8 @@ def read_json_value(plan, json_file, json_path, mounts=None):
     )
     return run.output
 
+
 def to_hex_chain_id(chain_id):
     out = "%x" % int(chain_id)
-    pad = 64-len(out)
-    return "0x" + "0"*pad + out
+    pad = 64 - len(out)
+    return "0x" + "0" * pad + out

@@ -83,7 +83,6 @@ def launch(
     sequencer_enabled,
     sequencer_context,
 ):
-
     config = get_config(
         plan,
         launcher,
@@ -138,7 +137,8 @@ def get_config(
         "--chain={0}".format(
             network
             if network in constants.PUBLIC_NETWORKS
-            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis-{0}.json".format(launcher.network_id)
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/genesis-{0}.json".format(launcher.network_id)
         ),
         "--http",
         "--http.port={0}".format(RPC_PORT_NUM),

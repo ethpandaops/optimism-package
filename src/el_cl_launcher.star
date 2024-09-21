@@ -81,7 +81,9 @@ def launch(
             "launch_method": op_node.launch,
         },
         "hildr": {
-            "launcher": hildr.new_hildr_launcher(deployment_output, jwt_file, network_params),
+            "launcher": hildr.new_hildr_launcher(
+                deployment_output, jwt_file, network_params
+            ),
             "launch_method": hildr.launch,
         },
     }

@@ -8,12 +8,14 @@ FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
 
 def deploy_contracts(
-        plan,
-        priv_key,
-        l1_config_env_vars,
-        optimism_args,
+    plan,
+    priv_key,
+    l1_config_env_vars,
+    optimism_args,
 ):
-    l2_chain_ids = ','.join([str(chain.network_params.network_id) for chain in optimism_args.chains])
+    l2_chain_ids = ",".join(
+        [str(chain.network_params.network_id) for chain in optimism_args.chains]
+    )
 
     op_deployer_init = plan.run_sh(
         name="op-deployer-init",
@@ -26,12 +28,14 @@ def deploy_contracts(
                 name="op-deployer-configs",
             )
         ],
-        run=" && ".join([
-            "mkdir -p /network-data",
-            "op-deployer init --l1-chain-id $L1_CHAIN_ID --l2-chain-ids {0} --workdir /network-data".format(
-                l2_chain_ids
-            ),
-        ])
+        run=" && ".join(
+            [
+                "mkdir -p /network-data",
+                "op-deployer init --l1-chain-id $L1_CHAIN_ID --l2-chain-ids {0} --workdir /network-data".format(
+                    l2_chain_ids
+                ),
+            ]
+        ),
     )
 
     op_deployer_configure = plan.run_sh(
@@ -47,12 +51,14 @@ def deploy_contracts(
         files={
             "/network-data": op_deployer_init.files_artifacts[0],
         },
-        run=" && ".join([
-            "cat /network-data/intent.toml | dasel put -r toml -t string -v '{0}' 'contractArtifactsURL' > /network-data/.intent.toml".format(
-                optimism_args.op_contract_deployer_params.artifacts_url
-            ),
-            "mv /network-data/.intent.toml /network-data/intent.toml",
-        ])
+        run=" && ".join(
+            [
+                "cat /network-data/intent.toml | dasel put -r toml -t string -v '{0}' 'contractArtifactsURL' > /network-data/.intent.toml".format(
+                    optimism_args.op_contract_deployer_params.artifacts_url
+                ),
+                "mv /network-data/.intent.toml /network-data/intent.toml",
+            ]
+        ),
     )
 
     apply_cmds = [
@@ -60,14 +66,16 @@ def deploy_contracts(
     ]
     for chain in optimism_args.chains:
         network_id = chain.network_params.network_id
-        apply_cmds.extend([
-            "op-deployer inspect genesis --workdir /network-data --outfile /network-data/genesis-{0}.json {0}".format(
-                network_id
-            ),
-            "op-deployer inspect rollup --workdir /network-data --outfile /network-data/rollup-{0}.json {0}".format(
-                network_id
-            ),
-        ])
+        apply_cmds.extend(
+            [
+                "op-deployer inspect genesis --workdir /network-data --outfile /network-data/genesis-{0}.json {0}".format(
+                    network_id
+                ),
+                "op-deployer inspect rollup --workdir /network-data --outfile /network-data/rollup-{0}.json {0}".format(
+                    network_id
+                ),
+            ]
+        )
 
     op_deployer_apply = plan.run_sh(
         name="op-deployer-apply",
@@ -83,7 +91,7 @@ def deploy_contracts(
         files={
             "/network-data": op_deployer_configure.files_artifacts[0],
         },
-        run=" && ".join(apply_cmds)
+        run=" && ".join(apply_cmds),
     )
 
     fund_script_artifact = plan.upload_files(
@@ -95,7 +103,8 @@ def deploy_contracts(
         name="op-deployer-fund",
         description="Collect keys, and fund addresses",
         image="mslipper/deployment-utils:latest",
-        env_vars={"PRIVATE_KEY": str(priv_key), "FUND_VALUE": "10ether"} | l1_config_env_vars,
+        env_vars={"PRIVATE_KEY": str(priv_key), "FUND_VALUE": "10ether"}
+        | l1_config_env_vars,
         store=[
             StoreSpec(
                 src="/network-data",
@@ -106,7 +115,7 @@ def deploy_contracts(
             "/network-data": op_deployer_apply.files_artifacts[0],
             "/fund-script": fund_script_artifact,
         },
-        run="bash /fund-script/fund.sh \"{0}\"".format(l2_chain_ids)
+        run='bash /fund-script/fund.sh "{0}"'.format(l2_chain_ids),
     )
 
     return collect_fund.files_artifacts[0]

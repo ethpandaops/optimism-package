@@ -144,7 +144,8 @@ def get_config(
 ):
     init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/genesis-{0}.json".format(network_id),
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        + "/genesis-{0}.json".format(network_id),
     )
 
     discovery_port = DISCOVERY_PORT_NUM

@@ -67,7 +67,6 @@ def launch(
     l1_config_env_vars,
     sequencer_enabled,
 ):
-
     beacon_node_identity_recipe = PostHttpRequestRecipe(
         endpoint="/",
         content_type="application/json",
@@ -141,7 +140,9 @@ def get_beacon_config(
         "--l2={0}".format(EXECUTION_ENGINE_ENDPOINT),
         "--l2.jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--verifier.l1-confs=4",
-        "--rollup.config=" + constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/rollup-{0}.json".format(launcher.network_params.network_id),
+        "--rollup.config="
+        + constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        + "/rollup-{0}.json".format(launcher.network_params.network_id),
         "--rpc.addr=0.0.0.0",
         "--rpc.port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rpc.enable-admin",

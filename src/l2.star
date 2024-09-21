@@ -7,6 +7,7 @@ static_files = import_module(
 )
 util = import_module("./util.star")
 
+
 def launch_l2(
     plan,
     l2_services_suffix,
@@ -49,7 +50,9 @@ def launch_l2(
         plan,
         deployment_output,
         "state",
-        '.opChainDeployments[] | select(.id=="{0}") | .l1StandardBridgeProxyAddress'.format(network_id_as_hex),
+        '.opChainDeployments[] | select(.id=="{0}") | .l1StandardBridgeProxyAddress'.format(
+            network_id_as_hex
+        ),
     )
 
     for additional_service in l2_args.additional_services:
@@ -62,7 +65,7 @@ def launch_l2(
                 all_el_contexts[0],  # first l2 EL url
                 network_params.name,
                 deployment_output,
-                network_params.network_id
+                network_params.network_id,
             )
             plan.print("Successfully launched op-blockscout")
 

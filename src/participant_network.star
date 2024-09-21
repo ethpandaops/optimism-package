@@ -5,6 +5,7 @@ op_batcher_launcher = import_module("./batcher/op-batcher/op_batcher_launcher.st
 op_proposer_launcher = import_module("./proposer/op-proposer/op_proposer_launcher.star")
 util = import_module("./util.star")
 
+
 def launch_participant_network(
     plan,
     participants,
@@ -47,14 +48,14 @@ def launch_participant_network(
     proposer_key = util.read_network_config_value(
         plan,
         deployment_output,
-        'proposer-{0}'.format(network_params.network_id),
-        '.privateKey',
+        "proposer-{0}".format(network_params.network_id),
+        ".privateKey",
     )
     batcher_key = util.read_network_config_value(
         plan,
         deployment_output,
-        'batcher-{0}'.format(network_params.network_id),
-        '.privateKey',
+        "batcher-{0}".format(network_params.network_id),
+        ".privateKey",
     )
 
     op_batcher_launcher.launch(

@@ -52,11 +52,15 @@ def launch_blockscout(
     l2_el_context,
     l2_network_name,
     deployment_output,
-    network_id
+    network_id,
 ):
     rollup_filename = "rollup-{0}".format(network_id)
-    portal_address = util.read_network_config_value(plan, deployment_output, rollup_filename, ".deposit_contract_address")
-    l1_deposit_start_block = util.read_network_config_value(plan, deployment_output, rollup_filename, ".genesis.l1.number")
+    portal_address = util.read_network_config_value(
+        plan, deployment_output, rollup_filename, ".deposit_contract_address"
+    )
+    l1_deposit_start_block = util.read_network_config_value(
+        plan, deployment_output, rollup_filename, ".genesis.l1.number"
+    )
 
     postgres_output = postgres.run(
         plan,

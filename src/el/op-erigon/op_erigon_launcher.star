@@ -142,7 +142,8 @@ def get_config(
 ):
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis-{0}.json".format(network_id),
+        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis-{0}.json".format(network_id),
     )
 
     discovery_port = DISCOVERY_PORT_NUM

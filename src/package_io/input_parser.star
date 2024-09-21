@@ -57,14 +57,15 @@ def input_parser(plan, input_args):
                     name=result["network_params"]["name"],
                     fjord_time_offset=result["network_params"]["fjord_time_offset"],
                     granite_time_offset=result["network_params"]["granite_time_offset"],
-                    holocene_time_offset=result["network_params"]["holocene_time_offset"],
+                    holocene_time_offset=result["network_params"][
+                        "holocene_time_offset"
+                    ],
                     interop_time_offset=result["network_params"]["interop_time_offset"],
                 ),
                 additional_services=result["additional_services"],
             )
             for result in results["chains"]
         ],
-
         op_contract_deployer_params=struct(
             image=results["op_contract_deployer_params"]["image"],
             artifacts_url=results["op_contract_deployer_params"]["artifacts_url"],
@@ -85,8 +86,8 @@ def parse_network_params(plan, input_args):
         network_params = default_network_params()
         network_params.update(chain.get("network_params", {}))
 
-        network_name = network_params['name']
-        network_id = network_params['network_id']
+        network_name = network_params["name"]
+        network_id = network_params["network_id"]
 
         if network_name in seen_names:
             fail("Network name {0} is duplicated".format(network_name))
@@ -132,18 +133,25 @@ def parse_network_params(plan, input_args):
             participants.append(participant)
 
         # swap the order of items so that the sequencer is the first participant
-        participants[0], participants[sequencer_idx] = participants[sequencer_idx], participants[0]
+        participants[0], participants[sequencer_idx] = (
+            participants[sequencer_idx],
+            participants[0],
+        )
 
         result = {
             "participants": participants,
             "network_params": network_params,
-            "additional_services": chain.get("additional_services", DEFAULT_ADDITIONAL_SERVICES),
+            "additional_services": chain.get(
+                "additional_services", DEFAULT_ADDITIONAL_SERVICES
+            ),
         }
         chains.append(result)
 
     results["chains"] = chains
     results["op_contract_deployer_params"] = default_op_contract_deployer_params()
-    results["op_contract_deployer_params"].update(input_args.get("op_contract_deployer_params", {}))
+    results["op_contract_deployer_params"].update(
+        input_args.get("op_contract_deployer_params", {})
+    )
     return results
 
 
@@ -190,9 +198,9 @@ def default_ethereum_config():
                         "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
                         "storage": {},
                         "nonce": 0,
-                        "secretKey": "0x"
+                        "secretKey": "0x",
                     }
                 }
-            )
+            ),
         }
     }
