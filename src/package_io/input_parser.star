@@ -8,7 +8,7 @@ DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
     "op-reth": "ghcr.io/paradigmxyz/op-reth:latest",
     "op-erigon": "testinprod/op-erigon:latest",
-    "op-nethermind": "nethermindeth/nethermind:op-c482d56",
+    "op-nethermind": "nethermind/nethermind:latest",
     "op-besu": "ghcr.io/optimism-java/op-besu:latest",
 }
 

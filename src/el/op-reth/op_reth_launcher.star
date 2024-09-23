@@ -159,6 +159,7 @@ def get_config(
         "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port),
         "--port={0}".format(discovery_port),
+        "--rpc.eth-proof-window=302400",
     ]
 
     if not sequencer_enabled:
