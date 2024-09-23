@@ -1,3 +1,7 @@
+# Taken from https://github.com/ethereum/hive and modified to support more cases for Ethereum / OP networks
+
+# Usage: cat genesis.json | jq --from-file gen2spec.jq  > chainspec.json
+
 # Removes all empty keys and values in input.
 def remove_empty:
   . | walk(
@@ -43,6 +47,13 @@ def infix_zeros_to_length(s;l):
 ;
 
 # This gives the consensus engine definition for the ethash engine.
+def ethash:
+  {
+    "Ethash": {}
+  }
+;
+
+# This gives the consensus engine definition for the op engine.
 def optimism:
   {
     "Optimism": {
@@ -63,7 +74,7 @@ def optimism:
 
 {
   "version": "1",
-  "engine": optimism,
+  "engine": (if .config.optimism != null then optimism else ethash end),
   "params": {
     # Tangerine Whistle
     "eip150Transition": "0x0",
@@ -158,5 +169,5 @@ def optimism:
     "excessBlobGas": .excessBlobGas,
     "parentBeaconBlockRoot": .parentBeaconBlockRoot,
   },
-  "accounts": ((.alloc|with_entries(.key|="0x"+.))),
+  "accounts": ((.alloc|with_entries(.key|=(if startswith("0x") then . else "0x" + . end)))),
 }|remove_empty
