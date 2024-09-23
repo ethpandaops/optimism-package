@@ -22,6 +22,11 @@ SUBCATEGORY_PARAMS = {
     ],
 }
 
+OP_CONTRACT_DEPLOYER_PARAMS = [
+    "image",
+    "artifacts_url",
+]
+
 ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
 ]
@@ -96,4 +101,13 @@ def sanity_check(plan, optimism_config):
                 )
 
         # If everything passes, print a message
-        plan.print("Sanity check for OP package passed")
+
+    if "op_contract_deployer_params" in optimism_config:
+        validate_params(
+            plan,
+            optimism_config,
+            "op_contract_deployer_params",
+            OP_CONTRACT_DEPLOYER_PARAMS,
+        )
+
+    plan.print("Sanity check for OP package passed")

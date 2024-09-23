@@ -181,7 +181,7 @@ def default_participant():
 
 def default_op_contract_deployer_params():
     return {
-        "image": "ethpandaops/optimism-contract-deployer:develop",
+        "image": "mslipper/op-deployer:latest",
         "artifacts_url": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-4accd01f0c35c26f24d2aa71aba898dd7e5085a2ce5daadc8a84b10caf113409.tar.gz",
     }
 
@@ -190,7 +190,7 @@ def default_ethereum_config():
     return {
         "network_params": {
             "preset": "minimal",
-            "seconds_per_slot": 3,
+            # Preload the Arachnid CREATE2 deployer
             "additional_preloaded_contracts": json.encode(
                 {
                     "0x4e59b44847b379578588920cA78FbF26c0B4956C": {
