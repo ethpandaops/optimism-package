@@ -50,95 +50,98 @@ To configure the package behaviour, you can modify your `network_params.yaml` fi
 
 ```yaml
 optimism_package:
-  # Specification of the optimism-participants in the network
-  participants:
-    # EL(Execution Layer) Specific flags
-      # The type of EL client that should be started
-      # Valid values are:
-      # op-geth
-      # op-reth
-      # op-erigon
-      # op-nethermind
-      # op-besu
-    - el_type: geth
+  # An array of L2 networks to run
+  chains:
+    # Specification of the optimism-participants in the network
+    - participants:
+      # EL(Execution Layer) Specific flags
+        # The type of EL client that should be started
+        # Valid values are:
+        # op-geth
+        # op-reth
+        # op-erigon
+        # op-nethermind
+        # op-besu
+      - el_type: op-geth
 
-      # The Docker image that should be used for the EL client; leave blank to use the default for the client type
-      # Defaults by client:
-      # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
-      # - op-reth: parithoshj/op-reth:latest
-      # - op-erigon: testinprod/op-erigon:latest
-      # - op-nethermind: nethermindeth/nethermind:op-c482d56
-      # - op-besu: ghcr.io/optimism-java/op-besu:latest
-      el_image: ""
+        # The Docker image that should be used for the EL client; leave blank to use the default for the client type
+        # Defaults by client:
+        # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
+        # - op-reth: parithoshj/op-reth:latest
+        # - op-erigon: testinprod/op-erigon:latest
+        # - op-nethermind: nethermindeth/nethermind:op-c482d56
+        # - op-besu: ghcr.io/optimism-java/op-besu:latest
+        el_image: ""
 
-    # CL(Consensus Layer) Specific flags
-      # The type of CL client that should be started
-      # Valid values are:
-      # op-node
-      # hildr
-      cl_type: op-node
+      # CL(Consensus Layer) Specific flags
+        # The type of CL client that should be started
+        # Valid values are:
+        # op-node
+        # hildr
+        cl_type: op-node
 
-      # The Docker image that should be used for the CL client; leave blank to use the default for the client type
-      # Defaults by client:
-      # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop
-      # - hildr: ghcr.io/optimism-java/hildr:latest
-      cl_image: ""
+        # The Docker image that should be used for the CL client; leave blank to use the default for the client type
+        # Defaults by client:
+        # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop
+        # - hildr: ghcr.io/optimism-java/hildr:latest
+        cl_image: ""
 
-      # Count of nodes to spin up for this participant
-      # Default to 1
-      count: 1
+        # Count of nodes to spin up for this participant
+        # Default to 1
+        count: 1
 
-  # Default configuration parameters for the network
-  network_params:
-    # Network name, used to enable syncing of alternative networks
-    # Defaults to "kurtosis"
-    network: "kurtosis"
+      # Default configuration parameters for the network
+      network_params:
+        # Network name, used to enable syncing of alternative networks
+        # Defaults to "kurtosis"
+        network: "kurtosis"
 
-    # The network ID of the network.
-    # Must be unique for each network (if you run multiple networks)
-    # Defaults to "2151908"
-    network_id: "2151908"
+        # The network ID of the network.
+        # Must be unique for each network (if you run multiple networks)
+        # Defaults to "2151908"
+        network_id: "2151908"
 
-    # Seconds per slots
-    seconds_per_slot: 2
+        # Seconds per slots
+        seconds_per_slot: 2
 
-    # Name of your rollup.
-    # Must be unique for each rollup (if you run multiple rollups)
-    # Defaults to "op-kurtosis"
-    name: "op-kurtosis"
+        # Name of your rollup.
+        # Must be unique for each rollup (if you run multiple rollups)
+        # Defaults to "op-kurtosis"
+        name: "op-kurtosis"
 
-    # Triggering future forks in the network
-    # Fjord fork
-    # Defaults to 0 (genesis activation) - decimal value
-    # Offset is in seconds
-    fjord_time_offset: 0
+        # Triggering future forks in the network
+        # Fjord fork
+        # Defaults to 0 (genesis activation) - decimal value
+        # Offset is in seconds
+        fjord_time_offset: 0
 
-    # Granite fork
-    # Defaults to None - not activated - decimal value
-    # Offset is in seconds
-    granite_time_offset: ""
+        # Granite fork
+        # Defaults to None - not activated - decimal value
+        # Offset is in seconds
+        granite_time_offset: ""
 
-    # Holocene fork
-    # Defaults to None - not activated - decimal value
-    # Offset is in seconds
-    holocene_time_offset: ""
+        # Holocene fork
+        # Defaults to None - not activated - decimal value
+        # Offset is in seconds
+        holocene_time_offset: ""
 
-    # Interop fork
-    # Defaults to None - not activated - decimal value
-    # Offset is in seconds
-    interop_time_offset: ""
+        # Interop fork
+        # Defaults to None - not activated - decimal value
+        # Offset is in seconds
+        interop_time_offset: ""
 
 
-  # Additional services to run alongside the network
-  # Defaults to []
-  # Available services:
-  # - blockscout
-  additional_services: []
+      # Additional services to run alongside the network
+      # Defaults to []
+      # Available services:
+      # - blockscout
+      additional_services: []
 
-  # L2 contract deployer configuration
+  # L2 contract deployer configuration - used for all L2 networks
   # The docker image that should be used for the L2 contract deployer
   op_contract_deployer_params:
-    image: ethpandaops/optimism-contract-deployer:develop
+    image: mslipper/op-deployer:latest
+    artifacts_url: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-4accd01f0c35c26f24d2aa71aba898dd7e5085a2ce5daadc8a84b10caf113409.tar.gz
 ```
 
 ### Additional configuration recommendations

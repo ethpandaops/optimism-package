@@ -190,6 +190,7 @@ def default_ethereum_config():
     return {
         "network_params": {
             "preset": "minimal",
+            "genesis_delay": 5,
             # Preload the Arachnid CREATE2 deployer
             "additional_preloaded_contracts": json.encode(
                 {

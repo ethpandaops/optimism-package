@@ -1,5 +1,6 @@
 utils = import_module("../util.star")
 
+
 def wait_for_sync(plan, l1_config_env_vars):
     plan.run_sh(
         name="wait-for-l1-sync",

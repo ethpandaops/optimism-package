@@ -1,5 +1,3 @@
-from importlib import import_module
-
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
 FACTORY_ADDRESS = "0x4e59b44847b379578588920cA78FbF26c0B4956C"
@@ -9,6 +7,7 @@ FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806
 FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
 utils = import_module("../util.star")
+
 
 def deploy_contracts(
     plan,

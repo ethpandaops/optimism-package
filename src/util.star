@@ -1,4 +1,5 @@
-DEPLOYMENT_UTILS_IMAGE="mslipper/deployment-utils:latest"
+DEPLOYMENT_UTILS_IMAGE = "mslipper/deployment-utils:latest"
+
 
 def read_network_config_value(plan, network_config_file, json_file, json_path):
     mounts = {"/network-data": network_config_file}
