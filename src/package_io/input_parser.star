@@ -100,12 +100,6 @@ def parse_network_params(plan, input_args):
             participant = default_participant()
             participant.update(p)
 
-            if participant["sequencer"]:
-                if seen_sequencer:
-                    fail("Only one sequencer is allowed per chain")
-                seen_sequencer = True
-                sequencer_idx = i
-
             el_type = participant["el_type"]
             cl_type = participant["cl_type"]
             el_image = participant["el_image"]
@@ -131,12 +125,6 @@ def parse_network_params(plan, input_args):
                 participant["cl_image"] = default_image
 
             participants.append(participant)
-
-        # swap the order of items so that the sequencer is the first participant
-        participants[0], participants[sequencer_idx] = (
-            participants[sequencer_idx],
-            participants[0],
-        )
 
         result = {
             "participants": participants,
