@@ -25,6 +25,12 @@ DEFAULT_PROPOSER_IMAGES = {
     "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
 }
 
+DEFAULT_DA_SERVER_IMAGES = {
+    # latest tag is super outdated, and doesn't have the --generic-commitment flag
+    # so we use the dev tag as default, which requires building locally (see default_da_server_params)
+    "da-server": "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:dev",
+}
+
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
     "participants",
@@ -37,6 +43,14 @@ DEFAULT_ADDITIONAL_SERVICES = []
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
+
+    result["da_server_params"] = default_da_server_params()
+
+    for attr, value in input_args.items():
+        if attr == "da_server_params":
+            result["da_server_params"]["enabled"] = "true"
+            for sub_attr, sub_value in value.items():
+                result["da_server_params"][sub_attr] = sub_value
 
     return struct(
         participants=[
@@ -64,6 +78,13 @@ def input_parser(plan, input_args):
         ),
         op_contract_deployer_params=struct(
             image=result["op_contract_deployer_params"]["image"],
+        ),
+        da_server_params=struct(
+            enabled=result["da_server_params"]["enabled"],
+            image=result["da_server_params"]["image"],
+            build_image=result["da_server_params"]["build_image"],
+            da_server_extra_args=result["da_server_params"]["da_server_extra_args"],
+            generic_commitment=result["da_server_params"]["generic_commitment"],
         ),
     )
 
@@ -162,4 +183,13 @@ def default_participant():
 def default_op_contract_deployer_params():
     return {
         "image": "ethpandaops/optimism-contract-deployer:develop",
+    }
+
+def default_da_server_params():
+    return {
+        "enabled": False,
+        "image": DEFAULT_DA_SERVER_IMAGES["da-server"],
+        "build_image": True,
+        "da_server_extra_args": [],
+        "generic_commitment": False,
     }

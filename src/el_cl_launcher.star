@@ -25,6 +25,7 @@ def launch(
     l1_config_env_vars,
     gs_sequencer_private_key,
     l2_services_suffix,
+    da_server_context,
 ):
     el_launchers = {
         "op-geth": {
@@ -134,9 +135,7 @@ def launch(
             participant.el_image,
             all_el_contexts,
             sequencer_enabled,
-            all_cl_contexts[0]
-            if len(all_cl_contexts) > 0
-            else None,  # sequencer context
+            all_cl_contexts[0] if len(all_cl_contexts) > 0 else None,  # sequencer context
         )
 
         cl_context = cl_launch_method(
@@ -149,6 +148,7 @@ def launch(
             l1_config_env_vars,
             gs_sequencer_private_key,
             sequencer_enabled,
+            da_server_context,
         )
 
         sequencer_enabled = False

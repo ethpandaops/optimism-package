@@ -15,6 +15,7 @@ def launch_participant_network(
     l1_config_env_vars,
     l2oo_address,
     l2_services_suffix,
+    da_server_context,
 ):
     num_participants = len(participants)
     sequencer_enabled = True
@@ -29,6 +30,7 @@ def launch_participant_network(
         l1_config_env_vars,
         gs_private_keys["GS_SEQUENCER_PRIVATE_KEY"],
         l2_services_suffix,
+        da_server_context,
     )
 
     all_participants = []
@@ -56,6 +58,7 @@ def launch_participant_network(
         all_cl_contexts[0],
         l1_config_env_vars,
         gs_private_keys["GS_BATCHER_PRIVATE_KEY"],
+        da_server_context,
     )
 
     op_proposer_launcher.launch(

@@ -40,6 +40,7 @@ def launch(
     cl_context,
     l1_config_env_vars,
     gs_batcher_private_key,
+    da_server_context,
 ):
     batcher_service_name = "{0}".format(service_name)
 
@@ -51,6 +52,7 @@ def launch(
         cl_context,
         l1_config_env_vars,
         gs_batcher_private_key,
+        da_server_context,
     )
 
     batcher_service = plan.add_service(service_name, config)
@@ -71,6 +73,7 @@ def get_batcher_config(
     cl_context,
     l1_config_env_vars,
     gs_batcher_private_key,
+    da_server_context,
 ):
     cmd = [
         "op-batcher",
@@ -87,7 +90,10 @@ def get_batcher_config(
         "--max-channel-duration=1",
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--private-key=" + gs_batcher_private_key,
-        "--data-availability-type=blobs",
+        "--altda.enabled=" + str(da_server_context.enabled),
+        "--altda.da-server=" + da_server_context.http_url,
+        "--altda.da-service=" + str(da_server_context.generic_commitment),
+        "--data-availability-type=" + "calldata" if da_server_context.enabled else "blobs",
     ]
 
     ports = get_used_ports()

@@ -20,10 +20,17 @@ SUBCATEGORY_PARAMS = {
         "interop_time_offset",
     ],
     "op_contract_deployer_params": ["image"],
+    "da_server_params": [
+        "image",
+        "build_image",
+        "da_server_extra_args",
+        "generic_commitment",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
+    "da_server",
 ]
 
 

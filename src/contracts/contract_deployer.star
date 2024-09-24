@@ -48,6 +48,7 @@ def deploy_l2_contracts(
     l2_services_suffix,
     fork_activation_env,
     image,
+    da_server_params, # for alt-da
 ):
     chainspec_files_artifact = plan.upload_files(
         src=CHAINSPEC_JQ_FILEPATH,
@@ -63,6 +64,8 @@ def deploy_l2_contracts(
             "FUND_VALUE": "10ether",
             "DEPLOY_CONFIG_PATH": "/workspace/optimism/packages/contracts-bedrock/deploy-config/getting-started.json",
             "DEPLOYMENT_CONTEXT": "getting-started",
+            "USE_ALTDA": "true" if da_server_params.enabled else "false",
+            "DA_COMMITMENT_TYPE": "GenericCommitment" if da_server_params.generic_commitment else "KeccakCommitment",
         }
         | l1_config_env_vars
         | l2_config_env_vars
@@ -91,7 +94,10 @@ def deploy_l2_contracts(
                 "cast send $GS_PROPOSER_ADDRESS --value $FUND_VALUE --private-key $PRIVATE_KEY --rpc-url $L1_RPC_URL",  # Fund Proposer
                 "cd /workspace/optimism/packages/contracts-bedrock",
                 "./scripts/getting-started/config.sh",
+                # TODO: should we add these as outputs in the config.sh script directly instead of manually here?
+                #       the jq gymnastics here is horrendous
                 'jq \'. + {"fundDevAccounts": true, "useInterop": true}\' $DEPLOY_CONFIG_PATH > tmp.$$.json && mv tmp.$$.json $DEPLOY_CONFIG_PATH',
+                "jq --argjson USE_ALTDA $USE_ALTDA --arg DA_COMMITMENT_TYPE \"$DA_COMMITMENT_TYPE\" '. + {useAltDA: $USE_ALTDA, daCommitmentType: $DA_COMMITMENT_TYPE, daChallengeWindow: 16, daResolveWindow: 16, daBondSize: 1000000, daResolverRefundPercentage: 0}' $DEPLOY_CONFIG_PATH > tmp.$$.json && mv tmp.$$.json $DEPLOY_CONFIG_PATH",
                 "forge script scripts/deploy/Deploy.s.sol:Deploy --private-key $GS_ADMIN_PRIVATE_KEY --broadcast --rpc-url $L1_RPC_URL",
                 "CONTRACT_ADDRESSES_PATH=$DEPLOYMENT_OUTFILE forge script scripts/L2Genesis.s.sol:L2Genesis --sig 'runWithStateDump()' --chain-id $L2_CHAIN_ID",
                 "cd /workspace/optimism/op-node/bin",
