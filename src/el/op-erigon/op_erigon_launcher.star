@@ -90,7 +90,7 @@ def launch(
 
     config = get_config(
         plan,
-        launcher.el_cl_genesis_data,
+        launcher.deployment_output,
         launcher.jwt_file,
         launcher.network,
         launcher.network_id,
@@ -130,7 +130,7 @@ def launch(
 
 def get_config(
     plan,
-    el_cl_genesis_data,
+    deployment_output,
     jwt_file,
     network,
     network_id,
@@ -142,7 +142,8 @@ def get_config(
 ):
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis-{0}.json".format(network_id),
     )
 
     discovery_port = DISCOVERY_PORT_NUM
@@ -199,7 +200,7 @@ def get_config(
         command_str = cmd_str
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
@@ -210,17 +211,18 @@ def get_config(
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        user=User(uid=0, gid=0),
     )
 
 
 def new_op_erigon_launcher(
-    el_cl_genesis_data,
+    deployment_output,
     jwt_file,
     network,
     network_id,
 ):
     return struct(
-        el_cl_genesis_data=el_cl_genesis_data,
+        deployment_output=deployment_output,
         jwt_file=jwt_file,
         network=network,
         network_id=network_id,

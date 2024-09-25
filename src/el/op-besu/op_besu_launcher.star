@@ -96,7 +96,7 @@ def launch(
 
     config = get_config(
         plan,
-        launcher.el_cl_genesis_data,
+        launcher.deployment_output,
         launcher.jwt_file,
         launcher.network,
         launcher.network_id,
@@ -133,7 +133,7 @@ def launch(
 
 def get_config(
     plan,
-    el_cl_genesis_data,
+    deployment_output,
     jwt_file,
     network,
     network_id,
@@ -150,7 +150,7 @@ def get_config(
         "besu",
         "--genesis-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/genesis.json",
+        + "/genesis-{0}.json".format(network_id),
         "--network-id={0}".format(network_id),
         # "--logging=" + log_level,
         "--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -199,7 +199,7 @@ def get_config(
     cmd_str = " ".join(cmd)
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
@@ -215,13 +215,13 @@ def get_config(
 
 
 def new_op_besu_launcher(
-    el_cl_genesis_data,
+    deployment_output,
     jwt_file,
     network,
     network_id,
 ):
     return struct(
-        el_cl_genesis_data=el_cl_genesis_data,
+        deployment_output=deployment_output,
         jwt_file=jwt_file,
         network=network,
         network_id=network_id,

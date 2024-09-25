@@ -5,6 +5,7 @@ PARTICIPANT_CATEGORIES = {
         "cl_type",
         "cl_image",
         "count",
+        "sequencer",
     ],
 }
 
@@ -19,8 +20,12 @@ SUBCATEGORY_PARAMS = {
         "holocene_time_offset",
         "interop_time_offset",
     ],
-    "op_contract_deployer_params": ["image"],
 }
+
+OP_CONTRACT_DEPLOYER_PARAMS = [
+    "image",
+    "artifacts_url",
+]
 
 ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
@@ -50,41 +55,56 @@ def validate_params(plan, input_args, category, allowed_params):
                 )
 
 
-def sanity_check(plan, input_args):
-    if type(input_args) == "list":
-        return "Cant bother with your input, you shall pass"
+def sanity_check(plan, optimism_config):
+    chains = optimism_config.get("chains", [])
 
-    # Checks participants
-    deep_validate_params(
-        plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
-    )
+    if type(chains) != "list":
+        fail("Invalid input_args type, expected list")
 
-    # Checks additional_services
-    if "additional_services" in input_args:
-        for additional_services in input_args["additional_services"]:
-            if additional_services not in ADDITIONAL_SERVICES_PARAMS:
+    for input_args in chains:
+        # Checks participants
+        deep_validate_params(
+            plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
+        )
+
+        # Checks additional_services
+        if "additional_services" in input_args:
+            for additional_services in input_args["additional_services"]:
+                if additional_services not in ADDITIONAL_SERVICES_PARAMS:
+                    fail(
+                        "Invalid additional_services {0}, allowed fields: {1}".format(
+                            additional_services, ADDITIONAL_SERVICES_PARAMS
+                        )
+                    )
+
+        # Checks subcategories
+        for subcategories in SUBCATEGORY_PARAMS.keys():
+            validate_params(
+                plan, input_args, subcategories, SUBCATEGORY_PARAMS[subcategories]
+            )
+        # Checks everything else
+        for param in input_args.keys():
+            combined_root_params = (
+                PARTICIPANT_CATEGORIES.keys() + SUBCATEGORY_PARAMS.keys()
+            )
+            combined_root_params.append("additional_services")
+            combined_root_params.append("op_contract_deployer_params")
+
+            if param not in combined_root_params:
                 fail(
-                    "Invalid additional_services {0}, allowed fields: {1}".format(
-                        additional_services, ADDITIONAL_SERVICES_PARAMS
+                    "Invalid parameter {0}, allowed fields {1}".format(
+                        param, combined_root_params
                     )
                 )
 
-    # Checks subcategories
-    for subcategories in SUBCATEGORY_PARAMS.keys():
+        # If everything passes, print a message
+
+    if "op_contract_deployer_params" in optimism_config:
         validate_params(
-            plan, input_args, subcategories, SUBCATEGORY_PARAMS[subcategories]
+            plan,
+            optimism_config,
+            "op_contract_deployer_params",
+            OP_CONTRACT_DEPLOYER_PARAMS,
         )
-    # Checks everything else
-    for param in input_args.keys():
-        combined_root_params = PARTICIPANT_CATEGORIES.keys() + SUBCATEGORY_PARAMS.keys()
-        combined_root_params.append("additional_services")
 
-        if param not in combined_root_params:
-            fail(
-                "Invalid parameter {0}, allowed fields {1}".format(
-                    param, combined_root_params
-                )
-            )
-
-    # If everything passes, print a message
     plan.print("Sanity check for OP package passed")

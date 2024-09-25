@@ -1,3 +1,4 @@
 optimism_package:
-  participants:
-    - count: 2
+  chains:
+    - participants:
+        - count: 2

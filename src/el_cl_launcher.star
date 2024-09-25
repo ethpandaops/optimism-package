@@ -20,17 +20,16 @@ def launch(
     plan,
     jwt_file,
     network_params,
-    el_cl_data,
+    deployment_output,
     participants,
     num_participants,
     l1_config_env_vars,
-    gs_sequencer_private_key,
     l2_services_suffix,
 ):
     el_launchers = {
         "op-geth": {
             "launcher": op_geth.new_op_geth_launcher(
-                el_cl_data,
+                deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
@@ -39,7 +38,7 @@ def launch(
         },
         "op-reth": {
             "launcher": op_reth.new_op_reth_launcher(
-                el_cl_data,
+                deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
@@ -48,7 +47,7 @@ def launch(
         },
         "op-erigon": {
             "launcher": op_erigon.new_op_erigon_launcher(
-                el_cl_data,
+                deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
@@ -57,7 +56,7 @@ def launch(
         },
         "op-nethermind": {
             "launcher": op_nethermind.new_nethermind_launcher(
-                el_cl_data,
+                deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
@@ -66,7 +65,7 @@ def launch(
         },
         "op-besu": {
             "launcher": op_besu.new_op_besu_launcher(
-                el_cl_data,
+                deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
@@ -78,12 +77,14 @@ def launch(
     cl_launchers = {
         "op-node": {
             "launcher": op_node.new_op_node_launcher(
-                el_cl_data, jwt_file, network_params
+                deployment_output, jwt_file, network_params
             ),
             "launch_method": op_node.launch,
         },
         "hildr": {
-            "launcher": hildr.new_hildr_launcher(el_cl_data, jwt_file, network_params),
+            "launcher": hildr.new_hildr_launcher(
+                deployment_output, jwt_file, network_params
+            ),
             "launch_method": hildr.launch,
         },
         "magi": {
@@ -125,13 +126,14 @@ def launch(
         # Zero-pad the index using the calculated zfill value
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
-        el_service_name = "op-el-{0}-{1}-{2}{3}".format(
+        el_service_name = "op-el-{0}-{1}-{2}-{3}".format(
             index_str, el_type, cl_type, l2_services_suffix
         )
-        cl_service_name = "op-cl-{0}-{1}-{2}{3}".format(
+        cl_service_name = "op-cl-{0}-{1}-{2}-{3}".format(
             index_str, cl_type, el_type, l2_services_suffix
         )
 
+        sequencer_context = all_cl_contexts[0] if len(all_cl_contexts) > 0 else None
         el_context = el_launch_method(
             plan,
             el_launcher,
@@ -139,9 +141,7 @@ def launch(
             participant.el_image,
             all_el_contexts,
             sequencer_enabled,
-            all_cl_contexts[0]
-            if len(all_cl_contexts) > 0
-            else None,  # sequencer context
+            sequencer_context,
         )
 
         cl_context = cl_launch_method(
@@ -152,7 +152,6 @@ def launch(
             el_context,
             all_cl_contexts,
             l1_config_env_vars,
-            gs_sequencer_private_key,
             sequencer_enabled,
         )
 

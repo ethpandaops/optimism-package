@@ -31,110 +31,131 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "participants",
 )
 
-
 DEFAULT_ADDITIONAL_SERVICES = []
 
 
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
-    result = parse_network_params(plan, input_args)
+    results = parse_network_params(plan, input_args)
 
     return struct(
-        participants=[
+        chains=[
             struct(
-                el_type=participant["el_type"],
-                el_image=participant["el_image"],
-                cl_type=participant["cl_type"],
-                cl_image=participant["cl_image"],
-                count=participant["count"],
+                participants=[
+                    struct(
+                        el_type=participant["el_type"],
+                        el_image=participant["el_image"],
+                        cl_type=participant["cl_type"],
+                        cl_image=participant["cl_image"],
+                        count=participant["count"],
+                    )
+                    for participant in result["participants"]
+                ],
+                network_params=struct(
+                    network=result["network_params"]["network"],
+                    network_id=result["network_params"]["network_id"],
+                    seconds_per_slot=result["network_params"]["seconds_per_slot"],
+                    name=result["network_params"]["name"],
+                    fjord_time_offset=result["network_params"]["fjord_time_offset"],
+                    granite_time_offset=result["network_params"]["granite_time_offset"],
+                    holocene_time_offset=result["network_params"][
+                        "holocene_time_offset"
+                    ],
+                    interop_time_offset=result["network_params"]["interop_time_offset"],
+                ),
+                additional_services=result["additional_services"],
             )
-            for participant in result["participants"]
+            for result in results["chains"]
         ],
-        network_params=struct(
-            network=result["network_params"]["network"],
-            network_id=result["network_params"]["network_id"],
-            seconds_per_slot=result["network_params"]["seconds_per_slot"],
-            name=result["network_params"]["name"],
-            fjord_time_offset=result["network_params"]["fjord_time_offset"],
-            granite_time_offset=result["network_params"]["granite_time_offset"],
-            holocene_time_offset=result["network_params"]["holocene_time_offset"],
-            interop_time_offset=result["network_params"]["interop_time_offset"],
-        ),
-        additional_services=result.get(
-            "additional_services", DEFAULT_ADDITIONAL_SERVICES
-        ),
         op_contract_deployer_params=struct(
-            image=result["op_contract_deployer_params"]["image"],
+            image=results["op_contract_deployer_params"]["image"],
+            artifacts_url=results["op_contract_deployer_params"]["artifacts_url"],
         ),
     )
 
 
 def parse_network_params(plan, input_args):
-    result = default_input_args(input_args)
+    results = {}
+    chains = []
 
-    for attr in input_args:
-        value = input_args[attr]
-        # if its insterted we use the value inserted
-        if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and attr in input_args:
-            result[attr] = value
-        elif attr == "network_params":
-            for sub_attr in input_args["network_params"]:
-                sub_value = input_args["network_params"][sub_attr]
-                result["network_params"][sub_attr] = sub_value
-        elif attr == "participants":
-            participants = []
-            for participant in input_args["participants"]:
-                new_participant = default_participant()
-                for sub_attr, sub_value in participant.items():
-                    # if the value is set in input we set it in participant
-                    new_participant[sub_attr] = sub_value
-                for _ in range(0, new_participant["count"]):
-                    participant_copy = (
-                        ethereum_package_input_parser.deep_copy_participant(
-                            new_participant
+    seen_names = {}
+    seen_network_ids = {}
+    for chain in input_args.get("chains", default_chains()):
+        network_params = default_network_params()
+        network_params.update(chain.get("network_params", {}))
+
+        network_name = network_params["name"]
+        network_id = network_params["network_id"]
+
+        if network_name in seen_names:
+            fail("Network name {0} is duplicated".format(network_name))
+
+        if network_id in seen_network_ids:
+            fail("Network id {0} is duplicated".format(network_id))
+
+        participants = []
+        for i, p in enumerate(chain["participants"]):
+            participant = default_participant()
+            participant.update(p)
+
+            el_type = participant["el_type"]
+            cl_type = participant["cl_type"]
+            el_image = participant["el_image"]
+            if el_image == "":
+                default_image = DEFAULT_EL_IMAGES.get(el_type, "")
+                if default_image == "":
+                    fail(
+                        "{0} received an empty image name and we don't have a default for it".format(
+                            el_type
                         )
                     )
-                    participants.append(participant_copy)
-            result["participants"] = participants
+                participant["el_image"] = default_image
 
-    for index, participant in enumerate(result["participants"]):
-        el_type = participant["el_type"]
-        cl_type = participant["cl_type"]
-        el_image = participant["el_image"]
-        if el_image == "":
-            default_image = DEFAULT_EL_IMAGES.get(el_type, "")
-            if default_image == "":
-                fail(
-                    "{0} received an empty image name and we don't have a default for it".format(
-                        el_type
-                    )
-                )
-            participant["el_image"] = default_image
-
-        cl_image = participant["cl_image"]
-        if cl_image == "":
+            cl_image = participant["cl_image"]
             if cl_image == "":
                 default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
-            if default_image == "":
-                fail(
-                    "{0} received an empty image name and we don't have a default for it".format(
-                        cl_type
+                if default_image == "":
+                    fail(
+                        "{0} received an empty image name and we don't have a default for it".format(
+                            cl_type
+                        )
                     )
-                )
-            participant["cl_image"] = default_image
+                participant["cl_image"] = default_image
 
-    return result
+            participants.append(participant)
+
+        result = {
+            "participants": participants,
+            "network_params": network_params,
+            "additional_services": chain.get(
+                "additional_services", DEFAULT_ADDITIONAL_SERVICES
+            ),
+        }
+        chains.append(result)
+
+    results["chains"] = chains
+    results["op_contract_deployer_params"] = default_op_contract_deployer_params()
+    results["op_contract_deployer_params"].update(
+        input_args.get("op_contract_deployer_params", {})
+    )
+    return results
 
 
-def default_input_args(input_args):
-    network_params = default_network_params()
-    participants = [default_participant()]
-    op_contract_deployer_params = default_op_contract_deployer_params()
+def default_optimism_args():
     return {
-        "participants": participants,
-        "network_params": network_params,
-        "op_contract_deployer_params": op_contract_deployer_params,
+        "chains": default_chains(),
+        "op_contract_deployer_params": default_op_contract_deployer_params(),
     }
+
+
+def default_chains():
+    return [
+        {
+            "participants": [default_participant()],
+            "network_params": default_network_params(),
+            "additional_services": DEFAULT_ADDITIONAL_SERVICES,
+        }
+    ]
 
 
 def default_network_params():
@@ -157,10 +178,33 @@ def default_participant():
         "cl_type": "op-node",
         "cl_image": "",
         "count": 1,
+        "sequencer": False,
     }
 
 
 def default_op_contract_deployer_params():
     return {
-        "image": "ethpandaops/optimism-contract-deployer:develop",
+        "image": "mslipper/op-deployer:latest",
+        "artifacts_url": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-4accd01f0c35c26f24d2aa71aba898dd7e5085a2ce5daadc8a84b10caf113409.tar.gz",
+    }
+
+
+def default_ethereum_config():
+    return {
+        "network_params": {
+            "preset": "minimal",
+            "genesis_delay": 5,
+            # Preload the Arachnid CREATE2 deployer
+            "additional_preloaded_contracts": json.encode(
+                {
+                    "0x4e59b44847b379578588920cA78FbF26c0B4956C": {
+                        "balance": "0ETH",
+                        "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
+                        "storage": {},
+                        "nonce": 0,
+                        "secretKey": "0x",
+                    }
+                }
+            ),
+        }
     }

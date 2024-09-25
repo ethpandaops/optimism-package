@@ -182,7 +182,7 @@ def get_config(
     cmd.append(
         "--Init.ChainSpecPath="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/chainspec.json"
+        + "/chainspec-{0}.json".format(network_id)
     )
 
     files = {
