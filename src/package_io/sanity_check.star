@@ -31,6 +31,11 @@ ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
 ]
 
+ROOT_PARAMS = [
+    "chains",
+    "op_contract_deployer_params",
+]
+
 
 def deep_validate_params(plan, input_args, category, allowed_params):
     if category in input_args:
@@ -56,6 +61,17 @@ def validate_params(plan, input_args, category, allowed_params):
 
 
 def sanity_check(plan, optimism_config):
+    if type(optimism_config) != "dict":
+        fail("Invalid input_args type, expected dict")
+
+    for key in optimism_config.keys():
+        if key not in ROOT_PARAMS:
+            fail(
+                "Invalid parameter {0}, allowed fields: {1}".format(
+                    key, ROOT_PARAMS
+                )
+            )
+
     chains = optimism_config.get("chains", [])
 
     if type(chains) != "list":
