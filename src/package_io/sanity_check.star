@@ -66,11 +66,7 @@ def sanity_check(plan, optimism_config):
 
     for key in optimism_config.keys():
         if key not in ROOT_PARAMS:
-            fail(
-                "Invalid parameter {0}, allowed fields: {1}".format(
-                    key, ROOT_PARAMS
-                )
-            )
+            fail("Invalid parameter {0}, allowed fields: {1}".format(key, ROOT_PARAMS))
 
     chains = optimism_config.get("chains", [])
 
