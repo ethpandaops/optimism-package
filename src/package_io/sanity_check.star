@@ -61,9 +61,6 @@ def sanity_check(plan, optimism_config):
     if type(chains) != "list":
         fail("Invalid input_args type, expected list")
 
-    if len(chains) == 0:
-        fail("Please provide at least one chain")
-
     for input_args in chains:
         # Checks participants
         deep_validate_params(

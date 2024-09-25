@@ -79,10 +79,7 @@ def parse_network_params(plan, input_args):
 
     seen_names = {}
     seen_network_ids = {}
-    for chain in input_args["chains"]:
-        seen_sequencer = False
-        sequencer_idx = -1
-
+    for chain in input_args.get("chains", default_chains()):
         network_params = default_network_params()
         network_params.update(chain.get("network_params", {}))
 
@@ -141,6 +138,15 @@ def parse_network_params(plan, input_args):
         input_args.get("op_contract_deployer_params", {})
     )
     return results
+
+def default_chains():
+    return [
+        {
+            "participants": [default_participant()],
+            "network_params": default_network_params(),
+            "additional_services": DEFAULT_ADDITIONAL_SERVICES,
+        }
+    ]
 
 
 def default_network_params():
