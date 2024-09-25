@@ -19,7 +19,10 @@ def run(plan, args):
     plan.print("Parsing the L1 input args")
     # If no args are provided, use the default values with minimal preset
     ethereum_args = args.get("ethereum_package", input_parser.default_ethereum_config())
-    optimism_args = args.get("optimism_package", {})
+
+    # need to do a raw get here in case only optimism_package is provided.
+    # .get will return None if the key is in the config with a None value.
+    optimism_args = args.get("optimism_package") or input_parser.default_optimism_args()
     optimism_args_with_right_defaults = input_parser.input_parser(plan, optimism_args)
     # Deploy the L1
     plan.print("Deploying a local L1")
