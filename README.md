@@ -150,11 +150,12 @@ It is required you to launch an L1 Ethereum node to interact with the L2 network
 
 ```yaml
 optimism_package:
-  participants:
-    - el_type: op-geth
-      cl_type: op-node
-  additional_services:
-    - blockscout
+  chains:
+    - participants:
+        - el_type: op-geth
+          cl_type: op-node
+      additional_services:
+        - blockscout
 ethereum_package:
   participants:
     - el_type: geth
@@ -170,20 +171,21 @@ Additionally, you can spin up multiple L2 networks by providing a list of L2 con
 
 ```yaml
 optimism_package:
-  - participants:
-      - el_type: op-geth
-    network_params:
-      name: op-rollup-one
-      network_id: "3151909"
-    additional_services:
-      - blockscout
-  - participants:
-      - el_type: op-geth
-    network_params:
-      name: op-rollup-two
-      network_id: "3151910"
-    additional_services:
-      - blockscout
+  chains:
+    - participants:
+        - el_type: op-geth
+      network_params:
+        name: op-rollup-one
+        network_id: "3151909"
+      additional_services:
+        - blockscout
+    - participants:
+        - el_type: op-geth
+      network_params:
+        name: op-rollup-two
+        network_id: "3151910"
+      additional_services:
+        - blockscout
 ethereum_package:
   participants:
     - el_type: geth
