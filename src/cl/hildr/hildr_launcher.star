@@ -13,11 +13,12 @@ constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+util = import_module("../../util.star")
+
 #  ---------------------------------- Beacon client -------------------------------------
 
 # The Docker container runs as the "hildr" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/hildr/hildr-beacon-data"
-ROLLUP_CONFIG_MOUNT_PATH_ON_CONTAINER = "/network-configs/rollup.json"
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
@@ -64,11 +65,8 @@ def launch(
     el_context,
     existing_cl_clients,
     l1_config_env_vars,
-    gs_sequencer_private_key,
     sequencer_enabled,
 ):
-    network_name = shared_utils.get_network_name(launcher.network)
-
     # beacon_node_identity_recipe = PostHttpRequestRecipe(
     #     endpoint="/",
     #     content_type="application/json",
@@ -83,14 +81,12 @@ def launch(
 
     config = get_beacon_config(
         plan,
-        launcher.el_cl_genesis_data,
-        launcher.jwt_file,
+        launcher,
         image,
         service_name,
         el_context,
         existing_cl_clients,
         l1_config_env_vars,
-        gs_sequencer_private_key,
         # beacon_node_identity_recipe,
         sequencer_enabled,
     )
@@ -122,14 +118,12 @@ def launch(
 
 def get_beacon_config(
     plan,
-    el_cl_genesis_data,
-    jwt_file,
+    launcher,
     image,
     service_name,
     el_context,
     existing_cl_clients,
     l1_config_env_vars,
-    gs_sequencer_private_key,
     # beacon_node_identity_recipe,
     sequencer_enabled,
 ):
@@ -155,11 +149,22 @@ def get_beacon_config(
         "--rpc-addr=0.0.0.0",
         "--rpc-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--sync-mode=full",
-        "--network=" + ROLLUP_CONFIG_MOUNT_PATH_ON_CONTAINER,
+        "--network="
+        + constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        + "/rollup-{0}.json".format(launcher.network_params.network_id),
     ]
+
+    sequencer_private_key = util.read_network_config_value(
+        plan,
+        launcher.deployment_output,
+        "sequencer-{0}".format(launcher.network_params.network_id),
+        ".privateKey",
+    )
 
     if sequencer_enabled:
         cmd.append("--sequencer-enable")
+
+    # sequencer private key can't be used by hildr yet
 
     if len(existing_cl_clients) == 1:
         cmd.append(
@@ -170,8 +175,8 @@ def get_beacon_config(
         )
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
     ports = {}
     ports.update(used_ports)
@@ -192,9 +197,9 @@ def get_beacon_config(
     )
 
 
-def new_hildr_launcher(el_cl_genesis_data, jwt_file, network_params):
+def new_hildr_launcher(deployment_output, jwt_file, network_params):
     return struct(
-        el_cl_genesis_data=el_cl_genesis_data,
+        deployment_output=deployment_output,
         jwt_file=jwt_file,
-        network=network_params.network,
+        network_params=network_params,
     )

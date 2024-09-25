@@ -1,7 +1,8 @@
 optimism_package:
-  - participants:
-      - el_type: op-geth
-    network_params:
-      name: op-rollup-one
-    additional_services:
-      - blockscout
+  chains:
+    - participants:
+        - el_type: op-geth
+      network_params:
+        name: op-rollup-one
+      additional_services:
+        - blockscout

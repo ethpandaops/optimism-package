@@ -18,10 +18,11 @@ def run(plan, args):
     """
     plan.print("Parsing the L1 input args")
     # If no args are provided, use the default values with minimal preset
-    ethereum_args = args.get(
-        "ethereum_package", {"network_params": {"preset": "minimal"}}
-    )
-    optimism_args = args.get("optimism_package", {})
+    ethereum_args = args.get("ethereum_package", input_parser.default_ethereum_config())
+
+    # need to do a raw get here in case only optimism_package is provided.
+    # .get will return None if the key is in the config with a None value.
+    optimism_args = args.get("optimism_package") or input_parser.default_optimism_args()
     optimism_args_with_right_defaults = input_parser.input_parser(plan, optimism_args)
     # Deploy the L1
     plan.print("Deploying a local L1")
@@ -38,17 +39,32 @@ def run(plan, args):
         all_l1_participants, l1_network_params, l1_network_id
     )
 
-    if l1_network_params.network != "kurtosis":
+    if l1_network_params.network == "kurtosis":
+        plan.print("Waiting for L1 to start up")
+        wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
+    else:
+        plan.print("Waiting for network to sync")
         wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
 
-    l2_contract_deployer_image = (
-        optimism_args_with_right_defaults.op_contract_deployer_params.image
+    deployment_output = contract_deployer.deploy_contracts(
+        plan,
+        l1_priv_key,
+        l1_config_env_vars,
+        optimism_args_with_right_defaults,
     )
 
-    # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
-    contract_deployer.deploy_factory_contract(
-        plan, l1_priv_key, l1_config_env_vars, l2_contract_deployer_image
-    )
+    for chain in optimism_args_with_right_defaults.chains:
+        l2_launcher.launch_l2(
+            plan,
+            chain.network_params.name,
+            chain,
+            deployment_output,
+            l1_config_env_vars,
+            l1_priv_key,
+            all_l1_participants[0].el_context,
+        )
+
+    return
     # Deploy L2s
     plan.print("Deploying a local L2")
     if type(optimism_args) == "dict":
@@ -104,15 +120,4 @@ def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars["L1_WS_URL"] = str(all_l1_participants[0].el_context.ws_url)
     env_vars["L1_CHAIN_ID"] = str(l1_network_id)
     env_vars["L1_BLOCK_TIME"] = str(l1_network_params.seconds_per_slot)
-    env_vars["DEPLOYMENT_OUTFILE"] = (
-        "/workspace/optimism/packages/contracts-bedrock/deployments/"
-        + str(l1_network_id)
-        + "/kurtosis.json"
-    )
-    env_vars["STATE_DUMP_PATH"] = (
-        "/workspace/optimism/packages/contracts-bedrock/deployments/"
-        + str(l1_network_id)
-        + "/state-dump.json"
-    )
-
     return env_vars

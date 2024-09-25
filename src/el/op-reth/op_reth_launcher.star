@@ -83,18 +83,10 @@ def launch(
     sequencer_enabled,
     sequencer_context,
 ):
-    network_name = shared_utils.get_network_name(launcher.network)
-
-    cl_client_name = service_name.split("-")[3]
-
     config = get_config(
         plan,
-        launcher.el_cl_genesis_data,
-        launcher.jwt_file,
-        launcher.network,
-        launcher.network_id,
+        launcher,
         image,
-        service_name,
         existing_el_clients,
         sequencer_enabled,
         sequencer_context,
@@ -126,16 +118,15 @@ def launch(
 
 def get_config(
     plan,
-    el_cl_genesis_data,
-    jwt_file,
-    network,
-    network_id,
+    launcher,
     image,
-    service_name,
     existing_el_clients,
     sequencer_enabled,
     sequencer_context,
 ):
+    deployment_output = launcher.deployment_output
+    jwt_file = launcher.jwt_file
+    network = launcher.network
     public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
     used_ports = get_used_ports(discovery_port)
@@ -146,7 +137,8 @@ def get_config(
         "--chain={0}".format(
             network
             if network in constants.PUBLIC_NETWORKS
-            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/genesis-{0}.json".format(launcher.network_id)
         ),
         "--http",
         "--http.port={0}".format(RPC_PORT_NUM),
@@ -187,7 +179,7 @@ def get_config(
         )
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
@@ -202,13 +194,13 @@ def get_config(
 
 
 def new_op_reth_launcher(
-    el_cl_genesis_data,
+    deployment_output,
     jwt_file,
     network,
     network_id,
 ):
     return struct(
-        el_cl_genesis_data=el_cl_genesis_data,
+        deployment_output=deployment_output,
         jwt_file=jwt_file,
         network=network,
         network_id=network_id,

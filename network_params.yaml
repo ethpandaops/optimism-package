@@ -1,11 +1,21 @@
 optimism_package:
-  participants:
-    - el_type: op-geth
-    - el_type: op-reth
-    - el_type: op-erigon
-    - el_type: op-nethermind
-    - el_type: op-besu
-  additional_services:
-    - blockscout
+  chains:
+    - participants:
+      - el_type: op-geth
+        el_image: ""
+        cl_type: op-node
+        cl_image: ""
+        count: 1
+      network_params:
+        network: "kurtosis"
+        network_id: "2151908"
+        seconds_per_slot: 2
+        name: "op-kurtosis"
+        fjord_time_offset: 0
+        granite_time_offset: ""
+        holocene_time_offset: ""
+        interop_time_offset: ""
+      additional_services: []
   op_contract_deployer_params:
-    image: ethpandaops/optimism-contract-deployer:develop
+    image: mslipper/op-deployer:latest
+    artifacts_url: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-4accd01f0c35c26f24d2aa71aba898dd7e5085a2ce5daadc8a84b10caf113409.tar.gz
