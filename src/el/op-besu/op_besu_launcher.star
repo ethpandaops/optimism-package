@@ -150,7 +150,7 @@ def get_config(
         "besu",
         "--genesis-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/genesis={0}.json".format(network_id),
+        + "/genesis-{0}.json".format(network_id),
         "--network-id={0}".format(network_id),
         # "--logging=" + log_level,
         "--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
