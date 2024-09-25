@@ -139,11 +139,13 @@ def parse_network_params(plan, input_args):
     )
     return results
 
+
 def default_optimism_args():
     return {
         "chains": default_chains(),
         "op_contract_deployer_params": default_op_contract_deployer_params(),
     }
+
 
 def default_chains():
     return [
@@ -184,6 +186,7 @@ def default_op_contract_deployer_params():
         "image": "mslipper/op-deployer:latest",
         "artifacts_url": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-4accd01f0c35c26f24d2aa71aba898dd7e5085a2ce5daadc8a84b10caf113409.tar.gz",
     }
+
 
 def default_ethereum_config():
     return {
