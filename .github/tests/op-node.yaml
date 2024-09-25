@@ -5,8 +5,7 @@ optimism_package:
           cl_type: op-node
         - el_type: op-reth
           cl_type: op-node
-          sequencer: true
-        # - el_type: op-erigon
-        #   cl_type: op-node
+        - el_type: op-erigon
+          cl_type: op-node
         - el_type: op-nethermind
           cl_type: op-node
