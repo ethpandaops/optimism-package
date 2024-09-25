@@ -88,7 +88,9 @@ def launch(
             "launch_method": hildr.launch,
         },
         "magi": {
-            "launcher": magi.new_magi_launcher(el_cl_data, jwt_file, network_params),
+            "launcher": magi.new_magi_launcher(
+                deployment_output, jwt_file, network_params
+            ),
             "launch_method": magi.launch,
         },
     }

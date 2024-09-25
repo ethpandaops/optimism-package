@@ -64,11 +64,8 @@ def launch(
     el_context,
     existing_cl_clients,
     l1_config_env_vars,
-    gs_sequencer_private_key,
     sequencer_enabled,
 ):
-    network_name = shared_utils.get_network_name(launcher.network)
-
     # beacon_node_identity_recipe = PostHttpRequestRecipe(
     #     endpoint="/",
     #     content_type="application/json",
@@ -83,14 +80,12 @@ def launch(
 
     config = get_beacon_config(
         plan,
-        launcher.el_cl_genesis_data,
-        launcher.jwt_file,
+        launcher,
         image,
         service_name,
         el_context,
         existing_cl_clients,
         l1_config_env_vars,
-        gs_sequencer_private_key,
         # beacon_node_identity_recipe,
         sequencer_enabled,
     )
@@ -122,14 +117,12 @@ def launch(
 
 def get_beacon_config(
     plan,
-    el_cl_genesis_data,
-    jwt_file,
+    launcher,
     image,
     service_name,
     el_context,
     existing_cl_clients,
     l1_config_env_vars,
-    gs_sequencer_private_key,
     # beacon_node_identity_recipe,
     sequencer_enabled,
 ):
@@ -172,8 +165,8 @@ def get_beacon_config(
     #     )
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
     ports = {}
     ports.update(used_ports)
@@ -194,9 +187,9 @@ def get_beacon_config(
     )
 
 
-def new_magi_launcher(el_cl_genesis_data, jwt_file, network_params):
+def new_magi_launcher(deployment_output, jwt_file, network_params):
     return struct(
-        el_cl_genesis_data=el_cl_genesis_data,
+        deployment_output=deployment_output,
         jwt_file=jwt_file,
-        network=network_params.network,
+        network_params=network_params,
     )
