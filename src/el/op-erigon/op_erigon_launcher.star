@@ -210,6 +210,7 @@ def get_config(
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        user=User(uid=0, gid=0),
     )
 
 
