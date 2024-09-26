@@ -93,7 +93,7 @@ def parse_network_params(plan, input_args):
             fail("Network id {0} is duplicated".format(network_id))
 
         participants = []
-        for i, p in enumerate(chain["participants"]):
+        for i, p in enumerate(chain.get("participants", [default_participant()])):
             participant = default_participant()
             participant.update(p)
 
