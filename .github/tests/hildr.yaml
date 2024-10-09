@@ -9,3 +9,7 @@ optimism_package:
         cl_type: hildr
       - el_type: op-erigon
         cl_type: hildr
+      - el_type: op-nethermind
+        cl_type: hildr
+      - el_type: op-besu
+        cl_type: hildr

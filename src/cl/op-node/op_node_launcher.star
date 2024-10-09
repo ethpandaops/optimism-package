@@ -1,17 +1,20 @@
-shared_utils = import_module(
+ethereum_package_shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
 
-cl_context = import_module(
+ethereum_package_cl_context = import_module(
     "github.com/ethpandaops/ethereum-package/src/cl/cl_context.star"
 )
 
-cl_node_ready_conditions = import_module(
-    "github.com/ethpandaops/ethereum-package/src/cl/cl_node_ready_conditions.star"
-)
-constants = import_module(
+ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
+
+ethereum_package_input_parser = import_module(
+    "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
+)
+
+constants = import_module("../../package_io/constants.star")
 
 util = import_module("../../util.star")
 
@@ -31,16 +34,16 @@ BEACON_HTTP_PORT_NUM = 8547
 
 def get_used_ports(discovery_port):
     used_ports = {
-        BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            discovery_port, shared_utils.TCP_PROTOCOL, wait=None
+        BEACON_TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+            discovery_port, ethereum_package_shared_utils.TCP_PROTOCOL, wait=None
         ),
-        BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            discovery_port, shared_utils.UDP_PROTOCOL, wait=None
+        BEACON_UDP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+            discovery_port, ethereum_package_shared_utils.UDP_PROTOCOL, wait=None
         ),
-        BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+        BEACON_HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             BEACON_HTTP_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-            shared_utils.HTTP_APPLICATION_PROTOCOL,
+            ethereum_package_shared_utils.TCP_PROTOCOL,
+            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
     return used_ports
@@ -49,11 +52,11 @@ def get_used_ports(discovery_port):
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_LOG_LEVEL.error: "ERROR",
-    constants.GLOBAL_LOG_LEVEL.warn: "WARN",
-    constants.GLOBAL_LOG_LEVEL.info: "INFO",
-    constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
-    constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+    ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "ERROR",
+    ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "WARN",
+    ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "INFO",
+    ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
+    ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
 }
 
 
@@ -61,7 +64,11 @@ def launch(
     plan,
     launcher,
     service_name,
-    image,
+    participant,
+    global_log_level,
+    persistent,
+    tolerations,
+    node_selectors,
     el_context,
     existing_cl_clients,
     l1_config_env_vars,
@@ -79,10 +86,19 @@ def launch(
         },
     )
 
+    log_level = ethereum_package_input_parser.get_client_log_level_or_default(
+        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     config = get_beacon_config(
         plan,
         launcher,
-        image,
+        service_name,
+        participant,
+        log_level,
+        persistent,
+        tolerations,
+        node_selectors,
         el_context,
         existing_cl_clients,
         l1_config_env_vars,
@@ -105,7 +121,7 @@ def launch(
     beacon_multiaddr = response["extract.multiaddr"]
     beacon_peer_id = response["extract.peer_id"]
 
-    return cl_context.new_cl_context(
+    return ethereum_package_cl_context.new_cl_context(
         client_name="op-node",
         enr=beacon_node_enr,
         ip_addr=beacon_service.ip_address,
@@ -121,7 +137,12 @@ def launch(
 def get_beacon_config(
     plan,
     launcher,
-    image,
+    service_name,
+    participant,
+    log_level,
+    persistent,
+    tolerations,
+    node_selectors,
     el_context,
     existing_cl_clients,
     l1_config_env_vars,
@@ -138,10 +159,10 @@ def get_beacon_config(
     cmd = [
         "op-node",
         "--l2={0}".format(EXECUTION_ENGINE_ENDPOINT),
-        "--l2.jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--l2.jwt-secret=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--verifier.l1-confs=4",
         "--rollup.config="
-        + constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        + ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
         + "/rollup-{0}.json".format(launcher.network_params.network_id),
         "--rpc.addr=0.0.0.0",
         "--rpc.port={0}".format(BEACON_HTTP_PORT_NUM),
@@ -150,7 +171,8 @@ def get_beacon_config(
         "--l1.rpckind={0}".format(l1_config_env_vars["L1_RPC_KIND"]),
         "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
         "--l1.trustrpc",
-        "--p2p.advertise.ip=" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--p2p.advertise.ip="
+        + ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--p2p.advertise.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--p2p.advertise.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--p2p.listen.ip=0.0.0.0",
@@ -174,31 +196,68 @@ def get_beacon_config(
         cmd.append(
             "--p2p.bootnodes="
             + ",".join(
-                [ctx.enr for ctx in existing_cl_clients[: constants.MAX_ENR_ENTRIES]]
+                [
+                    ctx.enr
+                    for ctx in existing_cl_clients[
+                        : ethereum_package_constants.MAX_ENR_ENTRIES
+                    ]
+                ]
             )
         )
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+
+    if persistent:
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+            size=int(participant.cl_volume_size)
+            if int(participant.cl_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.CL_TYPE.hildr + "_volume_size"
+            ],
+        )
+
     ports = {}
     ports.update(used_ports)
 
-    return ServiceConfig(
-        image=image,
-        ports=ports,
-        cmd=cmd,
-        files=files,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=ReadyCondition(
+    env_vars = participant.cl_extra_env_vars
+    config_args = {
+        "image": participant.cl_image,
+        "ports": ports,
+        "cmd": cmd,
+        "files": files,
+        "private_ip_address_placeholder": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "env_vars": env_vars,
+        "labels": ethereum_package_shared_utils.label_maker(
+            client=constants.CL_TYPE.op_node,
+            client_type=constants.CLIENT_TYPES.cl,
+            image=participant.cl_image,
+            connected_client=el_context.client_name,
+            extra_labels=participant.cl_extra_labels,
+        ),
+        "ready_conditions": ReadyCondition(
             recipe=beacon_node_identity_recipe,
             field="code",
             assertion="==",
             target_value=200,
             timeout="1m",
         ),
-    )
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+    }
+
+    if participant.cl_min_cpu > 0:
+        config_args["min_cpu"] = participant.cl_min_cpu
+    if participant.cl_max_cpu > 0:
+        config_args["max_cpu"] = participant.cl_max_cpu
+    if participant.cl_min_mem > 0:
+        config_args["min_memory"] = participant.cl_min_mem
+    if participant.cl_max_mem > 0:
+        config_args["max_memory"] = participant.cl_max_mem
+    return ServiceConfig(**config_args)
 
 
 def new_op_node_launcher(deployment_output, jwt_file, network_params):

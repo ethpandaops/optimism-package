@@ -1,9 +1,11 @@
-constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
-)
-shared_utils = import_module(
+ethereum_package_shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
+
+ethereum_package_input_parser = import_module(
+    "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
+)
+
 # EL
 op_geth = import_module("./el/op-geth/op_geth_launcher.star")
 op_reth = import_module("./el/op-reth/op_reth_launcher.star")
@@ -24,6 +26,10 @@ def launch(
     num_participants,
     l1_config_env_vars,
     l2_services_suffix,
+    global_log_level,
+    global_node_selectors,
+    global_tolerations,
+    persistent,
 ):
     el_launchers = {
         "op-geth": {
@@ -95,6 +101,19 @@ def launch(
         cl_type = participant.cl_type
         el_type = participant.el_type
 
+        node_selectors = ethereum_package_input_parser.get_client_node_selectors(
+            participant.node_selectors,
+            global_node_selectors,
+        )
+
+        el_tolerations = ethereum_package_input_parser.get_client_tolerations(
+            participant.el_tolerations, participant.tolerations, global_tolerations
+        )
+
+        cl_tolerations = ethereum_package_input_parser.get_client_tolerations(
+            participant.cl_tolerations, participant.tolerations, global_tolerations
+        )
+
         if el_type not in el_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
@@ -119,7 +138,9 @@ def launch(
         )
 
         # Zero-pad the index using the calculated zfill value
-        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
+        index_str = ethereum_package_shared_utils.zfill_custom(
+            index + 1, len(str(len(participants)))
+        )
 
         el_service_name = "op-el-{0}-{1}-{2}-{3}".format(
             index_str, el_type, cl_type, l2_services_suffix
@@ -133,7 +154,11 @@ def launch(
             plan,
             el_launcher,
             el_service_name,
-            participant.el_image,
+            participant,
+            global_log_level,
+            persistent,
+            el_tolerations,
+            node_selectors,
             all_el_contexts,
             sequencer_enabled,
             sequencer_context,
@@ -143,7 +168,11 @@ def launch(
             plan,
             cl_launcher,
             cl_service_name,
-            participant.cl_image,
+            participant,
+            global_log_level,
+            persistent,
+            cl_tolerations,
+            node_selectors,
             el_context,
             all_cl_contexts,
             l1_config_env_vars,

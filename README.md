@@ -73,6 +73,48 @@ optimism_package:
         # - op-besu: ghcr.io/optimism-java/op-besu:latest
         el_image: ""
 
+        # The log level string that this participant's EL client should log at
+        # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+        # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
+        # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+        # over a specific participant's logging
+        el_log_level: ""
+
+        # A list of optional extra env_vars the el container should spin up with
+        el_extra_env_vars: {}
+
+        # A list of optional extra labels the el container should spin up with
+        # Example; el_extra_labels: {"ethereum-package.partition": "1"}
+        el_extra_labels: {}
+
+        # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
+        el_extra_params: []
+
+        # A list of tolerations that will be passed to the EL client container
+        # Only works with Kubernetes
+        # Example: el_tolerations:
+        # - key: "key"
+        #   operator: "Equal"
+        #   value: "value"
+        #   effect: "NoSchedule"
+        #   toleration_seconds: 3600
+        # Defaults to empty
+        el_tolerations: []
+
+        # Persistent storage size for the EL client container (in MB)
+        # Defaults to 0, which means that the default size for the client will be used
+        # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+        el_volume_size: 0
+
+        # Resource management for el containers
+        # CPU is milicores
+        # RAM is in MB
+        # Defaults to 0, which results in no resource limits
+        el_min_cpu: 0
+        el_max_cpu: 0
+        el_min_mem: 0
+        el_max_mem: 0
+
       # CL(Consensus Layer) Specific flags
         # The type of CL client that should be started
         # Valid values are:
@@ -85,6 +127,67 @@ optimism_package:
         # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop
         # - hildr: ghcr.io/optimism-java/hildr:latest
         cl_image: ""
+
+        # The log level string that this participant's CL client should log at
+        # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+        # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+        # over a specific participant's logging
+        cl_log_level: ""
+
+        # A list of optional extra env_vars the cl container should spin up with
+        cl_extra_env_vars: {}
+
+        # A list of optional extra labels that will be passed to the CL client Beacon container.
+        # Example; cl_extra_labels: {"ethereum-package.partition": "1"}
+        cl_extra_labels: {}
+
+        # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
+        # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
+        cl_extra_params: []
+
+        # A list of tolerations that will be passed to the CL client container
+        # Only works with Kubernetes
+        # Example: el_tolerations:
+        # - key: "key"
+        #   operator: "Equal"
+        #   value: "value"
+        #   effect: "NoSchedule"
+        #   toleration_seconds: 3600
+        # Defaults to empty
+        cl_tolerations: []
+
+        # Persistent storage size for the CL client container (in MB)
+        # Defaults to 0, which means that the default size for the client will be used
+        # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+        cl_volume_size: 0
+
+        # Resource management for cl containers
+        # CPU is milicores
+        # RAM is in MB
+        # Defaults to 0, which results in no resource limits
+        cl_min_cpu: 0
+        cl_max_cpu: 0
+        cl_min_mem: 0
+        cl_max_mem: 0
+
+        # Participant specific flags
+        # Node selector
+        # Only works with Kubernetes
+        # Example: node_selectors: { "disktype": "ssd" }
+        # Defaults to empty
+        node_selectors: {}
+
+        # A list of tolerations that will be passed to the EL/CL/validator containers
+        # This is to be used when you don't want to specify the tolerations for each container separately
+        # Only works with Kubernetes
+        # Example: tolerations:
+        # - key: "key"
+        #   operator: "Equal"
+        #   value: "value"
+        #   effect: "NoSchedule"
+        #   toleration_seconds: 3600
+        # Defaults to empty
+        tolerations: []
 
         # Count of nodes to spin up for this participant
         # Default to 1
@@ -142,6 +245,32 @@ optimism_package:
   op_contract_deployer_params:
     image: mslipper/op-deployer:latest
     artifacts_url: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-4accd01f0c35c26f24d2aa71aba898dd7e5085a2ce5daadc8a84b10caf113409.tar.gz
+
+  # The global log level that all clients should log at
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # This value will be overridden by participant-specific values
+  global_log_level: "info"
+
+  # Global node selector that will be passed to all containers (unless overridden by a more specific node selector)
+  # Only works with Kubernetes
+  # Example: global_node_selectors: { "disktype": "ssd" }
+  # Defaults to empty
+  global_node_selectors: {}
+
+  # Global tolerations that will be passed to all containers (unless overridden by a more specific toleration)
+  # Only works with Kubernetes
+  # Example: tolerations:
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+  #   toleration_seconds: 3600
+  # Defaults to empty
+  global_tolerations: []
+
+  # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
+  # Defaults to false
+  persistent: false
 ```
 
 ### Additional configuration recommendations

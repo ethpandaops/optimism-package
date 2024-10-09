@@ -2,10 +2,31 @@ PARTICIPANT_CATEGORIES = {
     "participants": [
         "el_type",
         "el_image",
+        "el_log_level",
+        "el_extra_env_vars",
+        "el_extra_labels",
+        "el_extra_params",
+        "el_tolerations",
+        "el_volume_size",
+        "el_min_cpu",
+        "el_max_cpu",
+        "el_min_mem",
+        "el_max_mem",
         "cl_type",
         "cl_image",
+        "cl_log_level",
+        "cl_extra_env_vars",
+        "cl_extra_labels",
+        "cl_extra_params",
+        "cl_tolerations",
+        "cl_volume_size",
+        "cl_min_cpu",
+        "cl_max_cpu",
+        "cl_min_mem",
+        "cl_max_mem",
+        "node_selectors",
+        "tolerations",
         "count",
-        "sequencer",
     ],
 }
 
@@ -34,6 +55,10 @@ ADDITIONAL_SERVICES_PARAMS = [
 ROOT_PARAMS = [
     "chains",
     "op_contract_deployer_params",
+    "global_log_level",
+    "global_node_selectors",
+    "global_tolerations",
+    "persistent",
 ]
 
 

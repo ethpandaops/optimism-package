@@ -14,6 +14,10 @@ def launch_participant_network(
     deployment_output,
     l1_config_env_vars,
     l2_services_suffix,
+    global_log_level,
+    global_node_selectors,
+    global_tolerations,
+    persistent,
 ):
     num_participants = len(participants)
     # First EL and sequencer CL
@@ -26,6 +30,10 @@ def launch_participant_network(
         num_participants,
         l1_config_env_vars,
         l2_services_suffix,
+        global_log_level,
+        global_node_selectors,
+        global_tolerations,
+        persistent,
     )
 
     all_participants = []

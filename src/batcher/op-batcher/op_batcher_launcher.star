@@ -1,8 +1,8 @@
-shared_utils = import_module(
+ethereum_package_shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
 
-constants = import_module(
+ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
@@ -20,10 +20,10 @@ BATCHER_HTTP_PORT_NUM = 8548
 
 def get_used_ports():
     used_ports = {
-        BATCHER_HTTP_PORT_ID: shared_utils.new_port_spec(
+        BATCHER_HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             BATCHER_HTTP_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-            shared_utils.HTTP_APPLICATION_PROTOCOL,
+            ethereum_package_shared_utils.TCP_PROTOCOL,
+            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
     return used_ports
@@ -95,5 +95,5 @@ def get_batcher_config(
         image=image,
         ports=ports,
         cmd=cmd,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

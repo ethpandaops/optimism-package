@@ -1,16 +1,13 @@
-shared_utils = import_module(
+ethereum_package_shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
-)
-constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
 util = import_module("../util.star")
 
-IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout-optimism:6.6.0"
-IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.7.0"
+IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout-optimism:6.8.0"
+IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
 
 SERVICE_NAME_BLOCKSCOUT = "op-blockscout"
 
@@ -29,18 +26,18 @@ BLOCKSCOUT_VERIF_MIN_MEMORY = 10
 BLOCKSCOUT_VERIF_MAX_MEMORY = 1024
 
 USED_PORTS = {
-    HTTP_PORT_ID: shared_utils.new_port_spec(
+    HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ethereum_package_shared_utils.TCP_PROTOCOL,
+        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
 }
 
 VERIF_USED_PORTS = {
-    HTTP_PORT_ID: shared_utils.new_port_spec(
+    HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
         HTTP_PORT_NUMBER_VERIF,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ethereum_package_shared_utils.TCP_PROTOCOL,
+        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
 }
 
@@ -76,7 +73,7 @@ def launch_blockscout(
         SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
     )
     verif_service = plan.add_service(verif_service_name, config_verif)
-    verif_url = "http://{}:{}/api".format(
+    verif_url = "http://{}:{}".format(
         verif_service.hostname, verif_service.ports["http"].number
     )
 
