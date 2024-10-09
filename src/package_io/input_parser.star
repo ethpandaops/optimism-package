@@ -201,7 +201,6 @@ def default_ethereum_package_network_params():
                         "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
                         "storage": {},
                         "nonce": "1",
-                        "secretKey": "0x",
                     }
                 }
             ),
