@@ -1,7 +1,4 @@
-constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
-)
-shared_utils = import_module(
+ethereum_package_shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
 
@@ -141,7 +138,9 @@ def launch(
         )
 
         # Zero-pad the index using the calculated zfill value
-        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
+        index_str = ethereum_package_shared_utils.zfill_custom(
+            index + 1, len(str(len(participants)))
+        )
 
         el_service_name = "op-el-{0}-{1}-{2}-{3}".format(
             index_str, el_type, cl_type, l2_services_suffix

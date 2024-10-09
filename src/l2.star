@@ -2,7 +2,7 @@ participant_network = import_module("./participant_network.star")
 blockscout = import_module("./blockscout/blockscout_launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
 input_parser = import_module("./package_io/input_parser.star")
-static_files = import_module(
+ethereum_package_static_files = import_module(
     "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
 )
 util = import_module("./util.star")
@@ -29,7 +29,7 @@ def launch_l2(
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))
     jwt_file = plan.upload_files(
-        src=static_files.JWT_PATH_FILEPATH,
+        src=ethereum_package_static_files.JWT_PATH_FILEPATH,
         name="op_jwt_file{0}".format(l2_services_suffix),
     )
 
