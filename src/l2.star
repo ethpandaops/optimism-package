@@ -16,6 +16,10 @@ def launch_l2(
     l1_config,
     l1_priv_key,
     l1_bootnode_context,
+    global_log_level,
+    global_node_selectors,
+    global_tolerations,
+    persistent,
 ):
     network_params = l2_args.network_params
 
@@ -37,6 +41,10 @@ def launch_l2(
         deployment_output,
         l1_config,
         l2_services_suffix,
+        global_log_level,
+        global_node_selectors,
+        global_tolerations,
+        persistent,
     )
 
     all_el_contexts = []

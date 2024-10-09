@@ -24,6 +24,11 @@ def run(plan, args):
     # .get will return None if the key is in the config with a None value.
     optimism_args = args.get("optimism_package") or input_parser.default_optimism_args()
     optimism_args_with_right_defaults = input_parser.input_parser(plan, optimism_args)
+    global_tolerations = optimism_args_with_right_defaults.global_tolerations
+    global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
+    global_log_level = optimism_args_with_right_defaults.global_log_level
+    persistent = optimism_args_with_right_defaults.persistent
+
     # Deploy the L1
     plan.print("Deploying a local L1")
     l1 = ethereum_package.run(plan, ethereum_args)
@@ -62,6 +67,10 @@ def run(plan, args):
             l1_config_env_vars,
             l1_priv_key,
             all_l1_participants[0].el_context,
+            global_log_level,
+            global_node_selectors,
+            global_tolerations,
+            persistent,
         )
 
     return
@@ -76,6 +85,10 @@ def run(plan, args):
             l1_config_env_vars,
             l1_priv_key,
             all_l1_participants[0].el_context,
+            global_log_level,
+            global_node_selectors,
+            global_tolerations,
+            persistent,
         )
     elif type(optimism_args) == "list":
         seen_names = {}
@@ -106,6 +119,10 @@ def run(plan, args):
                 l1_config_env_vars,
                 l1_priv_key,
                 all_l1_participants[0].el_context,
+                global_log_level,
+                global_node_selectors,
+                global_tolerations,
+                persistent,
             )
     else:
         fail("invalid type provided for param: `optimism-package`")

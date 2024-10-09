@@ -3,3 +3,5 @@ optimism_package:
     - participants:
         - el_type: op-erigon
           cl_type: op-node
+        - el_type: op-erigon
+          cl_type: hildr
