@@ -18,7 +18,12 @@ def run(plan, args):
     """
     plan.print("Parsing the L1 input args")
     # If no args are provided, use the default values with minimal preset
-    ethereum_args = args.get("ethereum_package", input_parser.default_ethereum_config())
+    ethereum_args_network_params = args.get(
+        "ethereum_package.network_params",
+        input_parser.default_ethereum_package_network_params(),
+    )
+    ethereum_args = args.get("ethereum_package")
+    ethereum_args.update(ethereum_args_network_params)
 
     # need to do a raw get here in case only optimism_package is provided.
     # .get will return None if the key is in the config with a None value.

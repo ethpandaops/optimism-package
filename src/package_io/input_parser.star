@@ -188,7 +188,7 @@ def default_op_contract_deployer_params():
     }
 
 
-def default_ethereum_config():
+def default_ethereum_package_network_params():
     return {
         "network_params": {
             "preset": "minimal",
@@ -200,7 +200,7 @@ def default_ethereum_config():
                         "balance": "0ETH",
                         "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
                         "storage": {},
-                        "nonce": 0,
+                        "nonce": "1",
                         "secretKey": "0x",
                     }
                 }
