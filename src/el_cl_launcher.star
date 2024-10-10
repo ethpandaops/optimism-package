@@ -13,6 +13,7 @@ op_besu = import_module("./el/op-besu/op_besu_launcher.star")
 # CL
 op_node = import_module("./cl/op-node/op_node_launcher.star")
 hildr = import_module("./cl/hildr/hildr_launcher.star")
+magi = import_module("./cl/magi/magi_launcher.star")
 
 
 def launch(
@@ -85,6 +86,12 @@ def launch(
                 deployment_output, jwt_file, network_params
             ),
             "launch_method": hildr.launch,
+        },
+        "magi": {
+            "launcher": magi.new_magi_launcher(
+                deployment_output, jwt_file, network_params
+            ),
+            "launch_method": magi.launch,
         },
     }
 
