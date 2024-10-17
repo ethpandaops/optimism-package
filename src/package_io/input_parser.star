@@ -36,7 +36,10 @@ DEFAULT_ADDITIONAL_SERVICES = []
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     results = parse_network_params(plan, input_args)
-
+    results["global_log_level"] = "info"
+    results["global_node_selectors"] = {}
+    results["global_tolerations"] = []
+    results["persistent"] = False
     return struct(
         chains=[
             struct(
@@ -44,8 +47,30 @@ def input_parser(plan, input_args):
                     struct(
                         el_type=participant["el_type"],
                         el_image=participant["el_image"],
+                        el_log_level=participant["el_log_level"],
+                        el_extra_env_vars=participant["el_extra_env_vars"],
+                        el_extra_labels=participant["el_extra_labels"],
+                        el_extra_params=participant["el_extra_params"],
+                        el_tolerations=participant["el_tolerations"],
+                        el_volume_size=participant["el_volume_size"],
+                        el_min_cpu=participant["el_min_cpu"],
+                        el_max_cpu=participant["el_max_cpu"],
+                        el_min_mem=participant["el_min_mem"],
+                        el_max_mem=participant["el_max_mem"],
                         cl_type=participant["cl_type"],
                         cl_image=participant["cl_image"],
+                        cl_log_level=participant["cl_log_level"],
+                        cl_extra_env_vars=participant["cl_extra_env_vars"],
+                        cl_extra_labels=participant["cl_extra_labels"],
+                        cl_extra_params=participant["cl_extra_params"],
+                        cl_tolerations=participant["cl_tolerations"],
+                        cl_volume_size=participant["cl_volume_size"],
+                        cl_min_cpu=participant["cl_min_cpu"],
+                        cl_max_cpu=participant["cl_max_cpu"],
+                        cl_min_mem=participant["cl_min_mem"],
+                        cl_max_mem=participant["cl_max_mem"],
+                        node_selectors=participant["node_selectors"],
+                        tolerations=participant["tolerations"],
                         count=participant["count"],
                     )
                     for participant in result["participants"]
@@ -70,6 +95,10 @@ def input_parser(plan, input_args):
             image=results["op_contract_deployer_params"]["image"],
             artifacts_url=results["op_contract_deployer_params"]["artifacts_url"],
         ),
+        global_log_level=results["global_log_level"],
+        global_node_selectors=results["global_node_selectors"],
+        global_tolerations=results["global_tolerations"],
+        persistent=results["persistent"],
     )
 
 
@@ -137,6 +166,8 @@ def parse_network_params(plan, input_args):
     results["op_contract_deployer_params"].update(
         input_args.get("op_contract_deployer_params", {})
     )
+    results["global_log_level"] = input_args.get("global_log_level", "info")
+
     return results
 
 
@@ -144,6 +175,10 @@ def default_optimism_args():
     return {
         "chains": default_chains(),
         "op_contract_deployer_params": default_op_contract_deployer_params(),
+        "global_log_level": "info",
+        "global_node_selectors": {},
+        "global_tolerations": [],
+        "persistent": False,
     }
 
 
@@ -174,10 +209,31 @@ def default_participant():
     return {
         "el_type": "op-geth",
         "el_image": "",
+        "el_log_level": "",
+        "el_extra_env_vars": {},
+        "el_extra_labels": {},
+        "el_extra_params": [],
+        "el_tolerations": [],
+        "el_volume_size": 0,
+        "el_min_cpu": 0,
+        "el_max_cpu": 0,
+        "el_min_mem": 0,
+        "el_max_mem": 0,
         "cl_type": "op-node",
         "cl_image": "",
+        "cl_log_level": "",
+        "cl_extra_env_vars": {},
+        "cl_extra_labels": {},
+        "cl_extra_params": [],
+        "cl_tolerations": [],
+        "cl_volume_size": 0,
+        "cl_min_cpu": 0,
+        "cl_max_cpu": 0,
+        "cl_min_mem": 0,
+        "cl_max_mem": 0,
+        "node_selectors": {},
+        "tolerations": [],
         "count": 1,
-        "sequencer": False,
     }
 
 
