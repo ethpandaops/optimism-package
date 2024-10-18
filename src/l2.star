@@ -23,10 +23,6 @@ def launch_l2(
 ):
     network_params = l2_args.network_params
 
-    l2_config_env_vars = {}
-    l2_config_env_vars["L2_CHAIN_ID"] = str(network_params.network_id)
-    l2_config_env_vars["L2_BLOCK_TIME"] = str(network_params.seconds_per_slot)
-
     plan.print("Deploying L2 with name {0}".format(network_params.name))
     jwt_file = plan.upload_files(
         src=ethereum_package_static_files.JWT_PATH_FILEPATH,

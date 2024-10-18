@@ -225,6 +225,8 @@ def get_config(
                 constants.EL_TYPE.op_nethermind + "_volume_size"
             ],
         )
+
+    cmd += participant.el_extra_params
     env_vars = participant.el_extra_env_vars
     config_args = {
         "image": participant.el_image,

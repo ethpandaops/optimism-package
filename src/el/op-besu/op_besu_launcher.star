@@ -222,6 +222,7 @@ def get_config(
             )
         )
 
+    cmd += participant.el_extra_params
     cmd_str = " ".join(cmd)
 
     files = {

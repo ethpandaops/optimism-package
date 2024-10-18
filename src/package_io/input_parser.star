@@ -86,6 +86,8 @@ def input_parser(plan, input_args):
                         "holocene_time_offset"
                     ],
                     interop_time_offset=result["network_params"]["interop_time_offset"],
+                    fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
+                    batcher_image=result["network_params"]["batcher_image"],
                 ),
                 additional_services=result["additional_services"],
             )
@@ -202,6 +204,8 @@ def default_network_params():
         "granite_time_offset": None,
         "holocene_time_offset": None,
         "interop_time_offset": None,
+        "fund_dev_accounts": True,
+        "batcher_image": "",
     }
 
 
