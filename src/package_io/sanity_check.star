@@ -40,6 +40,8 @@ SUBCATEGORY_PARAMS = {
         "granite_time_offset",
         "holocene_time_offset",
         "interop_time_offset",
+        "fund_dev_accounts",
+        "batcher_image",
     ],
 }
 

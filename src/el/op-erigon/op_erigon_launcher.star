@@ -211,6 +211,7 @@ def get_config(
             )
         )
 
+    cmd += participant.el_extra_params
     cmd_str = " ".join(cmd)
     if launcher.network not in ethereum_package_constants.PUBLIC_NETWORKS:
         subcommand_strs = [
