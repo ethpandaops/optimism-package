@@ -11,6 +11,7 @@ def launch_participant_network(
     participants,
     jwt_file,
     network_params,
+    batcher_params,
     deployment_output,
     l1_config_env_vars,
     l2_services_suffix,
@@ -66,7 +67,7 @@ def launch_participant_network(
         ".privateKey",
     )
 
-    op_batcher_image = network_params.batcher_image if network_params.batcher_image != "" else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
+    op_batcher_image = batcher_params.image if batcher_params.image != "" else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
 
     op_batcher_launcher.launch(
         plan,
@@ -76,6 +77,7 @@ def launch_participant_network(
         all_cl_contexts[0],
         l1_config_env_vars,
         batcher_key,
+        batcher_params,
     )
 
     # The OP Stack don't run the proposer anymore, it has been replaced with the challenger

@@ -38,7 +38,9 @@ optimism_package:
         holocene_time_offset: ""
         interop_time_offset: ""
         fund_dev_accounts: true
-        batcher_image: ""
+      batcher_params:
+        image: ""
+        extra_params: []
       additional_services: []
   op_contract_deployer_params:
     image: mslipper/op-deployer:latest

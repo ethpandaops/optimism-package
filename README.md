@@ -237,9 +237,13 @@ optimism_package:
         # Defaults to True
         fund_dev_accounts: true
 
+      # Default batcher configuration
+      batcher_params:
         # The Docker image that should be used for the batcher; leave blank to use the default op-batcher image
-        batcher_image: ""
+        image: ""
 
+        # A list of optional extra params that will be passed to the batcher container for modifying its behaviour
+        extra_params: []
 
       # Additional services to run alongside the network
       # Defaults to []
