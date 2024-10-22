@@ -210,6 +210,7 @@ def default_network_params():
         "fund_dev_accounts": True,
     }
 
+
 def default_batcher_params():
     return {
         "image": "",

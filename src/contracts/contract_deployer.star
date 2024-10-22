@@ -40,15 +40,31 @@ def deploy_contracts(
         ),
     )
 
-    intent_updates = [
-        ("string", "contractArtifactsURL", optimism_args.op_contract_deployer_params.artifacts_url),
-    ] + [
-        ("int", "chains.[{0}].deployOverrides.l2BlockTime".format(index), str(chain.network_params.seconds_per_slot))
-        for index, chain in enumerate(optimism_args.chains)
-    ] + [
-        ("bool", "chains.[{0}].deployOverrides.fundDevAccounts".format(index), "true" if chain.network_params.fund_dev_accounts else "false")
-        for index, chain in enumerate(optimism_args.chains)
-    ]
+    intent_updates = (
+        [
+            (
+                "string",
+                "contractArtifactsURL",
+                optimism_args.op_contract_deployer_params.artifacts_url,
+            ),
+        ]
+        + [
+            (
+                "int",
+                "chains.[{0}].deployOverrides.l2BlockTime".format(index),
+                str(chain.network_params.seconds_per_slot),
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
+        + [
+            (
+                "bool",
+                "chains.[{0}].deployOverrides.fundDevAccounts".format(index),
+                "true" if chain.network_params.fund_dev_accounts else "false",
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
+    )
 
     op_deployer_configure = plan.run_sh(
         name="op-deployer-configure",
