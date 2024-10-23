@@ -40,6 +40,32 @@ def deploy_contracts(
         ),
     )
 
+    intent_updates = (
+        [
+            (
+                "string",
+                "contractArtifactsURL",
+                optimism_args.op_contract_deployer_params.artifacts_url,
+            ),
+        ]
+        + [
+            (
+                "int",
+                "chains.[{0}].deployOverrides.l2BlockTime".format(index),
+                str(chain.network_params.seconds_per_slot),
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
+        + [
+            (
+                "bool",
+                "chains.[{0}].deployOverrides.fundDevAccounts".format(index),
+                "true" if chain.network_params.fund_dev_accounts else "false",
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
+    )
+
     op_deployer_configure = plan.run_sh(
         name="op-deployer-configure",
         description="Configure L2 contract deployments",
@@ -55,10 +81,10 @@ def deploy_contracts(
         },
         run=" && ".join(
             [
-                "cat /network-data/intent.toml | dasel put -r toml -t string -v '{0}' 'contractArtifactsURL' > /network-data/.intent.toml".format(
-                    optimism_args.op_contract_deployer_params.artifacts_url
-                ),
-                "mv /network-data/.intent.toml /network-data/intent.toml",
+                "cat /network-data/intent.toml | dasel put -r toml -t {0} -v '{2}' '{1}' -o /network-data/intent.toml".format(
+                    t, k, v
+                )
+                for t, k, v in intent_updates
             ]
         ),
     )

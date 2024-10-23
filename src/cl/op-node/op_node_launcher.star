@@ -205,6 +205,8 @@ def get_beacon_config(
             )
         )
 
+    cmd += participant.cl_extra_params
+
     files = {
         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
         ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,

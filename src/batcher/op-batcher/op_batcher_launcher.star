@@ -40,6 +40,7 @@ def launch(
     cl_context,
     l1_config_env_vars,
     gs_batcher_private_key,
+    batcher_params,
 ):
     batcher_service_name = "{0}".format(service_name)
 
@@ -51,6 +52,7 @@ def launch(
         cl_context,
         l1_config_env_vars,
         gs_batcher_private_key,
+        batcher_params,
     )
 
     batcher_service = plan.add_service(service_name, config)
@@ -71,6 +73,7 @@ def get_batcher_config(
     cl_context,
     l1_config_env_vars,
     gs_batcher_private_key,
+    batcher_params,
 ):
     cmd = [
         "op-batcher",
@@ -89,6 +92,8 @@ def get_batcher_config(
         "--private-key=" + gs_batcher_private_key,
         "--data-availability-type=blobs",
     ]
+
+    cmd += batcher_params.extra_params
 
     ports = get_used_ports()
     return ServiceConfig(

@@ -25,11 +25,6 @@ DEFAULT_PROPOSER_IMAGES = {
     "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
 }
 
-ATTR_TO_BE_SKIPPED_AT_ROOT = (
-    "network_params",
-    "participants",
-)
-
 DEFAULT_ADDITIONAL_SERVICES = []
 
 
@@ -86,6 +81,11 @@ def input_parser(plan, input_args):
                         "holocene_time_offset"
                     ],
                     interop_time_offset=result["network_params"]["interop_time_offset"],
+                    fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
+                ),
+                batcher_params=struct(
+                    image=result["batcher_params"]["image"],
+                    extra_params=result["batcher_params"]["extra_params"],
                 ),
                 additional_services=result["additional_services"],
             )
@@ -111,6 +111,9 @@ def parse_network_params(plan, input_args):
     for chain in input_args.get("chains", default_chains()):
         network_params = default_network_params()
         network_params.update(chain.get("network_params", {}))
+
+        batcher_params = default_batcher_params()
+        batcher_params.update(chain.get("batcher_params", {}))
 
         network_name = network_params["name"]
         network_id = network_params["network_id"]
@@ -155,6 +158,7 @@ def parse_network_params(plan, input_args):
         result = {
             "participants": participants,
             "network_params": network_params,
+            "batcher_params": batcher_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
@@ -187,6 +191,7 @@ def default_chains():
         {
             "participants": [default_participant()],
             "network_params": default_network_params(),
+            "batcher_params": default_batcher_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
         }
     ]
@@ -202,6 +207,14 @@ def default_network_params():
         "granite_time_offset": None,
         "holocene_time_offset": None,
         "interop_time_offset": None,
+        "fund_dev_accounts": True,
+    }
+
+
+def default_batcher_params():
+    return {
+        "image": "",
+        "extra_params": [],
     }
 
 

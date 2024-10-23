@@ -233,6 +233,17 @@ optimism_package:
         # Offset is in seconds
         interop_time_offset: ""
 
+        # Whether to fund dev accounts on L2
+        # Defaults to True
+        fund_dev_accounts: true
+
+      # Default batcher configuration
+      batcher_params:
+        # The Docker image that should be used for the batcher; leave blank to use the default op-batcher image
+        image: ""
+
+        # A list of optional extra params that will be passed to the batcher container for modifying its behaviour
+        extra_params: []
 
       # Additional services to run alongside the network
       # Defaults to []
