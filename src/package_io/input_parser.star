@@ -26,9 +26,7 @@ DEFAULT_PROPOSER_IMAGES = {
 }
 
 DEFAULT_DA_SERVER_IMAGES = {
-    # latest tag is super outdated, and doesn't have the --generic-commitment flag
-    # so we use the dev tag as default, which requires building locally (see default_da_server_params)
-    "da-server": "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:dev",
+    "da-server": "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
 }
 
 
@@ -42,13 +40,6 @@ def input_parser(plan, input_args):
     results["global_node_selectors"] = {}
     results["global_tolerations"] = []
     results["persistent"] = False
-
-    results["da_server_params"] = default_da_server_params()
-    for attr, value in input_args.items():
-        if attr == "da_server_params":
-            results["da_server_params"]["enabled"] = "true"
-            for sub_attr, sub_value in value.items():
-                results["da_server_params"][sub_attr] = sub_value
 
     return struct(
         chains=[
@@ -102,6 +93,13 @@ def input_parser(plan, input_args):
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
                 ),
+                da_server_params=struct(
+                    enabled=result["da_server_params"]["enabled"],
+                    image=result["da_server_params"]["image"],
+                    build_image=result["da_server_params"]["build_image"],
+                    da_server_extra_args=result["da_server_params"]["da_server_extra_args"],
+                    generic_commitment=result["da_server_params"]["generic_commitment"],
+                ),
                 additional_services=result["additional_services"],
             )
             for result in results["chains"]
@@ -114,13 +112,6 @@ def input_parser(plan, input_args):
         global_node_selectors=results["global_node_selectors"],
         global_tolerations=results["global_tolerations"],
         persistent=results["persistent"],
-        da_server_params=struct(
-            enabled=result["da_server_params"]["enabled"],
-            image=result["da_server_params"]["image"],
-            build_image=result["da_server_params"]["build_image"],
-            da_server_extra_args=result["da_server_params"]["da_server_extra_args"],
-            generic_commitment=result["da_server_params"]["generic_commitment"],
-        ),
     )
 
 
@@ -136,6 +127,9 @@ def parse_network_params(plan, input_args):
 
         batcher_params = default_batcher_params()
         batcher_params.update(chain.get("batcher_params", {}))
+
+        da_server_params = default_da_server_params()
+        da_server_params.update(chain.get("da_server_params", {}))
 
         network_name = network_params["name"]
         network_id = network_params["network_id"]
@@ -181,6 +175,7 @@ def parse_network_params(plan, input_args):
             "participants": participants,
             "network_params": network_params,
             "batcher_params": batcher_params,
+            "da_server_params": da_server_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
@@ -214,6 +209,7 @@ def default_chains():
             "participants": [default_participant()],
             "network_params": default_network_params(),
             "batcher_params": default_batcher_params(),
+            "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
         }
     ]
@@ -302,7 +298,7 @@ def default_da_server_params():
     return {
         "enabled": False,
         "image": DEFAULT_DA_SERVER_IMAGES["da-server"],
-        "build_image": True,
+        "build_image": False,
         "da_server_extra_args": [],
         "generic_commitment": False,
     }

@@ -27,7 +27,10 @@ def run(plan, args):
     global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
     global_log_level = optimism_args_with_right_defaults.global_log_level
     persistent = optimism_args_with_right_defaults.persistent
-    da_server_params = args_with_right_defaults.da_server_params
+    # TODO: Not sure how to deal with these da_server_params,
+    #       basically when/how to turn on altda mode.
+    #       If any one chain uses altda??
+    da_server_params = optimism_args_with_right_defaults.chains[0].da_server_params
 
     # Deploy the L1
     plan.print("Deploying a local L1")
