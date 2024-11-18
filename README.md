@@ -228,6 +228,11 @@ optimism_package:
         # Offset is in seconds
         holocene_time_offset: ""
 
+        # Isthmus fork
+        # Defaults to None - not activated - decimal value
+        # Offset is in seconds
+        isthmus_time_offset: ""
+
         # Interop fork
         # Defaults to None - not activated - decimal value
         # Offset is in seconds

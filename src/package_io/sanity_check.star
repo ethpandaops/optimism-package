@@ -39,6 +39,7 @@ SUBCATEGORY_PARAMS = {
         "fjord_time_offset",
         "granite_time_offset",
         "holocene_time_offset",
+        "isthmus_time_offset",
         "interop_time_offset",
         "fund_dev_accounts",
     ],

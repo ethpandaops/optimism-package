@@ -80,6 +80,9 @@ def input_parser(plan, input_args):
                     holocene_time_offset=result["network_params"][
                         "holocene_time_offset"
                     ],
+                    isthmus_time_offset=result["network_params"][
+                        "isthmus_time_offset"
+                    ],
                     interop_time_offset=result["network_params"]["interop_time_offset"],
                     fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
                 ),
@@ -206,6 +209,7 @@ def default_network_params():
         "fjord_time_offset": 0,
         "granite_time_offset": None,
         "holocene_time_offset": None,
+        "isthmus_time_offset": None,
         "interop_time_offset": None,
         "fund_dev_accounts": True,
     }
