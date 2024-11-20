@@ -64,6 +64,38 @@ def deploy_contracts(
             )
             for index, chain in enumerate(optimism_args.chains)
         ]
+        + [
+            (
+                "int",
+                "chains.[{0}].deployOverrides.l2GenesisFjordTimeOffset".format(index),
+                str(chain.network_params.fjord_time_offset)
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
+        + [
+            (
+                "int",
+                "chains.[{0}].deployOverrides.l2GenesisGraniteTimeOffset".format(index),
+                str(chain.network_params.granite_time_offset)
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
+        + [
+            (
+                "int",
+                "chains.[{0}].deployOverrides.l2GenesisHoloceneTimeOffset".format(index),
+                str(chain.network_params.holocene_time_offset)
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
+        + [
+            (
+                "int",
+                "chains.[{0}].deployOverrides.l2GenesisIsthmusTimeOffset".format(index),
+                str(chain.network_params.isthmus_time_offset)
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
     )
 
     op_deployer_configure = plan.run_sh(
