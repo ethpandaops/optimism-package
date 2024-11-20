@@ -34,17 +34,15 @@ optimism_package:
         seconds_per_slot: 2
         name: "op-kurtosis"
         fjord_time_offset: 0
-        granite_time_offset: ""
-        holocene_time_offset: ""
-        interop_time_offset: ""
+        granite_time_offset: 0
+        holocene_time_offset: 0
         fund_dev_accounts: true
       batcher_params:
         image: ""
         extra_params: []
       additional_services: []
   op_contract_deployer_params:
-    image: mslipper/op-deployer:latest
-    artifacts_url: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-4accd01f0c35c26f24d2aa71aba898dd7e5085a2ce5daadc8a84b10caf113409.tar.gz
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.6
   global_log_level: "info"
   global_node_selectors: {}
   global_tolerations: []

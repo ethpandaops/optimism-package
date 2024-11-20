@@ -47,7 +47,8 @@ SUBCATEGORY_PARAMS = {
 
 OP_CONTRACT_DEPLOYER_PARAMS = [
     "image",
-    "artifacts_url",
+    "l1_artifacts_locator",
+    "l2_artifacts_locator",
 ]
 
 ADDITIONAL_SERVICES_PARAMS = [
