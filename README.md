@@ -221,7 +221,7 @@ optimism_package:
         # Granite fork
         # Defaults to 0 (genesis activation) - decimal value
         # Offset is in seconds
-        granite_time_offset: ""
+        granite_time_offset: 0
 
         # Holocene fork
         # Defaults to None - not activated - decimal value
