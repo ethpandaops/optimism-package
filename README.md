@@ -260,8 +260,8 @@ optimism_package:
   # The docker image that should be used for the L2 contract deployer
   op_contract_deployer_params:
     image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.6
-    l1_artifacts_locator: op-contracts/v1.6.0
-    l2_artifacts_locator: op-contracts/v1.7.0-beta.1+l2-contracts
+    l1_artifacts_locator: tag://op-contracts/v1.6.0
+    l2_artifacts_locator: tag://op-contracts/v1.7.0-beta.1+l2-contracts
 
   # The global log level that all clients should log at
   # Valid values are "error", "warn", "info", "debug", and "trace"
