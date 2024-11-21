@@ -39,6 +39,7 @@ SUBCATEGORY_PARAMS = {
         "fjord_time_offset",
         "granite_time_offset",
         "holocene_time_offset",
+        "isthmus_time_offset",
         "interop_time_offset",
         "fund_dev_accounts",
     ],
@@ -47,7 +48,8 @@ SUBCATEGORY_PARAMS = {
 
 OP_CONTRACT_DEPLOYER_PARAMS = [
     "image",
-    "artifacts_url",
+    "l1_artifacts_locator",
+    "l2_artifacts_locator",
 ]
 
 ADDITIONAL_SERVICES_PARAMS = [

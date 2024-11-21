@@ -80,6 +80,7 @@ def input_parser(plan, input_args):
                     holocene_time_offset=result["network_params"][
                         "holocene_time_offset"
                     ],
+                    isthmus_time_offset=result["network_params"]["isthmus_time_offset"],
                     interop_time_offset=result["network_params"]["interop_time_offset"],
                     fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
                 ),
@@ -93,7 +94,12 @@ def input_parser(plan, input_args):
         ],
         op_contract_deployer_params=struct(
             image=results["op_contract_deployer_params"]["image"],
-            artifacts_url=results["op_contract_deployer_params"]["artifacts_url"],
+            l1_artifacts_locator=results["op_contract_deployer_params"][
+                "l1_artifacts_locator"
+            ],
+            l2_artifacts_locator=results["op_contract_deployer_params"][
+                "l2_artifacts_locator"
+            ],
         ),
         global_log_level=results["global_log_level"],
         global_node_selectors=results["global_node_selectors"],
@@ -208,8 +214,9 @@ def default_network_params():
         "name": "op-kurtosis",
         "seconds_per_slot": 2,
         "fjord_time_offset": 0,
-        "granite_time_offset": None,
+        "granite_time_offset": 0,
         "holocene_time_offset": None,
+        "isthmus_time_offset": None,
         "interop_time_offset": None,
         "fund_dev_accounts": True,
     }
@@ -256,8 +263,9 @@ def default_participant():
 
 def default_op_contract_deployer_params():
     return {
-        "image": "mslipper/op-deployer:latest",
-        "artifacts_url": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-4accd01f0c35c26f24d2aa71aba898dd7e5085a2ce5daadc8a84b10caf113409.tar.gz",
+        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.6",
+        "l1_artifacts_locator": "tag://op-contracts/v1.6.0",
+        "l2_artifacts_locator": "tag://op-contracts/v1.7.0-beta.1+l2-contracts",
     }
 
 

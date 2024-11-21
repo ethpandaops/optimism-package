@@ -230,14 +230,19 @@ optimism_package:
         fjord_time_offset: 0
 
         # Granite fork
-        # Defaults to None - not activated - decimal value
+        # Defaults to 0 (genesis activation) - decimal value
         # Offset is in seconds
-        granite_time_offset: ""
+        granite_time_offset: 0
 
         # Holocene fork
         # Defaults to None - not activated - decimal value
         # Offset is in seconds
         holocene_time_offset: ""
+
+        # Isthmus fork
+        # Defaults to None - not activated - decimal value
+        # Offset is in seconds
+        isthmus_time_offset: ""
 
         # Interop fork
         # Defaults to None - not activated - decimal value
@@ -265,8 +270,9 @@ optimism_package:
   # L2 contract deployer configuration - used for all L2 networks
   # The docker image that should be used for the L2 contract deployer
   op_contract_deployer_params:
-    image: mslipper/op-deployer:latest
-    artifacts_url: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-4accd01f0c35c26f24d2aa71aba898dd7e5085a2ce5daadc8a84b10caf113409.tar.gz
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.6
+    l1_artifacts_locator: tag://op-contracts/v1.6.0
+    l2_artifacts_locator: tag://op-contracts/v1.7.0-beta.1+l2-contracts
 
   # The global log level that all clients should log at
   # Valid values are "error", "warn", "info", "debug", and "trace"
