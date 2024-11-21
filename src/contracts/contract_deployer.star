@@ -40,12 +40,36 @@ def deploy_contracts(
         ),
     )
 
+    hardfork_schedule = []
+    for index, chain in enumerate(optimism_args.chains):
+        np = chain.network_params
+
+        # rename each hardfork to the name the override expects
+        renames = (
+            ("l2GenesisFjordTimeOffset", np.fjord_time_offset),
+            ("l2GenesisGraniteTimeOffset", np.granite_time_offset),
+            ("l2GenesisHoloceneTimeOffset", np.holocene_time_offset),
+            ("l2GenesisIsthmusTimeOffset", np.isthmus_time_offset),
+            ("l2GenesisInteropTimeOffset", np.interop_time_offset),
+        )
+
+        # only include the hardforks that have been activated since
+        # toml does not support null values
+        for fork_key, activation_timestamp in renames:
+            if activation_timestamp != None:
+                hardfork_schedule.append((index, fork_key, activation_timestamp))
+
     intent_updates = (
         [
             (
                 "string",
-                "contractArtifactsURL",
-                optimism_args.op_contract_deployer_params.artifacts_url,
+                "l1ContractsLocator",
+                optimism_args.op_contract_deployer_params.l1_artifacts_locator,
+            ),
+            (
+                "string",
+                "l2ContractsLocator",
+                optimism_args.op_contract_deployer_params.l2_artifacts_locator,
             ),
         ]
         + [
@@ -63,6 +87,14 @@ def deploy_contracts(
                 "true" if chain.network_params.fund_dev_accounts else "false",
             )
             for index, chain in enumerate(optimism_args.chains)
+        ]
+        + [
+            (
+                "string",
+                "chains.[{0}].deployOverrides.{1}".format(index, fork_key),
+                "0x%x" % activation_timestamp,
+            )
+            for index, fork_key, activation_timestamp in hardfork_schedule
         ]
     )
 
