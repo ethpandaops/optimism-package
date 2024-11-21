@@ -153,7 +153,11 @@ def parse_network_params(plan, input_args):
                     )
                 participant["cl_image"] = default_image
 
-            participants.append(participant)
+            for _ in range(0, participant["count"]):
+                participant_copy = ethereum_package_input_parser.deep_copy_participant(
+                    participant
+                )
+                participants.append(participant_copy)
 
         result = {
             "participants": participants,
