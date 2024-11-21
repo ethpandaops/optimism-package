@@ -1,5 +1,6 @@
 ## Welcome to Optimism Package
-The default package for Optimism
+The default package for Optimism. The kurtosis package uses [op-deployer](https://github.com/ethereum-optimism/optimism/tree/develop/op-deployer) to manage
+the L2 chains and all associated artifacts such as contract deployments.
 
 ```yaml
 optimism_package:
@@ -28,7 +29,7 @@ Kurtosis packages are parameterizable, meaning you can customize your network an
 kurtosis run github.com/ethpandaops/optimism-package --args-file https://raw.githubusercontent.com/ethpandaops/optimism-package/main/network_params.yaml
 ```
 
-For `--args-file` you can pass a local file path or a URL to a file.
+For `--args-file` parameters file, you can pass a local file path or a URL to a file.
 
 To clean up running enclaves and data, you can run:
 
@@ -38,6 +39,15 @@ kurtosis clean -a
 
 This will stop and remove all running enclaves and **delete all data**.
 
+#### Run with changes to the optimism package
+
+If you are attempting to test any changes to the package code, you can point to the directory as the `run` argument
+
+```bash
+cd ~/go/src/github.com/ethpandaops/optimism-package
+kurtosis run . --args-file ./network_params.yaml
+```
+
 # L2 Contract deployer
 The enclave will automatically deploy an optimism L2 contract on the L1 network. The contract address will be printed in the logs. You can use this contract address to interact with the L2 network.
 
@@ -46,7 +56,8 @@ Please refer to this Dockerfile if you want to see how the contract deployer ima
 
 ## Configuration
 
-To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
+To configure the package behaviour, you can modify your `network_params.yaml` file and use that as the input to `--args-file`.
+The full YAML schema that can be passed in is as follows with the defaults provided:
 
 ```yaml
 optimism_package:
@@ -292,6 +303,8 @@ optimism_package:
 
 ### Additional configuration recommendations
 
+#### L1 customization
+
 It is required you to launch an L1 Ethereum node to interact with the L2 network. You can use the `ethereum_package` to launch an Ethereum node. The `ethereum_package` configuration is as follows:
 
 ```yaml
@@ -312,6 +325,32 @@ ethereum_package:
     - dora
     - blockscout
 ```
+
+#### L2 customization with Hard Fork transitions
+
+To spin up an L2 chain with specific hard fork transition blocks and any local docker image to run the EL/CL components,
+use the `network_params` section of your arguments file to specify the hard fork transitions and custom images.
+
+```yaml
+optimism_package:
+  chains:
+    - participants:
+      - el_type: op-geth
+        el_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:<tag>"
+        cl_type: op-node
+        cl_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:<tag>"
+      - el_type: op-geth
+        el_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:<tag>"
+        cl_type: op-node
+        cl_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:<tag>"
+      network_params:
+        fjord_time_offset: 0
+        granite_time_offset: 0
+        holocene_time_offset: 4
+        isthmus_time_offset: 8
+```
+
+#### Multiple L2 chains
 
 Additionally, you can spin up multiple L2 networks by providing a list of L2 configuration parameters like so:
 
