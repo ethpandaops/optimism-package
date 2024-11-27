@@ -238,7 +238,7 @@ def get_config(
         "labels": ethereum_package_shared_utils.label_maker(
             client=constants.EL_TYPE.op_nethermind,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image[: constants.MAX_LABEL_LENGTH],
+            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
         ),
