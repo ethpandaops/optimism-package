@@ -14,6 +14,18 @@ optimism_package:
 ethereum_package:
   network_params:
     preset: minimal
+    genesis_delay: 5
+    additional_preloaded_contracts: '
+      {
+        "0x4e59b44847b379578588920cA78FbF26c0B4956C": {
+          "balance": "0ETH",
+          "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
+          "storage": {},
+          "nonce": "1"
+        }
+      }
+    '
+
 ```
 
 Please note, by default your network will be running a `minimal` preset Ethereum network. Click [here](https://github.com/ethereum/consensus-specs/blob/dev/configs/minimal.yaml) to learn more about minimal preset. You can [customize](https://github.com/ethpandaops/ethereum-package) the L1 Ethereum network by modifying the `ethereum_package` configuration.
@@ -299,6 +311,26 @@ optimism_package:
   # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
   # Defaults to false
   persistent: false
+
+# Ethereum package configuration
+ethereum_package:
+  network_params:
+    # The Ethereum network preset to use
+    preset: minimal
+    # The delay in seconds before the genesis block is mined
+    genesis_delay: 5
+    # Preloaded contracts for the Ethereum network
+    additional_preloaded_contracts: '
+      {
+        "0x4e59b44847b379578588920cA78FbF26c0B4956C": {
+          "balance": "0ETH",
+          "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
+          "storage": {},
+          "nonce": "1"
+        }
+      }
+    '
+
 ```
 
 ### Additional configuration recommendations
@@ -321,6 +353,17 @@ ethereum_package:
     - el_type: reth
   network_params:
     preset: minimal
+    genesis_delay: 5
+    additional_preloaded_contracts: '
+      {
+        "0x4e59b44847b379578588920cA78FbF26c0B4956C": {
+          "balance": "0ETH",
+          "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
+          "storage": {},
+          "nonce": "1"
+        }
+      }
+    '
   additional_services:
     - dora
     - blockscout
@@ -377,6 +420,18 @@ ethereum_package:
     - el_type: reth
   network_params:
     preset: minimal
+    genesis_delay: 5
+    additional_preloaded_contracts: '
+      {
+        "0x4e59b44847b379578588920cA78FbF26c0B4956C": {
+          "balance": "0ETH",
+          "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
+          "storage": {},
+          "nonce": "1"
+        }
+      }
+    '
+
   additional_services:
     - dora
     - blockscout
