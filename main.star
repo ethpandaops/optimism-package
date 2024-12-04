@@ -16,9 +16,14 @@ def run(plan, args):
     plan.print("Parsing the L1 input args")
     # If no args are provided, use the default values with minimal preset
     ethereum_args = args.get("ethereum_package", {})
-    external_l1_network_params = args.get("external_l1_network_params", {})
-    if "network_params" not in ethereum_args and not external_l1_network_params:
-        ethereum_args.update(input_parser.default_ethereum_package_network_params())
+    external_l1_args = args.get("external_l1_network_params", {})
+    if external_l1_args:
+        external_l1_args = input_parser.external_l1_network_params_input_parser(
+            plan, external_l1_args
+        )
+    else:
+        if "network_params" not in ethereum_args:
+            ethereum_args.update(input_parser.default_ethereum_package_network_params())
 
     # need to do a raw get here in case only optimism_package is provided.
     # .get will return None if the key is in the config with a None value.
@@ -31,35 +36,18 @@ def run(plan, args):
 
     # Deploy the L1
     l1_network = ""
-    if external_l1_network_params:
-        # Validate the struct.
-        EXTERNAL_L1_NETWORK_PARAMS = [
-            "network_id",
-            "rpc_kind",
-            "el_rpc_url",
-            "el_ws_url",
-            "cl_rpc_url",
-            "priv_key",
-        ]
-        for key in external_l1_network_params.keys():
-            if key not in EXTERNAL_L1_NETWORK_PARAMS:
-                fail(
-                    "Invalid parameter {0}, allowed fields: {1}".format(
-                        key, EXTERNAL_L1_NETWORK_PARAMS
-                    )
-                )
-
+    if external_l1_args:
         plan.print("Using external L1")
-        plan.print(external_l1_network_params)
+        plan.print(external_l1_args)
 
-        l1_rpc_url = external_l1_network_params.el_rpc_url
-        l1_priv_key = external_l1_network_params.priv_key
+        l1_rpc_url = external_l1_args.el_rpc_url
+        l1_priv_key = external_l1_args.priv_key
         l1_config_env_vars = {
-            "L1_RPC_KIND": external_l1_network_params.rpc_kind,
+            "L1_RPC_KIND": external_l1_args.rpc_kind,
             "L1_RPC_URL": l1_rpc_url,
-            "CL_RPC_URL": external_l1_network_params.cl_rpc_url,
-            "L1_WS_URL": external_l1_network_params.el_ws_url,
-            "L1_CHAIN_ID": external_l1_network_params.network_id,
+            "CL_RPC_URL": external_l1_args.cl_rpc_url,
+            "L1_WS_URL": external_l1_args.el_ws_url,
+            "L1_CHAIN_ID": external_l1_args.network_id,
         }
     else:
         plan.print("Deploying a local L1")
