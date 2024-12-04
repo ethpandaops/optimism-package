@@ -177,7 +177,7 @@ def get_config(
         "--http.addr=0.0.0.0",
         "--http.vhosts=*",
         "--http.corsdomain=*",
-        "--http.api=admin,engine,net,eth,web3,debug",
+        "--http.api=admin,engine,net,eth,web3,debug,miner",
         "--ws",
         "--ws.port={0}".format(WS_PORT_NUM),
         "--allow-insecure-unlock",
