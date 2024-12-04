@@ -34,10 +34,12 @@ jobs:
 
       - name: Run Starlark
         run: |
-          if [ "${{ matrix.file_name }}" != "./.github/tests/mix-with-tools-mev.yaml" ]; then
-            kurtosis run ${{ github.workspace }} --verbosity detailed --args-file ${{ matrix.file_name }}
-          else
+          if [ "${{ matrix.file_name }}" == "./.github/tests/mix-with-tools-mev.yaml" ]; then
             echo "Skipping ./.github/tests/mix-with-tools-mev.yaml"
+          elif [ "${{ matrix.file_name }}" == "./.github/tests/external_l1.yaml" ]; then
+            echo "Skipping ./.github/tests/external_l1.yaml"
+          else
+            kurtosis run --verbosity detailed --args-file ${{ matrix.file_name }} ${{ github.workspace }}
           fi
 
       - name: Check if Discord Webhook is Set
@@ -58,3 +60,23 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
           args: "The nightly test for ${{matrix.file_name}} on optimism-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+  run_with_external_l1_args:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Kurtosis
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli
+          kurtosis analytics disable
+      
+      - name: Deploy L1
+        run: kurtosis run --enclave test https://github.com/ethpandaops/ethereum-package
+      
+      - name: Run Starlark
+        run: |
+          kurtosis run --verbosity detailed --args-file ./.github/tests/external_l1.yaml ${{ github.workspace }}
