@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.2.0](https://github.com/ethpandaops/optimism-package/compare/1.1.0...1.2.0) (2024-12-04)
+
+
+### Features
+
+* add miner to op-geth ([#98](https://github.com/ethpandaops/optimism-package/issues/98)) ([01eccb4](https://github.com/ethpandaops/optimism-package/commit/01eccb4e7883a482bf0e40f075bddfd41afedceb))
+
+
+### Bug Fixes
+
+* add miner as an api ([#97](https://github.com/ethpandaops/optimism-package/issues/97)) ([349d815](https://github.com/ethpandaops/optimism-package/commit/349d81581937174df1193694319bd110884e561f))
+* image tag name ([#96](https://github.com/ethpandaops/optimism-package/issues/96)) ([28d6a79](https://github.com/ethpandaops/optimism-package/commit/28d6a79be673af41c7cf085972ffd451fdea8426))
+* readme ([#93](https://github.com/ethpandaops/optimism-package/issues/93)) ([1fb3de4](https://github.com/ethpandaops/optimism-package/commit/1fb3de431c535d1cb1acbcd214ef425e3c423a0a))
+* Update Nethermind scripts for Holocene ([#92](https://github.com/ethpandaops/optimism-package/issues/92)) ([50f0193](https://github.com/ethpandaops/optimism-package/commit/50f0193f734fad10c7c05f691e3ddbe08bdb50ca))
+
 ## [1.1.0](https://github.com/ethpandaops/optimism-package/compare/1.0.0...1.1.0) (2024-11-21)
 
 
