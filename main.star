@@ -32,6 +32,23 @@ def run(plan, args):
     # Deploy the L1
     l1_network = ""
     if external_l1_network_params:
+        # Validate the struct.
+        EXTERNAL_L1_NETWORK_PARAMS = [
+            "network_id",
+            "rpc_kind",
+            "el_rpc_url",
+            "el_ws_url",
+            "cl_rpc_url",
+            "priv_key",
+        ]
+        for key in external_l1_network_params.keys():
+            if key not in EXTERNAL_L1_NETWORK_PARAMS:
+                fail(
+                    "Invalid parameter {0}, allowed fields: {1}".format(
+                        key, EXTERNAL_L1_NETWORK_PARAMS
+                    )
+                )
+
         plan.print("Using external L1")
         plan.print(external_l1_network_params)
 
