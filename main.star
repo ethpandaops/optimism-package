@@ -42,6 +42,7 @@ def run(plan, args):
 
         l1_rpc_url = external_l1_args.el_rpc_url
         l1_priv_key = external_l1_args.priv_key
+
         l1_config_env_vars = {
             "L1_RPC_KIND": external_l1_args.rpc_kind,
             "L1_RPC_URL": l1_rpc_url,
@@ -53,17 +54,17 @@ def run(plan, args):
         plan.print("Deploying a local L1")
         l1 = ethereum_package.run(plan, ethereum_args)
         plan.print(l1.network_params)
+
         # Get L1 info
-        all_l1_participants = l1.all_participants
-        l1_network_params = l1.network_params
-        l1_network = l1_network_params.network
-        l1_network_id = l1.network_id
         l1_rpc_url = all_l1_participants[0].el_context
         l1_priv_key = l1.pre_funded_accounts[
             12
         ].private_key  # reserved for L2 contract deployers
+
+        l1_network_params = l1.network_params
+        l1_network = l1_network_params.network
         l1_config_env_vars = get_l1_config(
-            all_l1_participants, l1_network_params, l1_network_id
+            l1.all_participants, l1_network_params, l1.network_id
         )
 
     if l1_network == "kurtosis":
