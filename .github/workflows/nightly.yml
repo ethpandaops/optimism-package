@@ -33,14 +33,7 @@ jobs:
           kurtosis analytics disable
 
       - name: Run Starlark
-        run: |
-          if [ "${{ matrix.file_name }}" == "./.github/tests/mix-with-tools-mev.yaml" ]; then
-            echo "Skipping ./.github/tests/mix-with-tools-mev.yaml"
-          elif [ "${{ matrix.file_name }}" == "./.github/tests/external_l1.yaml" ]; then
-            echo "Skipping ./.github/tests/external_l1.yaml"
-          else
-            kurtosis run --verbosity detailed --args-file ${{ matrix.file_name }} ${{ github.workspace }}
-          fi
+        run: kurtosis run --verbosity detailed --args-file ${{ matrix.file_name }} ${{ github.workspace }}
 
       - name: Check if Discord Webhook is Set
         id: check_discord_webhook
@@ -75,8 +68,8 @@ jobs:
           kurtosis analytics disable
       
       - name: Deploy L1
-        run: kurtosis run --enclave test github.com/ethpandaops/ethereum-package@4.4.0
+        run: kurtosis run --enclave test --args-file ./.github/tests/external-l1/ethereum.yaml github.com/ethpandaops/ethereum-package@4.4.0
       
       - name: Run Starlark
         run: |
-          kurtosis run --enclave test --verbosity detailed --args-file ./.github/tests/external_l1.yaml ${{ github.workspace }}
+          kurtosis run --enclave test --verbosity detailed --args-file ./.github/tests/external-l1/optimism.yaml ${{ github.workspace }}
