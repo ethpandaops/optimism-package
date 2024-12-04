@@ -83,7 +83,7 @@ def run(plan, args):
             deployment_output,
             l1_config_env_vars,
             l1_priv_key,
-            l1_rpc_http_url,
+            l1_rpc_url,
             global_log_level,
             global_node_selectors,
             global_tolerations,
