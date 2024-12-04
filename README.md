@@ -282,9 +282,9 @@ optimism_package:
   # L2 contract deployer configuration - used for all L2 networks
   # The docker image that should be used for the L2 contract deployer
   op_contract_deployer_params:
-    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.6
-    l1_artifacts_locator: tag://op-contracts/v1.6.0
-    l2_artifacts_locator: tag://op-contracts/v1.7.0-beta.1+l2-contracts
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.7
+    l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz
+    l2_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz
 
   # The global log level that all clients should log at
   # Valid values are "error", "warn", "info", "debug", and "trace"

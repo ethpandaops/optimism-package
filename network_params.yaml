@@ -41,9 +41,9 @@ optimism_package:
         extra_params: []
       additional_services: []
   op_contract_deployer_params:
-    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.6
-    l1_artifacts_locator: tag://op-contracts/v1.6.0
-    l2_artifacts_locator: tag://op-contracts/v1.7.0-beta.1+l2-contracts
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.7
+    l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz
+    l2_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz
   global_log_level: "info"
   global_node_selectors: {}
   global_tolerations: []
@@ -59,6 +59,12 @@ ethereum_package:
           "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
           "storage": {},
           "nonce": "1"
-        }
+        },
+        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266": {
+          "balance": "10000ETH",
+          "code": "0x",
+          "storage": {},
+          "nonce": "0"
+        },
       }
     '
