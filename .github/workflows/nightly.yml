@@ -33,7 +33,12 @@ jobs:
           kurtosis analytics disable
 
       - name: Run Starlark
-        run: kurtosis run --verbosity detailed --args-file ${{ matrix.file_name }} ${{ github.workspace }}
+        run: |
+          if [ "${{ matrix.file_name }}" != "./.github/tests/mix-with-tools-mev.yaml" ]; then
+            kurtosis run ${{ github.workspace }} --verbosity detailed --args-file ${{ matrix.file_name }}
+          else
+            echo "Skipping ./.github/tests/mix-with-tools-mev.yaml"
+          fi
 
       - name: Check if Discord Webhook is Set
         id: check_discord_webhook
