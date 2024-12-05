@@ -23,6 +23,7 @@ def launch_l2(
 ):
     network_params = l2_args.network_params
     batcher_params = l2_args.batcher_params
+    mev_params = l2_args.mev_params
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))
     jwt_file = plan.upload_files(
@@ -36,6 +37,7 @@ def launch_l2(
         jwt_file,
         network_params,
         batcher_params,
+        mev_params,
         deployment_output,
         l1_config,
         l2_services_suffix,
@@ -43,6 +45,7 @@ def launch_l2(
         global_node_selectors,
         global_tolerations,
         persistent,
+        l2_args.additional_services,
     )
 
     all_el_contexts = []

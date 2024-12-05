@@ -25,6 +25,10 @@ DEFAULT_PROPOSER_IMAGES = {
     "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
 }
 
+DEFAULT_SIDECAR_IMAGES = {
+    "rollup-boost": "flashbots/rollup-boost:latest",
+}
+
 DEFAULT_ADDITIONAL_SERVICES = []
 
 
@@ -76,6 +80,10 @@ def input_parser(plan, input_args):
                         cl_max_cpu=participant["cl_max_cpu"],
                         cl_min_mem=participant["cl_min_mem"],
                         cl_max_mem=participant["cl_max_mem"],
+                        el_builder_type=participant["el_builder_type"],
+                        el_builder_image=participant["el_builder_image"],
+                        cl_builder_type=participant["cl_builder_type"],
+                        cl_builder_image=participant["cl_builder_image"],
                         node_selectors=participant["node_selectors"],
                         tolerations=participant["tolerations"],
                         count=participant["count"],
@@ -99,6 +107,9 @@ def input_parser(plan, input_args):
                 batcher_params=struct(
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
+                ),
+                mev_params=struct(
+                    rollup_boost_image=result["mev_params"]["rollup_boost_image"],
                 ),
                 additional_services=result["additional_services"],
             )
@@ -132,6 +143,9 @@ def parse_network_params(plan, input_args):
 
         batcher_params = default_batcher_params()
         batcher_params.update(chain.get("batcher_params", {}))
+
+        mev_params = default_mev_params()
+        mev_params.update(chain.get("mev_params", {}))
 
         network_name = network_params["name"]
         network_id = network_params["network_id"]
@@ -171,6 +185,30 @@ def parse_network_params(plan, input_args):
                     )
                 participant["cl_image"] = default_image
 
+            el_builder_type = participant["el_builder_type"]
+            el_builder_image = participant["el_builder_image"]
+            if el_builder_image == "":
+                default_image = DEFAULT_EL_IMAGES.get(el_builder_type, "")
+                if default_image == "":
+                    fail(
+                    "{0} received an empty image name and we don't have a default for it".format(
+                        el_builder_type
+                    )
+                )
+                participant["el_builder_image"] = default_image
+        
+            cl_builder_type = participant["cl_builder_type"]
+            cl_builder_image = participant["cl_builder_image"]
+            if cl_builder_image == "":
+                default_image = DEFAULT_CL_IMAGES.get(cl_builder_type, "")
+                if default_image == "":
+                    fail(
+                        "{0} received an empty image name and we don't have a default for it".format(
+                            cl_builder_type
+                        )
+                    )
+                participant["cl_builder_image"] = default_image
+
             for _ in range(0, participant["count"]):
                 participant_copy = ethereum_package_input_parser.deep_copy_participant(
                     participant
@@ -181,6 +219,7 @@ def parse_network_params(plan, input_args):
             "participants": participants,
             "network_params": network_params,
             "batcher_params": batcher_params,
+            "mev_params": mev_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
@@ -207,6 +246,10 @@ def default_optimism_args():
         "persistent": False,
     }
 
+def default_mev_params():
+    return {
+        "rollup_boost_image": "",
+    }
 
 def default_chains():
     return [
@@ -214,6 +257,7 @@ def default_chains():
             "participants": [default_participant()],
             "network_params": default_network_params(),
             "batcher_params": default_batcher_params(),
+            "mev_params": default_mev_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
         }
     ]
@@ -267,6 +311,10 @@ def default_participant():
         "cl_max_cpu": 0,
         "cl_min_mem": 0,
         "cl_max_mem": 0,
+        "el_builder_type": "op-geth",
+        "el_builder_image": "",
+        "cl_builder_type": "op-node",
+        "cl_builder_image": "",
         "node_selectors": {},
         "tolerations": [],
         "count": 1,
