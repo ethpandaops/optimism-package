@@ -431,7 +431,6 @@ ethereum_package:
         }
       }
     '
-
   additional_services:
     - dora
     - blockscout
