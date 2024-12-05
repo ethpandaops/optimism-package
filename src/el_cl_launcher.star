@@ -116,7 +116,7 @@ def launch(
     all_el_contexts = []
     sequencer_enabled = True
     rollup_boost_enabled = "rollup-boost" in additional_services
-    plan.print("Rollup Boost enabled: {0}".format(rollup_boost_enabled))
+
     for index, participant in enumerate(participants):
         cl_type = participant.cl_type
         el_type = participant.el_type
@@ -199,13 +199,13 @@ def launch(
         cl_service_name = "op-cl-{0}-{1}-{2}-{3}".format(
             index_str, cl_type, el_type, l2_services_suffix
         )
-        el_builder_service_name = "op-el-builder-{0}-{1}-{2}{3}".format(
+        el_builder_service_name = "op-el-builder-{0}-{1}-{2}-{3}".format(
             index_str, el_builder_type, cl_builder_type, l2_services_suffix
         )
-        cl_builder_service_name = "op-cl-builder-{0}-{1}-{2}{3}".format(
+        cl_builder_service_name = "op-cl-builder-{0}-{1}-{2}-{3}".format(
             index_str, cl_builder_type, el_builder_type, l2_services_suffix
         )
-        sidecar_service_name = "op-rollup-boost-{0}{1}".format(
+        sidecar_service_name = "op-rollup-boost-{0}-{1}".format(
             index_str, l2_services_suffix
         )
 
@@ -225,6 +225,7 @@ def launch(
         )
 
         if rollup_boost_enabled:
+            plan.print("Rollup boost enabled")
             el_builder_context = el_builder_launch_method(
                 plan,
                 el_builder_launcher,
@@ -235,8 +236,8 @@ def launch(
                 el_tolerations,
                 node_selectors,
                 all_el_contexts,
-                False,
-                None,
+                sequencer_enabled,
+                sequencer_context,
             )
 
             rollup_boost_image = (
@@ -283,8 +284,8 @@ def launch(
         if rollup_boost_enabled:
             cl_builder_context = cl_builder_launch_method(
                 plan,
-                cl_launcher,
-                cl_service_name,
+                cl_builder_launcher,
+                cl_builder_service_name,
                 participant,
                 global_log_level,
                 persistent,
