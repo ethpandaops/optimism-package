@@ -25,8 +25,6 @@ optimism_package:
         cl_max_cpu: 0
         cl_min_mem: 0
         cl_max_mem: 0
-        el_builder_type: "op-geth"
-        cl_builder_type: "op-node"
         node_selectors: {}
         tolerations: []
         count: 1
@@ -43,9 +41,7 @@ optimism_package:
         extra_params: []
       mev_params:
         rollup_boost_image: ""
-      additional_services: [
-        "rollup-boost"
-      ]
+      additional_services: []
   op_contract_deployer_params:
     image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.7
     l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz
