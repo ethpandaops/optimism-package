@@ -187,9 +187,7 @@ def get_config(
         "--Metrics.ExposeHost=0.0.0.0",
     ]
     if not sequencer_enabled:
-        cmd.append(
-            "--Optimism.SequencerUrl={0}".format(sequencer_context.beacon_http_url)
-        )
+        cmd.append("--Optimism.SequencerUrl={0}".format(sequencer_context.rpc_http_url))
 
     if len(existing_el_clients) > 0:
         cmd.append(
