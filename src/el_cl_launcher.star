@@ -226,19 +226,26 @@ def launch(
 
         if rollup_boost_enabled:
             plan.print("Rollup boost enabled")
-            el_builder_context = el_builder_launch_method(
-                plan,
-                el_builder_launcher,
-                el_builder_service_name,
-                participant,
-                global_log_level,
-                persistent,
-                el_tolerations,
-                node_selectors,
-                all_el_contexts,
-                sequencer_enabled,
-                sequencer_context,
-            )
+
+            if mev_params.builder_host == "" or mev_params.builder_port == "":
+                el_builder_context = el_builder_launch_method(
+                    plan,
+                    el_builder_launcher,
+                    el_builder_service_name,
+                    participant,
+                    global_log_level,
+                    persistent,
+                    el_tolerations,
+                    node_selectors,
+                    all_el_contexts,
+                    sequencer_enabled,
+                    sequencer_context,
+                )
+            else:
+                el_builder_context = struct(
+                    ip_addr=mev_params.builder_host,
+                    engine_rpc_port_num=mev_params.builder_port,
+                )
 
             rollup_boost_image = (
                 mev_params.rollup_boost_image

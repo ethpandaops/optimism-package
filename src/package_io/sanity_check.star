@@ -48,7 +48,7 @@ SUBCATEGORY_PARAMS = {
         "fund_dev_accounts",
     ],
     "batcher_params": ["image", "extra_params"],
-    "mev_params": ["rollup_boost_image"],
+    "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
 }
 
 OP_CONTRACT_DEPLOYER_PARAMS = [
