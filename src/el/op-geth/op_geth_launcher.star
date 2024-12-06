@@ -209,9 +209,7 @@ def get_config(
     ]
 
     if not sequencer_enabled:
-        cmd.append(
-            "--rollup.sequencerhttp={0}".format(sequencer_context.beacon_http_url)
-        )
+        cmd.append("--rollup.sequencerhttp={0}".format(sequencer_context.rpc_http_url))
 
     if len(existing_el_clients) > 0:
         cmd.append(
