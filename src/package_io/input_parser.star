@@ -110,6 +110,8 @@ def input_parser(plan, input_args):
                 ),
                 mev_params=struct(
                     rollup_boost_image=result["mev_params"]["rollup_boost_image"],
+                    builder_host=result["mev_params"]["builder_host"],
+                    builder_port=result["mev_params"]["builder_port"],
                 ),
                 additional_services=result["additional_services"],
             )
@@ -249,6 +251,8 @@ def default_optimism_args():
 def default_mev_params():
     return {
         "rollup_boost_image": "",
+        "builder_host": "",
+        "builder_port": "",
     }
 
 def default_chains():
