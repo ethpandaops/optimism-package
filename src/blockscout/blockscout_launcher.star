@@ -45,7 +45,7 @@ VERIF_USED_PORTS = {
 def launch_blockscout(
     plan,
     l2_services_suffix,
-    l1_el_context,
+    l1_rpc_url,
     l2_el_context,
     l2_network_name,
     deployment_output,
@@ -79,7 +79,7 @@ def launch_blockscout(
 
     config_backend = get_config_backend(
         postgres_output,
-        l1_el_context,
+        l1_rpc_url,
         l2_el_context,
         verif_url,
         l2_network_name,
@@ -122,7 +122,7 @@ def get_config_verif():
 
 def get_config_backend(
     postgres_output,
-    l1_el_context,
+    l1_rpc_url,
     l2_el_context,
     verif_url,
     l2_network_name,
@@ -139,7 +139,7 @@ def get_config_backend(
 
     optimism_env_vars = {
         "CHAIN_TYPE": "optimism",
-        "INDEXER_OPTIMISM_L1_RPC": l1_el_context.rpc_http_url,
+        "INDEXER_OPTIMISM_L1_RPC": l1_rpc_url,
         # "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": "",
         # "INDEXER_OPTIMISM_L1_BATCH_START_BLOCK": "",
         "INDEXER_OPTIMISM_L1_BATCH_INBOX": "0xff00000000000000000000000000000000042069",
