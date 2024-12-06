@@ -66,6 +66,16 @@ ROOT_PARAMS = [
 ]
 
 
+EXTERNAL_L1_NETWORK_PARAMS = [
+    "network_id",
+    "rpc_kind",
+    "el_rpc_url",
+    "el_ws_url",
+    "cl_rpc_url",
+    "priv_key",
+]
+
+
 def deep_validate_params(plan, input_args, category, allowed_params):
     if category in input_args:
         for item in input_args[category]:
@@ -149,3 +159,13 @@ def sanity_check(plan, optimism_config):
         )
 
     plan.print("Sanity check for OP package passed")
+
+
+def external_l1_network_params_input_parser(plan, external_l1_network_params):
+    for key in external_l1_network_params.keys():
+        if key not in EXTERNAL_L1_NETWORK_PARAMS:
+            fail(
+                "Invalid parameter {0}, allowed fields: {1}".format(
+                    key, EXTERNAL_L1_NETWORK_PARAMS
+                )
+            )

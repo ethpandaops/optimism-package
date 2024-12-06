@@ -149,7 +149,7 @@ def launch(
             index_str, cl_type, el_type, l2_services_suffix
         )
 
-        sequencer_context = all_cl_contexts[0] if len(all_cl_contexts) > 0 else None
+        sequencer_context = all_el_contexts[0] if len(all_el_contexts) > 0 else None
         el_context = el_launch_method(
             plan,
             el_launcher,
