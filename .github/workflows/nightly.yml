@@ -58,3 +58,23 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
           args: "The nightly test for ${{matrix.file_name}} on optimism-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+  run_with_external_l1_args:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Kurtosis
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli
+          kurtosis analytics disable
+      
+      - name: Deploy L1
+        run: kurtosis run --enclave test --args-file ./.github/tests/external-l1/ethereum.yaml github.com/ethpandaops/ethereum-package
+      
+      - name: Run Starlark
+        run: |
+          kurtosis run --enclave test --verbosity detailed --args-file ./.github/tests/external-l1/optimism.yaml ${{ github.workspace }}

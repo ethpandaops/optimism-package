@@ -28,6 +28,18 @@ DEFAULT_PROPOSER_IMAGES = {
 DEFAULT_ADDITIONAL_SERVICES = []
 
 
+def external_l1_network_params_input_parser(plan, input_args):
+    sanity_check.external_l1_network_params_input_parser(plan, input_args)
+    return struct(
+        network_id=input_args["network_id"],
+        rpc_kind=input_args["rpc_kind"],
+        el_rpc_url=input_args["el_rpc_url"],
+        el_ws_url=input_args["el_ws_url"],
+        cl_rpc_url=input_args["cl_rpc_url"],
+        priv_key=input_args["priv_key"],
+    )
+
+
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     results = parse_network_params(plan, input_args)
