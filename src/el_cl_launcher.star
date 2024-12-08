@@ -30,6 +30,7 @@ def launch(
     global_node_selectors,
     global_tolerations,
     persistent,
+    da_server_context,
 ):
     el_launchers = {
         "op-geth": {
@@ -177,6 +178,7 @@ def launch(
             all_cl_contexts,
             l1_config_env_vars,
             sequencer_enabled,
+            da_server_context,
         )
 
         sequencer_enabled = False

@@ -44,6 +44,12 @@ SUBCATEGORY_PARAMS = {
         "fund_dev_accounts",
     ],
     "batcher_params": ["image", "extra_params"],
+    "da_server_params": [
+        "image",
+        "build_image",
+        "da_server_extra_args",
+        "generic_commitment",
+    ],
 }
 
 OP_CONTRACT_DEPLOYER_PARAMS = [
@@ -54,6 +60,7 @@ OP_CONTRACT_DEPLOYER_PARAMS = [
 
 ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
+    "da_server",
 ]
 
 ROOT_PARAMS = [

@@ -73,6 +73,7 @@ def launch(
     existing_cl_clients,
     l1_config_env_vars,
     sequencer_enabled,
+    da_server_context,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
         endpoint="/",
@@ -104,6 +105,7 @@ def launch(
         l1_config_env_vars,
         beacon_node_identity_recipe,
         sequencer_enabled,
+        da_server_context,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -148,6 +150,7 @@ def get_beacon_config(
     l1_config_env_vars,
     beacon_node_identity_recipe,
     sequencer_enabled,
+    da_server_context,
 ):
     EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -178,7 +181,11 @@ def get_beacon_config(
         "--p2p.listen.ip=0.0.0.0",
         "--p2p.listen.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--p2p.listen.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        "--altda.enabled=" + str(da_server_context.enabled),
+        "--altda.da-service=" + str(da_server_context.generic_commitment),
+        "--altda.da-server=" + da_server_context.http_url,
     ]
+    plan.print(da_server_context.generic_commitment)
 
     sequencer_private_key = util.read_network_config_value(
         plan,
