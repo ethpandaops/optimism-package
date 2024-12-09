@@ -21,6 +21,7 @@ hildr = import_module("./cl/hildr/hildr_launcher.star")
 # MEV
 rollup_boost = import_module("./mev/rollup-boost/rollup_boost_launcher.star")
 
+
 def launch(
     plan,
     jwt_file,
@@ -148,7 +149,7 @@ def launch(
                     cl_type, ",".join(cl_launchers.keys())
                 )
             )
-        
+
         if el_builder_type not in el_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(

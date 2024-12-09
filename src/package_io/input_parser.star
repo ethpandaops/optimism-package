@@ -193,12 +193,12 @@ def parse_network_params(plan, input_args):
                 default_image = DEFAULT_EL_IMAGES.get(el_builder_type, "")
                 if default_image == "":
                     fail(
-                    "{0} received an empty image name and we don't have a default for it".format(
-                        el_builder_type
+                        "{0} received an empty image name and we don't have a default for it".format(
+                            el_builder_type
+                        )
                     )
-                )
                 participant["el_builder_image"] = default_image
-        
+
             cl_builder_type = participant["cl_builder_type"]
             cl_builder_image = participant["cl_builder_image"]
             if cl_builder_image == "":
@@ -248,12 +248,14 @@ def default_optimism_args():
         "persistent": False,
     }
 
+
 def default_mev_params():
     return {
         "rollup_boost_image": "",
         "builder_host": "",
         "builder_port": "",
     }
+
 
 def default_chains():
     return [
