@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
+set -euo pipefail
 
 export ETH_RPC_URL="$L1_RPC_URL"
 
 addr=$(cast wallet address "$PRIVATE_KEY")
 nonce=$(cast nonce "$addr")
 mnemonic="test test test test test test test test test test test junk"
+roles=("proposer" "batcher" "sequencer" "challenger" "L2ProxyAdmin" "L1ProxyAdmin" "BaseFeeVaultRecipient" "L1FeeVaultRecipient" "SequencerFeeVaultRecipient" "SystemConfigOwner")
 
 IFS=',';read -r -a chain_ids <<< "$1"
 
@@ -20,21 +21,25 @@ send() {
 }
 
 for chain_id in "${chain_ids[@]}"; do
-  proposer_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/1")
-  proposer_addr=$(cast wallet address "$proposer_priv")
-  write_keyfile "$proposer_addr" "$proposer_priv" "proposer-$chain_id"
-  batcher_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/2")
-  batcher_addr=$(cast wallet address "$batcher_priv")
-  write_keyfile "$batcher_addr" "$batcher_priv" "batcher-$chain_id"
-  sequencer_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/3")
-  sequencer_addr=$(cast wallet address "$sequencer_priv")
-  write_keyfile "$sequencer_addr" "$sequencer_priv" "sequencer-$chain_id"
-  challenger_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/4")
-  challenger_addr=$(cast wallet address "$challenger_priv")
-  write_keyfile "$challenger_addr" "$challenger_priv" "challenger-$chain_id"
-  send "$proposer_addr"
-  send "$batcher_addr"
-  send "$challenger_addr"
+  for index in "${!roles[@]}"; do
+    role="${roles[$index]}"
+    role_idx=$((index+1))
+
+    # Skip wallet addrs for anything other Proposer/Batcher/Sequencer/Challenger if not on local L1
+    if [[ "${L1_NETWORK}" != "local" && $role_idx -gt 4 ]]; then
+      continue
+    fi
+
+    private_key=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/$role_idx")
+    address=$(cast wallet address "${private_key}")
+    write_keyfile "${address}" "${private_key}" "${role}-$chain_id"
+    send "${address}"
+
+    echo "${role} on chain $chain_id, private key:"${private_key}", address:"${address}""
+  done
 
   cat "/network-data/genesis-$chain_id.json" | jq --from-file /fund-script/gen2spec.jq > "/network-data/chainspec-$chain_id.json"
 done
+
+echo "L1 faucet private key:"0x${PRIVATE_KEY}", address:"${addr}""
+echo "L2 faucet private key:"0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", address:"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266""
