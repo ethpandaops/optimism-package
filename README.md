@@ -193,6 +193,31 @@ optimism_package:
         cl_min_mem: 0
         cl_max_mem: 0
 
+      # Builder client specific flags
+        # The type of builder EL client that should be started
+        # Valid values are:
+        # op-geth
+        # op-reth
+        el_builder_type: ""
+        
+        # The Docker image that should be used for the builder EL client; leave blank to use the default for the client type
+        # Defaults by client:
+        # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
+        # - op-reth: parithoshj/op-reth:latest
+        el_builder_image: ""
+
+        # The type of builder CL client that should be started
+        # Valid values are:
+        # op-node
+        # hildr
+        cl_builder_type: ""
+
+        # The Docker image that should be used for the builder CL client; leave blank to use the default for the client type
+        # Defaults by client:
+        # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop
+        # - hildr: ghcr.io/optimism-java/hildr:latest
+        cl_builder_image: ""
+
         # Participant specific flags
         # Node selector
         # Only works with Kubernetes
@@ -272,11 +297,23 @@ optimism_package:
 
         # A list of optional extra params that will be passed to the batcher container for modifying its behaviour
         extra_params: []
+      
+      # Default MEV configuration
+      mev_params:
+        # The Docker image that should be used for rollup boost; leave blank to use the default op-rollup-boost image
+        rollup_boost_image: ""
+
+        # The host of an external builder
+        builder_host: ""
+
+        # The port of an external builder
+        builder_port: ""
 
       # Additional services to run alongside the network
       # Defaults to []
       # Available services:
       # - blockscout
+      # - rollup-boost
       additional_services: []
 
   # L2 contract deployer configuration - used for all L2 networks
@@ -436,6 +473,26 @@ ethereum_package:
     - blockscout
 ```
 Note: if configuring multiple L2s, make sure that the `network_id` and `name` are set to differentiate networks.
+
+#### Rollup Boost for External Block Building
+
+Rollup Boost is a sidecar to the sequencer op-node that allows blocks to be built by an external builder on the L2 network.
+
+To use rollup boost, you can add `rollup-boost` as an additional service and configure the `mev_params` section of your arguments file to specify the rollup boost image. Optionally, you can specify the host and port of an external builder outside of the Kurtosis enclave.
+
+```yaml
+optimism_package:
+  chains:
+    - participants:
+        - el_builder_type: op-geth
+        - cl_builder_type: op-node
+      mev_params:
+        rollup_boost_image: "flashbots/rollup-boost:latest"
+        builder_host: "localhost"
+        builder_port: "8545"
+      additional_services:
+        - rollup-boost
+```
 
 ### Additional configurations
 Please find examples of additional configurations in the [test folder](.github/tests/).
