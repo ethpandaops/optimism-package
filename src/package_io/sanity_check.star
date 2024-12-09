@@ -24,6 +24,10 @@ PARTICIPANT_CATEGORIES = {
         "cl_max_cpu",
         "cl_min_mem",
         "cl_max_mem",
+        "el_builder_type",
+        "el_builder_image",
+        "cl_builder_type",
+        "cl_builder_image",
         "node_selectors",
         "tolerations",
         "count",
@@ -44,6 +48,7 @@ SUBCATEGORY_PARAMS = {
         "fund_dev_accounts",
     ],
     "batcher_params": ["image", "extra_params"],
+    "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
 }
 
 OP_CONTRACT_DEPLOYER_PARAMS = [
@@ -54,6 +59,7 @@ OP_CONTRACT_DEPLOYER_PARAMS = [
 
 ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
+    "rollup-boost",
 ]
 
 ROOT_PARAMS = [
