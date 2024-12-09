@@ -300,7 +300,8 @@ optimism_package:
       
       # Default MEV configuration
       mev_params:
-        # The Docker image that should be used for rollup boost; leave blank to use the default op-rollup-boost image
+        # The Docker image that should be used for rollup boost; leave blank to use the default rollup-boost image
+        # Defaults to "flashbots/rollup-boost:latest"
         rollup_boost_image: ""
 
         # The host of an external builder
@@ -485,7 +486,7 @@ optimism_package:
   chains:
     - participants:
         - el_builder_type: op-geth
-        - cl_builder_type: op-node
+          cl_builder_type: op-node
       mev_params:
         rollup_boost_image: "flashbots/rollup-boost:latest"
         builder_host: "localhost"
