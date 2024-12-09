@@ -56,6 +56,7 @@ def run(plan, args):
         plan.print(l1.network_params)
         # Get L1 info
         all_l1_participants = l1.all_participants
+        l1_network = "local"
         l1_network_params = l1.network_params
         l1_network_id = l1.network_id
         l1_rpc_url = all_l1_participants[0].el_context.rpc_http_url
@@ -78,6 +79,7 @@ def run(plan, args):
         l1_priv_key,
         l1_config_env_vars,
         optimism_args_with_right_defaults,
+        l1_network
     )
 
     for chain in optimism_args_with_right_defaults.chains:
