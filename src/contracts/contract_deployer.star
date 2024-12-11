@@ -14,6 +14,7 @@ def deploy_contracts(
     priv_key,
     l1_config_env_vars,
     optimism_args,
+    l1_network
 ):
     l2_chain_ids = ",".join(
         [str(chain.network_params.network_id) for chain in optimism_args.chains]
@@ -163,7 +164,7 @@ def deploy_contracts(
         name="op-deployer-fund",
         description="Collect keys, and fund addresses",
         image=utils.DEPLOYMENT_UTILS_IMAGE,
-        env_vars={"PRIVATE_KEY": str(priv_key), "FUND_VALUE": "10ether"}
+        env_vars={"PRIVATE_KEY": str(priv_key), "FUND_VALUE": "10ether", "L1_NETWORK": str(l1_network)}
         | l1_config_env_vars,
         store=[
             StoreSpec(
