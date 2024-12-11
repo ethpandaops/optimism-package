@@ -12,6 +12,7 @@ def launch_participant_network(
     jwt_file,
     network_params,
     batcher_params,
+    mev_params,
     deployment_output,
     l1_config_env_vars,
     l2_services_suffix,
@@ -19,6 +20,7 @@ def launch_participant_network(
     global_node_selectors,
     global_tolerations,
     persistent,
+    additional_services,
 ):
     num_participants = len(participants)
     # First EL and sequencer CL
@@ -26,6 +28,7 @@ def launch_participant_network(
         plan,
         jwt_file,
         network_params,
+        mev_params,
         deployment_output,
         participants,
         num_participants,
@@ -35,6 +38,7 @@ def launch_participant_network(
         global_node_selectors,
         global_tolerations,
         persistent,
+        additional_services,
     )
 
     all_participants = []
