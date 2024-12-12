@@ -7,7 +7,7 @@ export ETH_RPC_URL="$L1_RPC_URL"
 addr=$(cast wallet address "$PRIVATE_KEY")
 nonce=$(cast nonce "$addr")
 mnemonic="test test test test test test test test test test test junk"
-roles=("proposer" "batcher" "sequencer" "challenger" "L2ProxyAdmin" "L1ProxyAdmin" "BaseFeeVaultRecipient" "L1FeeVaultRecipient" "SequencerFeeVaultRecipient" "SystemConfigOwner")
+roles=("proposer" "batcher" "sequencer" "challenger" "l2ProxyAdmin" "l1ProxyAdmin" "baseFeeVaultRecipient" "l1FeeVaultRecipient" "sequencerFeeVaultRecipient" "systemConfigOwner")
 
 IFS=',';read -r -a chain_ids <<< "$1"
 
@@ -20,6 +20,8 @@ send() {
   nonce=$((nonce+1))
 }
 
+# Create a JSON object to store all the wallet addresses and private keys, start with an empty one
+wallets_json=$(jq -n '{}')
 for chain_id in "${chain_ids[@]}"; do
   for index in "${!roles[@]}"; do
     role="${roles[$index]}"
@@ -35,11 +37,18 @@ for chain_id in "${chain_ids[@]}"; do
     write_keyfile "${address}" "${private_key}" "${role}-$chain_id"
     send "${address}"
 
-    echo "${role} on chain $chain_id, private key:"${private_key}", address:"${address}""
-  done
+    wallets_json=$(echo "$wallets_json" | jq \
+      --arg role "$role" \
+      --arg private_key "$private_key" \
+      --arg address "$address" \
+      '.[$role + "_private_key"] = $private_key | .[$role + "_address"] = $address')
 
+  done
   cat "/network-data/genesis-$chain_id.json" | jq --from-file /fund-script/gen2spec.jq > "/network-data/chainspec-$chain_id.json"
 done
 
-echo "L1 faucet private key:"0x${PRIVATE_KEY}", address:"${addr}""
-echo "L2 faucet private key:"0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", address:"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266""
+echo "Wallet private key and addresses"
+wallets_json=$(echo "$wallets_json" | jq --arg addr "$addr" --arg private_key "0x$PRIVATE_KEY" '.["l1_faucet_private_key"] = $private_key | .["l1_faucet_address"] = $addr')
+wallets_json=$(echo "$wallets_json" | jq --arg addr "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" --arg private_key  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" '.["l2_faucet_private_key"] = $private_key | .["l2_faucet_address"] = $addr')
+echo "$wallets_json" > "/network-data/wallets.json"
+echo "$wallets_json"
