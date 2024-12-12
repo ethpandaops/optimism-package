@@ -41,14 +41,14 @@ for chain_id in "${chain_ids[@]}"; do
       --arg role "$role" \
       --arg private_key "$private_key" \
       --arg address "$address" \
-      '.[$role + "_private_key"] = $private_key | .[$role + "_address"] = $address')
+      '.[$role + "PrivateKey"] = $private_key | .[$role + "Address"] = $address')
 
   done
   cat "/network-data/genesis-$chain_id.json" | jq --from-file /fund-script/gen2spec.jq > "/network-data/chainspec-$chain_id.json"
 done
 
 echo "Wallet private key and addresses"
-wallets_json=$(echo "$wallets_json" | jq --arg addr "$addr" --arg private_key "0x$PRIVATE_KEY" '.["l1_faucet_private_key"] = $private_key | .["l1_faucet_address"] = $addr')
-wallets_json=$(echo "$wallets_json" | jq --arg addr "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" --arg private_key  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" '.["l2_faucet_private_key"] = $private_key | .["l2_faucet_address"] = $addr')
+wallets_json=$(echo "$wallets_json" | jq --arg addr "$addr" --arg private_key "0x$PRIVATE_KEY" '.["l1FaucetPrivateKey"] = $private_key | .["l1FaucetAddress"] = $addr')
+wallets_json=$(echo "$wallets_json" | jq --arg addr "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" --arg private_key  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" '.["l2FaucetPrivateKey"] = $private_key | .["l2FaucetAddress"] = $addr')
 echo "$wallets_json" > "/network-data/wallets.json"
 echo "$wallets_json"
