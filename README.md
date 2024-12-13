@@ -495,6 +495,14 @@ optimism_package:
         - rollup-boost
 ```
 
+#### Run tx-fuzz to send l2 transactions
+
+Compile https://github.com/MariusVanDerWijden/tx-fuzz locally per instructions in the repo. Run tx-fuzz against the l2 EL client's RPC URL and using the pre-funded wallet
+
+```
+./livefuzzer spam  --sk "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" --rpc http://127.0.0.1:<port> --slot-time 2
+```
+
 ### Additional configurations
 Please find examples of additional configurations in the [test folder](.github/tests/).
 
@@ -534,4 +542,12 @@ kurtosis service logs <enclave-name> <service-name> -f .   (-f tails the log)
 ```
 kurtosis service stop <enclave-name> <service-name>
 kurtosis service start <enclave-name> <service-name>
+```
+
+## Contributing
+
+If you have made changes and would like to submit a PR, test locally and make sure to run `lint` on your changes
+
+```
+kurtosis lint  --format .
 ```
