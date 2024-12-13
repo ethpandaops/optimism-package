@@ -79,7 +79,7 @@ def run(plan, args):
         l1_priv_key,
         l1_config_env_vars,
         optimism_args_with_right_defaults,
-        l1_network
+        l1_network,
     )
 
     for chain in optimism_args_with_right_defaults.chains:
