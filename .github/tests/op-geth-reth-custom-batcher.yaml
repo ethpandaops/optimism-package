@@ -1,0 +1,13 @@
+optimism_package:
+  chains:
+    - participants:
+      - el_type: op-geth
+        cl_type: op-node
+      - el_type: op-reth
+        cl_type: op-node
+      network_params:
+        fjord_time_offset: 0
+        granite_time_offset: 0
+        holocene_time_offset: 100
+      batcher_params:
+        extra_params: [--max-channel-duration=60, --max-l1-tx-size-bytes=10000, --target-num-frames=5, --data-availability-type=calldata, --batch-type=0]

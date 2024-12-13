@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
+set -euo pipefail
 
 export ETH_RPC_URL="$L1_RPC_URL"
 
 addr=$(cast wallet address "$PRIVATE_KEY")
 nonce=$(cast nonce "$addr")
 mnemonic="test test test test test test test test test test test junk"
+roles=("proposer" "batcher" "sequencer" "challenger" "l2ProxyAdmin" "l1ProxyAdmin" "baseFeeVaultRecipient" "l1FeeVaultRecipient" "sequencerFeeVaultRecipient" "systemConfigOwner")
 
 IFS=',';read -r -a chain_ids <<< "$1"
 
@@ -19,22 +20,35 @@ send() {
   nonce=$((nonce+1))
 }
 
+# Create a JSON object to store all the wallet addresses and private keys, start with an empty one
+wallets_json=$(jq -n '{}')
 for chain_id in "${chain_ids[@]}"; do
-  proposer_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/1")
-  proposer_addr=$(cast wallet address "$proposer_priv")
-  write_keyfile "$proposer_addr" "$proposer_priv" "proposer-$chain_id"
-  batcher_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/2")
-  batcher_addr=$(cast wallet address "$batcher_priv")
-  write_keyfile "$batcher_addr" "$batcher_priv" "batcher-$chain_id"
-  sequencer_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/3")
-  sequencer_addr=$(cast wallet address "$sequencer_priv")
-  write_keyfile "$sequencer_addr" "$sequencer_priv" "sequencer-$chain_id"
-  challenger_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/4")
-  challenger_addr=$(cast wallet address "$challenger_priv")
-  write_keyfile "$challenger_addr" "$challenger_priv" "challenger-$chain_id"
-  send "$proposer_addr"
-  send "$batcher_addr"
-  send "$challenger_addr"
+  for index in "${!roles[@]}"; do
+    role="${roles[$index]}"
+    role_idx=$((index+1))
 
+    # Skip wallet addrs for anything other Proposer/Batcher/Sequencer/Challenger if not on local L1
+    if [[ "${L1_NETWORK}" != "local" && $role_idx -gt 4 ]]; then
+      continue
+    fi
+
+    private_key=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/$role_idx")
+    address=$(cast wallet address "${private_key}")
+    write_keyfile "${address}" "${private_key}" "${role}-$chain_id"
+    send "${address}"
+
+    wallets_json=$(echo "$wallets_json" | jq \
+      --arg role "$role" \
+      --arg private_key "$private_key" \
+      --arg address "$address" \
+      '.[$role + "PrivateKey"] = $private_key | .[$role + "Address"] = $address')
+
+  done
   cat "/network-data/genesis-$chain_id.json" | jq --from-file /fund-script/gen2spec.jq > "/network-data/chainspec-$chain_id.json"
 done
+
+echo "Wallet private key and addresses"
+wallets_json=$(echo "$wallets_json" | jq --arg addr "$addr" --arg private_key "0x$PRIVATE_KEY" '.["l1FaucetPrivateKey"] = $private_key | .["l1FaucetAddress"] = $addr')
+wallets_json=$(echo "$wallets_json" | jq --arg addr "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" --arg private_key  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" '.["l2FaucetPrivateKey"] = $private_key | .["l2FaucetAddress"] = $addr')
+echo "$wallets_json" > "/network-data/wallets.json"
+echo "$wallets_json"
