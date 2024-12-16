@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.2.0](https://github.com/ethpandaops/optimism-package/compare/1.1.0...1.2.0) (2024-12-13)
+
+
+### Features
+
+* add miner to op-geth ([#98](https://github.com/ethpandaops/optimism-package/issues/98)) ([01eccb4](https://github.com/ethpandaops/optimism-package/commit/01eccb4e7883a482bf0e40f075bddfd41afedceb))
+* add miner to op-reth ([#99](https://github.com/ethpandaops/optimism-package/issues/99)) ([9bd409e](https://github.com/ethpandaops/optimism-package/commit/9bd409e826022a316f460035a41e64a5751a087e))
+* add option to deploy the package to an external layer 1 ([#104](https://github.com/ethpandaops/optimism-package/issues/104)) ([a19a5fb](https://github.com/ethpandaops/optimism-package/commit/a19a5fb3d35c64f2ad86d6db1827b95594e2c302))
+* integrate Rollup boost ([#105](https://github.com/ethpandaops/optimism-package/issues/105)) ([df0aa48](https://github.com/ethpandaops/optimism-package/commit/df0aa48cb669bed7abd78f20960e5aafd83ac949))
+
+
+### Bug Fixes
+
+* add miner as an api ([#97](https://github.com/ethpandaops/optimism-package/issues/97)) ([349d815](https://github.com/ethpandaops/optimism-package/commit/349d81581937174df1193694319bd110884e561f))
+* image tag name ([#96](https://github.com/ethpandaops/optimism-package/issues/96)) ([28d6a79](https://github.com/ethpandaops/optimism-package/commit/28d6a79be673af41c7cf085972ffd451fdea8426))
+* Readme ([#103](https://github.com/ethpandaops/optimism-package/issues/103)) ([0d60a9d](https://github.com/ethpandaops/optimism-package/commit/0d60a9d3997f83ecee6f7f6695027f819d776309))
+* readme ([#93](https://github.com/ethpandaops/optimism-package/issues/93)) ([1fb3de4](https://github.com/ethpandaops/optimism-package/commit/1fb3de431c535d1cb1acbcd214ef425e3c423a0a))
+* remove additional example from network_params ([#107](https://github.com/ethpandaops/optimism-package/issues/107)) ([b58e98e](https://github.com/ethpandaops/optimism-package/commit/b58e98e920ea75d7863e8aaf5a2bac6dfd629c8c))
+* sequencer forwarding ([#106](https://github.com/ethpandaops/optimism-package/issues/106)) ([0505def](https://github.com/ethpandaops/optimism-package/commit/0505defac34beb9ac51c8d280c46e3b2fe87579a))
+* update default network params ([e0902cf](https://github.com/ethpandaops/optimism-package/commit/e0902cfc7a1a24cde93cfb83993b099718d7ec5b))
+* Update Nethermind scripts for Holocene ([#92](https://github.com/ethpandaops/optimism-package/issues/92)) ([50f0193](https://github.com/ethpandaops/optimism-package/commit/50f0193f734fad10c7c05f691e3ddbe08bdb50ca))
+
 ## [1.1.0](https://github.com/ethpandaops/optimism-package/compare/1.0.0...1.1.0) (2024-11-21)
 
 
