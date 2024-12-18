@@ -28,9 +28,7 @@ def get_used_ports():
     }
     return used_ports
 
-
 ENTRYPOINT_ARGS = ["sh", "-c"]
-
 
 def launch(
     plan,
