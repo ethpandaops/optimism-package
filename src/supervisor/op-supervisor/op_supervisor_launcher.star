@@ -14,15 +14,15 @@ ethereum_package_constants = import_module(
 SUPERVISOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-supervisor/op-supervisor-data"
 
 # Port IDs
-SUPERVISOR_HTTP_PORT_ID = "http"
+SUPERVISOR_RPC_PORT_ID = "rpc"
 
 # Port nums
-SUPERVISOR_HTTP_PORT_NUM = 8548
+SUPERVISOR_RPC_PORT_NUM = 8545
 
 def get_used_ports():
     used_ports = {
-        SUPERVISOR_HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            SUPERVISOR_HTTP_PORT_NUM,
+        SUPERVISOR_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+            SUPERVISOR_RPC_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
@@ -59,13 +59,12 @@ def launch(
 
     supervisor_service = plan.add_service(service_name, config)
 
-    supervisor_http_port = supervisor_service.ports[SUPERVISOR_HTTP_PORT_ID]
+    supervisor_rpc_port = supervisor_service.ports[SUPERVISOR_RPC_PORT_ID]
     supervisor_http_url = "http://{0}:{1}".format(
-        supervisor_service.ip_address, supervisor_http_port.number
+        supervisor_service.ip_address, supervisor_rpc_port.number
     )
 
     return "op_supervisor"
-
 
 def get_supervisor_config(
     plan,
