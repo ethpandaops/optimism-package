@@ -101,16 +101,10 @@ def run(plan, args):
         ))
     
     # deploy op-supervisor
-    op_supervisor_image = (
-        optimism_args_with_right_defaults.supervisor_params.image
-        if optimism_args_with_right_defaults.supervisor_params.image != ""
-        else input_parser.DEFAULT_SUPERVISOR_IMAGES["op-supervisor"]
-    )
 
     op_supervisor_launcher.launch(
         plan,
         "op-supervisor",
-        op_supervisor_image,
         all_participants,
         optimism_args_with_right_defaults.supervisor_params,
     )

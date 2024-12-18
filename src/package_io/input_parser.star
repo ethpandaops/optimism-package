@@ -266,10 +266,20 @@ def parse_network_params(plan, input_args):
         chains.append(result)
 
     results["chains"] = chains
+
+    # configure supervisor
+    
     results["supervisor_params"] = default_supervisor_params()
     results["supervisor_params"].update(
         input_args.get("supervisor_params", {})
     )
+
+    results["supervisor_params"]["image"] = (
+        results["supervisor_params"]["image"]
+        if results["supervisor_params"]["image"] != ""
+        else DEFAULT_SUPERVISOR_IMAGES["op-supervisor"]
+    )
+
     results["op_contract_deployer_params"] = default_op_contract_deployer_params()
     results["op_contract_deployer_params"].update(
         input_args.get("op_contract_deployer_params", {})
