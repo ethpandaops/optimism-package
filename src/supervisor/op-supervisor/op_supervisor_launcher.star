@@ -1,3 +1,5 @@
+utils = import_module("../../util.star")
+
 ethereum_package_shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
@@ -29,16 +31,29 @@ def get_used_ports():
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
+DATA_DIR = "/etc/op-supervisor"
+DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
+DEPENDENCY_SET_FILE_PATH = "{0}/{1}".format(DATA_DIR, DEPENDENCY_SET_FILE_NAME)
+
 def launch(
     plan,
     service_name,
     all_participants,
     supervisor_params,
 ):
+    # write dependency set to a file
+    dependency_set_artifact = utils.write_to_file(
+        plan,
+        DATA_DIR,
+        DEPENDENCY_SET_FILE_NAME,
+        supervisor_params.dependency_set
+    )
+
     config = get_supervisor_config(
         plan,
         service_name,
         all_participants,
+        dependency_set_artifact,
         supervisor_params,
     )
 
@@ -56,6 +71,7 @@ def get_supervisor_config(
     plan,
     service_name,
     all_participants,
+    dependency_set_artifact,
     supervisor_params,
 ):
     cmd = [
@@ -74,6 +90,9 @@ def get_supervisor_config(
     return ServiceConfig(
         image=supervisor_params.image,
         ports=ports,
+        files={
+            DEPENDENCY_SET_FILE_PATH: dependency_set_artifact
+        },
         cmd=cmd,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
