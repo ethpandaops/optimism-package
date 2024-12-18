@@ -7,7 +7,7 @@ export ETH_RPC_URL="$L1_RPC_URL"
 addr=$(cast wallet address "$PRIVATE_KEY")
 nonce=$(cast nonce "$addr")
 mnemonic="test test test test test test test test test test test junk"
-roles=("proposer" "batcher" "sequencer" "challenger" "l2ProxyAdmin" "l1ProxyAdmin" "baseFeeVaultRecipient" "l1FeeVaultRecipient" "sequencerFeeVaultRecipient" "systemConfigOwner")
+roles=("proposer" "batcher" "sequencer" "challenger" "l2ProxyAdmin" "l1ProxyAdmin" "baseFeeVaultRecipient" "l1FeeVaultRecipient" "operatorFeeVaultRecipient" "sequencerFeeVaultRecipient" "systemConfigOwner" "unsafeBlockSigner")
 
 IFS=',';read -r -a chain_ids <<< "$1"
 

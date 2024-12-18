@@ -49,12 +49,22 @@ SUBCATEGORY_PARAMS = {
     ],
     "batcher_params": ["image", "extra_params"],
     "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
+    "eip1559_params": ["denominator_canyon", "denominator", "elasticity"],
+    "vaults_params": [
+        "base_fee_vault_recipient",
+        "l1_fee_vault_recipient",
+        "sequencer_fee_vault_recipient",
+        "operator_fee_vault_recipient",
+    ],
 }
 
 OP_CONTRACT_DEPLOYER_PARAMS = [
     "image",
     "l1_artifacts_locator",
     "l2_artifacts_locator",
+    "proxyAdminOwner",
+    "protocolVersionsOwner",
+    "guardian",
 ]
 
 ADDITIONAL_SERVICES_PARAMS = [

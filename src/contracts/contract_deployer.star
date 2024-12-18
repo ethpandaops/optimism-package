@@ -9,6 +9,21 @@ FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 utils = import_module("../util.star")
 
 
+def get_intent_update_from_network_config(plan, network_config_file, prefix, field, suffix, chains):
+    return [
+        (
+            "string",
+            "{0}.{1}".format(prefix, field + suffix),
+            utils.read_network_config_value(
+                plan,
+                network_config_file,
+                "{0}-{1}".format(field, chain.network_params.network_id),
+                ".address",
+            )
+        )
+        for index, chain in enumerate(chains)
+    ]
+
 def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_network):
     l2_chain_ids = ",".join(
         [str(chain.network_params.network_id) for chain in optimism_args.chains]
@@ -28,11 +43,39 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
         run=" && ".join(
             [
                 "mkdir -p /network-data",
-                "op-deployer init --l1-chain-id $L1_CHAIN_ID --l2-chain-ids {0} --workdir /network-data".format(
+                "op-deployer init --l1-chain-id $L1_CHAIN_ID --l2-chain-ids {0} --workdir /network-data --intent-config-type custom".format(
                     l2_chain_ids
                 ),
             ]
         ),
+    )
+
+    fund_script_artifact = plan.upload_files(
+        src=FUND_SCRIPT_FILEPATH,
+        name="op-deployer-fund-script",
+    )
+
+    collect_fund = plan.run_sh(
+        name="op-deployer-fund",
+        description="Collect keys, and fund addresses",
+        image=utils.DEPLOYMENT_UTILS_IMAGE,
+        env_vars={
+            "PRIVATE_KEY": str(priv_key),
+            "FUND_VALUE": "10ether",
+            "L1_NETWORK": str(l1_network),
+        }
+        | l1_config_env_vars,
+        store=[
+            StoreSpec(
+                src="/network-data",
+                name="op-deployer-configs",
+            )
+        ],
+        files={
+            "/network-data": op_deployer_init.files_artifacts[0],
+            "/fund-script": fund_script_artifact,
+        },
+        run='bash /fund-script/fund.sh "{0}"'.format(l2_chain_ids),
     )
 
     hardfork_schedule = []
@@ -66,12 +109,85 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
                 "l2ContractsLocator",
                 optimism_args.op_contract_deployer_params.l2_artifacts_locator,
             ),
+            (
+                "string", 
+                "superchainRoles.proxyAdminOwner",
+                optimism_args.op_contract_deployer_params.proxyAdminOwner
+            ),
+            (
+                "string",
+                "superchainRoles.protocolVersionsOwner",
+                optimism_args.op_contract_deployer_params.protocolVersionsOwner
+            ),
+            (
+                "string",
+                "superchainRoles.guardian",
+                optimism_args.op_contract_deployer_params.guardian
+            ),
         ]
+        +  get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}]".format(index),
+                "baseFeeVaultRecipient",
+                "",
+                optimism_args.chains
+            )
+        
+        + get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}]".format(index),
+                "l1FeeVaultRecipient",
+                "",
+                optimism_args.chains
+            )
+        
+        + get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}]".format(index),
+                "sequencerFeeVaultRecipient",
+                "",
+                optimism_args.chains
+            )
+        + get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}]".format(index),
+                "operatorFeeVaultRecipient",
+                "",
+                optimism_args.chains
+            )
         + [
             (
                 "int",
                 "chains.[{0}].deployOverrides.l2BlockTime".format(index),
                 str(chain.network_params.seconds_per_slot),
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
+        + [
+            (
+                "int",
+                "chains.[{0}].eip1559DenominatorCanyon".format(index),
+                str(chain.eip1559_params.denominator_canyon),
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
+        + [
+            (
+                "int",
+                "chains.[{0}].eip1559Denominator".format(index),
+                str(chain.eip1559_params.denominator),
+            )
+            for index, chain in enumerate(optimism_args.chains)
+        ]
+        + [
+            (
+                "int",
+                "chains.[{0}].eip1559Elasticity".format(index),
+                str(chain.eip1559_params.elasticity),
             )
             for index, chain in enumerate(optimism_args.chains)
         ]
@@ -91,6 +207,62 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
             )
             for index, fork_key, activation_timestamp in hardfork_schedule
         ]
+        + get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}].roles".format(index),
+                "l1ProxyAdmin",
+                "Owner",
+                optimism_args.chains
+            )
+        + get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}].roles".format(index),
+                "l2ProxyAdmin",
+                "Owner",
+                optimism_args.chains
+            )
+        + get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}].roles".format(index),
+                "systemConfigOwner",
+                "",
+                optimism_args.chains
+            )
+        + get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}].roles".format(index),
+                "unsafeBlockSigner",
+                "",
+                optimism_args.chains
+            )
+        + get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}].roles".format(index),
+                "batcher",
+                "",
+                optimism_args.chains
+            )
+        + get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}].roles".format(index),
+                "proposer",
+                "",
+                optimism_args.chains
+            )
+        + get_intent_update_from_network_config(
+                plan,
+                collect_fund.files_artifacts[0],
+                "chains.[{0}].roles".format(index),
+                "challenger",
+                "",
+                optimism_args.chains
+            )
     )
 
     op_deployer_configure = plan.run_sh(
@@ -104,7 +276,7 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
             )
         ],
         files={
-            "/network-data": op_deployer_init.files_artifacts[0],
+            "/network-data": collect_fund.files_artifacts[0],
         },
         run=" && ".join(
             [
@@ -149,32 +321,4 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
         run=" && ".join(apply_cmds),
     )
 
-    fund_script_artifact = plan.upload_files(
-        src=FUND_SCRIPT_FILEPATH,
-        name="op-deployer-fund-script",
-    )
-
-    collect_fund = plan.run_sh(
-        name="op-deployer-fund",
-        description="Collect keys, and fund addresses",
-        image=utils.DEPLOYMENT_UTILS_IMAGE,
-        env_vars={
-            "PRIVATE_KEY": str(priv_key),
-            "FUND_VALUE": "10ether",
-            "L1_NETWORK": str(l1_network),
-        }
-        | l1_config_env_vars,
-        store=[
-            StoreSpec(
-                src="/network-data",
-                name="op-deployer-configs",
-            )
-        ],
-        files={
-            "/network-data": op_deployer_apply.files_artifacts[0],
-            "/fund-script": fund_script_artifact,
-        },
-        run='bash /fund-script/fund.sh "{0}"'.format(l2_chain_ids),
-    )
-
-    return collect_fund.files_artifacts[0]
+    return op_deployer_apply.files_artifacts[0]
