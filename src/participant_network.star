@@ -85,7 +85,7 @@ def launch_participant_network(
         all_cl_contexts[0],
         l1_config_env_vars,
         batcher_key,
-        batcher_params,
+        batcher_params
     )
 
     # The OP Stack don't run the proposer anymore, it has been replaced with the challenger
