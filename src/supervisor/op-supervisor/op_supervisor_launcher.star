@@ -73,17 +73,7 @@ def get_supervisor_config(
     dependency_set_artifact,
     supervisor_params,
 ):
-    cmd = [
-        "op-supervisor",
-        "--data-dir=" + SUPERVISOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--dependency-set=" + supervisor_params.dependency_set,
-        "--l2-rpcs=" + ",".join([str(participant.el_context.rpc_http_url) for participant in all_participants]),
-        "--rpc.addr=0.0.0.0",
-        "--rpc.port=" + str(SUPERVISOR_HTTP_PORT_NUM),
-        "--rpc.enable-admin",
-    ]
-
-    cmd += supervisor_params.extra_params
+    cmd = ["op-supervisor"] + supervisor_params.extra_params
 
     ports = get_used_ports()
     return ServiceConfig(
@@ -91,6 +81,14 @@ def get_supervisor_config(
         ports=ports,
         files={
             DEPENDENCY_SET_FILE_PATH: dependency_set_artifact
+        },
+        env_vars={
+            "OP_SUPERVISOR_DATADIR": "/db",
+            "OP_SUPERVISOR_DEPENDENCY_SET": DEPENDENCY_SET_FILE_PATH,
+            "OP_SUPERVISOR_L2_RPCS": ",".join([str(participant.el_context.rpc_http_url) for participant in all_participants]),
+            "OP_SUPERVISOR_RPC_ADDR": "0.0.0.0",
+            "OP_SUPERVISOR_RPC_PORT": str(SUPERVISOR_RPC_PORT_NUM),
+            "OP_SUPERVISOR_RPC_ENABLE_ADMIN": "true"
         },
         cmd=cmd,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
