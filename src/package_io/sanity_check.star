@@ -48,6 +48,7 @@ SUBCATEGORY_PARAMS = {
         "fund_dev_accounts",
     ],
     "batcher_params": ["image", "extra_params"],
+    "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
     "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
 }
 
