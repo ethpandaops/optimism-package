@@ -39,7 +39,8 @@ def launch(
     cl_context,
     l1_config_env_vars,
     gs_proposer_private_key,
-    l2oo_address,
+    game_factory_address,
+    proposer_params,
 ):
     proposer_service_name = "{0}".format(service_name)
 
@@ -50,7 +51,8 @@ def launch(
         cl_context,
         l1_config_env_vars,
         gs_proposer_private_key,
-        l2oo_address,
+        game_factory_address,
+        proposer_params,
     )
 
     proposer_service = plan.add_service(service_name, config)
@@ -70,17 +72,24 @@ def get_proposer_config(
     cl_context,
     l1_config_env_vars,
     gs_proposer_private_key,
-    l2oo_address,
+    game_factory_address,
+    proposer_params,
 ):
     cmd = [
         "op-proposer",
         "--poll-interval=12s",
         "--rpc.port=" + str(PROPOSER_HTTP_PORT_NUM),
         "--rollup-rpc=" + cl_context.beacon_http_url,
-        "--l2oo-address=" + str(l2oo_address),
+        "--game-factory-address=" + str(game_factory_address),
         "--private-key=" + gs_proposer_private_key,
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
+        "--allow-non-finalized=true",
+        "--game-type={0}".format(proposer_params.game_type),
+        "--proposal-interval=" + proposer_params.proposal_interval,
+        "--wait-node-sync=true",
     ]
+
+    cmd += proposer_params.extra_params
 
     ports = get_used_ports()
     return ServiceConfig(

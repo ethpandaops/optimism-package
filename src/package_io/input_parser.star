@@ -108,6 +108,12 @@ def input_parser(plan, input_args):
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
                 ),
+                proposer_params=struct(
+                    image=result["proposer_params"]["image"],
+                    extra_params=result["proposer_params"]["extra_params"],
+                    game_type=result["proposer_params"]["game_type"],
+                    proposal_interval=result["proposer_params"]["proposal_interval"],
+                ),
                 mev_params=struct(
                     rollup_boost_image=result["mev_params"]["rollup_boost_image"],
                     builder_host=result["mev_params"]["builder_host"],
@@ -145,6 +151,9 @@ def parse_network_params(plan, input_args):
 
         batcher_params = default_batcher_params()
         batcher_params.update(chain.get("batcher_params", {}))
+
+        proposer_params = default_proposer_params()
+        proposer_params.update(chain.get("proposer_params", {}))
 
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
@@ -221,6 +230,7 @@ def parse_network_params(plan, input_args):
             "participants": participants,
             "network_params": network_params,
             "batcher_params": batcher_params,
+            "proposer_params": proposer_params,
             "mev_params": mev_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
@@ -263,6 +273,7 @@ def default_chains():
             "participants": [default_participant()],
             "network_params": default_network_params(),
             "batcher_params": default_batcher_params(),
+            "proposer_params": default_proposer_params(),
             "mev_params": default_mev_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
         }
@@ -288,6 +299,15 @@ def default_batcher_params():
     return {
         "image": "",
         "extra_params": [],
+    }
+
+
+def default_proposer_params():
+    return {
+        "image": "",
+        "extra_params": [],
+        "game_type": 1,
+        "proposal_interval": "10m",
     }
 
 
