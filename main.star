@@ -1,6 +1,7 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 l2_launcher = import_module("./src/l2.star")
+op_supervisor_launcher = import_module("./src/supervisor/op-supervisor/op_supervisor_launcher.star")
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
 
@@ -82,8 +83,9 @@ def run(plan, args):
         l1_network,
     )
 
+    all_participants = []
     for chain in optimism_args_with_right_defaults.chains:
-        l2_launcher.launch_l2(
+        all_participants.extend(l2_launcher.launch_l2(
             plan,
             chain.network_params.name,
             chain,
@@ -95,9 +97,25 @@ def run(plan, args):
             global_node_selectors,
             global_tolerations,
             persistent,
-        )
+        ))
+    
+    # deploy op-supervisor
+    op_supervisor_image = (
+        optimism_args_with_right_defaults.supervisor_params.image
+        if optimism_args_with_right_defaults.supervisor_params.image != ""
+        else input_parser.DEFAULT_SUPERVISOR_IMAGES["op-supervisor"]
+    )
+
+    op_supervisor_launcher.launch(
+        plan,
+        "op-supervisor",
+        op_supervisor_image,
+        all_participants,
+        optimism_args_with_right_defaults.supervisor_params,
+    )
 
     return
+
     # Deploy L2s
     plan.print("Deploying a local L2")
     if type(optimism_args) == "dict":
@@ -136,7 +154,7 @@ def run(plan, args):
             seen_names[name] = True
             seen_network_ids[network_id] = True
             l2_services_suffix = "-{0}".format(name)
-            l2_launcher.launch_l2(
+            all_l2_participants = l2_launcher.launch_l2(
                 plan,
                 l2_services_suffix,
                 l2_args,
@@ -148,9 +166,10 @@ def run(plan, args):
                 global_tolerations,
                 persistent,
             )
+
+            all_participants.extend(all_l2_participants)
     else:
         fail("invalid type provided for param: `optimism-package`")
-
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}
