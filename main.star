@@ -82,9 +82,10 @@ def run(plan, args):
         l1_network,
     )
 
-    for chain in optimism_args_with_right_defaults.chains:
+    for l2_num, chain in enumerate(optimism_args_with_right_defaults.chains):
         l2_launcher.launch_l2(
             plan,
+            l2_num,
             chain.network_params.name,
             chain,
             deployment_output,
@@ -101,9 +102,11 @@ def run(plan, args):
     # Deploy L2s
     plan.print("Deploying a local L2")
     if type(optimism_args) == "dict":
+        l2_num = 0
         l2_services_suffix = ""  # no suffix if one l2
         l2_launcher.launch_l2(
             plan,
+            l2_num,
             l2_services_suffix,
             optimism_args,
             l1_config_env_vars,
@@ -138,6 +141,7 @@ def run(plan, args):
             l2_services_suffix = "-{0}".format(name)
             l2_launcher.launch_l2(
                 plan,
+                l2_num,
                 l2_services_suffix,
                 l2_args,
                 l1_config_env_vars,
