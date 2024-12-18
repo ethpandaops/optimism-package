@@ -33,7 +33,6 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 
 DATA_DIR = "/etc/op-supervisor"
 DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
-DEPENDENCY_SET_FILE_PATH = "{0}/{1}".format(DATA_DIR, DEPENDENCY_SET_FILE_NAME)
 
 def launch(
     plan,
@@ -44,9 +43,9 @@ def launch(
     # write dependency set to a file
     dependency_set_artifact = utils.write_to_file(
         plan,
+        supervisor_params.dependency_set,
         DATA_DIR,
-        DEPENDENCY_SET_FILE_NAME,
-        supervisor_params.dependency_set
+        DEPENDENCY_SET_FILE_NAME
     )
 
     config = get_supervisor_config(
@@ -80,16 +79,16 @@ def get_supervisor_config(
         image=supervisor_params.image,
         ports=ports,
         files={
-            DEPENDENCY_SET_FILE_PATH: dependency_set_artifact
+            DATA_DIR: dependency_set_artifact
         },
         env_vars={
             "OP_SUPERVISOR_DATADIR": "/db",
-            "OP_SUPERVISOR_DEPENDENCY_SET": DEPENDENCY_SET_FILE_PATH,
+            "OP_SUPERVISOR_DEPENDENCY_SET": "{0}/{1}".format(DATA_DIR, DEPENDENCY_SET_FILE_NAME),
             "OP_SUPERVISOR_L2_RPCS": ",".join([str(participant.el_context.rpc_http_url) for participant in all_participants]),
             "OP_SUPERVISOR_RPC_ADDR": "0.0.0.0",
             "OP_SUPERVISOR_RPC_PORT": str(SUPERVISOR_RPC_PORT_NUM),
             "OP_SUPERVISOR_RPC_ENABLE_ADMIN": "true"
         },
         cmd=cmd,
-        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
     )
