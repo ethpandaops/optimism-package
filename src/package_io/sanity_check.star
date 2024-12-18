@@ -64,6 +64,12 @@ OP_CONTRACT_DEPLOYER_PARAMS = [
     "l2_artifacts_locator",
 ]
 
+SUPERVISOR_PARAMS = [
+    "image",
+    "dependency_set",
+    "extra_params",
+]
+
 ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
     "rollup-boost",
@@ -72,12 +78,12 @@ ADDITIONAL_SERVICES_PARAMS = [
 ROOT_PARAMS = [
     "chains",
     "op_contract_deployer_params",
+    "supervisor_params",
     "global_log_level",
     "global_node_selectors",
     "global_tolerations",
     "persistent",
 ]
-
 
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",
@@ -153,6 +159,7 @@ def sanity_check(plan, optimism_config):
             )
             combined_root_params.append("additional_services")
             combined_root_params.append("op_contract_deployer_params")
+            combined_root_params.append("supervisor_params")
 
             if param not in combined_root_params:
                 fail(
@@ -169,6 +176,14 @@ def sanity_check(plan, optimism_config):
             optimism_config,
             "op_contract_deployer_params",
             OP_CONTRACT_DEPLOYER_PARAMS,
+        )
+
+    if "supervisor_params" in optimism_config:
+        validate_params(
+            plan,
+            optimism_config,
+            "supervisor_params",
+            SUPERVISOR_PARAMS,
         )
 
     plan.print("Sanity check for OP package passed")

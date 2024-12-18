@@ -25,6 +25,10 @@ DEFAULT_CHALLENGER_IMAGES = {
     "op-challenger": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
 }
 
+DEFAULT_SUPERVISOR_IMAGES = {
+    "op-supervisor": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+}
+
 DEFAULT_PROPOSER_IMAGES = {
     "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
 }
@@ -146,6 +150,11 @@ def input_parser(plan, input_args):
                 "l2_artifacts_locator"
             ],
         ),
+        supervisor_params=struct(
+            image=results["supervisor_params"]["image"],
+            dependency_set=results["supervisor_params"]["dependency_set"],
+            extra_params=results["supervisor_params"]["extra_params"],
+        ),
         global_log_level=results["global_log_level"],
         global_node_selectors=results["global_node_selectors"],
         global_tolerations=results["global_tolerations"],
@@ -257,6 +266,10 @@ def parse_network_params(plan, input_args):
         chains.append(result)
 
     results["chains"] = chains
+    results["supervisor_params"] = default_supervisor_params()
+    results["supervisor_params"].update(
+        input_args.get("supervisor_params", {})
+    )
     results["op_contract_deployer_params"] = default_op_contract_deployer_params()
     results["op_contract_deployer_params"].update(
         input_args.get("op_contract_deployer_params", {})
@@ -377,11 +390,16 @@ def default_participant():
 
 def default_op_contract_deployer_params():
     return {
-        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.7",
-        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz",
-        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz",
+        "image": "",
+        "extra_params": [],
     }
 
+def default_supervisor_params():
+    return {
+        "image": "",
+        "dependency_set": "",
+        "extra_params": [],
+    }
 
 def default_ethereum_package_network_params():
     return {
