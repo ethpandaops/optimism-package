@@ -32,13 +32,11 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 def launch(
     plan,
     service_name,
-    image,
     all_participants,
     supervisor_params,
 ):
     config = get_supervisor_config(
         plan,
-        image,
         service_name,
         all_participants,
         supervisor_params,
@@ -56,7 +54,6 @@ def launch(
 
 def get_supervisor_config(
     plan,
-    image,
     service_name,
     all_participants,
     supervisor_params,
@@ -75,7 +72,7 @@ def get_supervisor_config(
 
     ports = get_used_ports()
     return ServiceConfig(
-        image=image,
+        image=supervisor_params.image,
         ports=ports,
         cmd=cmd,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
