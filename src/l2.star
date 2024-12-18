@@ -90,3 +90,5 @@ def launch_l2(
             l1_bridge_address
         )
     )
+
+    return all_l2_participants
