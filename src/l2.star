@@ -24,6 +24,7 @@ def launch_l2(
 ):
     network_params = l2_args.network_params
     batcher_params = l2_args.batcher_params
+    challenger_params = l2_args.challenger_params
     proposer_params = l2_args.proposer_params
     mev_params = l2_args.mev_params
 
@@ -39,6 +40,7 @@ def launch_l2(
         jwt_file,
         network_params,
         batcher_params,
+        challenger_params,
         proposer_params,
         mev_params,
         deployment_output,

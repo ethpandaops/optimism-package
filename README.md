@@ -298,6 +298,34 @@ optimism_package:
         # A list of optional extra params that will be passed to the batcher container for modifying its behaviour
         extra_params: []
 
+      # Default challenger configuration
+      challenger_params:
+        # The Docker image that should be used for the challenger; leave blank to use the default op-challenger image
+        image: ""
+
+        # A list of optional extra params that will be passed to the challenger container for modifying its behaviour
+        extra_params: []
+
+        # Path to folder containing cannon prestate-proof.json file
+        cannon_prestates_path: "static_files/prestates"
+
+        # Base URL to absolute prestates to use when generating trace data.
+        cannon_prestates_url: ""
+
+      # Default proposer configuration
+      proposer_params:
+        # The Docker image that should be used for the proposer; leave blank to use the default op-proposer image
+        image: ""
+
+        # A list of optional extra params that will be passed to the proposer container for modifying its behaviour
+        extra_params: []
+
+        # Dispute game type to create via the configured DisputeGameFactory
+        game_type: 1
+
+        # Interval between submitting L2 output proposals
+        proposal_internal: 10m
+
       # Default MEV configuration
       mev_params:
         # The Docker image that should be used for rollup boost; leave blank to use the default rollup-boost image
