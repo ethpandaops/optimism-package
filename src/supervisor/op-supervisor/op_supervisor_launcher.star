@@ -8,11 +8,6 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-#
-#  ---------------------------------- Batcher client -------------------------------------
-# The Docker container runs as the "op-supervisor" user so we can't write to root
-SUPERVISOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-supervisor/op-supervisor-data"
-
 # Port IDs
 SUPERVISOR_RPC_PORT_ID = "rpc"
 
@@ -29,8 +24,6 @@ def get_used_ports():
     }
     return used_ports
 
-ENTRYPOINT_ARGS = ["sh", "-c"]
-
 DATA_DIR = "/etc/op-supervisor"
 DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
 
@@ -40,7 +33,6 @@ def launch(
     all_participants,
     supervisor_params,
 ):
-    # write dependency set to a file
     dependency_set_artifact = utils.write_to_file(
         plan,
         supervisor_params.dependency_set,
@@ -57,11 +49,6 @@ def launch(
     )
 
     supervisor_service = plan.add_service(service_name, config)
-
-    supervisor_rpc_port = supervisor_service.ports[SUPERVISOR_RPC_PORT_ID]
-    supervisor_http_url = "http://{0}:{1}".format(
-        supervisor_service.ip_address, supervisor_rpc_port.number
-    )
 
     return "op_supervisor"
 
