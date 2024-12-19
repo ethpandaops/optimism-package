@@ -21,6 +21,7 @@ def launch_l2(
     global_node_selectors,
     global_tolerations,
     persistent,
+    interop_params,
 ):
     network_params = l2_args.network_params
     batcher_params = l2_args.batcher_params
@@ -52,6 +53,7 @@ def launch_l2(
         global_tolerations,
         persistent,
         l2_args.additional_services,
+        interop_params,
     )
 
     all_el_contexts = []

@@ -37,6 +37,7 @@ def launch(
     global_tolerations,
     persistent,
     additional_services,
+    interop_params,
 ):
     el_launchers = {
         "op-geth": {
@@ -45,6 +46,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
+                interop_params
             ),
             "launch_method": op_geth.launch,
         },
@@ -54,6 +56,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
+                interop_params
             ),
             "launch_method": op_reth.launch,
         },
@@ -63,6 +66,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
+                interop_params
             ),
             "launch_method": op_erigon.launch,
         },
@@ -72,6 +76,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
+                interop_params
             ),
             "launch_method": op_nethermind.launch,
         },
@@ -81,6 +86,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
+                interop_params
             ),
             "launch_method": op_besu.launch,
         },
@@ -89,7 +95,7 @@ def launch(
     cl_launchers = {
         "op-node": {
             "launcher": op_node.new_op_node_launcher(
-                deployment_output, jwt_file, network_params
+                deployment_output, jwt_file, network_params, interop_params
             ),
             "launch_method": op_node.launch,
         },
@@ -223,6 +229,7 @@ def launch(
             all_el_contexts,
             sequencer_enabled,
             sequencer_context,
+            interop_params,
         )
 
         if rollup_boost_enabled:
@@ -241,6 +248,7 @@ def launch(
                     all_el_contexts,
                     sequencer_enabled,
                     sequencer_context,
+                    interop_params,
                 )
             else:
                 el_builder_context = struct(
@@ -282,6 +290,7 @@ def launch(
             all_cl_contexts,
             l1_config_env_vars,
             sequencer_enabled,
+            interop_params,
         )
 
         sequencer_enabled = False
