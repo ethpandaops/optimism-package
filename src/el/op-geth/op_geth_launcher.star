@@ -22,6 +22,7 @@ ethereum_package_constants = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
+op_supervisor_launcher = import_module("../../supervisor/op-supervisor/op_supervisor_launcher.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -104,6 +105,7 @@ def launch(
     existing_el_clients,
     sequencer_enabled,
     sequencer_context,
+    interop_params
 ):
     log_level = ethereum_package_input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -124,6 +126,7 @@ def launch(
         cl_client_name,
         sequencer_enabled,
         sequencer_context,
+        interop_params
     )
 
     service = plan.add_service(service_name, config)
@@ -166,6 +169,7 @@ def get_config(
     cl_client_name,
     sequencer_enabled,
     sequencer_context,
+    interop_params
 ):
     init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -248,7 +252,12 @@ def get_config(
                 constants.EL_TYPE.op_geth + "_volume_size"
             ],
         )
-    env_vars = participant.el_extra_env_vars
+
+    env_vars = dict(participant.cl_extra_env_vars)
+
+    if interop_params.enabled:
+        env_vars["GETH_ROLLUP_INTEROPRPC"] = op_supervisor_launcher.SUPERVISOR_ENDPOINT
+
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
@@ -284,10 +293,12 @@ def new_op_geth_launcher(
     jwt_file,
     network,
     network_id,
+    interop_params
 ):
     return struct(
         deployment_output=deployment_output,
         jwt_file=jwt_file,
         network=network,
         network_id=network_id,
+        interop_params=interop_params,
     )

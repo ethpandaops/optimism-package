@@ -21,6 +21,7 @@ def launch_participant_network(
     global_tolerations,
     persistent,
     additional_services,
+    interop_params,
 ):
     num_participants = len(participants)
     # First EL and sequencer CL
@@ -39,6 +40,7 @@ def launch_participant_network(
         global_tolerations,
         persistent,
         additional_services,
+        interop_params,
     )
 
     all_participants = []
