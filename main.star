@@ -35,6 +35,8 @@ def run(plan, args):
     global_log_level = optimism_args_with_right_defaults.global_log_level
     persistent = optimism_args_with_right_defaults.persistent
 
+    interop_params = optimism_args_with_right_defaults.interop
+
     # Deploy the L1
     l1_network = ""
     if external_l1_args:
@@ -97,15 +99,14 @@ def run(plan, args):
             global_node_selectors,
             global_tolerations,
             persistent,
+            interop_params
         ))
     
-    if optimism_args_with_right_defaults.interop.enabled:
-        # deploy op-supervisor
+    if interop_params.enabled:
         op_supervisor_launcher.launch(
             plan,
-            "op-supervisor",
             all_participants,
-            optimism_args_with_right_defaults.interop.supervisor_params,
+            interop_params.supervisor_params,
         )
 
     return

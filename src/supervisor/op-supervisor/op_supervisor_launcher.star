@@ -8,11 +8,17 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+SUPERVISOR_SERVICE_NAME = "op-supervisor"
+
 # Port IDs
 SUPERVISOR_RPC_PORT_ID = "rpc"
 
 # Port nums
 SUPERVISOR_RPC_PORT_NUM = 8545
+
+SUPERVISOR_ENDPOINT = "http://{0}:{1}".format(
+    SUPERVISOR_SERVICE_NAME, SUPERVISOR_RPC_PORT_NUM
+)
 
 def get_used_ports():
     used_ports = {
@@ -29,7 +35,6 @@ DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
 
 def launch(
     plan,
-    service_name,
     all_participants,
     supervisor_params,
 ):
@@ -42,19 +47,17 @@ def launch(
 
     config = get_supervisor_config(
         plan,
-        service_name,
         all_participants,
         dependency_set_artifact,
         supervisor_params,
     )
 
-    supervisor_service = plan.add_service(service_name, config)
+    supervisor_service = plan.add_service(SUPERVISOR_SERVICE_NAME, config)
 
     return "op_supervisor"
 
 def get_supervisor_config(
     plan,
-    service_name,
     all_participants,
     dependency_set_artifact,
     supervisor_params,
