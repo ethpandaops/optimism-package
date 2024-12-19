@@ -1,6 +1,7 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 l2_launcher = import_module("./src/l2.star")
+op_supervisor_launcher = import_module("./src/supervisor/op-supervisor/op_supervisor_launcher.star")
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
 
@@ -33,6 +34,8 @@ def run(plan, args):
     global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
     global_log_level = optimism_args_with_right_defaults.global_log_level
     persistent = optimism_args_with_right_defaults.persistent
+
+    interop_params = optimism_args_with_right_defaults.interop
 
     # Deploy the L1
     l1_network = ""
@@ -82,8 +85,9 @@ def run(plan, args):
         l1_network,
     )
 
+    all_participants = []
     for chain in optimism_args_with_right_defaults.chains:
-        l2_launcher.launch_l2(
+        all_participants.extend(l2_launcher.launch_l2(
             plan,
             chain.network_params.name,
             chain,
@@ -95,62 +99,17 @@ def run(plan, args):
             global_node_selectors,
             global_tolerations,
             persistent,
+            interop_params
+        ))
+    
+    if interop_params.enabled:
+        op_supervisor_launcher.launch(
+            plan,
+            all_participants,
+            interop_params.supervisor_params,
         )
 
     return
-    # Deploy L2s
-    plan.print("Deploying a local L2")
-    if type(optimism_args) == "dict":
-        l2_services_suffix = ""  # no suffix if one l2
-        l2_launcher.launch_l2(
-            plan,
-            l2_services_suffix,
-            optimism_args,
-            l1_config_env_vars,
-            l1_priv_key,
-            l1_rpc_url,
-            global_log_level,
-            global_node_selectors,
-            global_tolerations,
-            persistent,
-        )
-    elif type(optimism_args) == "list":
-        seen_names = {}
-        seen_network_ids = {}
-        for l2_num, l2_args in enumerate(optimism_args):
-            name = l2_args["network_params"]["name"]
-            network_id = l2_args["network_params"]["network_id"]
-            if name in seen_names:
-                fail(
-                    "Duplicate name: {0} provided, make sure you use unique names.".format(
-                        name
-                    )
-                )
-            if network_id in seen_network_ids:
-                fail(
-                    "Duplicate network_id: {0} provided, make sure you use unique network_ids.".format(
-                        network_id
-                    )
-                )
-
-            seen_names[name] = True
-            seen_network_ids[network_id] = True
-            l2_services_suffix = "-{0}".format(name)
-            l2_launcher.launch_l2(
-                plan,
-                l2_services_suffix,
-                l2_args,
-                l1_config_env_vars,
-                l1_priv_key,
-                l1_rpc_url,
-                global_log_level,
-                global_node_selectors,
-                global_tolerations,
-                persistent,
-            )
-    else:
-        fail("invalid type provided for param: `optimism-package`")
-
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}
