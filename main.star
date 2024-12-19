@@ -99,14 +99,14 @@ def run(plan, args):
             persistent,
         ))
     
-    # deploy op-supervisor
-
-    op_supervisor_launcher.launch(
-        plan,
-        "op-supervisor",
-        all_participants,
-        optimism_args_with_right_defaults.supervisor_params,
-    )
+    if optimism_args_with_right_defaults.interop.enabled:
+        # deploy op-supervisor
+        op_supervisor_launcher.launch(
+            plan,
+            "op-supervisor",
+            all_participants,
+            optimism_args_with_right_defaults.interop.supervisor_params,
+        )
 
     return
 
