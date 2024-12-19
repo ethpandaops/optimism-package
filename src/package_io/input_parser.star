@@ -55,11 +55,21 @@ def external_l1_network_params_input_parser(plan, input_args):
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     results = parse_network_params(plan, input_args)
+
     results["global_log_level"] = "info"
     results["global_node_selectors"] = {}
     results["global_tolerations"] = []
     results["persistent"] = False
+
     return struct(
+        interop=struct(
+            enabled=results["interop"]["enabled"],
+            supervisor_params=struct(
+                image=results["interop"]["supervisor_params"]["image"],
+                dependency_set=results["interop"]["supervisor_params"]["dependency_set"],
+                extra_params=results["interop"]["supervisor_params"]["extra_params"],
+            )
+        ),
         chains=[
             struct(
                 participants=[
@@ -150,11 +160,6 @@ def input_parser(plan, input_args):
                 "l2_artifacts_locator"
             ],
         ),
-        supervisor_params=struct(
-            image=results["supervisor_params"]["image"],
-            dependency_set=results["supervisor_params"]["dependency_set"],
-            extra_params=results["supervisor_params"]["extra_params"],
-        ),
         global_log_level=results["global_log_level"],
         global_node_selectors=results["global_node_selectors"],
         global_tolerations=results["global_tolerations"],
@@ -164,6 +169,22 @@ def input_parser(plan, input_args):
 
 def parse_network_params(plan, input_args):
     results = {}
+
+    # configure interop
+
+    results["interop"] = default_interop_args()
+    results["interop"].update(
+        input_args.get("interop", {})
+    )
+    results["interop"]["supervisor_params"] = default_supervisor_params()
+    if "supervisor_params" in input_args["interop"]:
+        results["interop"]["supervisor_params"].update(
+            input_args["interop"]["supervisor_params"]
+        )    
+
+
+    # configure chains
+
     chains = []
 
     seen_names = {}
@@ -267,23 +288,13 @@ def parse_network_params(plan, input_args):
 
     results["chains"] = chains
 
-    # configure supervisor
-    
-    results["supervisor_params"] = default_supervisor_params()
-    results["supervisor_params"].update(
-        input_args.get("supervisor_params", {})
-    )
-
-    results["supervisor_params"]["image"] = (
-        results["supervisor_params"]["image"]
-        if results["supervisor_params"]["image"] != ""
-        else DEFAULT_SUPERVISOR_IMAGES["op-supervisor"]
-    )
+    # configur op-deployer
 
     results["op_contract_deployer_params"] = default_op_contract_deployer_params()
     results["op_contract_deployer_params"].update(
         input_args.get("op_contract_deployer_params", {})
     )
+
     results["global_log_level"] = input_args.get("global_log_level", "info")
 
     return results
@@ -291,6 +302,7 @@ def parse_network_params(plan, input_args):
 
 def default_optimism_args():
     return {
+        "interop": default_interop_args(),
         "chains": default_chains(),
         "op_contract_deployer_params": default_op_contract_deployer_params(),
         "global_log_level": "info",
@@ -299,6 +311,17 @@ def default_optimism_args():
         "persistent": False,
     }
 
+def default_interop_args():
+    return {
+        "enabled": False,
+    }
+
+def default_supervisor_params():
+    return {
+        "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
+        "dependency_set": "",
+        "extra_params": [],
+    }
 
 def default_mev_params():
     return {
@@ -401,13 +424,6 @@ def default_participant():
 def default_op_contract_deployer_params():
     return {
         "image": "",
-        "extra_params": [],
-    }
-
-def default_supervisor_params():
-    return {
-        "image": "",
-        "dependency_set": "",
         "extra_params": [],
     }
 

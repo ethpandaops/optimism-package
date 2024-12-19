@@ -100,14 +100,15 @@ def run(plan, args):
             persistent,
         ))
     
-    # deploy op-supervisor
+    if optimism_args_with_right_defaults.interop.enabled:
+        # deploy op-supervisor
+        op_supervisor_launcher.launch(
+            plan,
+            "op-supervisor",
+            all_participants,
+            optimism_args_with_right_defaults.interop.supervisor_params,
+        )
 
-    op_supervisor_launcher.launch(
-        plan,
-        "op-supervisor",
-        all_participants,
-        optimism_args_with_right_defaults.supervisor_params,
-    )
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}
     env_vars["L1_RPC_KIND"] = "standard"
