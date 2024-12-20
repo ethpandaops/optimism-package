@@ -101,7 +101,7 @@ def run(plan, args):
             global_tolerations,
             persistent,
             interop_params
-        ))
+        )
     
     if interop_params.enabled:
         op_supervisor_launcher.launch(
