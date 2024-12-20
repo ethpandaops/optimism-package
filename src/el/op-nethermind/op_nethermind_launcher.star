@@ -99,6 +99,7 @@ def launch(
     existing_el_clients,
     sequencer_enabled,
     sequencer_context,
+    interop_params,
 ):
     log_level = ethereum_package_input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -260,10 +261,12 @@ def new_nethermind_launcher(
     jwt_file,
     network,
     network_id,
+    interop_params,
 ):
     return struct(
         deployment_output=deployment_output,
         jwt_file=jwt_file,
         network=network,
         network_id=network_id,
+        interop_params=interop_params,
     )

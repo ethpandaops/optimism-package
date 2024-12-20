@@ -1,6 +1,7 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 l2_launcher = import_module("./src/l2.star")
+op_supervisor_launcher = import_module("./src/supervisor/op-supervisor/op_supervisor_launcher.star")
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
 
@@ -33,6 +34,8 @@ def run(plan, args):
     global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
     global_log_level = optimism_args_with_right_defaults.global_log_level
     persistent = optimism_args_with_right_defaults.persistent
+
+    interop_params = optimism_args_with_right_defaults.interop
 
     # Deploy the L1
     l1_network = ""
@@ -82,6 +85,7 @@ def run(plan, args):
         l1_network,
     )
 
+    all_participants = []
     for l2_num, chain in enumerate(optimism_args_with_right_defaults.chains):
         l2_launcher.launch_l2(
             plan,
@@ -96,8 +100,15 @@ def run(plan, args):
             global_node_selectors,
             global_tolerations,
             persistent,
+            interop_params
         )
-
+    
+    if interop_params.enabled:
+        op_supervisor_launcher.launch(
+            plan,
+            all_participants,
+            interop_params.supervisor_params,
+        )
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}
