@@ -180,8 +180,7 @@ def parse_network_params(plan, input_args):
     if "supervisor_params" in input_args["interop"]:
         results["interop"]["supervisor_params"].update(
             input_args["interop"]["supervisor_params"]
-        )    
-
+        )
 
     # configure chains
 
@@ -288,7 +287,7 @@ def parse_network_params(plan, input_args):
 
     results["chains"] = chains
 
-    # configur op-deployer
+    # configure op-deployer
 
     results["op_contract_deployer_params"] = default_op_contract_deployer_params()
     results["op_contract_deployer_params"].update(
@@ -423,8 +422,9 @@ def default_participant():
 
 def default_op_contract_deployer_params():
     return {
-        "image": "",
-        "extra_params": [],
+        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.7",
+        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz",
+        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz",
     }
 
 def default_ethereum_package_network_params():
