@@ -176,11 +176,11 @@ def parse_network_params(plan, input_args):
     results["interop"].update(
         input_args.get("interop", {})
     )
+
     results["interop"]["supervisor_params"] = default_supervisor_params()
-    if "supervisor_params" in input_args["interop"]:
-        results["interop"]["supervisor_params"].update(
-            input_args["interop"]["supervisor_params"]
-        )
+    results["interop"]["supervisor_params"].update(
+        input_args.get("interop", {}).get("supervisor_params", {})
+    )
 
     # configure chains
 
