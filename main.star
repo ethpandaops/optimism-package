@@ -82,9 +82,10 @@ def run(plan, args):
         l1_network,
     )
 
-    for chain in optimism_args_with_right_defaults.chains:
+    for l2_num, chain in enumerate(optimism_args_with_right_defaults.chains):
         l2_launcher.launch_l2(
             plan,
+            l2_num,
             chain.network_params.name,
             chain,
             deployment_output,
@@ -96,8 +97,6 @@ def run(plan, args):
             global_tolerations,
             persistent,
         )
-
-    return
 
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
