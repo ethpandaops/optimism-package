@@ -98,58 +98,6 @@ def run(plan, args):
         )
 
     return
-    # Deploy L2s
-    plan.print("Deploying a local L2")
-    if type(optimism_args) == "dict":
-        l2_services_suffix = ""  # no suffix if one l2
-        l2_launcher.launch_l2(
-            plan,
-            l2_services_suffix,
-            optimism_args,
-            l1_config_env_vars,
-            l1_priv_key,
-            l1_rpc_url,
-            global_log_level,
-            global_node_selectors,
-            global_tolerations,
-            persistent,
-        )
-    elif type(optimism_args) == "list":
-        seen_names = {}
-        seen_network_ids = {}
-        for l2_num, l2_args in enumerate(optimism_args):
-            name = l2_args["network_params"]["name"]
-            network_id = l2_args["network_params"]["network_id"]
-            if name in seen_names:
-                fail(
-                    "Duplicate name: {0} provided, make sure you use unique names.".format(
-                        name
-                    )
-                )
-            if network_id in seen_network_ids:
-                fail(
-                    "Duplicate network_id: {0} provided, make sure you use unique network_ids.".format(
-                        network_id
-                    )
-                )
-
-            seen_names[name] = True
-            seen_network_ids[network_id] = True
-            l2_services_suffix = "-{0}".format(name)
-            l2_launcher.launch_l2(
-                plan,
-                l2_services_suffix,
-                l2_args,
-                l1_config_env_vars,
-                l1_priv_key,
-                l1_rpc_url,
-                global_log_level,
-                global_node_selectors,
-                global_tolerations,
-                persistent,
-            )
-    else:
-        fail("invalid type provided for param: `optimism-package`")
 
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
