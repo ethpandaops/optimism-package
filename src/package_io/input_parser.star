@@ -66,9 +66,11 @@ def input_parser(plan, input_args):
             enabled=results["interop"]["enabled"],
             supervisor_params=struct(
                 image=results["interop"]["supervisor_params"]["image"],
-                dependency_set=results["interop"]["supervisor_params"]["dependency_set"],
+                dependency_set=results["interop"]["supervisor_params"][
+                    "dependency_set"
+                ],
                 extra_params=results["interop"]["supervisor_params"]["extra_params"],
-            )
+            ),
         ),
         chains=[
             struct(
@@ -173,9 +175,7 @@ def parse_network_params(plan, input_args):
     # configure interop
 
     results["interop"] = default_interop_args()
-    results["interop"].update(
-        input_args.get("interop", {})
-    )
+    results["interop"].update(input_args.get("interop", {}))
 
     results["interop"]["supervisor_params"] = default_supervisor_params()
     results["interop"]["supervisor_params"].update(
@@ -310,10 +310,12 @@ def default_optimism_args():
         "persistent": False,
     }
 
+
 def default_interop_args():
     return {
         "enabled": False,
     }
+
 
 def default_supervisor_params():
     return {
@@ -321,6 +323,7 @@ def default_supervisor_params():
         "dependency_set": "",
         "extra_params": [],
     }
+
 
 def default_mev_params():
     return {
@@ -426,6 +429,7 @@ def default_op_contract_deployer_params():
         "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz",
         "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz",
     }
+
 
 def default_ethereum_package_network_params():
     return {

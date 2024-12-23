@@ -17,7 +17,9 @@ ethereum_package_input_parser = import_module(
 constants = import_module("../../package_io/constants.star")
 
 util = import_module("../../util.star")
-op_supervisor_launcher = import_module("../../supervisor/op-supervisor/op_supervisor_launcher.star")
+op_supervisor_launcher = import_module(
+    "../../supervisor/op-supervisor/op_supervisor_launcher.star"
+)
 
 #  ---------------------------------- Beacon client -------------------------------------
 
@@ -271,12 +273,7 @@ def get_beacon_config(
     return ServiceConfig(**config_args)
 
 
-def new_op_node_launcher(
-    deployment_output,
-    jwt_file,
-    network_params,
-    interop_params
-):
+def new_op_node_launcher(deployment_output, jwt_file, network_params, interop_params):
     return struct(
         deployment_output=deployment_output,
         jwt_file=jwt_file,

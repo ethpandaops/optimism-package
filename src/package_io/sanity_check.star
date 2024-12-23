@@ -99,6 +99,7 @@ EXTERNAL_L1_NETWORK_PARAMS = [
     "priv_key",
 ]
 
+
 def deep_validate_params(plan, input_args, category, allowed_params):
     if category in input_args:
         for item in input_args[category]:

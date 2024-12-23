@@ -20,6 +20,7 @@ SUPERVISOR_ENDPOINT = "http://{0}:{1}".format(
     SUPERVISOR_SERVICE_NAME, SUPERVISOR_RPC_PORT_NUM
 )
 
+
 def get_used_ports():
     used_ports = {
         SUPERVISOR_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
@@ -30,8 +31,10 @@ def get_used_ports():
     }
     return used_ports
 
+
 DATA_DIR = "/etc/op-supervisor"
 DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
+
 
 def launch(
     plan,
@@ -39,10 +42,7 @@ def launch(
     supervisor_params,
 ):
     dependency_set_artifact = utils.write_to_file(
-        plan,
-        supervisor_params.dependency_set,
-        DATA_DIR,
-        DEPENDENCY_SET_FILE_NAME
+        plan, supervisor_params.dependency_set, DATA_DIR, DEPENDENCY_SET_FILE_NAME
     )
 
     config = get_supervisor_config(
@@ -56,6 +56,7 @@ def launch(
 
     return "op_supervisor"
 
+
 def get_supervisor_config(
     plan,
     all_participants,
@@ -68,17 +69,22 @@ def get_supervisor_config(
     return ServiceConfig(
         image=supervisor_params.image,
         ports=ports,
-        files={
-            DATA_DIR: dependency_set_artifact
-        },
+        files={DATA_DIR: dependency_set_artifact},
         env_vars={
             "OP_SUPERVISOR_DATADIR": "/db",
-            "OP_SUPERVISOR_DEPENDENCY_SET": "{0}/{1}".format(DATA_DIR, DEPENDENCY_SET_FILE_NAME),
-            "OP_SUPERVISOR_L2_RPCS": ",".join([str(participant.el_context.rpc_http_url) for participant in all_participants]),
+            "OP_SUPERVISOR_DEPENDENCY_SET": "{0}/{1}".format(
+                DATA_DIR, DEPENDENCY_SET_FILE_NAME
+            ),
+            "OP_SUPERVISOR_L2_RPCS": ",".join(
+                [
+                    str(participant.el_context.rpc_http_url)
+                    for participant in all_participants
+                ]
+            ),
             "OP_SUPERVISOR_RPC_ADDR": "0.0.0.0",
             "OP_SUPERVISOR_RPC_PORT": str(SUPERVISOR_RPC_PORT_NUM),
-            "OP_SUPERVISOR_RPC_ENABLE_ADMIN": "true"
+            "OP_SUPERVISOR_RPC_ENABLE_ADMIN": "true",
         },
         cmd=cmd,
-        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
+        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

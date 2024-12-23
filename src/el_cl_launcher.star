@@ -46,7 +46,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params
+                interop_params,
             ),
             "launch_method": op_geth.launch,
         },
@@ -56,7 +56,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params
+                interop_params,
             ),
             "launch_method": op_reth.launch,
         },
@@ -66,7 +66,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params
+                interop_params,
             ),
             "launch_method": op_erigon.launch,
         },
@@ -76,7 +76,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params
+                interop_params,
             ),
             "launch_method": op_nethermind.launch,
         },
@@ -86,7 +86,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params
+                interop_params,
             ),
             "launch_method": op_besu.launch,
         },

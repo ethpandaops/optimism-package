@@ -85,7 +85,7 @@ def launch_participant_network(
         all_cl_contexts[0],
         l1_config_env_vars,
         batcher_key,
-        batcher_params
+        batcher_params,
     )
 
     game_factory_address = util.read_network_config_value(
