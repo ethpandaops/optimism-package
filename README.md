@@ -75,6 +75,20 @@ The full YAML schema that can be passed in is as follows with the defaults provi
 
 ```yaml
 optimism_package:
+  # Interop configuration
+  interop:
+    # Whether or not to enable interop mode
+    enabled: false
+    # Default supervisor configuration
+    supervisor_params:
+      # The Docker image that should be used for the supervisor; leave blank to use the default op-supervisor image
+      image: ""
+
+      # A JSON string containing chain dependencies
+      dependency_set: ""
+
+      # A list of optional extra params that will be passed to the supervisor container for modifying its behaviour
+      extra_params: []
   # An array of L2 networks to run
   chains:
     # Specification of the optimism-participants in the network
