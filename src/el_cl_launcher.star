@@ -259,7 +259,14 @@ def launch(
                 el_builder_context = struct(
                     ip_addr=mev_params.builder_host,
                     engine_rpc_port_num=mev_params.builder_port,
+                    rpc_port_num=mev_params.builder_port,
+                    rpc_http_url="http://{0}:{1}".format(
+                        mev_params.builder_host, mev_params.builder_port
+                    ),
+    
+                    client_name="external-builder",
                 )
+                plan.print(el_builder_context)
 
             rollup_boost_image = (
                 mev_params.rollup_boost_image
