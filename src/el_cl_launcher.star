@@ -20,7 +20,9 @@ hildr = import_module("./cl/hildr/hildr_launcher.star")
 
 # MEV
 rollup_boost = import_module("./mev/rollup-boost/rollup_boost_launcher.star")
-
+op_geth_builder = import_module("./el/op-geth/op_geth_builder_launcher.star")
+op_reth_builder = import_module("./el/op-reth/op_reth_builder_launcher.star")
+op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
 
 def launch(
     plan,
@@ -92,6 +94,27 @@ def launch(
         },
     }
 
+    el_builder_launchers = {
+        "op-geth": {
+            "launcher": op_geth_builder.new_op_geth_builder_launcher(
+                deployment_output,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": op_geth_builder.launch,
+        },
+        "op-reth": {
+            "launcher": op_reth_builder.new_op_reth_builder_launcher(
+                deployment_output,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": op_reth_builder.launch,
+        },
+    }
+
     cl_launchers = {
         "op-node": {
             "launcher": op_node.new_op_node_launcher(
@@ -104,6 +127,15 @@ def launch(
                 deployment_output, jwt_file, network_params
             ),
             "launch_method": hildr.launch,
+        },
+    }
+
+    cl_builder_launchers = {
+        "op-node": {
+            "launcher": op_node_builder.new_op_node_builder_launcher(
+                deployment_output, jwt_file, network_params
+            ),
+            "launch_method": op_node_builder.launch,
         },
     }
 
@@ -156,17 +188,17 @@ def launch(
                 )
             )
 
-        if el_builder_type not in el_launchers:
+        if el_builder_type not in el_builder_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    el_builder_type, ",".join(el_launchers.keys())
+                    el_builder_type, ",".join(el_builder_launchers.keys())
                 )
             )
 
-        if cl_builder_type not in cl_launchers:
+        if cl_builder_type not in cl_builder_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    cl_builder_type, ",".join(cl_launchers.keys())
+                    cl_builder_type, ",".join(cl_builder_launchers.keys())
                 )
             )
 
@@ -181,13 +213,13 @@ def launch(
         )
 
         el_builder_launcher, el_builder_launch_method = (
-            el_launchers[el_builder_type]["launcher"],
-            el_launchers[el_builder_type]["launch_method"],
+            el_builder_launchers[el_builder_type]["launcher"],
+            el_builder_launchers[el_builder_type]["launch_method"],
         )
 
         cl_builder_launcher, cl_builder_launch_method = (
-            cl_launchers[cl_builder_type]["launcher"],
-            cl_launchers[cl_builder_type]["launch_method"],
+            cl_builder_launchers[cl_builder_type]["launcher"],
+            cl_builder_launchers[cl_builder_type]["launch_method"],
         )
 
         sidecar_launcher, sidecar_launch_method = (
@@ -261,7 +293,6 @@ def launch(
     
                     client_name="external-builder",
                 )
-                plan.print(el_builder_context)
 
             rollup_boost_image = (
                 mev_params.rollup_boost_image
