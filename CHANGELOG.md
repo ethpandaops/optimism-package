@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/ethpandaops/optimism-package/compare/1.2.0...1.3.0) (2025-01-03)
+
+
+### Features
+
+* adds op-challenger support ([#116](https://github.com/ethpandaops/optimism-package/issues/116)) ([6aba40a](https://github.com/ethpandaops/optimism-package/commit/6aba40a4eb4146a97b2c50b7c1ed8de720f7d2d8))
+* adds op-proposer support ([#111](https://github.com/ethpandaops/optimism-package/issues/111)) ([f062776](https://github.com/ethpandaops/optimism-package/commit/f062776d768c7b653a37733dbb6fe8831a8fdef0))
+
+
+### Bug Fixes
+
+* Remove dead code in main.star ([#114](https://github.com/ethpandaops/optimism-package/issues/114)) ([9e47fd6](https://github.com/ethpandaops/optimism-package/commit/9e47fd6392d874c2881e530051fcf2a889b54cfe))
+
 ## [1.2.0](https://github.com/ethpandaops/optimism-package/compare/1.1.0...1.2.0) (2024-12-13)
 
 
