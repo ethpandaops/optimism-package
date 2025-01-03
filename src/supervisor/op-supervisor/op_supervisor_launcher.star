@@ -38,6 +38,7 @@ DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
 
 def launch(
     plan,
+    l1_config_env_vars,
     all_participants,
     jwt_file,
     supervisor_params,
@@ -48,6 +49,7 @@ def launch(
 
     config = get_supervisor_config(
         plan,
+        l1_config_env_vars,
         all_participants,
         jwt_file,
         dependency_set_artifact,
@@ -61,6 +63,7 @@ def launch(
 
 def get_supervisor_config(
     plan,
+    l1_config_env_vars,
     all_participants,
     jwt_file,
     dependency_set_artifact,
@@ -81,9 +84,10 @@ def get_supervisor_config(
             "OP_SUPERVISOR_DEPENDENCY_SET": "{0}/{1}".format(
                 DATA_DIR, DEPENDENCY_SET_FILE_NAME
             ),
-            "OP_SUPERVISOR_L2_RPCS": ",".join(
+            "OP_SUPERVISOR_L1_RPC": l1_config_env_vars["L1_RPC_URL"],
+            "OP_SUPERVISOR_L2_CONSENSUS_NODES": ",".join(
                 [
-                    str(participant.el_context.rpc_http_url)
+                    str(participant.cl_context.beacon_http_url)
                     for participant in all_participants
                 ]
             ),

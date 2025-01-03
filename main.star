@@ -96,7 +96,7 @@ def run(plan, args):
 
     all_participants = []
     for l2_num, chain in enumerate(optimism_args_with_right_defaults.chains):
-        l2_launcher.launch_l2(
+        all_participants += l2_launcher.launch_l2(
             plan,
             l2_num,
             chain.network_params.name,
@@ -116,6 +116,7 @@ def run(plan, args):
     if interop_params.enabled:
         op_supervisor_launcher.launch(
             plan,
+            l1_config_env_vars,
             all_participants,
             jwt_file,
             interop_params.supervisor_params,
