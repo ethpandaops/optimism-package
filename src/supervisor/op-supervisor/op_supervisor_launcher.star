@@ -39,6 +39,7 @@ DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
 def launch(
     plan,
     all_participants,
+    jwt_file,
     supervisor_params,
 ):
     dependency_set_artifact = utils.write_to_file(
@@ -48,6 +49,7 @@ def launch(
     config = get_supervisor_config(
         plan,
         all_participants,
+        jwt_file,
         dependency_set_artifact,
         supervisor_params,
     )
@@ -60,6 +62,7 @@ def launch(
 def get_supervisor_config(
     plan,
     all_participants,
+    jwt_file,
     dependency_set_artifact,
     supervisor_params,
 ):
@@ -69,7 +72,10 @@ def get_supervisor_config(
     return ServiceConfig(
         image=supervisor_params.image,
         ports=ports,
-        files={DATA_DIR: dependency_set_artifact},
+        files={
+            DATA_DIR: dependency_set_artifact,
+            ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file
+        },
         env_vars={
             "OP_SUPERVISOR_DATADIR": "/db",
             "OP_SUPERVISOR_DEPENDENCY_SET": "{0}/{1}".format(
@@ -81,6 +87,7 @@ def get_supervisor_config(
                     for participant in all_participants
                 ]
             ),
+            "OP_SUPERVISOR_L2_CONSENSUS_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "OP_SUPERVISOR_RPC_ADDR": "0.0.0.0",
             "OP_SUPERVISOR_RPC_PORT": str(SUPERVISOR_RPC_PORT_NUM),
             "OP_SUPERVISOR_RPC_ENABLE_ADMIN": "true",

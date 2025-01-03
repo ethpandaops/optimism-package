@@ -6,7 +6,9 @@ op_supervisor_launcher = import_module(
 )
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
-
+ethereum_package_static_files = import_module(
+    "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
+)
 
 def run(plan, args):
     """Deploy Optimism L2s on an Ethereum L1.
@@ -87,6 +89,11 @@ def run(plan, args):
         l1_network,
     )
 
+    jwt_file = plan.upload_files(
+        src=ethereum_package_static_files.JWT_PATH_FILEPATH,
+        name="op_jwt_file",
+    )
+
     all_participants = []
     for l2_num, chain in enumerate(optimism_args_with_right_defaults.chains):
         l2_launcher.launch_l2(
@@ -94,6 +101,7 @@ def run(plan, args):
             l2_num,
             chain.network_params.name,
             chain,
+            jwt_file,
             deployment_output,
             l1_config_env_vars,
             l1_priv_key,
@@ -109,9 +117,9 @@ def run(plan, args):
         op_supervisor_launcher.launch(
             plan,
             all_participants,
+            jwt_file,
             interop_params.supervisor_params,
         )
-
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}
