@@ -17,6 +17,7 @@ ethereum_package_input_parser = import_module(
 constants = import_module("../../package_io/constants.star")
 
 util = import_module("../../util.star")
+interop_constants = import_module("../../interop/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 
@@ -44,6 +45,10 @@ def get_used_ports(discovery_port):
             BEACON_HTTP_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+        interop_constants.INTEROP_WS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+            interop_constants.INTEROP_WS_PORT_NUM,
+            ethereum_package_shared_utils.TCP_PROTOCOL,
         ),
     }
     return used_ports
@@ -73,6 +78,7 @@ def launch(
     existing_cl_clients,
     l1_config_env_vars,
     sequencer_enabled,
+    interop_params,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
         endpoint="/",
@@ -104,6 +110,7 @@ def launch(
         l1_config_env_vars,
         beacon_node_identity_recipe,
         sequencer_enabled,
+        interop_params,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -148,6 +155,7 @@ def get_beacon_config(
     l1_config_env_vars,
     beacon_node_identity_recipe,
     sequencer_enabled,
+    interop_params,
 ):
     EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -226,7 +234,18 @@ def get_beacon_config(
     ports = {}
     ports.update(used_ports)
 
-    env_vars = participant.cl_extra_env_vars
+    env_vars = dict(participant.cl_extra_env_vars)
+
+    if interop_params.enabled:
+        env_vars.update(
+            {
+                "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
+                "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
+                "OP_NODE_INTEROP_RPC_PORT": str(interop_constants.INTEROP_WS_PORT_NUM),
+                "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+            }
+        )
+
     config_args = {
         "image": participant.cl_image,
         "ports": ports,
@@ -263,9 +282,10 @@ def get_beacon_config(
     return ServiceConfig(**config_args)
 
 
-def new_op_node_launcher(deployment_output, jwt_file, network_params):
+def new_op_node_launcher(deployment_output, jwt_file, network_params, interop_params):
     return struct(
         deployment_output=deployment_output,
         jwt_file=jwt_file,
         network_params=network_params,
+        interop_params=interop_params,
     )
