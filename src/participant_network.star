@@ -2,6 +2,9 @@ el_cl_client_launcher = import_module("./el_cl_launcher.star")
 participant_module = import_module("./participant.star")
 input_parser = import_module("./package_io/input_parser.star")
 op_batcher_launcher = import_module("./batcher/op-batcher/op_batcher_launcher.star")
+op_challenger_launcher = import_module(
+    "./challenger/op-challenger/op_challenger_launcher.star"
+)
 op_proposer_launcher = import_module("./proposer/op-proposer/op_proposer_launcher.star")
 util = import_module("./util.star")
 
@@ -12,6 +15,7 @@ def launch_participant_network(
     jwt_file,
     network_params,
     batcher_params,
+    challenger_params,
     proposer_params,
     mev_params,
     deployment_output,
@@ -87,6 +91,30 @@ def launch_participant_network(
         deployment_output,
         "state",
         ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
+    )
+    challenger_key = util.read_network_config_value(
+        plan,
+        deployment_output,
+        "challenger-{0}".format(network_params.network_id),
+        ".privateKey",
+    )
+    op_challenger_image = (
+        challenger_params.image
+        if challenger_params.image != ""
+        else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
+    )
+    op_challenger_launcher.launch(
+        plan,
+        "op-challenger-{0}".format(l2_services_suffix),
+        op_challenger_image,
+        all_el_contexts[0],
+        all_cl_contexts[0],
+        l1_config_env_vars,
+        challenger_key,
+        game_factory_address,
+        deployment_output,
+        network_params,
+        challenger_params,
     )
 
     proposer_key = util.read_network_config_value(

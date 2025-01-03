@@ -21,6 +21,10 @@ DEFAULT_BATCHER_IMAGES = {
     "op-batcher": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
 }
 
+DEFAULT_CHALLENGER_IMAGES = {
+    "op-challenger": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
+}
+
 DEFAULT_PROPOSER_IMAGES = {
     "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
 }
@@ -108,6 +112,16 @@ def input_parser(plan, input_args):
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
                 ),
+                challenger_params=struct(
+                    image=result["challenger_params"]["image"],
+                    extra_params=result["challenger_params"]["extra_params"],
+                    cannon_prestate_path=result["challenger_params"][
+                        "cannon_prestate_path"
+                    ],
+                    cannon_prestates_url=result["challenger_params"][
+                        "cannon_prestates_url"
+                    ],
+                ),
                 proposer_params=struct(
                     image=result["proposer_params"]["image"],
                     extra_params=result["proposer_params"]["extra_params"],
@@ -151,6 +165,9 @@ def parse_network_params(plan, input_args):
 
         batcher_params = default_batcher_params()
         batcher_params.update(chain.get("batcher_params", {}))
+
+        challenger_params = default_challenger_params()
+        challenger_params.update(chain.get("challenger_params", {}))
 
         proposer_params = default_proposer_params()
         proposer_params.update(chain.get("proposer_params", {}))
@@ -230,6 +247,7 @@ def parse_network_params(plan, input_args):
             "participants": participants,
             "network_params": network_params,
             "batcher_params": batcher_params,
+            "challenger_params": challenger_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
             "additional_services": chain.get(
@@ -273,6 +291,7 @@ def default_chains():
             "participants": [default_participant()],
             "network_params": default_network_params(),
             "batcher_params": default_batcher_params(),
+            "challenger_params": default_challenger_params(),
             "proposer_params": default_proposer_params(),
             "mev_params": default_mev_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
@@ -299,6 +318,15 @@ def default_batcher_params():
     return {
         "image": "",
         "extra_params": [],
+    }
+
+
+def default_challenger_params():
+    return {
+        "image": "",
+        "extra_params": [],
+        "cannon_prestate_path": "../../../static_files/prestates",
+        "cannon_prestates_url": "",
     }
 
 
