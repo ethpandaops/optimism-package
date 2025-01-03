@@ -8,23 +8,13 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-SUPERVISOR_SERVICE_NAME = "op-supervisor"
-
-# Port IDs
-SUPERVISOR_RPC_PORT_ID = "rpc"
-
-# Port nums
-SUPERVISOR_RPC_PORT_NUM = 8545
-
-SUPERVISOR_ENDPOINT = "http://{0}:{1}".format(
-    SUPERVISOR_SERVICE_NAME, SUPERVISOR_RPC_PORT_NUM
-)
+interop_constants = import_module("../constants.star")
 
 
 def get_used_ports():
     used_ports = {
-        SUPERVISOR_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            SUPERVISOR_RPC_PORT_NUM,
+        interop_constants.SUPERVISOR_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+            interop_constants.SUPERVISOR_RPC_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
@@ -56,7 +46,7 @@ def launch(
         supervisor_params,
     )
 
-    supervisor_service = plan.add_service(SUPERVISOR_SERVICE_NAME, config)
+    supervisor_service = plan.add_service(interop_constants.SUPERVISOR_SERVICE_NAME, config)
 
     return "op_supervisor"
 
@@ -87,13 +77,13 @@ def get_supervisor_config(
             "OP_SUPERVISOR_L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "OP_SUPERVISOR_L2_CONSENSUS_NODES": ",".join(
                 [
-                    str(participant.cl_context.beacon_http_url)
+                    "http://{0}:{1}".format(participant.cl_context.ip_addr, interop_constants.INTEROP_WS_PORT_NUM)
                     for participant in all_participants
                 ]
             ),
             "OP_SUPERVISOR_L2_CONSENSUS_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "OP_SUPERVISOR_RPC_ADDR": "0.0.0.0",
-            "OP_SUPERVISOR_RPC_PORT": str(SUPERVISOR_RPC_PORT_NUM),
+            "OP_SUPERVISOR_RPC_PORT": str(interop_constants.SUPERVISOR_RPC_PORT_NUM),
             "OP_SUPERVISOR_RPC_ENABLE_ADMIN": "true",
         },
         cmd=cmd,

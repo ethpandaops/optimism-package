@@ -17,9 +17,7 @@ ethereum_package_input_parser = import_module(
 constants = import_module("../../package_io/constants.star")
 
 util = import_module("../../util.star")
-op_supervisor_launcher = import_module(
-    "../../supervisor/op-supervisor/op_supervisor_launcher.star"
-)
+interop_constants = import_module("../../interop/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 
@@ -47,6 +45,10 @@ def get_used_ports(discovery_port):
             BEACON_HTTP_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+        interop_constants.INTEROP_WS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+            interop_constants.INTEROP_WS_PORT_NUM,
+            ethereum_package_shared_utils.TCP_PROTOCOL
         ),
     }
     return used_ports
@@ -235,7 +237,12 @@ def get_beacon_config(
     env_vars = dict(participant.cl_extra_env_vars)
 
     if interop_params.enabled:
-        env_vars["OP_NODE_SUPERVISOR"] = op_supervisor_launcher.SUPERVISOR_ENDPOINT
+        env_vars.update({
+            "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
+            "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
+            "OP_NODE_INTEROP_RPC_PORT": str(interop_constants.INTEROP_WS_PORT_NUM),
+            "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        })
 
     config_args = {
         "image": participant.cl_image,

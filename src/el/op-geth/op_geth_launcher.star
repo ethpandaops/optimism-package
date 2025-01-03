@@ -22,9 +22,7 @@ ethereum_package_constants = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
-op_supervisor_launcher = import_module(
-    "../../supervisor/op-supervisor/op_supervisor_launcher.star"
-)
+interop_constants = import_module("../../interop/constants.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -258,7 +256,7 @@ def get_config(
     env_vars = dict(participant.cl_extra_env_vars)
 
     if interop_params.enabled:
-        env_vars["GETH_ROLLUP_INTEROPRPC"] = op_supervisor_launcher.SUPERVISOR_ENDPOINT
+        env_vars["GETH_ROLLUP_INTEROPRPC"] = interop_constants.SUPERVISOR_ENDPOINT
 
     config_args = {
         "image": participant.el_image,
