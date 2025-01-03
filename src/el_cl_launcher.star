@@ -264,8 +264,8 @@ def launch(
             interop_params,
         )
 
-        if rollup_boost_enabled:
-            plan.print("Rollup boost enabled")
+        if rollup_boost_enabled and sequencer_enabled:
+            plan.print("Starting rollup boost")
 
             if mev_params.builder_host == "" or mev_params.builder_port == "":
                 el_builder_context = el_builder_launch_method(
@@ -311,7 +311,6 @@ def launch(
             )
 
             all_el_contexts.append(el_builder_context)
-            all_el_contexts.append(sidecar_context)
         else:
             sidecar_context = None
 
@@ -324,7 +323,7 @@ def launch(
             persistent,
             cl_tolerations,
             node_selectors,
-            sidecar_context if rollup_boost_enabled else el_context,
+            sidecar_context if rollup_boost_enabled and sequencer_enabled else el_context,
             all_cl_contexts,
             l1_config_env_vars,
             sequencer_enabled,
@@ -336,7 +335,7 @@ def launch(
         all_el_contexts.append(el_context)
         all_cl_contexts.append(cl_context)
 
-        if rollup_boost_enabled:
+        if rollup_boost_enabled and sequencer_enabled:
             cl_builder_context = cl_builder_launch_method(
                 plan,
                 cl_builder_launcher,
