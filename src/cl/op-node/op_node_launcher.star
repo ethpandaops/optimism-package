@@ -48,7 +48,7 @@ def get_used_ports(discovery_port):
         ),
         interop_constants.INTEROP_WS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             interop_constants.INTEROP_WS_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL
+            ethereum_package_shared_utils.TCP_PROTOCOL,
         ),
     }
     return used_ports
@@ -237,12 +237,14 @@ def get_beacon_config(
     env_vars = dict(participant.cl_extra_env_vars)
 
     if interop_params.enabled:
-        env_vars.update({
-            "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
-            "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
-            "OP_NODE_INTEROP_RPC_PORT": str(interop_constants.INTEROP_WS_PORT_NUM),
-            "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        })
+        env_vars.update(
+            {
+                "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
+                "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
+                "OP_NODE_INTEROP_RPC_PORT": str(interop_constants.INTEROP_WS_PORT_NUM),
+                "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+            }
+        )
 
     config_args = {
         "image": participant.cl_image,

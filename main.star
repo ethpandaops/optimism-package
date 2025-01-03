@@ -10,6 +10,7 @@ ethereum_package_static_files = import_module(
     "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
 )
 
+
 def run(plan, args):
     """Deploy Optimism L2s on an Ethereum L1.
 
@@ -121,6 +122,7 @@ def run(plan, args):
             jwt_file,
             interop_params.supervisor_params,
         )
+
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}

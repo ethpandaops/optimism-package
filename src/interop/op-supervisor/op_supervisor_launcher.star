@@ -46,7 +46,9 @@ def launch(
         supervisor_params,
     )
 
-    supervisor_service = plan.add_service(interop_constants.SUPERVISOR_SERVICE_NAME, config)
+    supervisor_service = plan.add_service(
+        interop_constants.SUPERVISOR_SERVICE_NAME, config
+    )
 
     return "op_supervisor"
 
@@ -67,7 +69,7 @@ def get_supervisor_config(
         ports=ports,
         files={
             DATA_DIR: dependency_set_artifact,
-            ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file
+            ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         env_vars={
             "OP_SUPERVISOR_DATADIR": "/db",
@@ -77,7 +79,10 @@ def get_supervisor_config(
             "OP_SUPERVISOR_L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "OP_SUPERVISOR_L2_CONSENSUS_NODES": ",".join(
                 [
-                    "http://{0}:{1}".format(participant.cl_context.ip_addr, interop_constants.INTEROP_WS_PORT_NUM)
+                    "http://{0}:{1}".format(
+                        participant.cl_context.ip_addr,
+                        interop_constants.INTEROP_WS_PORT_NUM,
+                    )
                     for participant in all_participants
                 ]
             ),
