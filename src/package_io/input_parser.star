@@ -108,6 +108,12 @@ def input_parser(plan, input_args):
                     interop_time_offset=result["network_params"]["interop_time_offset"],
                     fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
                 ),
+                vaults_params=struct(
+                    base_fee_vault_recipient=result["vaults_params"]["base_fee_vault_recipient"],
+                    l1_fee_vault_recipient=result["vaults_params"]["l1_fee_vault_recipient"],
+                    sequencer_fee_vault_recipient=result["vaults_params"]["sequencer_fee_vault_recipient"],
+                    operator_fee_vault_recipient=result["vaults_params"]["operator_fee_vault_recipient"],
+                ),
                 batcher_params=struct(
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
@@ -133,6 +139,11 @@ def input_parser(plan, input_args):
                     builder_host=result["mev_params"]["builder_host"],
                     builder_port=result["mev_params"]["builder_port"],
                 ),
+                eip1559_params=struct(
+                    denominator_canyon=result["eip1559_params"]["denominator_canyon"],
+                    denominator=result["eip1559_params"]["denominator"],
+                    elasticity=result["eip1559_params"]["elasticity"],
+                ),
                 additional_services=result["additional_services"],
             )
             for result in results["chains"]
@@ -145,6 +156,11 @@ def input_parser(plan, input_args):
             l2_artifacts_locator=results["op_contract_deployer_params"][
                 "l2_artifacts_locator"
             ],
+            proxyAdminOwner=results["op_contract_deployer_params"]["proxyAdminOwner"],
+            protocolVersionsOwner=results["op_contract_deployer_params"][
+                "protocolVersionsOwner"
+            ],
+            guardian=results["op_contract_deployer_params"]["guardian"],
         ),
         global_log_level=results["global_log_level"],
         global_node_selectors=results["global_node_selectors"],
@@ -174,6 +190,12 @@ def parse_network_params(plan, input_args):
 
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
+
+        eip1559_params = default_eip1559_params()
+        eip1559_params.update(chain.get("eip1559_params", {}))
+
+        vaults_params = default_vaults_params()
+        vaults_params.update(chain.get("vaults_params", {}))
 
         network_name = network_params["name"]
         network_id = network_params["network_id"]
@@ -250,6 +272,8 @@ def parse_network_params(plan, input_args):
             "challenger_params": challenger_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
+            "eip1559_params": eip1559_params,
+            "vaults_params": vaults_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
@@ -284,6 +308,20 @@ def default_mev_params():
         "builder_port": "",
     }
 
+def default_eip1559_params():
+    return {
+        "denominator_canyon": "",
+        "denominator": "",
+        "elasticity": "",
+    }
+
+def default_vaults_params():
+    return {
+        "base_fee_vault_recipient": "",
+        "l1_fee_vault_recipient": "",
+        "sequencer_fee_vault_recipient": "",
+        "operator_fee_vault_recipient": "",
+    }
 
 def default_chains():
     return [
@@ -294,6 +332,8 @@ def default_chains():
             "challenger_params": default_challenger_params(),
             "proposer_params": default_proposer_params(),
             "mev_params": default_mev_params(),
+            "eip1559_params": default_eip1559_params(),
+            "vaults_params": default_vaults_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
         }
     ]
