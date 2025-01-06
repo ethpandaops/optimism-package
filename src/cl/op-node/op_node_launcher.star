@@ -46,10 +46,6 @@ def get_used_ports(discovery_port):
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
-        interop_constants.INTEROP_WS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            interop_constants.INTEROP_WS_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-        ),
     }
     return used_ports
 
@@ -237,6 +233,10 @@ def get_beacon_config(
     env_vars = dict(participant.cl_extra_env_vars)
 
     if interop_params.enabled:
+        ports[interop_constants.INTEROP_WS_PORT_ID] = ethereum_package_shared_utils.new_port_spec(
+            interop_constants.INTEROP_WS_PORT_NUM,
+            ethereum_package_shared_utils.TCP_PROTOCOL,
+        )
         env_vars.update(
             {
                 "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
