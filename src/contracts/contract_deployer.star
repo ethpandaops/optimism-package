@@ -214,7 +214,7 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
             ]
         )
 
-    plan.run_sh(
+    op_deployer_output = plan.run_sh(
         name="op-deployer-apply",
         description="Apply L2 contract deployments",
         image=optimism_args.op_contract_deployer_params.image,
@@ -231,7 +231,26 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
         run=" && ".join(apply_cmds),
     )
 
-    return collect_fund.files_artifacts[0]
+    for chain in optimism_args.chains:
+        plan.run_sh(
+            name="op-deployer-generate-chainspec",
+            description="Generate chainspec",
+            image=utils.DEPLOYMENT_UTILS_IMAGE,
+            env_vars={"CHAIN_ID": str(chain.network_params.network_id)},
+            store=[
+                StoreSpec(
+                    src="/network-data",
+                    name="op-deployer-configs",
+                )
+            ],
+            files={
+                "/network-data": op_deployer_output.files_artifacts[0],
+                "/fund-script": fund_script_artifact,
+            },
+            run='cat "/network-data/genesis-$CHAIN_ID.json" | jq --from-file /fund-script/gen2spec.jq > "/network-data/chainspec-$CHAIN_ID.json"'
+        )
+
+    return op_deployer_output.files_artifacts[0]
 
 
 def chain_key(index, key):
