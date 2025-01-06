@@ -175,8 +175,6 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
         )
         intent_updates.extend([(t, chain_key(i, k), v) for t, k, v in CANNED_VALUES])
 
-    plan.print(intent_updates)
-
     op_deployer_configure = plan.run_sh(
         name="op-deployer-configure",
         description="Configure L2 contract deployments",
