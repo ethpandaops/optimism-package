@@ -247,7 +247,7 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
                 "/network-data": op_deployer_output.files_artifacts[0],
                 "/fund-script": fund_script_artifact,
             },
-            run='cat "/network-data/genesis-$CHAIN_ID.json" | jq --from-file /fund-script/gen2spec.jq > "/network-data/chainspec-$CHAIN_ID.json"'
+            run='cat "/network-data/genesis-$CHAIN_ID.json" | jq --from-file /fund-script/gen2spec.jq > "/network-data/chainspec-$CHAIN_ID.json"',
         )
 
     return op_deployer_output.files_artifacts[0]
