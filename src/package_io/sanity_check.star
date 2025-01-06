@@ -1,3 +1,14 @@
+INTEROP_PARAMS = [
+    "enabled",
+    "supervisor_params",
+]
+
+SUPERVISOR_PARAMS = [
+    "image",
+    "dependency_set",
+    "extra_params",
+]
+
 PARTICIPANT_CATEGORIES = {
     "participants": [
         "el_type",
@@ -70,6 +81,7 @@ ADDITIONAL_SERVICES_PARAMS = [
 ]
 
 ROOT_PARAMS = [
+    "interop",
     "chains",
     "op_contract_deployer_params",
     "global_log_level",
@@ -77,7 +89,6 @@ ROOT_PARAMS = [
     "global_tolerations",
     "persistent",
 ]
-
 
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",
@@ -120,6 +131,22 @@ def sanity_check(plan, optimism_config):
         if key not in ROOT_PARAMS:
             fail("Invalid parameter {0}, allowed fields: {1}".format(key, ROOT_PARAMS))
 
+    if "interop" in optimism_config:
+        validate_params(
+            plan,
+            optimism_config,
+            "interop",
+            INTEROP_PARAMS,
+        )
+
+        if "supervisor_params" in optimism_config["interop"]:
+            validate_params(
+                plan,
+                optimism_config["interop"],
+                "supervisor_params",
+                SUPERVISOR_PARAMS,
+            )
+
     chains = optimism_config.get("chains", [])
 
     if type(chains) != "list":
@@ -153,6 +180,7 @@ def sanity_check(plan, optimism_config):
             )
             combined_root_params.append("additional_services")
             combined_root_params.append("op_contract_deployer_params")
+            combined_root_params.append("supervisor_params")
 
             if param not in combined_root_params:
                 fail(
