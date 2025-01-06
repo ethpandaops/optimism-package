@@ -44,7 +44,6 @@ for chain_id in "${chain_ids[@]}"; do
       '.[$role + "PrivateKey"] = $private_key | .[$role + "Address"] = $address')
 
   done
-  cat "/network-data/genesis-$chain_id.json" | jq --from-file /fund-script/gen2spec.jq > "/network-data/chainspec-$chain_id.json"
 done
 
 echo "Wallet private key and addresses"
