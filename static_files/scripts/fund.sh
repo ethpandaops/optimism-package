@@ -23,6 +23,7 @@ send() {
 # Create a JSON object to store all the wallet addresses and private keys, start with an empty one
 wallets_json=$(jq -n '{}')
 for chain_id in "${chain_ids[@]}"; do
+  chain_wallets=$(jq -n '{}')
   for index in "${!roles[@]}"; do
     role="${roles[$index]}"
     role_idx=$((index+1))
@@ -37,17 +38,31 @@ for chain_id in "${chain_ids[@]}"; do
     write_keyfile "${address}" "${private_key}" "${role}-$chain_id"
     send "${address}"
 
-    wallets_json=$(echo "$wallets_json" | jq \
+    chain_wallets=$(echo "$chain_wallets" | jq \
       --arg role "$role" \
       --arg private_key "$private_key" \
       --arg address "$address" \
       '.[$role + "PrivateKey"] = $private_key | .[$role + "Address"] = $address')
-
   done
+
+  # Add the L1 and L2 faucet information to each chain's wallet data
+  chain_wallets=$(echo "$chain_wallets" | jq \
+    --arg addr "$addr" \
+    --arg private_key "0x$PRIVATE_KEY" \
+    '.["l1FaucetPrivateKey"] = $private_key | .["l1FaucetAddress"] = $addr')
+
+  chain_wallets=$(echo "$chain_wallets" | jq \
+    --arg addr "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" \
+    --arg private_key "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" \
+    '.["l2FaucetPrivateKey"] = $private_key | .["l2FaucetAddress"] = $addr')
+
+  # Add this chain's wallet information to the main JSON object
+  wallets_json=$(echo "$wallets_json" | jq \
+    --arg chain_id "$chain_id" \
+    --argjson chain_wallets "$chain_wallets" \
+    '.[$chain_id] = $chain_wallets')
 done
 
 echo "Wallet private key and addresses"
-wallets_json=$(echo "$wallets_json" | jq --arg addr "$addr" --arg private_key "0x$PRIVATE_KEY" '.["l1FaucetPrivateKey"] = $private_key | .["l1FaucetAddress"] = $addr')
-wallets_json=$(echo "$wallets_json" | jq --arg addr "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" --arg private_key  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" '.["l2FaucetPrivateKey"] = $private_key | .["l2FaucetAddress"] = $addr')
 echo "$wallets_json" > "/network-data/wallets.json"
 echo "$wallets_json"
