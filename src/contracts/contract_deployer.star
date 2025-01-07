@@ -92,6 +92,11 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
 
     intent_updates = [
         (
+            "bool",
+            "useInterop",
+            optimism_args.interop.enabled,
+        ),
+        (
             "string",
             "l1ContractsLocator",
             optimism_args.op_contract_deployer_params.l1_artifacts_locator,
