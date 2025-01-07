@@ -241,7 +241,7 @@ def get_beacon_config(
 
         env_vars.update(
             {
-                "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
+                # "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
                 "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
                 "OP_NODE_INTEROP_RPC_PORT": str(interop_constants.INTEROP_WS_PORT_NUM),
                 "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
