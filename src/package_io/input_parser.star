@@ -161,6 +161,9 @@ def input_parser(plan, input_args):
             l2_artifacts_locator=results["op_contract_deployer_params"][
                 "l2_artifacts_locator"
             ],
+            global_deploy_overrides=results["op_contract_deployer_params"][
+                "global_deploy_overrides"
+            ],
         ),
         global_log_level=results["global_log_level"],
         global_node_selectors=results["global_node_selectors"],
@@ -373,8 +376,8 @@ def default_challenger_params():
     return {
         "image": "",
         "extra_params": [],
-        "cannon_prestate_path": "../../../static_files/prestates",
-        "cannon_prestates_url": "",
+        "cannon_prestate_path": "",
+        "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
     }
 
 
@@ -423,11 +426,18 @@ def default_participant():
     }
 
 
+def default_op_contract_deployer_global_deploy_overrides():
+    return {
+        "faultGameAbsolutePrestate": "",
+    }
+
+
 def default_op_contract_deployer_params():
     return {
         "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.8",
         "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz",
         "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz",
+        "global_deploy_overrides": default_op_contract_deployer_global_deploy_overrides(),
     }
 
 
