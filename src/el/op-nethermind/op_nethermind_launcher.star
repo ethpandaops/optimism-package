@@ -208,9 +208,7 @@ def get_config(
             "--Metrics.ExposePort={0}".format(observability.METRICS_PORT_NUM),
         ]
         
-        ports[observability.METRICS_PORT_ID] = ethereum_package_shared_utils.new_port_spec(
-            observability.METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
-        )
+        observability.expose_metrics_port(ports)
 
     if not sequencer_enabled:
         cmd.append("--Optimism.SequencerUrl={0}".format(sequencer_context.rpc_http_url))

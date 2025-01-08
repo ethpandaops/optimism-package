@@ -239,10 +239,8 @@ def get_config(
             "--metrics.addr=0.0.0.0",
             "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
         ]
-        
-        ports[observability.METRICS_PORT_ID] = ethereum_package_shared_utils.new_port_spec(
-            observability.METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
-        )
+
+        observability.expose_metrics_port(ports)
 
     if interop_params.enabled:
         env_vars["GETH_ROLLUP_INTEROPRPC"] = interop_constants.SUPERVISOR_ENDPOINT
