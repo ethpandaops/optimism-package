@@ -4,6 +4,8 @@ l2_launcher = import_module("./src/l2.star")
 op_supervisor_launcher = import_module(
     "./src/interop/op-supervisor/op_supervisor_launcher.star"
 )
+prometheus = import_module("./src/prometheus/prometheus_launcher.star")
+
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
 ethereum_package_static_files = import_module(
@@ -115,12 +117,12 @@ def run(plan, args):
 
     if observability_params.enabled:
         plan.print("Launching prometheus...")
-        # prometheus_private_url = prometheus.launch_prometheus(
-        #     plan,
-        #     metrics_jobs,
-        #     global_node_selectors,
-        #     observability_params,
-        # )
+        prometheus_private_url = prometheus.launch_prometheus(
+            plan,
+            metrics_jobs,
+            global_node_selectors,
+            observability_params,
+        )
 
     if interop_params.enabled:
         op_supervisor_launcher.launch(
