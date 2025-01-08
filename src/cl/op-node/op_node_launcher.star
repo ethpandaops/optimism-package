@@ -240,17 +240,19 @@ def get_beacon_config(
             }
         )
 
-    sequencer_private_key = util.read_network_config_value(
-        plan,
-        launcher.deployment_output,
-        "sequencer-{0}".format(launcher.network_params.network_id),
-        ".privateKey",
-    )
-
     if sequencer_enabled:
-        cmd.append("--p2p.sequencer.key=" + sequencer_private_key)
-        cmd.append("--sequencer.enabled")
-        cmd.append("--sequencer.l1-confs=5")
+        sequencer_private_key = util.read_network_config_value(
+            plan,
+            launcher.deployment_output,
+            "sequencer-{0}".format(launcher.network_params.network_id),
+            ".privateKey",
+        )
+
+        cmd += [
+            "--p2p.sequencer.key=" + sequencer_private_key
+            "--sequencer.enabled",
+            "--sequencer.l1-confs=5",
+        ]
 
     if len(existing_cl_clients) > 0:
         cmd.append(
