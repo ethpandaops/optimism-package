@@ -112,6 +112,7 @@ def run(plan, args):
             global_node_selectors,
             global_tolerations,
             persistent,
+            observability_params,
             interop_params,
         )
 

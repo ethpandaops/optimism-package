@@ -27,6 +27,7 @@ def launch_participant_network(
     global_tolerations,
     persistent,
     additional_services,
+    observability_params,
     interop_params,
 ):
     num_participants = len(participants)
@@ -46,6 +47,7 @@ def launch_participant_network(
         global_tolerations,
         persistent,
         additional_services,
+        observability_params,
         interop_params,
     )
 

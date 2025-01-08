@@ -7,6 +7,8 @@ ethereum_package_input_parser = import_module(
 )
 
 input_parser = import_module("./package_io/input_parser.star")
+prometheus = import_module("./prometheus/prometheus_launcher.star")
+
 
 # EL
 op_geth = import_module("./el/op-geth/op_geth_launcher.star")
@@ -37,6 +39,7 @@ def launch(
     global_tolerations,
     persistent,
     additional_services,
+    observability_params,
     interop_params,
 ):
     el_launchers = {
@@ -229,8 +232,16 @@ def launch(
             all_el_contexts,
             sequencer_enabled,
             sequencer_context,
+            observability_params,
             interop_params,
         )
+
+        if observability_params.enabled:
+            for metrics_info in el_context.el_metrics_info:
+                if(metrics_info == None):
+                    continue
+
+                prometheus.register_node_metrics_job(metrics_info)
 
         if rollup_boost_enabled:
             plan.print("Rollup boost enabled")
@@ -292,6 +303,16 @@ def launch(
             sequencer_enabled,
             interop_params,
         )
+
+        if observability_params.enabled:
+            for metrics_info in cl_context.cl_metrics_info:
+                if(metrics_info == None):
+                    continue
+
+                metrics_info[prometheus.METRICS_INFO_ADDITIONAL_CONFIG_KEY].update({
+                    "supernode": str(cl_context.supernode),
+                })
+                prometheus.register_node_metrics_job(metrics_info)
 
         sequencer_enabled = False
 
