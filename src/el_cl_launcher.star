@@ -236,7 +236,7 @@ def launch(
                 if(metrics_info == None):
                     continue
 
-                prometheus.register_node_metrics_job(metrics_info)
+                prometheus.register_node_metrics_job(el_context.client_name, "execution", metrics_info)
 
         if rollup_boost_enabled:
             plan.print("Rollup boost enabled")
@@ -303,11 +303,9 @@ def launch(
 
         if observability_params.enabled:
             for metrics_info in filter(lambda x: x is not None, cl_context.cl_metrics_info):
-                metrics_info[prometheus.METRICS_INFO_ADDITIONAL_CONFIG_KEY].update({
+                prometheus.register_node_metrics_job(cl_context.client_name, "beacon", metrics_info, {
                     "supernode": str(cl_context.supernode),
                 })
-
-                prometheus.register_node_metrics_job(metrics_info)
 
         sequencer_enabled = False
 

@@ -1,7 +1,5 @@
 prometheus = import_module("github.com/kurtosis-tech/prometheus-package/main.star")
 
-EXECUTION_CLIENT_TYPE = "execution"
-
 METRICS_INFO_NAME_KEY = "name"
 METRICS_INFO_URL_KEY = "url"
 METRICS_INFO_PATH_KEY = "path"
@@ -11,9 +9,6 @@ PROMETHEUS_DEFAULT_SCRAPE_INTERVAL = "15s"
 
 
 REGISTERED_METRICS_JOBS = []
-
-def register_metrics_job(metrics_job):
-    REGISTERED_METRICS_JOBS.append(metrics_job)
 
 def launch_prometheus(
     plan,
@@ -55,12 +50,31 @@ def new_metrics_job(
         "ScrapeInterval": scrape_interval,
     }
 
-def register_node_metrics_job(node_metrics_info):
+def register_metrics_job(metrics_job):
+    REGISTERED_METRICS_JOBS.append(metrics_job)
+
+def register_service_metrics_job(service_name, endpoint, metrics_path="", additional_labels={}, scrape_interval=PROMETHEUS_DEFAULT_SCRAPE_INTERVAL):
     labels = {
-        "service": el_context.service_name,
-        "client_type": EXECUTION_CLIENT_TYPE,
-        "client_name": el_context.client_name,
+        "service": service_name,
     }
+    labels.update(additional_labels)
+
+    register_metrics_job(
+        new_metrics_job(
+            job_name=service_name,
+            endpoint=endpoint,
+            metrics_path=metrics_path,
+            labels=labels,
+            scrape_interval=scrape_interval,
+        )
+    )
+
+def register_node_metrics_job(client_name, client_type, node_metrics_info, additional_labels={}):
+    labels = {
+        "client_type": client_type,
+        "client_name": client_name,
+    }
+    labels.update(additional_labels)
 
     scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
     
@@ -71,19 +85,17 @@ def register_node_metrics_job(node_metrics_info):
     if additional_config != None:
         if additional_config.labels != None:
             labels.update(additional_config.labels)
-            
+
         if (
             additional_config.scrape_interval != None
             and additional_config.scrape_interval != ""
         ):
             scrape_interval = additional_config.scrape_interval
-
-    register_metrics_job(
-        new_metrics_job(
-            job_name=node_metrics_info[METRICS_INFO_NAME_KEY],
-            endpoint=node_metrics_info[METRICS_INFO_URL_KEY],
-            metrics_path=node_metrics_info[METRICS_INFO_PATH_KEY],
-            labels=labels,
-            scrape_interval=scrape_interval,
-        )
+    
+    register_service_metrics_job(
+        service_name=node_metrics_info[METRICS_INFO_NAME_KEY],
+        endpoint=node_metrics_info[METRICS_INFO_URL_KEY]
+        metrics_path=node_metrics_info[METRICS_INFO_PATH_KEY]
+        additional_labels=labels,
+        scrape_interval=scrape_interval,
     )
