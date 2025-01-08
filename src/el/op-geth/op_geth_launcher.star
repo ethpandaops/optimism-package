@@ -22,6 +22,7 @@ ethereum_package_constants = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
+prometheus = import_module("../../prometheus/prometheus_launcher.star")
 interop_constants = import_module("../../interop/constants.star")
 
 RPC_PORT_NUM = 8545
@@ -105,6 +106,7 @@ def launch(
     existing_el_clients,
     sequencer_enabled,
     sequencer_context,
+    observability_params,
     interop_params,
 ):
     log_level = ethereum_package_input_parser.get_client_log_level_or_default(
@@ -135,10 +137,12 @@ def launch(
         plan, service_name, RPC_PORT_ID
     )
 
-    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    geth_metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metrics_url
-    )
+    geth_metrics_info = None
+    if observability_params.enabled:
+        metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+        geth_metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
+            service_name, METRICS_PATH, metrics_url
+        )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
