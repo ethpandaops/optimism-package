@@ -22,14 +22,13 @@ ethereum_package_constants = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
-prometheus = import_module("../../prometheus/prometheus_launcher.star")
+observability = import_module("../../observability/constants.star")
 interop_constants = import_module("../../interop/constants.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
-METRICS_PORT_NUM = 9001
 
 # The min/max CPU/memory that the execution node can use
 EXECUTION_MIN_CPU = 300
@@ -42,12 +41,10 @@ TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
 ENGINE_WS_PORT_ID = "engineWs"
-METRICS_PORT_ID = "metrics"
+
 
 # TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
 NUM_MINING_THREADS = 1
-
-METRICS_PATH = "/debug/metrics/prometheus"
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
@@ -138,9 +135,9 @@ def launch(
 
     metrics_info = None
     if observability_params.enabled:
-        metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+        metrics_url = "{0}:{1}".format(service.ip_address, observability.METRICS_PORT_NUM)
         metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
-            service_name, METRICS_PATH, metrics_url
+            service_name, observability.METRICS_PATH, metrics_url
         )
 
     return ethereum_package_el_context.new_el_context(
@@ -245,11 +242,11 @@ def get_config(
         cmd += [
             "--metrics",
             "--metrics.addr=0.0.0.0",
-            "--metrics.port={0}".format(METRICS_PORT_NUM),
+            "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
         ]
         
-        ports[METRICS_PORT_ID] = ethereum_package_shared_utils.new_port_spec(
-            METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
+        ports[observability.METRICS_PORT_ID] = ethereum_package_shared_utils.new_port_spec(
+            observability.METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
         )
 
     if interop_params.enabled:
