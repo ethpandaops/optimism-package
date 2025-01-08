@@ -259,6 +259,7 @@ def launch(
                     all_el_contexts,
                     sequencer_enabled,
                     sequencer_context,
+                    observability_params,
                     interop_params,
                 )
             else:
@@ -301,17 +302,16 @@ def launch(
             all_cl_contexts,
             l1_config_env_vars,
             sequencer_enabled,
+            observability_params,
             interop_params,
         )
 
         if observability_params.enabled:
-            for metrics_info in cl_context.cl_metrics_info:
-                if(metrics_info == None):
-                    continue
-
+            for metrics_info in filter(lambda x: x is not None, cl_context.cl_metrics_info):
                 metrics_info[prometheus.METRICS_INFO_ADDITIONAL_CONFIG_KEY].update({
                     "supernode": str(cl_context.supernode),
                 })
+
                 prometheus.register_node_metrics_job(metrics_info)
 
         sequencer_enabled = False
@@ -333,6 +333,7 @@ def launch(
                 all_cl_contexts,
                 l1_config_env_vars,
                 False,
+                observability_params,
                 interop_params,
             )
             all_cl_contexts.append(cl_builder_context)

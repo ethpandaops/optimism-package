@@ -73,9 +73,6 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
             ENGINE_RPC_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
         ),
-        METRICS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
-        ),
     }
     return used_ports
 
@@ -137,14 +134,14 @@ def launch(
         plan, service_name, RPC_PORT_ID
     )
 
-    geth_metrics_info = None
+    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
+
+    metrics_info = None
     if observability_params.enabled:
         metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-        geth_metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
+        metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
             service_name, METRICS_PATH, metrics_url
         )
-
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
     return ethereum_package_el_context.new_el_context(
         client_name="op-geth",
@@ -156,7 +153,7 @@ def launch(
         rpc_http_url=http_url,
         enr=enr,
         service_name=service_name,
-        el_metrics_info=[geth_metrics_info],
+        el_metrics_info=[metrics_info],
     )
 
 
@@ -173,16 +170,13 @@ def get_config(
     cl_client_name,
     sequencer_enabled,
     sequencer_context,
+    observability_params,
     interop_params,
 ):
-    init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
-        EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
-        + "/genesis-{0}.json".format(launcher.network_id),
-    )
-
     discovery_port = DISCOVERY_PORT_NUM
-    used_ports = get_used_ports(discovery_port)
+    ports = dict(get_used_ports(discovery_port))
+
+    subcommand_strs = []
 
     cmd = [
         "geth",
@@ -209,12 +203,57 @@ def get_config(
         "--syncmode=full",
         "--nat=extip:" + ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--rpc.allow-unprotected-txs",
-        "--metrics",
-        "--metrics.addr=0.0.0.0",
-        "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port),
         "--port={0}".format(discovery_port),
     ]
+
+    # configure files
+    
+    files = {
+        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+    }
+
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+            size=int(participant.el_volume_size)
+            if int(participant.el_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.EL_TYPE.op_geth + "_volume_size"
+            ],
+        )
+
+    if launcher.network not in ethereum_package_constants.PUBLIC_NETWORKS:
+        init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
+            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+            "{0}/genesis-{1}.json".format(
+                ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+                launcher.network_id
+            ),
+        )
+
+        subcommand_strs.append(init_datadir_cmd_str)
+
+    # configure environment variables
+
+    env_vars = dict(participant.el_extra_env_vars)
+
+    # apply customizations
+    
+    if observability_params.enabled:
+        cmd += [
+            "--metrics",
+            "--metrics.addr=0.0.0.0",
+            "--metrics.port={0}".format(METRICS_PORT_NUM),
+        ]
+        
+        ports[METRICS_PORT_ID] = ethereum_package_shared_utils.new_port_spec(
+            METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
+        )
+
+    if interop_params.enabled:
+        env_vars["GETH_ROLLUP_INTEROPRPC"] = interop_constants.SUPERVISOR_ENDPOINT
 
     if not sequencer_enabled:
         cmd.append("--rollup.sequencerhttp={0}".format(sequencer_context.rpc_http_url))
@@ -232,39 +271,15 @@ def get_config(
             )
         )
 
+    # construct command string
+
     cmd += participant.el_extra_params
-    cmd_str = " ".join(cmd)
-    if launcher.network not in ethereum_package_constants.PUBLIC_NETWORKS:
-        subcommand_strs = [
-            init_datadir_cmd_str,
-            cmd_str,
-        ]
-        command_str = " && ".join(subcommand_strs)
-    else:
-        command_str = cmd_str
-
-    files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
-        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
-    }
-    if persistent:
-        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.op_geth + "_volume_size"
-            ],
-        )
-
-    env_vars = dict(participant.cl_extra_env_vars)
-
-    if interop_params.enabled:
-        env_vars["GETH_ROLLUP_INTEROPRPC"] = interop_constants.SUPERVISOR_ENDPOINT
-
+    subcommand_strs.append(" ".join(cmd))
+    command_str = " && ".join(subcommand_strs)
+    
     config_args = {
         "image": participant.el_image,
-        "ports": used_ports,
+        "ports": ports,
         "cmd": [command_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
@@ -281,6 +296,8 @@ def get_config(
         "node_selectors": node_selectors,
     }
 
+    # configure resources
+
     if participant.el_min_cpu > 0:
         config_args["min_cpu"] = participant.el_min_cpu
     if participant.el_max_cpu > 0:
@@ -289,6 +306,7 @@ def get_config(
         config_args["min_memory"] = participant.el_min_mem
     if participant.el_max_mem > 0:
         config_args["max_memory"] = participant.el_max_mem
+
     return ServiceConfig(**config_args)
 
 
