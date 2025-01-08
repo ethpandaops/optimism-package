@@ -313,10 +313,9 @@ def get_beacon_config(
     return ServiceConfig(**config_args)
 
 
-def new_op_node_launcher(deployment_output, jwt_file, network_params, interop_params):
+def new_op_node_launcher(deployment_output, jwt_file, network_params):
     return struct(
         deployment_output=deployment_output,
         jwt_file=jwt_file,
         network_params=network_params,
-        interop_params=interop_params,
     )
