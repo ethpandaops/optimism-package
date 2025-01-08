@@ -118,12 +118,7 @@ def launch(
         beacon_service.ip_address, beacon_http_port.number
     )
 
-    metrics_info = None
-    if observability_params.enabled:
-        metrics_url = "{0}:{1}".format(service.ip_address, observability.METRICS_PORT_NUM)
-        metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
-            service_name, observability.METRICS_PATH, metrics_url
-        )
+    metrics_info = observability.new_metrics_info(service) if observability_params.enabled else None
 
     response = plan.request(
         recipe=beacon_node_identity_recipe, service_name=service_name
