@@ -133,13 +133,8 @@ def launch(
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
-    metrics_info = None
-    if observability_params.enabled:
-        metrics_url = "{0}:{1}".format(service.ip_address, observability.METRICS_PORT_NUM)
-        metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
-            service_name, observability.METRICS_PATH, metrics_url
-        )
-
+    metrics_info = observability.new_metrics_info(service) if observability_params.enabled else None
+    
     return ethereum_package_el_context.new_el_context(
         client_name="op-geth",
         enode=enode,
