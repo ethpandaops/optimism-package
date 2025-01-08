@@ -71,6 +71,7 @@ def register_node_metrics_job(node_metrics_info):
     if additional_config != None:
         if additional_config.labels != None:
             labels.update(additional_config.labels)
+            
         if (
             additional_config.scrape_interval != None
             and additional_config.scrape_interval != ""
