@@ -221,9 +221,7 @@ def get_beacon_config(
             "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
         ]
         
-        ports[observability.METRICS_PORT_ID] = ethereum_package_shared_utils.new_port_spec(
-            observability.METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
-        )
+        observability.expose_metrics_port(ports)
 
     if interop_params.enabled:
         ports[

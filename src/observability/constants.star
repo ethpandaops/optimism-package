@@ -9,3 +9,8 @@ def new_metrics_info(service):
     )
 
     return metrics_info
+
+def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NUM):
+    ports[port_id] = ethereum_package_shared_utils.new_port_spec(
+        port_num, ethereum_package_shared_utils.TCP_PROTOCOL
+    )
