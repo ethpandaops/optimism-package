@@ -75,6 +75,10 @@ The full YAML schema that can be passed in is as follows with the defaults provi
 
 ```yaml
 optimism_package:
+  # Observability configuration
+  observability:
+    # Whether or not to configure observability (e.g. prometheus)
+    enabled: true
   # Interop configuration
   interop:
     # Whether or not to enable interop mode

@@ -62,6 +62,9 @@ def input_parser(plan, input_args):
     results["persistent"] = False
 
     return struct(
+        observability=struct(
+            enabled=results["observability"]["enabled"],
+        ),
         interop=struct(
             enabled=results["interop"]["enabled"],
             supervisor_params=struct(
@@ -174,6 +177,11 @@ def input_parser(plan, input_args):
 
 def parse_network_params(plan, input_args):
     results = {}
+
+    # configure observability
+
+    results["observability"] = default_observability_args()
+    results["observability"].update(input_args.get("observability", {}))
 
     # configure interop
 
@@ -304,6 +312,7 @@ def parse_network_params(plan, input_args):
 
 def default_optimism_args():
     return {
+        "observability": default_observability_args(),
         "interop": default_interop_args(),
         "chains": default_chains(),
         "op_contract_deployer_params": default_op_contract_deployer_params(),
@@ -313,12 +322,15 @@ def default_optimism_args():
         "persistent": False,
     }
 
+def default_observability_args():
+    return {
+        "enabled": True,
+    }
 
 def default_interop_args():
     return {
         "enabled": False,
     }
-
 
 def default_supervisor_params():
     return {

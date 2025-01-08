@@ -40,6 +40,7 @@ def run(plan, args):
     global_log_level = optimism_args_with_right_defaults.global_log_level
     persistent = optimism_args_with_right_defaults.persistent
 
+    observability_params = optimism_args_with_right_defaults.observability
     interop_params = optimism_args_with_right_defaults.interop
 
     # Deploy the L1
@@ -111,6 +112,15 @@ def run(plan, args):
             persistent,
             interop_params,
         )
+
+    if observability_params.enabled:
+        plan.print("Launching prometheus...")
+        # prometheus_private_url = prometheus.launch_prometheus(
+        #     plan,
+        #     metrics_jobs,
+        #     global_node_selectors,
+        #     observability_params,
+        # )
 
     if interop_params.enabled:
         op_supervisor_launcher.launch(
