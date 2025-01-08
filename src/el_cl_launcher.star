@@ -49,7 +49,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params,
             ),
             "launch_method": op_geth.launch,
         },
@@ -59,7 +58,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params,
             ),
             "launch_method": op_reth.launch,
         },
@@ -69,7 +67,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params,
             ),
             "launch_method": op_erigon.launch,
         },
@@ -79,7 +76,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params,
             ),
             "launch_method": op_nethermind.launch,
         },
@@ -89,7 +85,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params,
             ),
             "launch_method": op_besu.launch,
         },
@@ -98,7 +93,7 @@ def launch(
     cl_launchers = {
         "op-node": {
             "launcher": op_node.new_op_node_launcher(
-                deployment_output, jwt_file, network_params, interop_params
+                deployment_output, jwt_file, network_params
             ),
             "launch_method": op_node.launch,
         },

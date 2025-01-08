@@ -271,12 +271,10 @@ def new_op_erigon_launcher(
     jwt_file,
     network,
     network_id,
-    interop_params,
 ):
     return struct(
         deployment_output=deployment_output,
         jwt_file=jwt_file,
         network=network,
         network_id=network_id,
-        interop_params=interop_params,
     )

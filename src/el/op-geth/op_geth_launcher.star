@@ -308,12 +308,11 @@ def get_config(
 
 
 def new_op_geth_launcher(
-    deployment_output, jwt_file, network, network_id, interop_params
+    deployment_output, jwt_file, network, network_id
 ):
     return struct(
         deployment_output=deployment_output,
         jwt_file=jwt_file,
         network=network,
         network_id=network_id,
-        interop_params=interop_params,
     )
