@@ -13,7 +13,7 @@ def read_json_value(plan, json_file, json_path, mounts=None):
         description="Read JSON value",
         image=DEPLOYMENT_UTILS_IMAGE,
         files=mounts,
-        run="cat {0} | jq -j '{1}'".format(json_file, json_path),
+        run="jq -j '{1}' < {0}".format(json_file, json_path),
     )
     return run.output
 
