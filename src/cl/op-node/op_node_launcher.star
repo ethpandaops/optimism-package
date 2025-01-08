@@ -17,6 +17,7 @@ ethereum_package_input_parser = import_module(
 constants = import_module("../../package_io/constants.star")
 
 util = import_module("../../util.star")
+observability = import_module("../../observability/constants.star")
 interop_constants = import_module("../../interop/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
@@ -31,7 +32,6 @@ BEACON_HTTP_PORT_ID = "http"
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9003
 BEACON_HTTP_PORT_NUM = 8547
-
 
 def get_used_ports(discovery_port):
     used_ports = {
@@ -74,6 +74,7 @@ def launch(
     existing_cl_clients,
     l1_config_env_vars,
     sequencer_enabled,
+    observability_params,
     interop_params,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
@@ -106,6 +107,7 @@ def launch(
         l1_config_env_vars,
         beacon_node_identity_recipe,
         sequencer_enabled,
+        observability_params,
         interop_params,
     )
 
@@ -115,6 +117,13 @@ def launch(
     beacon_http_url = "http://{0}:{1}".format(
         beacon_service.ip_address, beacon_http_port.number
     )
+
+    metrics_info = None
+    if observability_params.enabled:
+        metrics_url = "{0}:{1}".format(service.ip_address, observability.METRICS_PORT_NUM)
+        metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
+            service_name, observability.METRICS_PATH, metrics_url
+        )
 
     response = plan.request(
         recipe=beacon_node_identity_recipe, service_name=service_name
@@ -130,7 +139,7 @@ def launch(
         ip_addr=beacon_service.ip_address,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
-        cl_nodes_metrics_info=None,
+        cl_nodes_metrics_info=[metrics_info],
         beacon_service_name=service_name,
         multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
@@ -151,23 +160,25 @@ def get_beacon_config(
     l1_config_env_vars,
     beacon_node_identity_recipe,
     sequencer_enabled,
+    observability_params,
     interop_params,
 ):
+    ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
+
     EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
         el_context.ip_addr,
         el_context.engine_rpc_port_num,
     )
-
-    used_ports = get_used_ports(BEACON_DISCOVERY_PORT_NUM)
 
     cmd = [
         "op-node",
         "--l2={0}".format(EXECUTION_ENGINE_ENDPOINT),
         "--l2.jwt-secret=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--verifier.l1-confs=4",
-        "--rollup.config="
-        + ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
-        + "/rollup-{0}.json".format(launcher.network_params.network_id),
+        "--rollup.config=" + "{0}/rollup-{1}.json".format(
+            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+            launcher.network_params.network_id
+        ),
         "--rpc.addr=0.0.0.0",
         "--rpc.port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rpc.enable-admin",
@@ -184,6 +195,57 @@ def get_beacon_config(
         "--p2p.listen.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--safedb.path={0}".format(BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER),
     ]
+
+    # configure files
+    
+    files = {
+        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+    }
+
+    if persistent:
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+            size=int(participant.cl_volume_size)
+            if int(participant.cl_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.CL_TYPE.hildr + "_volume_size"
+            ],
+        )
+
+    # configure environment variables
+
+    env_vars = dict(participant.cl_extra_env_vars)
+
+    # apply customizations
+    
+    if observability_params.enabled:
+        cmd += [
+            "--metrics.enabled=true",
+            "--metrics.addr=0.0.0.0",
+            "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
+        ]
+        
+        ports[observability.METRICS_PORT_ID] = ethereum_package_shared_utils.new_port_spec(
+            observability.METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
+        )
+
+    if interop_params.enabled:
+        ports[
+            interop_constants.INTEROP_WS_PORT_ID
+        ] = ethereum_package_shared_utils.new_port_spec(
+            interop_constants.INTEROP_WS_PORT_NUM,
+            ethereum_package_shared_utils.TCP_PROTOCOL,
+        )
+
+        env_vars.update(
+            {
+                # "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
+                "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
+                "OP_NODE_INTEROP_RPC_PORT": str(interop_constants.INTEROP_WS_PORT_NUM),
+                "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+            }
+        )
 
     sequencer_private_key = util.read_network_config_value(
         plan,
@@ -212,42 +274,6 @@ def get_beacon_config(
 
     cmd += participant.cl_extra_params
 
-    files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
-        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
-    }
-
-    if persistent:
-        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.CL_TYPE.hildr + "_volume_size"
-            ],
-        )
-
-    ports = dict(used_ports)
-
-    env_vars = dict(participant.cl_extra_env_vars)
-
-    if interop_params.enabled:
-        ports[
-            interop_constants.INTEROP_WS_PORT_ID
-        ] = ethereum_package_shared_utils.new_port_spec(
-            interop_constants.INTEROP_WS_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-        )
-
-        env_vars.update(
-            {
-                # "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
-                "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
-                "OP_NODE_INTEROP_RPC_PORT": str(interop_constants.INTEROP_WS_PORT_NUM),
-                "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
-            }
-        )
-
     config_args = {
         "image": participant.cl_image,
         "ports": ports,
@@ -273,6 +299,8 @@ def get_beacon_config(
         "node_selectors": node_selectors,
     }
 
+    # configure resources
+
     if participant.cl_min_cpu > 0:
         config_args["min_cpu"] = participant.cl_min_cpu
     if participant.cl_max_cpu > 0:
@@ -281,6 +309,7 @@ def get_beacon_config(
         config_args["min_memory"] = participant.cl_min_mem
     if participant.cl_max_mem > 0:
         config_args["max_memory"] = participant.cl_max_mem
+
     return ServiceConfig(**config_args)
 
 
