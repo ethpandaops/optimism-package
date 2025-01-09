@@ -58,6 +58,9 @@ def run(plan, args):
             "L1_WS_URL": external_l1_args.el_ws_url,
             "L1_CHAIN_ID": external_l1_args.network_id,
         }
+
+        plan.print("Waiting for network to sync")
+        wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
     else:
         plan.print("Deploying a local L1")
         l1 = ethereum_package.run(plan, ethereum_args)
@@ -74,13 +77,8 @@ def run(plan, args):
         l1_config_env_vars = get_l1_config(
             all_l1_participants, l1_network_params, l1_network_id
         )
-
-    if l1_network == "kurtosis":
         plan.print("Waiting for L1 to start up")
         wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
-    else:
-        plan.print("Waiting for network to sync")
-        wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
 
     deployment_output = contract_deployer.deploy_contracts(
         plan,
