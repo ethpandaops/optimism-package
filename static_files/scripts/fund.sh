@@ -41,9 +41,10 @@ for chain_id in "${chain_ids[@]}"; do
   done
 
   # Add the L1 and L2 faucet information to each chain's wallet data
+  # Use chain 20 from the ethereum_package to prevent conflicts
   chain_wallets=$(echo "$chain_wallets" | jq \
-    --arg addr "$addr" \
-    --arg private_key "0x$PRIVATE_KEY" \
+    --arg addr "0xafF0CA253b97e54440965855cec0A8a2E2399896" \
+    --arg private_key "0x4b9f63ecf84210c5366c66d68fa1f5da1fa4f634fad6dfc86178e4d79ff9e59" \
     '.["l1FaucetPrivateKey"] = $private_key | .["l1FaucetAddress"] = $addr')
 
   chain_wallets=$(echo "$chain_wallets" | jq \
