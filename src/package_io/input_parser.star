@@ -395,7 +395,7 @@ def default_challenger_params():
 
 def default_proposer_params():
     return {
-        "image": "",
+        "image": DEFAULT_PROPOSER_IMAGES["op-proposer"],
         "extra_params": [],
         "game_type": 1,
         "proposal_interval": "10m",
