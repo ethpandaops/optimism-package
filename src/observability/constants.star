@@ -17,3 +17,13 @@ def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NU
     ports[port_id] = ethereum_package_shared_utils.new_port_spec(
         port_num, ethereum_package_shared_utils.TCP_PROTOCOL
     )
+
+# configures the CLI flags and ports for a service using the standard op-service setup
+def configure_op_service_metrics(cmd, ports):
+    cmd += [
+            "--metrics.enabled",
+            "--metrics.addr=0.0.0.0",
+            "--metrics.port={0}".format(METRICS_PORT_NUM),
+        ]
+        
+    expose_metrics_port(ports)

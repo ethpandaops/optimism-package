@@ -68,10 +68,7 @@ def launch(
     )
 
     if observability_params.enabled:
-        prometheus.register_service_metrics_job(
-            service_name=batcher_service.name
-            endpoint=prometheus.make_metrics_url(batcher_service),
-        )
+        prometheus.register_op_service_metrics_job(batcher_service)
 
     return "op_batcher"
 
@@ -110,13 +107,7 @@ def get_batcher_config(
    # apply customizations
     
     if observability_params.enabled:
-        cmd += [
-            "--metrics.enabled",
-            "--metrics.addr=0.0.0.0",
-            "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
-        ]
-        
-        observability.expose_metrics_port(ports)
+        observability.configure_op_service_metrics(cmd, ports)
 
     cmd += batcher_params.extra_params
 

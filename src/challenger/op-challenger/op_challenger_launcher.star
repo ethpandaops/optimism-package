@@ -6,6 +6,9 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+observability = import_module("../../observability/constants.star")
+prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+
 #
 #  ---------------------------------- Challenger client -------------------------------------
 CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-challenger/op-challenger-data"
@@ -29,6 +32,7 @@ def launch(
     deployment_output,
     network_params,
     challenger_params,
+    observability_params,
 ):
     challenger_service_name = "{0}".format(service_name)
 
@@ -44,9 +48,13 @@ def launch(
         deployment_output,
         network_params,
         challenger_params,
+        observability_params,
     )
 
     challenger_service = plan.add_service(service_name, config)
+
+    if observability_params.enabled:
+        prometheus.register_op_service_metrics_job(challenger_service)
 
     return "op_challenger"
 
@@ -63,15 +71,22 @@ def get_challenger_config(
     deployment_output,
     network_params,
     challenger_params,
+    observability_params,
 ):
+    ports = dict(get_used_ports())
+
     cmd = [
         "op-challenger",
         "--cannon-l2-genesis="
-        + ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
-        + "/genesis-{0}.json".format(network_params.network_id),
+        + "{0}/genesis-{1}.json".format(
+            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+            network_params.network_id
+        ),
         "--cannon-rollup-config="
-        + ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
-        + "/rollup-{0}.json".format(network_params.network_id),
+        + "{0}/rollup-{1}.json".format(
+            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+            network_params.network_id
+        ),
         "--game-factory-address=" + game_factory_address,
         "--datadir=" + CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--l1-beacon=" + l1_config_env_vars["CL_RPC_URL"],
@@ -81,9 +96,17 @@ def get_challenger_config(
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--trace-type=" + "cannon,permissioned",
     ]
+
+    # configure files
+
     files = {
         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
     }
+
+    # apply customizations
+
+    if observability_params.enabled:
+        observability.configure_op_service_metrics(cmd, ports)
 
     if (
         challenger_params.cannon_prestate_path
@@ -107,7 +130,6 @@ def get_challenger_config(
         CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
     )
 
-    ports = get_used_ports()
     return ServiceConfig(
         image=image,
         ports=ports,
