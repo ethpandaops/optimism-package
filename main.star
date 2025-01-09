@@ -133,6 +133,7 @@ def run(plan, args):
             all_participants,
             jwt_file,
             interop_params.supervisor_params,
+            observability_params,
         )
 
 
