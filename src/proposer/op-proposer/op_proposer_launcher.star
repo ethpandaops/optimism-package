@@ -44,7 +44,7 @@ def launch(
     gs_proposer_private_key,
     game_factory_address,
     proposer_params,
-    observability_params,
+    observability_helper,
 ):
     proposer_service_name = "{0}".format(service_name)
 
@@ -57,7 +57,7 @@ def launch(
         gs_proposer_private_key,
         game_factory_address,
         proposer_params,
-        observability_params,
+        observability_helper,
     )
 
     proposer_service = plan.add_service(service_name, config)
@@ -67,8 +67,7 @@ def launch(
         proposer_service.ip_address, proposer_http_port.number
     )
 
-    if observability_params.enabled:
-        prometheus.register_op_service_metrics_job(proposer_service)
+    observability.register_op_service_metrics_job(observability_helper, proposer_service)
 
     return "op_proposer"
 
@@ -82,7 +81,7 @@ def get_proposer_config(
     gs_proposer_private_key,
     game_factory_address,
     proposer_params,
-    observability_params,
+    observability_helper,
 ):
     ports = dict(get_used_ports())
 
@@ -102,7 +101,7 @@ def get_proposer_config(
 
     # apply customizations
 
-    if observability_params.enabled:
+    if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
         
     cmd += proposer_params.extra_params

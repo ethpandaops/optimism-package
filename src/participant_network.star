@@ -27,7 +27,7 @@ def launch_participant_network(
     global_tolerations,
     persistent,
     additional_services,
-    observability_params,
+    observability_helper,
     interop_params,
 ):
     num_participants = len(participants)
@@ -47,7 +47,7 @@ def launch_participant_network(
         global_tolerations,
         persistent,
         additional_services,
-        observability_params,
+        observability_helper,
         interop_params,
     )
 
@@ -84,7 +84,7 @@ def launch_participant_network(
         l1_config_env_vars,
         batcher_key,
         batcher_params,
-        observability_params,
+        observability_helper,
     )
 
     game_factory_address = util.read_network_config_value(
@@ -112,7 +112,7 @@ def launch_participant_network(
         deployment_output,
         network_params,
         challenger_params,
-        observability_params,
+        observability_helper,
     )
 
     proposer_key = util.read_network_config_value(
@@ -131,7 +131,7 @@ def launch_participant_network(
         proposer_key,
         game_factory_address,
         proposer_params,
-        observability_params,
+        observability_helper,
     )
 
     return all_participants

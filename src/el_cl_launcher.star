@@ -7,8 +7,8 @@ ethereum_package_input_parser = import_module(
 )
 
 input_parser = import_module("./package_io/input_parser.star")
-prometheus = import_module("./observability/prometheus/prometheus_launcher.star")
 
+observability = import_module("./observability/constants.star")
 
 # EL
 op_geth = import_module("./el/op-geth/op_geth_launcher.star")
@@ -39,7 +39,7 @@ def launch(
     global_tolerations,
     persistent,
     additional_services,
-    observability_params,
+    observability_helper,
     interop_params,
 ):
     el_launchers = {
@@ -227,13 +227,12 @@ def launch(
             all_el_contexts,
             sequencer_enabled,
             sequencer_context,
-            observability_params,
+            observability_helper,
             interop_params,
         )
 
-        if observability_params.enabled:
-            for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
-                prometheus.register_node_metrics_job(el_context.client_name, "execution", metrics_info)
+        for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
+            observability.register_node_metrics_job(observability_helper, el_context.client_name, "execution", metrics_info)
 
         if rollup_boost_enabled:
             plan.print("Rollup boost enabled")
@@ -251,7 +250,7 @@ def launch(
                     all_el_contexts,
                     sequencer_enabled,
                     sequencer_context,
-                    observability_params,
+                    observability_helper,
                     interop_params,
                 )
             else:
@@ -294,15 +293,14 @@ def launch(
             all_cl_contexts,
             l1_config_env_vars,
             sequencer_enabled,
-            observability_params,
+            observability_helper,
             interop_params,
         )
 
-        if observability_params.enabled:
-            for metrics_info in [x for x in cl_context.cl_metrics_info if x != None]:
-                prometheus.register_node_metrics_job(cl_context.client_name, "beacon", metrics_info, {
-                    "supernode": str(cl_context.supernode),
-                })
+        for metrics_info in [x for x in cl_context.cl_nodes_metrics_info if x != None]:
+            observability.register_node_metrics_job(observability_helper, cl_context.client_name, "beacon", metrics_info, {
+                "supernode": str(cl_context.supernode),
+            })
 
         sequencer_enabled = False
 
@@ -323,7 +321,7 @@ def launch(
                 all_cl_contexts,
                 l1_config_env_vars,
                 False,
-                observability_params,
+                observability_helper,
                 interop_params,
             )
             all_cl_contexts.append(cl_builder_context)

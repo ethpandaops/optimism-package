@@ -4,6 +4,8 @@ l2_launcher = import_module("./src/l2.star")
 op_supervisor_launcher = import_module(
     "./src/interop/op-supervisor/op_supervisor_launcher.star"
 )
+
+observability = import_module("./src/observability/constants.star")
 prometheus = import_module("./src/observability/prometheus/prometheus_launcher.star")
 
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
@@ -44,6 +46,8 @@ def run(plan, args):
 
     observability_params = optimism_args_with_right_defaults.observability
     interop_params = optimism_args_with_right_defaults.interop
+
+    observability_helper = observability.make_helper(observability_params)
 
     # Deploy the L1
     l1_network = ""
@@ -112,7 +116,7 @@ def run(plan, args):
             global_node_selectors,
             global_tolerations,
             persistent,
-            observability_params,
+            observability_helper,
             interop_params,
         )
 
@@ -124,15 +128,15 @@ def run(plan, args):
             all_participants,
             jwt_file,
             interop_params.supervisor_params,
-            observability_params,
+            observability_helper,
         )
 
-    if observability_params.enabled:
+    if observability_helper.enabled:
         plan.print("Launching prometheus...")
         prometheus_private_url = prometheus.launch_prometheus(
             plan,
+            observability_helper,
             global_node_selectors,
-            observability_params.prometheus_params,
         )
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):

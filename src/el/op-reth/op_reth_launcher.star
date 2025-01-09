@@ -90,7 +90,7 @@ def launch(
     existing_el_clients,
     sequencer_enabled,
     sequencer_context,
-    observability_params,
+    observability_helper,
     interop_params,
 ):
     log_level = ethereum_package_input_parser.get_client_log_level_or_default(
@@ -112,7 +112,7 @@ def launch(
         cl_client_name,
         sequencer_enabled,
         sequencer_context,
-        observability_params,
+        observability_helper,
     )
 
     service = plan.add_service(service_name, config)
@@ -123,7 +123,7 @@ def launch(
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
     
-    metrics_info = observability.new_metrics_info(service, METRICS_PATH) if observability_params.enabled else None
+    metrics_info = observability.new_metrics_info(observability_helper, service, METRICS_PATH)
 
     return ethereum_package_el_context.new_el_context(
         client_name="reth",
@@ -151,7 +151,7 @@ def get_config(
     cl_client_name,
     sequencer_enabled,
     sequencer_context,
-    observability_params,
+    observability_helper,
 ):
     discovery_port = DISCOVERY_PORT_NUM
     ports = dict(get_used_ports(discovery_port))
@@ -208,7 +208,7 @@ def get_config(
 
     # apply customizations
 
-    if observability_params.enabled:
+    if observability_helper.enabled:
         cmd.append("--metrics=0.0.0.0:{0}".format(observability.METRICS_PORT_NUM))
         
         observability.expose_metrics_port(ports)
