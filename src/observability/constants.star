@@ -1,3 +1,12 @@
+ethereum_package_shared_utils = import_module(
+    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+)
+
+ethereum_package_node_metrics = import_module(
+    "github.com/ethpandaops/ethereum-package/src/node_metrics_info.star"
+)
+
+
 METRICS_PORT_ID = "metrics"
 METRICS_PORT_NUM = 9001
 METRICS_PATH = "/debug/metrics/prometheus"

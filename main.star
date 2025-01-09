@@ -4,7 +4,7 @@ l2_launcher = import_module("./src/l2.star")
 op_supervisor_launcher = import_module(
     "./src/interop/op-supervisor/op_supervisor_launcher.star"
 )
-prometheus = import_module("./src/prometheus/prometheus_launcher.star")
+prometheus = import_module("./src/observability/prometheus/prometheus_launcher.star")
 
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")

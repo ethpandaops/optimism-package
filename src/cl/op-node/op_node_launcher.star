@@ -118,7 +118,7 @@ def launch(
         beacon_service.ip_address, beacon_http_port.number
     )
 
-    metrics_info = observability.new_metrics_info(service) if observability_params.enabled else None
+    metrics_info = observability.new_metrics_info(beacon_service) if observability_params.enabled else None
 
     response = plan.request(
         recipe=beacon_node_identity_recipe, service_name=service_name
@@ -249,7 +249,7 @@ def get_beacon_config(
         )
 
         cmd += [
-            "--p2p.sequencer.key=" + sequencer_private_key
+            "--p2p.sequencer.key=" + sequencer_private_key,
             "--sequencer.enabled",
             "--sequencer.l1-confs=5",
         ]

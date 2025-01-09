@@ -54,7 +54,7 @@ def register_metrics_job(metrics_job):
 
 def register_op_service_metrics_job(service):
     register_service_metrics_job(
-        service_name=service.name
+        service_name=service.name,
         endpoint=prometheus.make_metrics_url(service),
     )
 
@@ -99,8 +99,8 @@ def register_node_metrics_job(client_name, client_type, node_metrics_info, addit
     
     register_service_metrics_job(
         service_name=node_metrics_info[METRICS_INFO_NAME_KEY],
-        endpoint=node_metrics_info[METRICS_INFO_URL_KEY]
-        metrics_path=node_metrics_info[METRICS_INFO_PATH_KEY]
+        endpoint=node_metrics_info[METRICS_INFO_URL_KEY],
+        metrics_path=node_metrics_info[METRICS_INFO_PATH_KEY],
         additional_labels=labels,
         scrape_interval=scrape_interval,
     )

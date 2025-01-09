@@ -161,7 +161,7 @@ def sanity_check(plan, optimism_config):
         if "prometheus_params" in optimism_config["observability"]:
             validate_params(
                 plan,
-                optimism_config["observability"]:,
+                optimism_config["observability"],
                 "prometheus_params",
                 PROMETHEUS_PARAMS,
             )

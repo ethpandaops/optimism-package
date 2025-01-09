@@ -7,7 +7,7 @@ ethereum_package_input_parser = import_module(
 )
 
 input_parser = import_module("./package_io/input_parser.star")
-prometheus = import_module("./prometheus/prometheus_launcher.star")
+prometheus = import_module("./observability/prometheus/prometheus_launcher.star")
 
 
 # EL
@@ -232,10 +232,7 @@ def launch(
         )
 
         if observability_params.enabled:
-            for metrics_info in el_context.el_metrics_info:
-                if(metrics_info == None):
-                    continue
-
+            for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
                 prometheus.register_node_metrics_job(el_context.client_name, "execution", metrics_info)
 
         if rollup_boost_enabled:
@@ -302,7 +299,7 @@ def launch(
         )
 
         if observability_params.enabled:
-            for metrics_info in filter(lambda x: x is not None, cl_context.cl_metrics_info):
+            for metrics_info in [x for x in cl_context.cl_metrics_info if x != None]:
                 prometheus.register_node_metrics_job(cl_context.client_name, "beacon", metrics_info, {
                     "supernode": str(cl_context.supernode),
                 })
