@@ -122,6 +122,7 @@ def launch(
         cl_client_name,
         sequencer_enabled,
         sequencer_context,
+        observability_params,
         interop_params,
     )
 

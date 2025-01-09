@@ -117,7 +117,7 @@ def launch(
         beacon_service.ip_address, beacon_http_port.number
     )
 
-    metrics_info = observability.new_metrics_info(service, METRICS_PATH) if observability_params.enabled else None
+    metrics_info = observability.new_metrics_info(beacon_service, METRICS_PATH) if observability_params.enabled else None
 
     # response = plan.request(
     #     recipe=beacon_node_identity_recipe, service_name=service_name

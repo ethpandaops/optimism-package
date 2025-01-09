@@ -252,7 +252,7 @@ def get_config(
     
     config_args = {
         "image": participant.el_image,
-        "ports": used_ports,
+        "ports": ports,
         "cmd": [cmd_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
