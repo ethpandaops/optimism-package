@@ -116,15 +116,6 @@ def run(plan, args):
             interop_params,
         )
 
-    if observability_params.enabled:
-        plan.print("Launching prometheus...")
-        prometheus_private_url = prometheus.launch_prometheus(
-            plan,
-            metrics_jobs,
-            global_node_selectors,
-            observability_params,
-        )
-
     if interop_params.enabled:
         op_supervisor_launcher.launch(
             plan,
@@ -136,6 +127,13 @@ def run(plan, args):
             observability_params,
         )
 
+    if observability_params.enabled:
+        plan.print("Launching prometheus...")
+        prometheus_private_url = prometheus.launch_prometheus(
+            plan,
+            global_node_selectors,
+            observability_params.prometheus_params,
+        )
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}

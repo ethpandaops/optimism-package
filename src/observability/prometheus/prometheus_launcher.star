@@ -12,7 +12,6 @@ REGISTERED_METRICS_JOBS = []
 
 def launch_prometheus(
     plan,
-    metrics_jobs,
     global_node_selectors,
     prometheus_params,
 ):
