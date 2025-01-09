@@ -73,7 +73,10 @@ OP_CONTRACT_DEPLOYER_PARAMS = [
     "image",
     "l1_artifacts_locator",
     "l2_artifacts_locator",
+    "global_deploy_overrides",
 ]
+
+OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES = ["faultGameAbsolutePrestate"]
 
 ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
@@ -197,6 +200,12 @@ def sanity_check(plan, optimism_config):
             optimism_config,
             "op_contract_deployer_params",
             OP_CONTRACT_DEPLOYER_PARAMS,
+        )
+        validate_params(
+            plan,
+            optimism_config["op_contract_deployer_params"],
+            "global_deploy_overrides",
+            OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES,
         )
 
     plan.print("Sanity check for OP package passed")

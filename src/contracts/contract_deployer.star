@@ -124,6 +124,25 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
             "superchainRoles.proxyAdminOwner", "l1ProxyAdmin", l2_chain_ids_list[0]
         ),
     ]
+    if optimism_args.op_contract_deployer_params.global_deploy_overrides[
+        "faultGameAbsolutePrestate"
+    ]:
+        intent_updates.extend(
+            [
+                (
+                    "bool",
+                    "globalDeployOverrides.dangerouslyAllowCustomDisputeParameters",
+                    "true",
+                ),
+                (
+                    "string",
+                    "globalDeployOverrides.faultGameAbsolutePrestate",
+                    optimism_args.op_contract_deployer_params.global_deploy_overrides[
+                        "faultGameAbsolutePrestate"
+                    ],
+                ),
+            ]
+        )
     intent_updates.extend(
         [
             (
