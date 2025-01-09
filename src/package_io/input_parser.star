@@ -379,14 +379,14 @@ def default_network_params():
 
 def default_batcher_params():
     return {
-        "image": "",
+        "image": DEFAULT_BATCHER_IMAGES["op-batcher"],
         "extra_params": [],
     }
 
 
 def default_challenger_params():
     return {
-        "image": "",
+        "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
         "extra_params": [],
         "cannon_prestate_path": "",
         "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
