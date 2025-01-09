@@ -112,6 +112,7 @@ def launch_participant_network(
         deployment_output,
         network_params,
         challenger_params,
+        observability_params,
     )
 
     proposer_key = util.read_network_config_value(
@@ -130,6 +131,7 @@ def launch_participant_network(
         proposer_key,
         game_factory_address,
         proposer_params,
+        observability_params,
     )
 
     return all_participants
