@@ -41,5 +41,5 @@ def wait_for_startup(plan, l1_config_env_vars):
         image=utils.DEPLOYMENT_UTILS_IMAGE,
         env_vars=l1_config_env_vars,
         run='while true; do sleep 5; current_head=$(cast bn --rpc-url=$L1_RPC_URL); echo "L1 Execution is starting up"; if [ "$current_head" -ge "3" ]; then echo "L1 Execution has started!"; break; fi; done',
-        wait="5m"
+        wait="5m",
     )
