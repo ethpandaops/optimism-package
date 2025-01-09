@@ -28,11 +28,6 @@ for chain_id in "${chain_ids[@]}"; do
     role="${roles[$index]}"
     role_idx=$((index+1))
 
-    # Skip wallet addrs for anything other Proposer/Batcher/Sequencer/Challenger if not on local L1
-    if [[ "${L1_NETWORK}" != "local" && $role_idx -gt 4 ]]; then
-      continue
-    fi
-
     private_key=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/$role_idx")
     address=$(cast wallet address "${private_key}")
     write_keyfile "${address}" "${private_key}" "${role}-$chain_id"
