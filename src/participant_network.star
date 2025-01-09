@@ -120,15 +120,11 @@ def launch_participant_network(
         "proposer-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    op_proposer_image = (
-        proposer_params.image
-        if proposer_params.image != ""
-        else input_parser.DEFAULT_PROPOSER_IMAGES["op-proposer"]
-    )
+    
     op_proposer_launcher.launch(
         plan,
         "op-proposer-{0}".format(l2_services_suffix),
-        op_proposer_image,
+        proposer_params.image,
         all_cl_contexts[0],
         l1_config_env_vars,
         proposer_key,
