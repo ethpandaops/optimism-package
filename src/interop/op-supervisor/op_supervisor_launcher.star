@@ -79,7 +79,7 @@ def get_supervisor_config(
             "OP_SUPERVISOR_L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "OP_SUPERVISOR_L2_CONSENSUS_NODES": ",".join(
                 [
-                    "http://{0}:{1}".format(
+                    "ws://{0}:{1}".format(
                         participant.cl_context.ip_addr,
                         interop_constants.INTEROP_WS_PORT_NUM,
                     )
