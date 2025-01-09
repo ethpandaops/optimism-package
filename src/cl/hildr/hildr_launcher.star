@@ -73,6 +73,7 @@ def launch(
     existing_cl_clients,
     l1_config_env_vars,
     sequencer_enabled,
+    interop_params,
 ):
     # beacon_node_identity_recipe = PostHttpRequestRecipe(
     #     endpoint="/",

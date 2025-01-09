@@ -8,6 +8,10 @@ FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
 utils = import_module("../util.star")
 
+ethereum_package_genesis_constants = import_module(
+    "github.com/ethpandaops/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+)
+
 
 CANNED_VALUES = (
     ("int", "eip1559Denominator", 50),
@@ -48,12 +52,14 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
         name="op-deployer-fund-script",
     )
 
-    collect_fund = plan.run_sh(
+    plan.run_sh(
         name="op-deployer-fund",
         description="Collect keys, and fund addresses",
         image=utils.DEPLOYMENT_UTILS_IMAGE,
         env_vars={
-            "PRIVATE_KEY": str(priv_key),
+            "PRIVATE_KEY": ethereum_package_genesis_constants.PRE_FUNDED_ACCOUNTS[
+                19
+            ].private_key,
             "FUND_VALUE": "10ether",
             "L1_NETWORK": str(l1_network),
         }

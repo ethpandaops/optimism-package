@@ -312,6 +312,7 @@ def launch(
                 all_cl_contexts,
                 l1_config_env_vars,
                 False,
+                interop_params,
             )
             all_cl_contexts.append(cl_builder_context)
 
