@@ -6,6 +6,9 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+observability = import_module("../../observability/constants.star")
+prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+
 #
 #  ---------------------------------- Batcher client -------------------------------------
 # The Docker container runs as the "op-proposer" user so we can't write to root
@@ -41,6 +44,7 @@ def launch(
     gs_proposer_private_key,
     game_factory_address,
     proposer_params,
+    observability_params,
 ):
     proposer_service_name = "{0}".format(service_name)
 
@@ -53,6 +57,7 @@ def launch(
         gs_proposer_private_key,
         game_factory_address,
         proposer_params,
+        observability_params,
     )
 
     proposer_service = plan.add_service(service_name, config)
@@ -61,6 +66,9 @@ def launch(
     proposer_http_url = "http://{0}:{1}".format(
         proposer_service.ip_address, proposer_http_port.number
     )
+
+    if observability_params.enabled:
+        prometheus.register_op_service_metrics_job(proposer_service)
 
     return "op_proposer"
 
@@ -74,7 +82,10 @@ def get_proposer_config(
     gs_proposer_private_key,
     game_factory_address,
     proposer_params,
+    observability_params,
 ):
+    ports = dict(get_used_ports())
+
     cmd = [
         "op-proposer",
         "--poll-interval=12s",
@@ -89,6 +100,11 @@ def get_proposer_config(
         "--wait-node-sync=true",
     ]
 
+    # apply customizations
+
+    if observability_params.enabled:
+        observability.configure_op_service_metrics(cmd, ports)
+        
     cmd += proposer_params.extra_params
 
     ports = get_used_ports()
