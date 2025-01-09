@@ -16,7 +16,7 @@ write_keyfile() {
 }
 
 send() {
-  cast send $1 --value "$FUND_VALUE" --private-key "$PRIVATE_KEY" --nonce "$nonce" --async
+  cast send $1 --value "$FUND_VALUE" --private-key "$PRIVATE_KEY" --timeout 60 --nonce "$nonce" &
   nonce=$((nonce+1))
 }
 
@@ -62,3 +62,5 @@ done
 echo "Wallet private key and addresses"
 echo "$wallets_json" > "/network-data/wallets.json"
 echo "$wallets_json"
+
+wait
