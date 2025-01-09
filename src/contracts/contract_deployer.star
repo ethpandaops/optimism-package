@@ -220,7 +220,7 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
         },
         run=" && ".join(
             [
-                "cat /network-data/intent.toml | dasel put -r toml -t {0} -v {2} '{1}' -o /network-data/intent.toml".format(
+                "dasel put -r toml -t {0} -v {2} '{1}' -o /network-data/intent.toml < /network-data/intent.toml".format(
                     t, k, v
                 )
                 for t, k, v in intent_updates
@@ -277,7 +277,7 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
                 "/network-data": op_deployer_output.files_artifacts[0],
                 "/fund-script": fund_script_artifact,
             },
-            run='cat "/network-data/genesis-$CHAIN_ID.json" | jq --from-file /fund-script/gen2spec.jq > "/network-data/chainspec-$CHAIN_ID.json"',
+            run='jq --from-file /fund-script/gen2spec.jq < "/network-data/genesis-$CHAIN_ID.json" > "/network-data/chainspec-$CHAIN_ID.json"',
         )
 
     return op_deployer_output.files_artifacts[0]
