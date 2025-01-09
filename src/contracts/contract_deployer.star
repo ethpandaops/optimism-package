@@ -48,7 +48,7 @@ def deploy_contracts(plan, priv_key, l1_config_env_vars, optimism_args, l1_netwo
         name="op-deployer-fund-script",
     )
 
-    collect_fund = plan.run_sh(
+    plan.run_sh(
         name="op-deployer-fund",
         description="Collect keys, and fund addresses",
         image=utils.DEPLOYMENT_UTILS_IMAGE,
