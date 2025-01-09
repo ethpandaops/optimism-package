@@ -32,7 +32,7 @@ def launch(
     deployment_output,
     network_params,
     challenger_params,
-    observability_params,
+    observability_helper,
 ):
     challenger_service_name = "{0}".format(service_name)
 
@@ -48,13 +48,12 @@ def launch(
         deployment_output,
         network_params,
         challenger_params,
-        observability_params,
+        observability_helper,
     )
 
     challenger_service = plan.add_service(service_name, config)
 
-    if observability_params.enabled:
-        prometheus.register_op_service_metrics_job(challenger_service)
+    observability.register_op_service_metrics_job(observability_helper, challenger_service)
 
     return "op_challenger"
 
@@ -71,7 +70,7 @@ def get_challenger_config(
     deployment_output,
     network_params,
     challenger_params,
-    observability_params,
+    observability_helper,
 ):
     ports = dict(get_used_ports())
 
@@ -105,7 +104,7 @@ def get_challenger_config(
 
     # apply customizations
 
-    if observability_params.enabled:
+    if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
 
     if (

@@ -44,7 +44,7 @@ def launch(
     l1_config_env_vars,
     gs_batcher_private_key,
     batcher_params,
-    observability_params,
+    observability_helper,
 ):
     batcher_service_name = "{0}".format(service_name)
 
@@ -57,7 +57,7 @@ def launch(
         l1_config_env_vars,
         gs_batcher_private_key,
         batcher_params,
-        observability_params,
+        observability_helper,
     )
 
     batcher_service = plan.add_service(service_name, config)
@@ -67,8 +67,7 @@ def launch(
         batcher_service.ip_address, batcher_http_port.number
     )
 
-    if observability_params.enabled:
-        prometheus.register_op_service_metrics_job(batcher_service)
+    observability.register_op_service_metrics_job(observability_helper, batcher_service)
 
     return "op_batcher"
 
@@ -82,7 +81,7 @@ def get_batcher_config(
     l1_config_env_vars,
     gs_batcher_private_key,
     batcher_params,
-    observability_params,
+    observability_helper,
 ):
     ports = dict(get_used_ports())
 
@@ -106,7 +105,7 @@ def get_batcher_config(
 
    # apply customizations
     
-    if observability_params.enabled:
+    if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
 
     cmd += batcher_params.extra_params

@@ -74,7 +74,7 @@ def launch(
     existing_cl_clients,
     l1_config_env_vars,
     sequencer_enabled,
-    observability_params,
+    observability_helper,
     interop_params,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
@@ -107,7 +107,7 @@ def launch(
         l1_config_env_vars,
         beacon_node_identity_recipe,
         sequencer_enabled,
-        observability_params,
+        observability_helper,
         interop_params,
     )
 
@@ -118,7 +118,7 @@ def launch(
         beacon_service.ip_address, beacon_http_port.number
     )
 
-    metrics_info = observability.new_metrics_info(beacon_service) if observability_params.enabled else None
+    metrics_info = observability.new_metrics_info(observability_helper, beacon_service)
 
     response = plan.request(
         recipe=beacon_node_identity_recipe, service_name=service_name
@@ -155,7 +155,7 @@ def get_beacon_config(
     l1_config_env_vars,
     beacon_node_identity_recipe,
     sequencer_enabled,
-    observability_params,
+    observability_helper,
     interop_params,
 ):
     ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
@@ -214,7 +214,7 @@ def get_beacon_config(
 
     # apply customizations
     
-    if observability_params.enabled:
+    if observability_helper.enabled:
         cmd += [
             "--metrics.enabled=true",
             "--metrics.addr=0.0.0.0",
