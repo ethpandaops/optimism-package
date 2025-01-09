@@ -53,6 +53,12 @@ def new_metrics_job(
 def register_metrics_job(metrics_job):
     REGISTERED_METRICS_JOBS.append(metrics_job)
 
+def register_op_service_metrics_job(service):
+    register_service_metrics_job(
+        service_name=service.name
+        endpoint=prometheus.make_metrics_url(service),
+    )
+
 def register_service_metrics_job(service_name, endpoint, metrics_path="", additional_labels={}, scrape_interval=PROMETHEUS_DEFAULT_SCRAPE_INTERVAL):
     labels = {
         "service": service_name,
