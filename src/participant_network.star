@@ -74,15 +74,11 @@ def launch_participant_network(
         "batcher-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    op_batcher_image = (
-        batcher_params.image
-        if batcher_params.image != ""
-        else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
-    )
+
     op_batcher_launcher.launch(
         plan,
         "op-batcher-{0}".format(l2_services_suffix),
-        op_batcher_image,
+        batcher_params.image,
         all_el_contexts[0],
         all_cl_contexts[0],
         l1_config_env_vars,
@@ -103,15 +99,11 @@ def launch_participant_network(
         "challenger-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    op_challenger_image = (
-        challenger_params.image
-        if challenger_params.image != ""
-        else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
-    )
+
     op_challenger_launcher.launch(
         plan,
         "op-challenger-{0}".format(l2_services_suffix),
-        op_challenger_image,
+        challenger_params.image,
         all_el_contexts[0],
         all_cl_contexts[0],
         l1_config_env_vars,
