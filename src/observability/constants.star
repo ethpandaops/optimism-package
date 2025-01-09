@@ -21,7 +21,7 @@ def make_metrics_url(service, metrics_port_num=METRICS_PORT_NUM):
     return "{0}:{1}".format(service.ip_address, metrics_port_num)
 
 def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
-    if helper.enabled:
+    if not helper.enabled:
         return None
 
     metrics_url = make_metrics_url(service)
