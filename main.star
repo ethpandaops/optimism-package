@@ -116,6 +116,7 @@ def run(plan, args):
         op_supervisor_launcher.launch(
             plan,
             l1_config_env_vars,
+            optimism_args_with_right_defaults.chains,
             all_participants,
             jwt_file,
             interop_params.supervisor_params,
