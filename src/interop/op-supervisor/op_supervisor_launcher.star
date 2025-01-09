@@ -26,15 +26,35 @@ DATA_DIR = "/etc/op-supervisor"
 DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
 
 
+def create_dependency_set(chains):
+    result = {
+        "dependencies": {
+            str(chain.network_params.network_id): {
+                "chainIndex": str(chain.network_params.network_id),
+                "activationTime": 0,
+                "historyMinTime": 0,
+            }
+            for chain in chains
+        }
+    }
+    return result
+
+
 def launch(
     plan,
     l1_config_env_vars,
+    chains,
     all_participants,
     jwt_file,
     supervisor_params,
 ):
+    dependency_set_json = supervisor_params.dependency_set
+    if not dependency_set_json:
+        dependency_set = create_dependency_set(chains)
+        dependency_set_json = json.encode(dependency_set)
+
     dependency_set_artifact = utils.write_to_file(
-        plan, supervisor_params.dependency_set, DATA_DIR, DEPENDENCY_SET_FILE_NAME
+        plan, dependency_set_json, DATA_DIR, DEPENDENCY_SET_FILE_NAME
     )
 
     config = get_supervisor_config(
