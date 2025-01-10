@@ -5,7 +5,7 @@ op_supervisor_launcher = import_module(
     "./src/interop/op-supervisor/op_supervisor_launcher.star"
 )
 
-observability = import_module("./src/observability/constants.star")
+observability = import_module("./src/observability/observability.star")
 prometheus = import_module("./src/observability/prometheus/prometheus_launcher.star")
 
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")

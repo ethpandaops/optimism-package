@@ -15,7 +15,7 @@ ethereum_package_input_parser = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
-observability = import_module("../../observability/constants.star")
+observability = import_module("../../observability/observability.star")
 
 util = import_module("../../util.star")
 
