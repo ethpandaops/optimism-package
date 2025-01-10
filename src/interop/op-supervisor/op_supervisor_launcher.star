@@ -75,7 +75,9 @@ def launch(
         interop_constants.SUPERVISOR_SERVICE_NAME, config
     )
 
-    observability.register_op_service_metrics_job(observability_helper, supervisor_service)
+    observability.register_op_service_metrics_job(
+        observability_helper, supervisor_service
+    )
 
     return "op_supervisor"
 
@@ -93,11 +95,11 @@ def get_supervisor_config(
 
     cmd = ["op-supervisor"] + supervisor_params.extra_params
 
-   # apply customizations
-    
+    # apply customizations
+
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
-    
+
     return ServiceConfig(
         image=supervisor_params.image,
         ports=ports,

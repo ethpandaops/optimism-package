@@ -66,8 +66,12 @@ def input_parser(plan, input_args):
             enabled=results["observability"]["enabled"],
             prometheus_params=struct(
                 image=results["observability"]["prometheus_params"]["image"],
-                storage_tsdb_retention_time=results["observability"]["prometheus_params"]["storage_tsdb_retention_time"],
-                storage_tsdb_retention_size=results["observability"]["prometheus_params"]["storage_tsdb_retention_size"],
+                storage_tsdb_retention_time=results["observability"][
+                    "prometheus_params"
+                ]["storage_tsdb_retention_time"],
+                storage_tsdb_retention_size=results["observability"][
+                    "prometheus_params"
+                ]["storage_tsdb_retention_size"],
                 min_cpu=results["observability"]["prometheus_params"]["min_cpu"],
                 max_cpu=results["observability"]["prometheus_params"]["max_cpu"],
                 min_mem=results["observability"]["prometheus_params"]["min_mem"],
@@ -336,10 +340,12 @@ def default_optimism_params():
         "persistent": False,
     }
 
+
 def default_observability_params():
     return {
         "enabled": True,
     }
+
 
 def default_prometheus_params():
     return {
@@ -352,10 +358,12 @@ def default_prometheus_params():
         "max_mem": 2048,
     }
 
+
 def default_interop_params():
     return {
         "enabled": False,
     }
+
 
 def default_supervisor_params():
     return {

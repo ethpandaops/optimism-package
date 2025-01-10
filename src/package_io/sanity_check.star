@@ -166,7 +166,6 @@ def sanity_check(plan, optimism_config):
                 PROMETHEUS_PARAMS,
             )
 
-
     if "interop" in optimism_config:
         validate_params(
             plan,

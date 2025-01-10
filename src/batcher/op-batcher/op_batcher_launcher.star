@@ -103,8 +103,8 @@ def get_batcher_config(
         "--data-availability-type=blobs",
     ]
 
-   # apply customizations
-    
+    # apply customizations
+
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
 

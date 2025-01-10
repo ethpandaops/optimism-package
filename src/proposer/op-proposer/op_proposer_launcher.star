@@ -67,7 +67,9 @@ def launch(
         proposer_service.ip_address, proposer_http_port.number
     )
 
-    observability.register_op_service_metrics_job(observability_helper, proposer_service)
+    observability.register_op_service_metrics_job(
+        observability_helper, proposer_service
+    )
 
     return "op_proposer"
 
@@ -103,7 +105,7 @@ def get_proposer_config(
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
-        
+
     cmd += proposer_params.extra_params
 
     ports = get_used_ports()

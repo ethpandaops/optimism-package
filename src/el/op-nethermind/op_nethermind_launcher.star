@@ -199,15 +199,15 @@ def get_config(
 
     env_vars = dict(participant.el_extra_env_vars)
 
-    # apply customizations 
-    
+    # apply customizations
+
     if observability_helper.enabled:
         cmd += [
             "--Metrics.Enabled=true",
             "--Metrics.ExposeHost=0.0.0.0",
             "--Metrics.ExposePort={0}".format(observability.METRICS_PORT_NUM),
         ]
-        
+
         observability.expose_metrics_port(ports)
 
     if not sequencer_enabled:
@@ -232,12 +232,12 @@ def get_config(
         "--Init.ChainSpecPath="
         + "{0}/chainspec-{1}.json".format(
             ethereum_package_constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
-            launcher.network_id
+            launcher.network_id,
         ),
     )
 
     cmd += participant.el_extra_params
-    
+
     config_args = {
         "image": participant.el_image,
         "ports": ports,
@@ -266,7 +266,7 @@ def get_config(
         config_args["min_memory"] = participant.el_min_mem
     if participant.el_max_mem > 0:
         config_args["max_memory"] = participant.el_max_mem
-        
+
     return ServiceConfig(**config_args)
 
 

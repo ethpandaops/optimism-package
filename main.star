@@ -139,6 +139,7 @@ def run(plan, args):
             global_node_selectors,
         )
 
+
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}
     env_vars["L1_RPC_KIND"] = "standard"
