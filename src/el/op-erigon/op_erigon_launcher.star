@@ -202,7 +202,7 @@ def get_config(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             "{0}/genesis-{1}.json".format(
                 ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-                launcher.network_id
+                launcher.network_id,
             ),
         )
 
@@ -239,13 +239,12 @@ def get_config(
             )
         )
 
-    
     # construct command string
 
     cmd += participant.el_extra_params
     subcommand_strs.append(" ".join(cmd))
     command_str = " && ".join(subcommand_strs)
-    
+
     config_args = {
         "image": participant.el_image,
         "ports": ports,
@@ -276,7 +275,7 @@ def get_config(
         config_args["min_memory"] = participant.el_min_mem
     if participant.el_max_mem > 0:
         config_args["max_memory"] = participant.el_max_mem
-        
+
     return ServiceConfig(**config_args)
 
 

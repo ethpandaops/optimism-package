@@ -53,7 +53,9 @@ def launch(
 
     challenger_service = plan.add_service(service_name, config)
 
-    observability.register_op_service_metrics_job(observability_helper, challenger_service)
+    observability.register_op_service_metrics_job(
+        observability_helper, challenger_service
+    )
 
     return "op_challenger"
 
@@ -79,12 +81,12 @@ def get_challenger_config(
         "--cannon-l2-genesis="
         + "{0}/genesis-{1}.json".format(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-            network_params.network_id
+            network_params.network_id,
         ),
         "--cannon-rollup-config="
         + "{0}/rollup-{1}.json".format(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-            network_params.network_id
+            network_params.network_id,
         ),
         "--game-factory-address=" + game_factory_address,
         "--datadir=" + CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER,

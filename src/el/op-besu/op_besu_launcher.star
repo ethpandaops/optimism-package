@@ -170,7 +170,7 @@ def get_config(
         "--genesis-file="
         + "{0}/genesis-{1}.json".format(
             ethereum_package_constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
-            launcher.network_id
+            launcher.network_id,
         ),
         "--network-id={0}".format(launcher.network_id),
         # "--logging=" + log_level,
@@ -219,14 +219,14 @@ def get_config(
     env_vars = dict(participant.el_extra_env_vars)
 
     # apply customizations
-    
+
     if observability_helper.enabled:
         cmd += [
             "--metrics-enabled=true",
             "--metrics-host=0.0.0.0",
             "--metrics-port={0}".format(observability.METRICS_PORT_NUM),
         ]
-        
+
         observability.expose_metrics_port(ports)
 
     # if not sequencer_enabled:
@@ -249,7 +249,7 @@ def get_config(
 
     cmd += participant.el_extra_params
     cmd_str = " ".join(cmd)
-    
+
     config_args = {
         "image": participant.el_image,
         "ports": ports,

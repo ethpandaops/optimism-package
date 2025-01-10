@@ -34,6 +34,7 @@ BEACON_HTTP_PORT_NUM = 8547
 
 METRICS_PATH = "/metrics"
 
+
 def get_used_ports(discovery_port):
     used_ports = {
         BEACON_TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
@@ -117,7 +118,9 @@ def launch(
         beacon_service.ip_address, beacon_http_port.number
     )
 
-    metrics_info = observability.new_metrics_info(observability_helper, beacon_service, METRICS_PATH)
+    metrics_info = observability.new_metrics_info(
+        observability_helper, beacon_service, METRICS_PATH
+    )
 
     # response = plan.request(
     #     recipe=beacon_node_identity_recipe, service_name=service_name
@@ -178,7 +181,7 @@ def get_beacon_config(
         "--network="
         + "{0}/rollup-{1}.json".format(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-            launcher.network_params.network_id
+            launcher.network_params.network_id,
         ),
     ]
 
@@ -203,13 +206,13 @@ def get_beacon_config(
     env_vars = dict(participant.cl_extra_env_vars)
 
     # apply customizations
-    
+
     if observability_helper.enabled:
         cmd += [
             "--metrics-enable",
             "--metrics-port={0}".format(observability.METRICS_PORT_NUM),
         ]
-        
+
         observability.expose_metrics_port(ports)
 
     if sequencer_enabled:

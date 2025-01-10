@@ -33,6 +33,7 @@ BEACON_HTTP_PORT_ID = "http"
 BEACON_DISCOVERY_PORT_NUM = 9003
 BEACON_HTTP_PORT_NUM = 8547
 
+
 def get_used_ports(discovery_port):
     used_ports = {
         BEACON_TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
@@ -170,9 +171,10 @@ def get_beacon_config(
         "--l2={0}".format(EXECUTION_ENGINE_ENDPOINT),
         "--l2.jwt-secret=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--verifier.l1-confs=4",
-        "--rollup.config=" + "{0}/rollup-{1}.json".format(
+        "--rollup.config="
+        + "{0}/rollup-{1}.json".format(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-            launcher.network_params.network_id
+            launcher.network_params.network_id,
         ),
         "--rpc.addr=0.0.0.0",
         "--rpc.port={0}".format(BEACON_HTTP_PORT_NUM),
@@ -192,7 +194,7 @@ def get_beacon_config(
     ]
 
     # configure files
-    
+
     files = {
         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
         ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
@@ -213,14 +215,14 @@ def get_beacon_config(
     env_vars = dict(participant.cl_extra_env_vars)
 
     # apply customizations
-    
+
     if observability_helper.enabled:
         cmd += [
             "--metrics.enabled=true",
             "--metrics.addr=0.0.0.0",
             "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
         ]
-        
+
         observability.expose_metrics_port(ports)
 
     if interop_params.enabled:

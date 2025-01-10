@@ -121,7 +121,7 @@ def launch_participant_network(
         "proposer-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    
+
     op_proposer_launcher.launch(
         plan,
         "op-proposer-{0}".format(l2_services_suffix),

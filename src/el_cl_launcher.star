@@ -232,7 +232,9 @@ def launch(
         )
 
         for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
-            observability.register_node_metrics_job(observability_helper, el_context.client_name, "execution", metrics_info)
+            observability.register_node_metrics_job(
+                observability_helper, el_context.client_name, "execution", metrics_info
+            )
 
         if rollup_boost_enabled:
             plan.print("Rollup boost enabled")
@@ -298,9 +300,15 @@ def launch(
         )
 
         for metrics_info in [x for x in cl_context.cl_nodes_metrics_info if x != None]:
-            observability.register_node_metrics_job(observability_helper, cl_context.client_name, "beacon", metrics_info, {
-                "supernode": str(cl_context.supernode),
-            })
+            observability.register_node_metrics_job(
+                observability_helper,
+                cl_context.client_name,
+                "beacon",
+                metrics_info,
+                {
+                    "supernode": str(cl_context.supernode),
+                },
+            )
 
         sequencer_enabled = False
 

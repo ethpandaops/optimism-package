@@ -135,7 +135,7 @@ def launch(
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
     metrics_info = observability.new_metrics_info(observability_helper, service)
-    
+
     return ethereum_package_el_context.new_el_context(
         client_name="op-geth",
         enode=enode,
@@ -201,7 +201,7 @@ def get_config(
     ]
 
     # configure files
-    
+
     files = {
         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
         ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
@@ -222,7 +222,7 @@ def get_config(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             "{0}/genesis-{1}.json".format(
                 ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-                launcher.network_id
+                launcher.network_id,
             ),
         )
 
@@ -233,7 +233,7 @@ def get_config(
     env_vars = dict(participant.el_extra_env_vars)
 
     # apply customizations
-    
+
     if observability_helper.enabled:
         cmd += [
             "--metrics",
@@ -267,7 +267,7 @@ def get_config(
     cmd += participant.el_extra_params
     subcommand_strs.append(" ".join(cmd))
     command_str = " && ".join(subcommand_strs)
-    
+
     config_args = {
         "image": participant.el_image,
         "ports": ports,
@@ -301,9 +301,7 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
-def new_op_geth_launcher(
-    deployment_output, jwt_file, network, network_id
-):
+def new_op_geth_launcher(deployment_output, jwt_file, network, network_id):
     return struct(
         deployment_output=deployment_output,
         jwt_file=jwt_file,
