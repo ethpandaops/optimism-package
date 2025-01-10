@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.3.0](https://github.com/ethpandaops/optimism-package/compare/1.2.0...1.3.0) (2025-01-10)
+
+
+### Features
+
+* adds op-challenger support ([#116](https://github.com/ethpandaops/optimism-package/issues/116)) ([6aba40a](https://github.com/ethpandaops/optimism-package/commit/6aba40a4eb4146a97b2c50b7c1ed8de720f7d2d8))
+* adds op-proposer support ([#111](https://github.com/ethpandaops/optimism-package/issues/111)) ([f062776](https://github.com/ethpandaops/optimism-package/commit/f062776d768c7b653a37733dbb6fe8831a8fdef0))
+* Allow overriding faultGameAbsolutePrestate in op-deployer ([#125](https://github.com/ethpandaops/optimism-package/issues/125)) ([2e7b7cd](https://github.com/ethpandaops/optimism-package/commit/2e7b7cd70ab093d482d72c2f5b3a6a8bd7880b3e))
+* generate op-supervisor dependency set json ([#131](https://github.com/ethpandaops/optimism-package/issues/131)) ([464fbba](https://github.com/ethpandaops/optimism-package/commit/464fbbaeaa0b4feefe13d1a9db782f6f39bd7fd4))
+* **op-supervisor:** add op-supervisor component ([#110](https://github.com/ethpandaops/optimism-package/issues/110)) ([99fe41d](https://github.com/ethpandaops/optimism-package/commit/99fe41d3e28a28278240139a6027f951aed49a08))
+* **reproduicibility:** pin ethereum-package dependency ([#135](https://github.com/ethpandaops/optimism-package/issues/135)) ([e9eede2](https://github.com/ethpandaops/optimism-package/commit/e9eede2d74c5187344c6153ecd927cee612842db))
+
+
+### Bug Fixes
+
+* Generate all addresses, fix launchers ([#130](https://github.com/ethpandaops/optimism-package/issues/130)) ([0bc10d1](https://github.com/ethpandaops/optimism-package/commit/0bc10d1dff3ff503ec8c948b976441eb93d68c80))
+* Remove dead code in main.star ([#114](https://github.com/ethpandaops/optimism-package/issues/114)) ([9e47fd6](https://github.com/ethpandaops/optimism-package/commit/9e47fd6392d874c2881e530051fcf2a889b54cfe))
+* remove some UUOC ([#128](https://github.com/ethpandaops/optimism-package/issues/128)) ([6ed6c57](https://github.com/ethpandaops/optimism-package/commit/6ed6c57f5d7230b73873989894a9ce28c007f46d))
+* repair supervisor-&gt;node cnx ([#127](https://github.com/ethpandaops/optimism-package/issues/127)) ([6d6c96e](https://github.com/ethpandaops/optimism-package/commit/6d6c96ed2ed265b2627f0b22092f0865a1645cdd))
+* set useInterop flag properly ([#122](https://github.com/ethpandaops/optimism-package/issues/122)) ([92438b5](https://github.com/ethpandaops/optimism-package/commit/92438b5821c0948edaba55baf23d11ba0be6add3))
+* stop pointing op-node to op-supervisor ([#124](https://github.com/ethpandaops/optimism-package/issues/124)) ([ae515ea](https://github.com/ethpandaops/optimism-package/commit/ae515ea62588e09fcc1e071f4ad11dd2f4a03134))
+* wallets.json multi-chain support ([#123](https://github.com/ethpandaops/optimism-package/issues/123)) ([288176c](https://github.com/ethpandaops/optimism-package/commit/288176cdd14d1f88122508eb76dcad6c64324cd1))
+
 ## [1.2.0](https://github.com/ethpandaops/optimism-package/compare/1.1.0...1.2.0) (2024-12-13)
 
 
