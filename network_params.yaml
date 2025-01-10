@@ -2,7 +2,6 @@ optimism_package:
   chains:
     - participants:
       - el_type: op-geth
-        el_image: ""
         el_log_level: ""
         el_extra_env_vars: {}
         el_extra_labels: {}
@@ -14,7 +13,6 @@ optimism_package:
         el_min_mem: 0
         el_max_mem: 0
         cl_type: op-node
-        cl_image: ""
         cl_log_level: ""
         cl_extra_env_vars: {}
         cl_extra_labels: {}
@@ -37,10 +35,8 @@ optimism_package:
         granite_time_offset: 0
         fund_dev_accounts: true
       batcher_params:
-        image: ""
         extra_params: []
       mev_params:
-        rollup_boost_image: ""
         builder_host: ""
         builder_port: ""
       additional_services: []
