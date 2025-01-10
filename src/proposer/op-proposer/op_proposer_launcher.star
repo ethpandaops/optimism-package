@@ -108,7 +108,6 @@ def get_proposer_config(
 
     cmd += proposer_params.extra_params
 
-    ports = get_used_ports()
     return ServiceConfig(
         image=image,
         ports=ports,
