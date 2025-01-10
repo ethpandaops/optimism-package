@@ -17,7 +17,7 @@ ethereum_package_input_parser = import_module(
 constants = import_module("../../package_io/constants.star")
 
 util = import_module("../../util.star")
-observability = import_module("../../observability/constants.star")
+observability = import_module("../../observability/observability.star")
 interop_constants = import_module("../../interop/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------

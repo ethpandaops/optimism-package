@@ -22,7 +22,7 @@ ethereum_package_constants = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
-observability = import_module("../../observability/constants.star")
+observability = import_module("../../observability/observability.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546

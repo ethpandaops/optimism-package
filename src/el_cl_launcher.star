@@ -8,7 +8,7 @@ ethereum_package_input_parser = import_module(
 
 input_parser = import_module("./package_io/input_parser.star")
 
-observability = import_module("./observability/constants.star")
+observability = import_module("./observability/observability.star")
 
 # EL
 op_geth = import_module("./el/op-geth/op_geth_launcher.star")

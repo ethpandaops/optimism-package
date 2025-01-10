@@ -8,7 +8,7 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-observability = import_module("../../observability/constants.star")
+observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
 interop_constants = import_module("../constants.star")
