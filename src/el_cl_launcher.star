@@ -8,6 +8,8 @@ ethereum_package_input_parser = import_module(
 
 input_parser = import_module("./package_io/input_parser.star")
 
+observability = import_module("./observability/observability.star")
+
 # EL
 op_geth = import_module("./el/op-geth/op_geth_launcher.star")
 op_reth = import_module("./el/op-reth/op_reth_launcher.star")
@@ -37,6 +39,7 @@ def launch(
     global_tolerations,
     persistent,
     additional_services,
+    observability_helper,
     interop_params,
 ):
     el_launchers = {
@@ -46,7 +49,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params,
             ),
             "launch_method": op_geth.launch,
         },
@@ -56,7 +58,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params,
             ),
             "launch_method": op_reth.launch,
         },
@@ -66,7 +67,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params,
             ),
             "launch_method": op_erigon.launch,
         },
@@ -76,7 +76,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params,
             ),
             "launch_method": op_nethermind.launch,
         },
@@ -86,7 +85,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
-                interop_params,
             ),
             "launch_method": op_besu.launch,
         },
@@ -95,7 +93,7 @@ def launch(
     cl_launchers = {
         "op-node": {
             "launcher": op_node.new_op_node_launcher(
-                deployment_output, jwt_file, network_params, interop_params
+                deployment_output, jwt_file, network_params
             ),
             "launch_method": op_node.launch,
         },
@@ -229,8 +227,14 @@ def launch(
             all_el_contexts,
             sequencer_enabled,
             sequencer_context,
+            observability_helper,
             interop_params,
         )
+
+        for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
+            observability.register_node_metrics_job(
+                observability_helper, el_context.client_name, "execution", metrics_info
+            )
 
         if rollup_boost_enabled:
             plan.print("Rollup boost enabled")
@@ -248,6 +252,7 @@ def launch(
                     all_el_contexts,
                     sequencer_enabled,
                     sequencer_context,
+                    observability_helper,
                     interop_params,
                 )
             else:
@@ -290,8 +295,20 @@ def launch(
             all_cl_contexts,
             l1_config_env_vars,
             sequencer_enabled,
+            observability_helper,
             interop_params,
         )
+
+        for metrics_info in [x for x in cl_context.cl_nodes_metrics_info if x != None]:
+            observability.register_node_metrics_job(
+                observability_helper,
+                cl_context.client_name,
+                "beacon",
+                metrics_info,
+                {
+                    "supernode": str(cl_context.supernode),
+                },
+            )
 
         sequencer_enabled = False
 
@@ -312,6 +329,7 @@ def launch(
                 all_cl_contexts,
                 l1_config_env_vars,
                 False,
+                observability_helper,
                 interop_params,
             )
             all_cl_contexts.append(cl_builder_context)

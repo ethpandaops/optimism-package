@@ -6,6 +6,9 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+observability = import_module("../../observability/observability.star")
+prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+
 #
 #  ---------------------------------- Batcher client -------------------------------------
 # The Docker container runs as the "op-batcher" user so we can't write to root
@@ -41,6 +44,7 @@ def launch(
     l1_config_env_vars,
     gs_batcher_private_key,
     batcher_params,
+    observability_helper,
 ):
     batcher_service_name = "{0}".format(service_name)
 
@@ -53,6 +57,7 @@ def launch(
         l1_config_env_vars,
         gs_batcher_private_key,
         batcher_params,
+        observability_helper,
     )
 
     batcher_service = plan.add_service(service_name, config)
@@ -61,6 +66,8 @@ def launch(
     batcher_http_url = "http://{0}:{1}".format(
         batcher_service.ip_address, batcher_http_port.number
     )
+
+    observability.register_op_service_metrics_job(observability_helper, batcher_service)
 
     return "op_batcher"
 
@@ -74,7 +81,10 @@ def get_batcher_config(
     l1_config_env_vars,
     gs_batcher_private_key,
     batcher_params,
+    observability_helper,
 ):
+    ports = dict(get_used_ports())
+
     cmd = [
         "op-batcher",
         "--l2-eth-rpc=" + el_context.rpc_http_url,
@@ -93,9 +103,13 @@ def get_batcher_config(
         "--data-availability-type=blobs",
     ]
 
+    # apply customizations
+
+    if observability_helper.enabled:
+        observability.configure_op_service_metrics(cmd, ports)
+
     cmd += batcher_params.extra_params
 
-    ports = get_used_ports()
     return ServiceConfig(
         image=image,
         ports=ports,

@@ -62,6 +62,22 @@ def input_parser(plan, input_args):
     results["persistent"] = False
 
     return struct(
+        observability=struct(
+            enabled=results["observability"]["enabled"],
+            prometheus_params=struct(
+                image=results["observability"]["prometheus_params"]["image"],
+                storage_tsdb_retention_time=results["observability"][
+                    "prometheus_params"
+                ]["storage_tsdb_retention_time"],
+                storage_tsdb_retention_size=results["observability"][
+                    "prometheus_params"
+                ]["storage_tsdb_retention_size"],
+                min_cpu=results["observability"]["prometheus_params"]["min_cpu"],
+                max_cpu=results["observability"]["prometheus_params"]["max_cpu"],
+                min_mem=results["observability"]["prometheus_params"]["min_mem"],
+                max_mem=results["observability"]["prometheus_params"]["max_mem"],
+            ),
+        ),
         interop=struct(
             enabled=results["interop"]["enabled"],
             supervisor_params=struct(
@@ -175,9 +191,19 @@ def input_parser(plan, input_args):
 def parse_network_params(plan, input_args):
     results = {}
 
+    # configure observability
+
+    results["observability"] = default_observability_params()
+    results["observability"].update(input_args.get("observability", {}))
+
+    results["observability"]["prometheus_params"] = default_prometheus_params()
+    results["observability"]["prometheus_params"].update(
+        input_args.get("observability", {}).get("prometheus_params", {})
+    )
+
     # configure interop
 
-    results["interop"] = default_interop_args()
+    results["interop"] = default_interop_params()
     results["interop"].update(input_args.get("interop", {}))
 
     results["interop"]["supervisor_params"] = default_supervisor_params()
@@ -302,9 +328,10 @@ def parse_network_params(plan, input_args):
     return results
 
 
-def default_optimism_args():
+def default_optimism_params():
     return {
-        "interop": default_interop_args(),
+        "observability": default_observability_params(),
+        "interop": default_interop_params(),
         "chains": default_chains(),
         "op_contract_deployer_params": default_op_contract_deployer_params(),
         "global_log_level": "info",
@@ -314,7 +341,25 @@ def default_optimism_args():
     }
 
 
-def default_interop_args():
+def default_observability_params():
+    return {
+        "enabled": True,
+    }
+
+
+def default_prometheus_params():
+    return {
+        "image": "prom/prometheus:latest",
+        "storage_tsdb_retention_time": "1d",
+        "storage_tsdb_retention_size": "512MB",
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
+    }
+
+
+def default_interop_params():
     return {
         "enabled": False,
     }
@@ -367,14 +412,14 @@ def default_network_params():
 
 def default_batcher_params():
     return {
-        "image": "",
+        "image": DEFAULT_BATCHER_IMAGES["op-batcher"],
         "extra_params": [],
     }
 
 
 def default_challenger_params():
     return {
-        "image": "",
+        "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
         "extra_params": [],
         "cannon_prestate_path": "",
         "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
@@ -383,7 +428,7 @@ def default_challenger_params():
 
 def default_proposer_params():
     return {
-        "image": "",
+        "image": DEFAULT_PROPOSER_IMAGES["op-proposer"],
         "extra_params": [],
         "game_type": 1,
         "proposal_interval": "10m",

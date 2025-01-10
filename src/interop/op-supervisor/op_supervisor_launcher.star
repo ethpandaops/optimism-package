@@ -8,6 +8,9 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+observability = import_module("../../observability/observability.star")
+prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+
 interop_constants = import_module("../constants.star")
 
 
@@ -47,6 +50,7 @@ def launch(
     all_participants,
     jwt_file,
     supervisor_params,
+    observability_helper,
 ):
     dependency_set_json = supervisor_params.dependency_set
     if not dependency_set_json:
@@ -64,10 +68,15 @@ def launch(
         jwt_file,
         dependency_set_artifact,
         supervisor_params,
+        observability_helper,
     )
 
     supervisor_service = plan.add_service(
         interop_constants.SUPERVISOR_SERVICE_NAME, config
+    )
+
+    observability.register_op_service_metrics_job(
+        observability_helper, supervisor_service
     )
 
     return "op_supervisor"
@@ -80,10 +89,17 @@ def get_supervisor_config(
     jwt_file,
     dependency_set_artifact,
     supervisor_params,
+    observability_helper,
 ):
+    ports = dict(get_used_ports())
+
     cmd = ["op-supervisor"] + supervisor_params.extra_params
 
-    ports = get_used_ports()
+    # apply customizations
+
+    if observability_helper.enabled:
+        observability.configure_op_service_metrics(cmd, ports)
+
     return ServiceConfig(
         image=supervisor_params.image,
         ports=ports,

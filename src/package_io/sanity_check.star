@@ -1,3 +1,18 @@
+OBSERVABILITY_PARAMS = [
+    "enabled",
+    "prometheus_params",
+]
+
+PROMETHEUS_PARAMS = [
+    "image",
+    "storage_tsdb_retention_time",
+    "storage_tsdb_retention_size",
+    "min_cpu",
+    "max_cpu",
+    "min_mem",
+    "max_mem",
+]
+
 INTEROP_PARAMS = [
     "enabled",
     "supervisor_params",
@@ -84,6 +99,7 @@ ADDITIONAL_SERVICES_PARAMS = [
 ]
 
 ROOT_PARAMS = [
+    "observability",
     "interop",
     "chains",
     "op_contract_deployer_params",
@@ -133,6 +149,22 @@ def sanity_check(plan, optimism_config):
     for key in optimism_config.keys():
         if key not in ROOT_PARAMS:
             fail("Invalid parameter {0}, allowed fields: {1}".format(key, ROOT_PARAMS))
+
+    if "observability" in optimism_config:
+        validate_params(
+            plan,
+            optimism_config,
+            "observability",
+            OBSERVABILITY_PARAMS,
+        )
+
+        if "prometheus_params" in optimism_config["observability"]:
+            validate_params(
+                plan,
+                optimism_config["observability"],
+                "prometheus_params",
+                PROMETHEUS_PARAMS,
+            )
 
     if "interop" in optimism_config:
         validate_params(
