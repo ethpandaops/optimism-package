@@ -94,10 +94,9 @@ def launch(
     existing_el_clients,
     sequencer_enabled,
     sequencer_context,
-    interop_params,
 ):
     log_level = ethereum_package_input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
+        participant.el_builder_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
     cl_client_name = service_name.split("-")[4]
@@ -215,17 +214,17 @@ def get_config(
     if persistent:
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
+            size=int(participant.el_builder_volume_size)
+            if int(participant.el_builder_volume_size) > 0
             else constants.VOLUME_SIZE[launcher.network][
                 constants.EL_TYPE.op_reth + "_volume_size"
             ],
         )
 
-    cmd += participant.el_extra_params
-    env_vars = participant.el_extra_env_vars
+    cmd += participant.el_builder_extra_params
+    env_vars = participant.el_builder_extra_env_vars
     config_args = {
-        "image": participant.el_image,
+        "image": participant.el_builder_image,
         "ports": used_ports,
         "cmd": cmd,
         "files": files,
@@ -234,36 +233,34 @@ def get_config(
         "labels": ethereum_package_shared_utils.label_maker(
             client=constants.EL_TYPE.op_reth,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
+            image=participant.el_builder_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
-            extra_labels=participant.el_extra_labels,
+            extra_labels=participant.el_builder_extra_labels,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
 
     if participant.el_min_cpu > 0:
-        config_args["min_cpu"] = participant.el_min_cpu
-    if participant.el_max_cpu > 0:
-        config_args["max_cpu"] = participant.el_max_cpu
-    if participant.el_min_mem > 0:
-        config_args["min_memory"] = participant.el_min_mem
-    if participant.el_max_mem > 0:
-        config_args["max_memory"] = participant.el_max_mem
+        config_args["min_cpu"] = participant.el_builder_min_cpu
+    if participant.el_builder_max_cpu > 0:
+        config_args["max_cpu"] = participant.el_builder_max_cpu
+    if participant.el_builder_min_mem > 0:
+        config_args["min_memory"] = participant.el_builder_min_mem
+    if participant.el_builder_max_mem > 0:
+        config_args["max_memory"] = participant.el_builder_max_mem
     return ServiceConfig(**config_args)
 
 
-def new_op_reth_launcher(
+def new_op_reth_builder_launcher(
     deployment_output,
     jwt_file,
     network,
     network_id,
-    interop_params,
 ):
     return struct(
         deployment_output=deployment_output,
         jwt_file=jwt_file,
         network=network,
         network_id=network_id,
-        interop_params=interop_params,
     )
