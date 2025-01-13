@@ -7,6 +7,7 @@ op_supervisor_launcher = import_module(
 
 observability = import_module("./src/observability/observability.star")
 prometheus = import_module("./src/observability/prometheus/prometheus_launcher.star")
+grafana = import_module("github.com/ethpandaops/ethereum-package/src/grafana/grafana_launcher.star")
 
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
@@ -139,6 +140,24 @@ def run(plan, args):
             global_node_selectors,
         )
 
+        # grafana_datasource_config_template = read_file(
+        #     ethereum_package_static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
+        # )
+        # grafana_dashboards_config_template = read_file(
+        #     ethereum_package_static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH
+        # )
+
+        plan.print("Launching grafana...")
+        grafana.launch_grafana(
+            plan,
+            # grafana_datasource_config_template,
+            # grafana_dashboards_config_template,
+            "",
+            "",
+            prometheus_private_url,
+            global_node_selectors,
+            observability_params.grafana_params,
+        )
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}

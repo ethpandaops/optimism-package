@@ -1,12 +1,22 @@
 OBSERVABILITY_PARAMS = [
     "enabled",
     "prometheus_params",
+    "grafana_params",
 ]
 
 PROMETHEUS_PARAMS = [
     "image",
     "storage_tsdb_retention_time",
     "storage_tsdb_retention_size",
+    "min_cpu",
+    "max_cpu",
+    "min_mem",
+    "max_mem",
+]
+
+GRAFANA_PARAMS = [
+    "image",
+    "additional_dashboards",
     "min_cpu",
     "max_cpu",
     "min_mem",
@@ -164,6 +174,14 @@ def sanity_check(plan, optimism_config):
                 optimism_config["observability"],
                 "prometheus_params",
                 PROMETHEUS_PARAMS,
+            )
+
+        if "grafana_params" in optimism_config["observability"]:
+            validate_params(
+                plan,
+                optimism_config["observability"],
+                "grafana_params",
+                GRAFANA_PARAMS,
             )
 
     if "interop" in optimism_config:
