@@ -62,5 +62,3 @@ ethereum_package:
         }
       }
     '
-  ethereum_genesis_generator_params:
-    image: ethpandaops/ethereum-genesis-generator:3.5.1
