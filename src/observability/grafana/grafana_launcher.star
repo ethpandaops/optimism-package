@@ -10,6 +10,7 @@ SERVICE_NAME = "grafana"
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER_UINT16 = 3000
 
+DATASOURCE_UID = "grafanacloud-prom"
 DATASOURCE_CONFIG_REL_FILEPATH = "datasources/datasource.yml"
 
 # this is relative to the files artifact root
@@ -25,7 +26,7 @@ GRAFANA_ADDITIONAL_DASHBOARDS_FOLDER_NAME = "grafana-additional-dashboards-{0}"
 GRAFANA_ADDITIONAL_DASHBOARDS_MERGED_STORED_PATH_FORMAT = (
     GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE + "/*"
 )
-GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE = "/additional-dashobards"
+GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE = "/additional-dashboards"
 GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE_FORMAT = (
     GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE + "/{0}"
 )
@@ -68,7 +69,7 @@ def launch_grafana(
 
     merged_dashboards_artifact_name = merge_dashboards_artifacts(
         plan,
-        grafana_dashboards_artifacts_uuid,
+        grafana_dashboards_artifact_name,
         grafana_additional_dashboards_data,
     )
 
@@ -154,7 +155,10 @@ def get_config(
 
 
 def new_datasource_config_template_data(prometheus_url):
-    return {"PrometheusURL": prometheus_url}
+    return {
+        "PrometheusUID": DATASOURCE_UID,
+        "PrometheusURL": prometheus_url
+    }
 
 
 def new_dashboard_providers_config_template_data(dashboards_dirpath):
