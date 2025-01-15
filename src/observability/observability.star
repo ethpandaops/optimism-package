@@ -70,6 +70,7 @@ def new_metrics_job(
     labels,
     scrape_interval=DEFAULT_SCRAPE_INTERVAL,
 ):
+
     return {
         "Name": job_name,
         "Endpoint": endpoint,
@@ -97,6 +98,8 @@ def register_service_metrics_job(
 ):
     labels = {
         "service": service_name,
+        "namespace": "kurtosis",
+        "stack_optimism_io_network": "kurtosis",
     }
     labels.update(additional_labels)
 
