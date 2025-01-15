@@ -96,7 +96,7 @@ optimism_package:
     # Default grafana configuration
     grafana_params:
       # A list of locators for grafana dashboards to be loaded be the grafana service
-      additional_dashboards: []
+      dashboard_sources: []
       # Resource management for grafana container
       # CPU is milicores
       # RAM is in MB

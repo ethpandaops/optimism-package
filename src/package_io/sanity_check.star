@@ -16,7 +16,7 @@ PROMETHEUS_PARAMS = [
 
 GRAFANA_PARAMS = [
     "image",
-    "additional_dashboards",
+    "dashboard_sources",
     "min_cpu",
     "max_cpu",
     "min_mem",

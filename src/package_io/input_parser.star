@@ -79,9 +79,9 @@ def input_parser(plan, input_args):
             ),
             grafana_params=struct(
                 image=results["observability"]["grafana_params"]["image"],
-                additional_dashboards=results["observability"][
+                dashboard_sources=results["observability"][
                     "grafana_params"
-                ]["additional_dashboards"],
+                ]["dashboard_sources"],
                 min_cpu=results["observability"]["grafana_params"]["min_cpu"],
                 max_cpu=results["observability"]["grafana_params"]["max_cpu"],
                 min_mem=results["observability"]["grafana_params"]["min_mem"],
@@ -376,7 +376,7 @@ def default_prometheus_params():
 def default_grafana_params():
     return {
         "image": "grafana/grafana:latest",
-        "additional_dashboards": [],
+        "dashboard_sources": [],
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,
