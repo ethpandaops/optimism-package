@@ -142,17 +142,9 @@ def run(plan, args):
 
         plan.print("Launching grafana...")
 
-        grafana_datasource_config_template = read_file(
-            ethereum_package_static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
-        )
-        grafana_dashboards_config_template = read_file(
-            ethereum_package_static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH
-        )
 
         grafana.launch_grafana(
             plan,
-            grafana_datasource_config_template,
-            grafana_dashboards_config_template,
             prometheus_private_url,
             global_node_selectors,
             observability_params.grafana_params,

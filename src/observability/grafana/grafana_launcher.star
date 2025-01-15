@@ -43,15 +43,20 @@ USED_PORTS = {
 
 def launch_grafana(
     plan,
-    datasource_config_template,
-    dashboard_providers_config_template,
     prometheus_private_url,
     global_node_selectors,
     grafana_params,
 ):
+    datasource_config_template = read_file(
+        ethereum_package_static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
+    )
+    dashboard_providers_config_template = read_file(
+        ethereum_package_static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH
+    )
+
     (
-        grafana_config_artifacts_uuid,
-        grafana_dashboards_artifacts_uuid,
+        grafana_config_artifact_name,
+        grafana_dashboards_artifact_name,
         grafana_additional_dashboards_data,
     ) = get_grafana_config_dir_artifact_uuid(
         plan,
