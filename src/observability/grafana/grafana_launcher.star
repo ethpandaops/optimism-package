@@ -58,7 +58,7 @@ def launch_grafana(
         grafana_config_artifact_name,
         grafana_dashboards_artifact_name,
         grafana_additional_dashboards_data,
-    ) = get_grafana_config_dir_artifact_uuid(
+    ) = upload_grafana_config(
         plan,
         datasource_config_template,
         dashboard_providers_config_template,
@@ -73,7 +73,7 @@ def launch_grafana(
     )
 
     config = get_config(
-        grafana_config_artifacts_uuid,
+        grafana_config_artifact_name,
         merged_dashboards_artifact_name,
         global_node_selectors,
         grafana_params,
@@ -82,7 +82,7 @@ def launch_grafana(
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_grafana_config_dir_artifact_uuid(
+def upload_grafana_config(
     plan,
     datasource_config_template,
     dashboard_providers_config_template,
@@ -101,19 +101,16 @@ def get_grafana_config_dir_artifact_uuid(
         dashboard_providers_config_template, dashboard_providers_data
     )
 
-    template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        DATASOURCE_CONFIG_REL_FILEPATH
-    ] = datasource_template_and_data
-    template_and_data_by_rel_dest_filepath[
-        DASHBOARD_PROVIDERS_CONFIG_REL_FILEPATH
-    ] = dashboard_providers_template_and_data
+    template_and_data_by_rel_dest_filepath = {
+        DATASOURCE_CONFIG_REL_FILEPATH: datasource_template_and_data,
+        DASHBOARD_PROVIDERS_CONFIG_REL_FILEPATH: dashboard_providers_template_and_data,
+    }
 
-    grafana_config_artifacts_name = plan.render_templates(
+    grafana_config_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, name="grafana-config"
     )
 
-    grafana_dashboards_artifacts_name = plan.upload_files(
+    grafana_dashboards_artifact_name = plan.upload_files(
         ethereum_package_static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH, name="grafana-dashboards"
     )
 
@@ -122,15 +119,15 @@ def get_grafana_config_dir_artifact_uuid(
     )
 
     return (
-        grafana_config_artifacts_name,
-        grafana_dashboards_artifacts_name,
+        grafana_config_artifact_name,
+        grafana_dashboards_artifact_name,
         grafana_additional_dashboards_data,
     )
 
 
 def get_config(
-    grafana_config_artifacts_name,
-    grafana_dashboards_artifacts_name,
+    grafana_config_artifact_name,
+    grafana_dashboards_artifact_name,
     node_selectors,
     grafana_params,
 ):
@@ -145,8 +142,8 @@ def get_config(
             "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
         },
         files={
-            GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
-            GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
+            GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifact_name,
+            GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifact_name,
         },
         min_cpu=grafana_params.min_cpu,
         max_cpu=grafana_params.max_cpu,
@@ -189,14 +186,14 @@ def upload_additional_dashboards(plan, additional_dashboards):
 
 def merge_dashboards_artifacts(
     plan,
-    grafana_dashboards_artifacts_name,
+    grafana_dashboards_artifact_name,
     grafana_additional_dashboards_data=[],
 ):
     if len(grafana_additional_dashboards_data) == 0:
-        return grafana_dashboards_artifacts_name
+        return grafana_dashboards_artifact_name
 
     files = {
-        GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
+        GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifact_name,
     }
 
     for additional_dashboard_data in grafana_additional_dashboards_data:
