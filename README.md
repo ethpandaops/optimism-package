@@ -75,6 +75,24 @@ The full YAML schema that can be passed in is as follows with the defaults provi
 
 ```yaml
 optimism_package:
+  # Observability configuration
+  observability:
+    # Whether or not to configure observability (e.g. prometheus)
+    enabled: true
+    # Default prometheus configuration
+    prometheus_params:
+      storage_tsdb_retention_time: "1d"
+      storage_tsdb_retention_size: "512MB"
+      # Resource management for prometheus container
+      # CPU is milicores
+      # RAM is in MB
+      min_cpu: 10
+      max_cpu: 1000
+      min_mem: 128
+      max_mem: 2048
+      # Prometheus docker image to use
+      # Defaults to the latest image
+      image: "prom/prometheus:latest"
   # Interop configuration
   interop:
     # Whether or not to enable interop mode

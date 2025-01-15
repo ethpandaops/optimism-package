@@ -27,6 +27,7 @@ def launch_participant_network(
     global_tolerations,
     persistent,
     additional_services,
+    observability_helper,
     interop_params,
 ):
     num_participants = len(participants)
@@ -46,6 +47,7 @@ def launch_participant_network(
         global_tolerations,
         persistent,
         additional_services,
+        observability_helper,
         interop_params,
     )
 
@@ -72,20 +74,17 @@ def launch_participant_network(
         "batcher-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    op_batcher_image = (
-        batcher_params.image
-        if batcher_params.image != ""
-        else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
-    )
+
     op_batcher_launcher.launch(
         plan,
         "op-batcher-{0}".format(l2_services_suffix),
-        op_batcher_image,
+        batcher_params.image,
         all_el_contexts[0],
         all_cl_contexts[0],
         l1_config_env_vars,
         batcher_key,
         batcher_params,
+        observability_helper,
     )
 
     game_factory_address = util.read_network_config_value(
@@ -100,15 +99,11 @@ def launch_participant_network(
         "challenger-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    op_challenger_image = (
-        challenger_params.image
-        if challenger_params.image != ""
-        else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
-    )
+
     op_challenger_launcher.launch(
         plan,
         "op-challenger-{0}".format(l2_services_suffix),
-        op_challenger_image,
+        challenger_params.image,
         all_el_contexts[0],
         all_cl_contexts[0],
         l1_config_env_vars,
@@ -117,6 +112,7 @@ def launch_participant_network(
         deployment_output,
         network_params,
         challenger_params,
+        observability_helper,
     )
 
     proposer_key = util.read_network_config_value(
@@ -125,20 +121,17 @@ def launch_participant_network(
         "proposer-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    op_proposer_image = (
-        proposer_params.image
-        if proposer_params.image != ""
-        else input_parser.DEFAULT_PROPOSER_IMAGES["op-proposer"]
-    )
+
     op_proposer_launcher.launch(
         plan,
         "op-proposer-{0}".format(l2_services_suffix),
-        op_proposer_image,
+        proposer_params.image,
         all_cl_contexts[0],
         l1_config_env_vars,
         proposer_key,
         game_factory_address,
         proposer_params,
+        observability_helper,
     )
 
     return all_participants
