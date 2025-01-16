@@ -67,5 +67,5 @@ def label_from_image(image):
         label = label[-max_length:]
     return label
 
-def multiline_cmd(commands):
+def join_cmds(commands):
     return " && ".join(commands)

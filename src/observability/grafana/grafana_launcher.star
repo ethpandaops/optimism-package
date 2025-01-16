@@ -152,5 +152,5 @@ def provision_dashboards(plan, service_url, dashboard_sources):
             ): dashboard_artifact
             for i, dashboard_artifact in enumerate(dashboard_artifact_names)
         },
-        run=util.multiline_cmd(grr_commands),
+        run=util.join_cmds(grr_commands),
     )
