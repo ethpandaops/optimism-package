@@ -12,7 +12,9 @@ HTTP_PORT_NUMBER_UINT16 = 3000
 TEMPLATES_FILEPATH = "./templates"
 
 DATASOURCE_CONFIG_TEMPLATE_FILEPATH = TEMPLATES_FILEPATH + "/datasource.yml.tmpl"
-DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH = TEMPLATES_FILEPATH + "/dashboard-providers.yml.tmpl"
+DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH = (
+    TEMPLATES_FILEPATH + "/dashboard-providers.yml.tmpl"
+)
 
 DATASOURCE_UID = "grafanacloud-prom"
 DATASOURCE_CONFIG_REL_FILEPATH = "datasources/datasource.yml"
@@ -87,9 +89,7 @@ def upload_grafana_config(
         template_and_data_by_rel_dest_filepath, name="grafana-config"
     )
 
-    grafana_dashboards_artifact_names = upload_dashboards(
-        plan, dashboard_sources
-    )
+    grafana_dashboards_artifact_names = upload_dashboards(plan, dashboard_sources)
 
     return (
         grafana_config_artifact_name,
@@ -98,10 +98,7 @@ def upload_grafana_config(
 
 
 def new_datasource_config_template_data(prometheus_url):
-    return {
-        "PrometheusUID": DATASOURCE_UID,
-        "PrometheusURL": prometheus_url
-    }
+    return {"PrometheusUID": DATASOURCE_UID, "PrometheusURL": prometheus_url}
 
 
 def get_config(
@@ -133,7 +130,7 @@ def get_config(
 
 def upload_dashboards(plan, service_url, grafana_dashboards_artifact_names):
     def grr_push(dir):
-        return "grr push \"$DASHBOARDS_DIR/{0}\" -e --disable-reporting".format(dir)
+        return 'grr push "$DASHBOARDS_DIR/{0}" -e --disable-reporting'.format(dir)
 
     def grr_push_dashboards(i):
         return [
@@ -156,7 +153,9 @@ def upload_dashboards(plan, service_url, grafana_dashboards_artifact_names):
             "DASHBOARDS_DIR": DASHBOARDS_DIRPATH_ON_SERVICE,
         },
         files={
-            "{0}/dashboards-{1}".format(DASHBOARDS_DIRPATH_ON_SERVICE, i): grafana_dashboards_artifact_names[i]
+            "{0}/dashboards-{1}".format(
+                DASHBOARDS_DIRPATH_ON_SERVICE, i
+            ): grafana_dashboards_artifact_names[i]
             for i in range(len(grafana_dashboards_artifact_names))
         },
         run=util.multiline_cmd(grr_commands),

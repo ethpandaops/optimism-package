@@ -142,13 +142,13 @@ def run(plan, args):
 
         plan.print("Launching grafana...")
 
-
         grafana.launch_grafana(
             plan,
             prometheus_private_url,
             global_node_selectors,
             observability_params.grafana_params,
         )
+
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars = {}
