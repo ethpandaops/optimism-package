@@ -117,6 +117,9 @@ def get_config(
 
 
 def provision_dashboards(plan, service_url, dashboard_sources):
+    if len(dashboard_sources) == 0:
+        return
+
     def grr_push(dir):
         return 'grr push "$DASHBOARDS_DIR/{0}" -e --disable-reporting'.format(dir)
 
