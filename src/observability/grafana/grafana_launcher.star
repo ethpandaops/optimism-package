@@ -130,12 +130,14 @@ def provision_dashboards(plan, service_url, dashboard_sources):
         "grr config create-context kurtosis",
     ]
 
-    dashboard_artifact_names = []
+    files = {}
     for index, dashboard_src in enumerate(dashboard_sources):
-        dashboard_name = "grafana-dashboards-{0}".format(index)
-
+        dashboard_name = "dashboards-{0}".format(index)
         dashboard_artifact_name = plan.upload_files(dashboard_src, name=dashboard_name)
-        dashboard_artifact_names.append(dashboard_artifact_name)
+
+        files[
+            "{0}/{1}".format(DASHBOARDS_DIRPATH_ON_SERVICE, dashboard_name)
+        ] = dashboard_artifact_name
 
         grr_commands += grr_push_dashboards(index)
 
@@ -146,11 +148,6 @@ def provision_dashboards(plan, service_url, dashboard_sources):
             "GRAFANA_URL": service_url,
             "DASHBOARDS_DIR": DASHBOARDS_DIRPATH_ON_SERVICE,
         },
-        files={
-            "{0}/dashboards-{1}".format(
-                DASHBOARDS_DIRPATH_ON_SERVICE, i
-            ): dashboard_artifact
-            for i, dashboard_artifact in enumerate(dashboard_artifact_names)
-        },
+        files=files,
         run=util.join_cmds(grr_commands),
     )
