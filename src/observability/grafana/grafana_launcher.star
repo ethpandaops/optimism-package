@@ -42,19 +42,14 @@ def launch_grafana(
 ):
     datasource_config_template = read_file(DATASOURCE_CONFIG_TEMPLATE_FILEPATH)
 
-    (
-        grafana_config_artifact_name,
-        grafana_dashboards_artifact_names,
-    ) = upload_grafana_config(
+    grafana_config_artifact_name = upload_grafana_config(
         plan,
         datasource_config_template,
         prometheus_private_url,
-        dashboard_sources=grafana_params.dashboard_sources,
     )
 
     config = get_config(
         grafana_config_artifact_name,
-        grafana_dashboards_artifact_names,
         global_node_selectors,
         grafana_params,
     )
@@ -65,7 +60,7 @@ def launch_grafana(
         service.ip_address, service.ports[HTTP_PORT_ID].number
     )
 
-    upload_dashboards(plan, service_url, grafana_dashboards_artifact_names)
+    provision_dashboards(plan, service_url, grafana_params.dashboard_sources)
 
     return service_url
 
@@ -74,7 +69,6 @@ def upload_grafana_config(
     plan,
     datasource_config_template,
     prometheus_private_url,
-    dashboard_sources=[],
 ):
     datasource_data = new_datasource_config_template_data(prometheus_private_url)
     datasource_template_and_data = ethereum_package_shared_utils.new_template_and_data(
@@ -89,12 +83,7 @@ def upload_grafana_config(
         template_and_data_by_rel_dest_filepath, name="grafana-config"
     )
 
-    grafana_dashboards_artifact_names = upload_dashboards(plan, dashboard_sources)
-
-    return (
-        grafana_config_artifact_name,
-        grafana_dashboards_artifact_names,
-    )
+    return grafana_config_artifact_name
 
 
 def new_datasource_config_template_data(prometheus_url):
@@ -103,7 +92,6 @@ def new_datasource_config_template_data(prometheus_url):
 
 def get_config(
     grafana_config_artifact_name,
-    grafana_dashboards_artifact_names,
     node_selectors,
     grafana_params,
 ):
@@ -128,7 +116,7 @@ def get_config(
     )
 
 
-def upload_dashboards(plan, service_url, grafana_dashboards_artifact_names):
+def provision_dashboards(plan, service_url, dashboard_sources):
     def grr_push(dir):
         return 'grr push "$DASHBOARDS_DIR/{0}" -e --disable-reporting'.format(dir)
 
@@ -142,8 +130,14 @@ def upload_dashboards(plan, service_url, grafana_dashboards_artifact_names):
         "grr config create-context kurtosis",
     ]
 
-    for i in range(len(grafana_dashboards_artifact_names)):
-        grr_commands += grr_push_dashboards(i)
+    dashboard_artifact_names = []
+    for index, dashboard_src in enumerate(dashboard_sources):
+        dashboard_name = "grafana-dashboards-{0}".format(index)
+
+        dashboard_artifact_name = plan.upload_files(dashboard_src, name=dashboard_name)
+        dashboard_artifact_names.append(dashboard_artifact_name)
+
+        grr_commands += grr_push_dashboards(index)
 
     plan.run_sh(
         description="upload dashboards",
@@ -155,8 +149,8 @@ def upload_dashboards(plan, service_url, grafana_dashboards_artifact_names):
         files={
             "{0}/dashboards-{1}".format(
                 DASHBOARDS_DIRPATH_ON_SERVICE, i
-            ): grafana_dashboards_artifact_names[i]
-            for i in range(len(grafana_dashboards_artifact_names))
+            ): dashboard_artifact
+            for i, dashboard_artifact in enumerate(dashboard_artifact_names)
         },
         run=util.multiline_cmd(grr_commands),
     )
