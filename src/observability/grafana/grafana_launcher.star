@@ -11,19 +11,11 @@ HTTP_PORT_NUMBER_UINT16 = 3000
 
 TEMPLATES_FILEPATH = "./templates"
 
-DATASOURCE_CONFIG_TEMPLATE_FILEPATH = TEMPLATES_FILEPATH + "/datasource.yml.tmpl"
-DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH = (
-    TEMPLATES_FILEPATH + "/dashboard-providers.yml.tmpl"
-)
-
 DATASOURCE_UID = "grafanacloud-prom"
+DATASOURCE_CONFIG_TEMPLATE_FILEPATH = TEMPLATES_FILEPATH + "/datasource.yml.tmpl"
 DATASOURCE_CONFIG_REL_FILEPATH = "datasources/datasource.yml"
 
-# this is relative to the files artifact root
-DASHBOARD_PROVIDERS_CONFIG_REL_FILEPATH = "dashboards/dashboard-providers.yml"
-
 CONFIG_DIRPATH_ON_SERVICE = "/config"
-DASHBOARDS_DIRPATH_ON_SERVICE = "/dashboards"
 
 USED_PORTS = {
     HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
@@ -121,12 +113,12 @@ def provision_dashboards(plan, service_url, dashboard_sources):
         return
 
     def grr_push(dir):
-        return 'grr push "$DASHBOARDS_DIR/{0}" -e --disable-reporting'.format(dir)
+        return 'grr push "{0}" -e --disable-reporting'.format(dir)
 
-    def grr_push_dashboards(i):
+    def grr_push_dashboards(name):
         return [
-            grr_push("dashboards-{0}/folders".format(i)),
-            grr_push("dashboards-{0}/dashboards".format(i)),
+            grr_push("{0}/folders".format(name)),
+            grr_push("{0}/dashboards".format(name)),
         ]
 
     grr_commands = [
@@ -138,18 +130,14 @@ def provision_dashboards(plan, service_url, dashboard_sources):
         dashboard_name = "dashboards-{0}".format(index)
         dashboard_artifact_name = plan.upload_files(dashboard_src, name=dashboard_name)
 
-        files[
-            "{0}/{1}".format(DASHBOARDS_DIRPATH_ON_SERVICE, dashboard_name)
-        ] = dashboard_artifact_name
-
-        grr_commands += grr_push_dashboards(index)
+        files[dashboard_name] = dashboard_artifact_name
+        grr_commands += grr_push_dashboards(dashboard_name)
 
     plan.run_sh(
         description="upload dashboards",
         image="grafana/grizzly:main-0b88d01",
         env_vars={
             "GRAFANA_URL": service_url,
-            "DASHBOARDS_DIR": DASHBOARDS_DIRPATH_ON_SERVICE,
         },
         files=files,
         run=util.join_cmds(grr_commands),

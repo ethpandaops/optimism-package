@@ -141,7 +141,6 @@ def run(plan, args):
         )
 
         plan.print("Launching grafana...")
-
         grafana.launch_grafana(
             plan,
             prometheus_private_url,
