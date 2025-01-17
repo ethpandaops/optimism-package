@@ -21,6 +21,7 @@ ethereum_package_constants = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
+util = import_module("../../util.star")
 observability = import_module("../../observability/observability.star")
 util = import_module("../../util.star")
 
@@ -33,35 +34,27 @@ ENGINE_RPC_PORT_NUM = 8551
 EXECUTION_MIN_CPU = 300
 EXECUTION_MIN_MEMORY = 512
 
-# Port IDs
-RPC_PORT_ID = "rpc"
-WS_PORT_ID = "ws"
-TCP_DISCOVERY_PORT_ID = "tcp-discovery"
-UDP_DISCOVERY_PORT_ID = "udp-discovery"
-ENGINE_RPC_PORT_ID = "engine-rpc"
-ENGINE_WS_PORT_ID = "engineWs"
-
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/op-erigon/execution-data"
 
 
 def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
     used_ports = {
-        RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             RPC_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
-        WS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.WS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             WS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
         ),
-        TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             discovery_port, ethereum_package_shared_utils.TCP_PROTOCOL
         ),
-        UDP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.UDP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             discovery_port, ethereum_package_shared_utils.UDP_PROTOCOL
         ),
-        ENGINE_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.ENGINE_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             ENGINE_RPC_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
         ),
@@ -118,12 +111,11 @@ def launch(
     )
 
     service = plan.add_service(service_name, config)
+    http_url = util.make_service_http_url(service, constants.RPC_PORT_ID)
 
     enode, enr = ethereum_package_el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, RPC_PORT_ID
+        plan, service_name, constants.RPC_PORT_ID
     )
-
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
     metrics_info = observability.new_metrics_info(observability_helper, service)
 

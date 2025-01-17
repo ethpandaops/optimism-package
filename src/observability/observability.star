@@ -25,16 +25,11 @@ METRICS_INFO_URL_KEY = "url"
 METRICS_INFO_PATH_KEY = "path"
 METRICS_INFO_ADDITIONAL_CONFIG_KEY = "config"
 
-
-def make_metrics_url(service, metrics_port_num=METRICS_PORT_NUM):
-    return "{0}:{1}".format(service.ip_address, metrics_port_num)
-
-
 def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
     if not helper.enabled:
         return None
 
-    metrics_url = make_metrics_url(service)
+    metrics_url = util.make_service_url_authority(service)
     metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
         service.name, metrics_path, metrics_url
     )
@@ -91,7 +86,7 @@ def register_op_service_metrics_job(helper, service):
     register_service_metrics_job(
         helper,
         service_name=service.name,
-        endpoint=make_metrics_url(service),
+        endpoint=util.make_service_url_authority(service),
     )
 
 

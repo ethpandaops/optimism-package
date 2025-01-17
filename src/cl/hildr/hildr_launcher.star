@@ -26,7 +26,6 @@ BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/hildr/hildr-beacon-data"
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
-BEACON_HTTP_PORT_ID = "http"
 
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9003
@@ -43,7 +42,7 @@ def get_used_ports(discovery_port):
         BEACON_UDP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             discovery_port, ethereum_package_shared_utils.UDP_PROTOCOL, wait=None
         ),
-        BEACON_HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             BEACON_HTTP_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -84,7 +83,7 @@ def launch(
     #     endpoint="/",
     #     content_type="application/json",
     #     body='{"jsonrpc":"2.0","method":"opp2p_self","params":[],"id":1}',
-    #     port_id=BEACON_HTTP_PORT_ID,
+    #     port_id=constants.HTTP_PORT_ID,
     #     extract={
     #         "enr": ".result.ENR",
     #         "multiaddr": ".result.addresses[0]",
@@ -113,15 +112,11 @@ def launch(
         da_server_context,
     )
 
-    beacon_service = plan.add_service(service_name, config)
-
-    beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
-    beacon_http_url = "http://{0}:{1}".format(
-        beacon_service.ip_address, beacon_http_port.number
-    )
+    service = plan.add_service(service_name, config)
+    service_url = util.make_service_http_url(service)
 
     metrics_info = observability.new_metrics_info(
-        observability_helper, beacon_service, METRICS_PATH
+        observability_helper, service, METRICS_PATH
     )
 
     # response = plan.request(
@@ -135,9 +130,9 @@ def launch(
     return ethereum_package_cl_context.new_cl_context(
         client_name="hildr",
         enr="",  # beacon_node_enr,
-        ip_addr=beacon_service.ip_address,
-        http_port=beacon_http_port.number,
-        beacon_http_url=beacon_http_url,
+        ip_addr=service.ip_address,
+        http_port=constants.get_service_http_port_num(service),
+        beacon_http_url=service_url,
         cl_nodes_metrics_info=[metrics_info],
         beacon_service_name=service_name,
     )
@@ -159,14 +154,8 @@ def get_beacon_config(
     observability_helper,
     da_server_context,
 ):
-    EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-        el_context.ip_addr,
-        el_context.engine_rpc_port_num,
-    )
-    EXECUTION_RPC_ENDPOINT = "http://{0}:{1}".format(
-        el_context.ip_addr,
-        el_context.rpc_port_num,
-    )
+    EXECUTION_ENGINE_ENDPOINT = util.make_execution_engine_url(el_context)
+    EXECUTION_RPC_ENDPOINT = util.make_execution_rpc_url(el_context)
 
     ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
 

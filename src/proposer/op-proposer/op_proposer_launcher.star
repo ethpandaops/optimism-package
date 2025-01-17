@@ -6,25 +6,25 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+constants = import_module("../../package_io/constants.star")
+util = import_module("../../util.star")
+
 observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
 #
 #  ---------------------------------- Batcher client -------------------------------------
 # The Docker container runs as the "op-proposer" user so we can't write to root
-PROPOSER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-proposer/op-proposer-data"
-
-# Port IDs
-PROPOSER_HTTP_PORT_ID = "http"
+DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-proposer/op-proposer-data"
 
 # Port nums
-PROPOSER_HTTP_PORT_NUM = 8560
+HTTP_PORT_NUM = 8560
 
 
 def get_used_ports():
     used_ports = {
-        PROPOSER_HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            PROPOSER_HTTP_PORT_NUM,
+        constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+            HTTP_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
@@ -60,18 +60,14 @@ def launch(
         observability_helper,
     )
 
-    proposer_service = plan.add_service(service_name, config)
-
-    proposer_http_port = proposer_service.ports[PROPOSER_HTTP_PORT_ID]
-    proposer_http_url = "http://{0}:{1}".format(
-        proposer_service.ip_address, proposer_http_port.number
-    )
+    service = plan.add_service(service_name, config)
+    http_url = util.make_service_http_url(service)
 
     observability.register_op_service_metrics_job(
-        observability_helper, proposer_service
+        observability_helper, service
     )
 
-    return "op_proposer"
+    return http_url
 
 
 def get_proposer_config(
@@ -90,7 +86,7 @@ def get_proposer_config(
     cmd = [
         "op-proposer",
         "--poll-interval=12s",
-        "--rpc.port=" + str(PROPOSER_HTTP_PORT_NUM),
+        "--rpc.port=" + str(HTTP_PORT_NUM),
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--game-factory-address=" + str(game_factory_address),
         "--private-key=" + gs_proposer_private_key,
