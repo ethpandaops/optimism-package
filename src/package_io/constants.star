@@ -26,5 +26,3 @@ VOLUME_SIZE = {
         "hildr_volume_size": 1000,  # 1GB
     },
 }
-
-MAX_LABEL_LENGTH = 63
