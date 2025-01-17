@@ -6,6 +6,8 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+constants = import_module("../../package_io/constants.star")
+
 observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
@@ -14,16 +16,13 @@ prometheus = import_module("../../observability/prometheus/prometheus_launcher.s
 # The Docker container runs as the "op-batcher" user so we can't write to root
 BATCHER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-batcher/op-batcher-data"
 
-# Port IDs
-BATCHER_HTTP_PORT_ID = "http"
-
 # Port nums
 BATCHER_HTTP_PORT_NUM = 8548
 
 
 def get_used_ports():
     used_ports = {
-        BATCHER_HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             BATCHER_HTTP_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -47,8 +46,6 @@ def launch(
     observability_helper,
     da_server_context,
 ):
-    batcher_service_name = "{0}".format(service_name)
-
     config = get_batcher_config(
         plan,
         image,
@@ -62,16 +59,12 @@ def launch(
         da_server_context,
     )
 
-    batcher_service = plan.add_service(service_name, config)
+    service = plan.add_service(service_name, config)
+    service_url = util.make_service_http_url(service)
 
-    batcher_http_port = batcher_service.ports[BATCHER_HTTP_PORT_ID]
-    batcher_http_url = "http://{0}:{1}".format(
-        batcher_service.ip_address, batcher_http_port.number
-    )
+    observability.register_op_service_metrics_job(observability_helper, service)
 
-    observability.register_op_service_metrics_job(observability_helper, batcher_service)
-
-    return "op_batcher"
+    return service_url
 
 
 def get_batcher_config(
