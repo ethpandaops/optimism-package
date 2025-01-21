@@ -182,7 +182,6 @@ def get_beacon_config(
         "--l1={0}".format(l1_config_env_vars["L1_RPC_URL"]),
         "--l1.rpckind={0}".format(l1_config_env_vars["L1_RPC_KIND"]),
         "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
-        "--l1.trustrpc",
         "--p2p.advertise.ip="
         + ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--p2p.advertise.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
