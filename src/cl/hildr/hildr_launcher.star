@@ -15,6 +15,7 @@ ethereum_package_input_parser = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
+observability = import_module("../../observability/observability.star")
 
 util = import_module("../../util.star")
 
@@ -30,6 +31,8 @@ BEACON_HTTP_PORT_ID = "http"
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9003
 BEACON_HTTP_PORT_NUM = 8547
+
+METRICS_PATH = "/metrics"
 
 
 def get_used_ports(discovery_port):
@@ -73,6 +76,8 @@ def launch(
     existing_cl_clients,
     l1_config_env_vars,
     sequencer_enabled,
+    observability_helper,
+    interop_params,
 ):
     # beacon_node_identity_recipe = PostHttpRequestRecipe(
     #     endpoint="/",
@@ -103,6 +108,7 @@ def launch(
         existing_cl_clients,
         l1_config_env_vars,
         sequencer_enabled,
+        observability_helper,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -110,6 +116,10 @@ def launch(
     beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(
         beacon_service.ip_address, beacon_http_port.number
+    )
+
+    metrics_info = observability.new_metrics_info(
+        observability_helper, beacon_service, METRICS_PATH
     )
 
     # response = plan.request(
@@ -126,6 +136,7 @@ def launch(
         ip_addr=beacon_service.ip_address,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
+        cl_nodes_metrics_info=[metrics_info],
         beacon_service_name=service_name,
     )
 
@@ -143,6 +154,7 @@ def get_beacon_config(
     existing_cl_clients,
     l1_config_env_vars,
     sequencer_enabled,
+    observability_helper,
 ):
     EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -153,7 +165,7 @@ def get_beacon_config(
         el_context.rpc_port_num,
     )
 
-    used_ports = get_used_ports(BEACON_DISCOVERY_PORT_NUM)
+    ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
 
     cmd = [
         "--devnet",
@@ -167,21 +179,52 @@ def get_beacon_config(
         "--rpc-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--sync-mode=full",
         "--network="
-        + ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
-        + "/rollup-{0}.json".format(launcher.network_params.network_id),
+        + "{0}/rollup-{1}.json".format(
+            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+            launcher.network_params.network_id,
+        ),
     ]
 
-    sequencer_private_key = util.read_network_config_value(
-        plan,
-        launcher.deployment_output,
-        "sequencer-{0}".format(launcher.network_params.network_id),
-        ".privateKey",
-    )
+    # configure files
+
+    files = {
+        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+    }
+    if persistent:
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+            size=int(participant.cl_volume_size)
+            if int(participant.cl_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.CL_TYPE.hildr + "_volume_size"
+            ],
+        )
+
+    # configure environment variables
+
+    env_vars = dict(participant.cl_extra_env_vars)
+
+    # apply customizations
+
+    if observability_helper.enabled:
+        cmd += [
+            "--metrics-enable",
+            "--metrics-port={0}".format(observability.METRICS_PORT_NUM),
+        ]
+
+        observability.expose_metrics_port(ports)
 
     if sequencer_enabled:
-        cmd.append("--sequencer-enable")
+        # sequencer private key can't be used by hildr yet
+        # sequencer_private_key = util.read_network_config_value(
+        #     plan,
+        #     launcher.deployment_output,
+        #     "sequencer-{0}".format(launcher.network_params.network_id),
+        #     ".privateKey",
+        # )
 
-    # sequencer private key can't be used by hildr yet
+        cmd.append("--sequencer-enable")
 
     if len(existing_cl_clients) == 1:
         cmd.append(
@@ -198,24 +241,6 @@ def get_beacon_config(
 
     cmd += participant.cl_extra_params
 
-    files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
-        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
-    }
-    if persistent:
-        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.CL_TYPE.hildr + "_volume_size"
-            ],
-        )
-
-    ports = {}
-    ports.update(used_ports)
-
-    env_vars = participant.cl_extra_env_vars
     config_args = {
         "image": participant.cl_image,
         "ports": ports,
@@ -234,6 +259,8 @@ def get_beacon_config(
         "node_selectors": node_selectors,
     }
 
+    # configure resources
+
     if participant.cl_min_cpu > 0:
         config_args["min_cpu"] = participant.cl_min_cpu
     if participant.cl_max_cpu > 0:
@@ -242,6 +269,7 @@ def get_beacon_config(
         config_args["min_memory"] = participant.cl_min_mem
     if participant.cl_max_mem > 0:
         config_args["max_memory"] = participant.cl_max_mem
+
     return ServiceConfig(**config_args)
 
 

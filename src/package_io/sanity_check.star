@@ -1,3 +1,29 @@
+OBSERVABILITY_PARAMS = [
+    "enabled",
+    "prometheus_params",
+]
+
+PROMETHEUS_PARAMS = [
+    "image",
+    "storage_tsdb_retention_time",
+    "storage_tsdb_retention_size",
+    "min_cpu",
+    "max_cpu",
+    "min_mem",
+    "max_mem",
+]
+
+INTEROP_PARAMS = [
+    "enabled",
+    "supervisor_params",
+]
+
+SUPERVISOR_PARAMS = [
+    "image",
+    "dependency_set",
+    "extra_params",
+]
+
 PARTICIPANT_CATEGORIES = {
     "participants": [
         "el_type",
@@ -62,7 +88,10 @@ OP_CONTRACT_DEPLOYER_PARAMS = [
     "image",
     "l1_artifacts_locator",
     "l2_artifacts_locator",
+    "global_deploy_overrides",
 ]
+
+OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES = ["faultGameAbsolutePrestate"]
 
 ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
@@ -70,6 +99,8 @@ ADDITIONAL_SERVICES_PARAMS = [
 ]
 
 ROOT_PARAMS = [
+    "observability",
+    "interop",
     "chains",
     "op_contract_deployer_params",
     "global_log_level",
@@ -77,7 +108,6 @@ ROOT_PARAMS = [
     "global_tolerations",
     "persistent",
 ]
-
 
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",
@@ -120,6 +150,38 @@ def sanity_check(plan, optimism_config):
         if key not in ROOT_PARAMS:
             fail("Invalid parameter {0}, allowed fields: {1}".format(key, ROOT_PARAMS))
 
+    if "observability" in optimism_config:
+        validate_params(
+            plan,
+            optimism_config,
+            "observability",
+            OBSERVABILITY_PARAMS,
+        )
+
+        if "prometheus_params" in optimism_config["observability"]:
+            validate_params(
+                plan,
+                optimism_config["observability"],
+                "prometheus_params",
+                PROMETHEUS_PARAMS,
+            )
+
+    if "interop" in optimism_config:
+        validate_params(
+            plan,
+            optimism_config,
+            "interop",
+            INTEROP_PARAMS,
+        )
+
+        if "supervisor_params" in optimism_config["interop"]:
+            validate_params(
+                plan,
+                optimism_config["interop"],
+                "supervisor_params",
+                SUPERVISOR_PARAMS,
+            )
+
     chains = optimism_config.get("chains", [])
 
     if type(chains) != "list":
@@ -153,6 +215,7 @@ def sanity_check(plan, optimism_config):
             )
             combined_root_params.append("additional_services")
             combined_root_params.append("op_contract_deployer_params")
+            combined_root_params.append("supervisor_params")
 
             if param not in combined_root_params:
                 fail(
@@ -169,6 +232,12 @@ def sanity_check(plan, optimism_config):
             optimism_config,
             "op_contract_deployer_params",
             OP_CONTRACT_DEPLOYER_PARAMS,
+        )
+        validate_params(
+            plan,
+            optimism_config["op_contract_deployer_params"],
+            "global_deploy_overrides",
+            OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES,
         )
 
     plan.print("Sanity check for OP package passed")

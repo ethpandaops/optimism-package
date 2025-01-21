@@ -2,9 +2,6 @@ participant_network = import_module("./participant_network.star")
 blockscout = import_module("./blockscout/blockscout_launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
 input_parser = import_module("./package_io/input_parser.star")
-ethereum_package_static_files = import_module(
-    "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
-)
 util = import_module("./util.star")
 
 
@@ -13,6 +10,7 @@ def launch_l2(
     l2_num,
     l2_services_suffix,
     l2_args,
+    jwt_file,
     deployment_output,
     l1_config,
     l1_priv_key,
@@ -21,6 +19,8 @@ def launch_l2(
     global_node_selectors,
     global_tolerations,
     persistent,
+    observability_helper,
+    interop_params,
 ):
     network_params = l2_args.network_params
     batcher_params = l2_args.batcher_params
@@ -29,10 +29,6 @@ def launch_l2(
     mev_params = l2_args.mev_params
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))
-    jwt_file = plan.upload_files(
-        src=ethereum_package_static_files.JWT_PATH_FILEPATH,
-        name="op_jwt_file{0}".format(l2_services_suffix),
-    )
 
     all_l2_participants = participant_network.launch_participant_network(
         plan,
@@ -52,6 +48,8 @@ def launch_l2(
         global_tolerations,
         persistent,
         l2_args.additional_services,
+        observability_helper,
+        interop_params,
     )
 
     all_el_contexts = []
@@ -90,3 +88,5 @@ def launch_l2(
             l1_bridge_address
         )
     )
+
+    return all_l2_participants

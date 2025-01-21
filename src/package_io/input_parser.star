@@ -25,6 +25,10 @@ DEFAULT_CHALLENGER_IMAGES = {
     "op-challenger": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
 }
 
+DEFAULT_SUPERVISOR_IMAGES = {
+    "op-supervisor": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+}
+
 DEFAULT_PROPOSER_IMAGES = {
     "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
 }
@@ -51,11 +55,39 @@ def external_l1_network_params_input_parser(plan, input_args):
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     results = parse_network_params(plan, input_args)
+
     results["global_log_level"] = "info"
     results["global_node_selectors"] = {}
     results["global_tolerations"] = []
     results["persistent"] = False
+
     return struct(
+        observability=struct(
+            enabled=results["observability"]["enabled"],
+            prometheus_params=struct(
+                image=results["observability"]["prometheus_params"]["image"],
+                storage_tsdb_retention_time=results["observability"][
+                    "prometheus_params"
+                ]["storage_tsdb_retention_time"],
+                storage_tsdb_retention_size=results["observability"][
+                    "prometheus_params"
+                ]["storage_tsdb_retention_size"],
+                min_cpu=results["observability"]["prometheus_params"]["min_cpu"],
+                max_cpu=results["observability"]["prometheus_params"]["max_cpu"],
+                min_mem=results["observability"]["prometheus_params"]["min_mem"],
+                max_mem=results["observability"]["prometheus_params"]["max_mem"],
+            ),
+        ),
+        interop=struct(
+            enabled=results["interop"]["enabled"],
+            supervisor_params=struct(
+                image=results["interop"]["supervisor_params"]["image"],
+                dependency_set=results["interop"]["supervisor_params"][
+                    "dependency_set"
+                ],
+                extra_params=results["interop"]["supervisor_params"]["extra_params"],
+            ),
+        ),
         chains=[
             struct(
                 participants=[
@@ -145,6 +177,9 @@ def input_parser(plan, input_args):
             l2_artifacts_locator=results["op_contract_deployer_params"][
                 "l2_artifacts_locator"
             ],
+            global_deploy_overrides=results["op_contract_deployer_params"][
+                "global_deploy_overrides"
+            ],
         ),
         global_log_level=results["global_log_level"],
         global_node_selectors=results["global_node_selectors"],
@@ -155,6 +190,29 @@ def input_parser(plan, input_args):
 
 def parse_network_params(plan, input_args):
     results = {}
+
+    # configure observability
+
+    results["observability"] = default_observability_params()
+    results["observability"].update(input_args.get("observability", {}))
+
+    results["observability"]["prometheus_params"] = default_prometheus_params()
+    results["observability"]["prometheus_params"].update(
+        input_args.get("observability", {}).get("prometheus_params", {})
+    )
+
+    # configure interop
+
+    results["interop"] = default_interop_params()
+    results["interop"].update(input_args.get("interop", {}))
+
+    results["interop"]["supervisor_params"] = default_supervisor_params()
+    results["interop"]["supervisor_params"].update(
+        input_args.get("interop", {}).get("supervisor_params", {})
+    )
+
+    # configure chains
+
     chains = []
 
     seen_names = {}
@@ -257,23 +315,61 @@ def parse_network_params(plan, input_args):
         chains.append(result)
 
     results["chains"] = chains
+
+    # configure op-deployer
+
     results["op_contract_deployer_params"] = default_op_contract_deployer_params()
     results["op_contract_deployer_params"].update(
         input_args.get("op_contract_deployer_params", {})
     )
+
     results["global_log_level"] = input_args.get("global_log_level", "info")
 
     return results
 
 
-def default_optimism_args():
+def default_optimism_params():
     return {
+        "observability": default_observability_params(),
+        "interop": default_interop_params(),
         "chains": default_chains(),
         "op_contract_deployer_params": default_op_contract_deployer_params(),
         "global_log_level": "info",
         "global_node_selectors": {},
         "global_tolerations": [],
         "persistent": False,
+    }
+
+
+def default_observability_params():
+    return {
+        "enabled": True,
+    }
+
+
+def default_prometheus_params():
+    return {
+        "image": "prom/prometheus:latest",
+        "storage_tsdb_retention_time": "1d",
+        "storage_tsdb_retention_size": "512MB",
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
+    }
+
+
+def default_interop_params():
+    return {
+        "enabled": False,
+    }
+
+
+def default_supervisor_params():
+    return {
+        "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
+        "dependency_set": "",
+        "extra_params": [],
     }
 
 
@@ -316,23 +412,23 @@ def default_network_params():
 
 def default_batcher_params():
     return {
-        "image": "",
+        "image": DEFAULT_BATCHER_IMAGES["op-batcher"],
         "extra_params": [],
     }
 
 
 def default_challenger_params():
     return {
-        "image": "",
+        "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
         "extra_params": [],
-        "cannon_prestate_path": "../../../static_files/prestates",
-        "cannon_prestates_url": "",
+        "cannon_prestate_path": "",
+        "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
     }
 
 
 def default_proposer_params():
     return {
-        "image": "",
+        "image": DEFAULT_PROPOSER_IMAGES["op-proposer"],
         "extra_params": [],
         "game_type": 1,
         "proposal_interval": "10m",
@@ -375,11 +471,18 @@ def default_participant():
     }
 
 
+def default_op_contract_deployer_global_deploy_overrides():
+    return {
+        "faultGameAbsolutePrestate": "",
+    }
+
+
 def default_op_contract_deployer_params():
     return {
-        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.7",
-        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz",
-        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-9af7366a7102f51e8dbe451dcfa22971131d89e218915c91f420a164cc48be65.tar.gz",
+        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.8",
+        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz",
+        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz",
+        "global_deploy_overrides": default_op_contract_deployer_global_deploy_overrides(),
     }
 
 

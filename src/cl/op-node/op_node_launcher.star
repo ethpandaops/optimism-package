@@ -17,6 +17,8 @@ ethereum_package_input_parser = import_module(
 constants = import_module("../../package_io/constants.star")
 
 util = import_module("../../util.star")
+observability = import_module("../../observability/observability.star")
+interop_constants = import_module("../../interop/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 
@@ -73,6 +75,8 @@ def launch(
     existing_cl_clients,
     l1_config_env_vars,
     sequencer_enabled,
+    observability_helper,
+    interop_params,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
         endpoint="/",
@@ -104,6 +108,8 @@ def launch(
         l1_config_env_vars,
         beacon_node_identity_recipe,
         sequencer_enabled,
+        observability_helper,
+        interop_params,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -112,6 +118,8 @@ def launch(
     beacon_http_url = "http://{0}:{1}".format(
         beacon_service.ip_address, beacon_http_port.number
     )
+
+    metrics_info = observability.new_metrics_info(observability_helper, beacon_service)
 
     response = plan.request(
         recipe=beacon_node_identity_recipe, service_name=service_name
@@ -127,7 +135,7 @@ def launch(
         ip_addr=beacon_service.ip_address,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
-        cl_nodes_metrics_info=None,
+        cl_nodes_metrics_info=[metrics_info],
         beacon_service_name=service_name,
         multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
@@ -148,13 +156,15 @@ def get_beacon_config(
     l1_config_env_vars,
     beacon_node_identity_recipe,
     sequencer_enabled,
+    observability_helper,
+    interop_params,
 ):
+    ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
+
     EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
         el_context.ip_addr,
         el_context.engine_rpc_port_num,
     )
-
-    used_ports = get_used_ports(BEACON_DISCOVERY_PORT_NUM)
 
     cmd = [
         "op-node",
@@ -162,8 +172,10 @@ def get_beacon_config(
         "--l2.jwt-secret=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--verifier.l1-confs=4",
         "--rollup.config="
-        + ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
-        + "/rollup-{0}.json".format(launcher.network_params.network_id),
+        + "{0}/rollup-{1}.json".format(
+            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+            launcher.network_params.network_id,
+        ),
         "--rpc.addr=0.0.0.0",
         "--rpc.port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rpc.enable-admin",
@@ -181,32 +193,7 @@ def get_beacon_config(
         "--safedb.path={0}".format(BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER),
     ]
 
-    sequencer_private_key = util.read_network_config_value(
-        plan,
-        launcher.deployment_output,
-        "sequencer-{0}".format(launcher.network_params.network_id),
-        ".privateKey",
-    )
-
-    if sequencer_enabled:
-        cmd.append("--p2p.sequencer.key=" + sequencer_private_key)
-        cmd.append("--sequencer.enabled")
-        cmd.append("--sequencer.l1-confs=5")
-
-    if len(existing_cl_clients) > 0:
-        cmd.append(
-            "--p2p.bootnodes="
-            + ",".join(
-                [
-                    ctx.enr
-                    for ctx in existing_cl_clients[
-                        : ethereum_package_constants.MAX_ENR_ENTRIES
-                    ]
-                ]
-            )
-        )
-
-    cmd += participant.cl_extra_params
+    # configure files
 
     files = {
         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
@@ -223,10 +210,67 @@ def get_beacon_config(
             ],
         )
 
-    ports = {}
-    ports.update(used_ports)
+    # configure environment variables
 
-    env_vars = participant.cl_extra_env_vars
+    env_vars = dict(participant.cl_extra_env_vars)
+
+    # apply customizations
+
+    if observability_helper.enabled:
+        cmd += [
+            "--metrics.enabled=true",
+            "--metrics.addr=0.0.0.0",
+            "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
+        ]
+
+        observability.expose_metrics_port(ports)
+
+    if interop_params.enabled:
+        ports[
+            interop_constants.INTEROP_WS_PORT_ID
+        ] = ethereum_package_shared_utils.new_port_spec(
+            interop_constants.INTEROP_WS_PORT_NUM,
+            ethereum_package_shared_utils.TCP_PROTOCOL,
+        )
+
+        env_vars.update(
+            {
+                # "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
+                "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
+                "OP_NODE_INTEROP_RPC_PORT": str(interop_constants.INTEROP_WS_PORT_NUM),
+                "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+            }
+        )
+
+    if sequencer_enabled:
+        sequencer_private_key = util.read_network_config_value(
+            plan,
+            launcher.deployment_output,
+            "sequencer-{0}".format(launcher.network_params.network_id),
+            ".privateKey",
+        )
+
+        cmd += [
+            "--p2p.sequencer.key=" + sequencer_private_key,
+            "--sequencer.enabled",
+            "--sequencer.l1-confs=5",
+        ]
+
+    if len(existing_cl_clients) > 0:
+        cmd.append(
+            "--p2p.bootnodes="
+            + ",".join(
+                [
+                    ctx.enr
+                    for ctx in existing_cl_clients[
+                        : ethereum_package_constants.MAX_ENR_ENTRIES
+                    ]
+                ]
+            )
+        )
+
+    cmd += participant.cl_extra_params
+
     config_args = {
         "image": participant.cl_image,
         "ports": ports,
@@ -252,6 +296,8 @@ def get_beacon_config(
         "node_selectors": node_selectors,
     }
 
+    # configure resources
+
     if participant.cl_min_cpu > 0:
         config_args["min_cpu"] = participant.cl_min_cpu
     if participant.cl_max_cpu > 0:
@@ -260,6 +306,7 @@ def get_beacon_config(
         config_args["min_memory"] = participant.cl_min_mem
     if participant.cl_max_mem > 0:
         config_args["max_memory"] = participant.cl_max_mem
+
     return ServiceConfig(**config_args)
 
 

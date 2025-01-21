@@ -22,12 +22,12 @@ ethereum_package_constants = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
+observability = import_module("../../observability/observability.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
-METRICS_PORT_NUM = 9001
 
 # The min/max CPU/memory that the execution node can use
 EXECUTION_MIN_CPU = 300
@@ -40,12 +40,9 @@ TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
 ENGINE_WS_PORT_ID = "engineWs"
-METRICS_PORT_ID = "metrics"
 
 # TODO(old) Scale this dynamically based on CPUs available and Nethermind nodes mining
 NUM_MINING_THREADS = 1
-
-METRICS_PATH = "/debug/metrics/prometheus"
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nethermind/execution-data"
@@ -70,9 +67,6 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
         ENGINE_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             ENGINE_RPC_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
-        ),
-        METRICS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
         ),
     }
     return used_ports
@@ -99,6 +93,8 @@ def launch(
     existing_el_clients,
     sequencer_enabled,
     sequencer_context,
+    observability_helper,
+    interop_params,
 ):
     log_level = ethereum_package_input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -119,6 +115,7 @@ def launch(
         cl_client_name,
         sequencer_enabled,
         sequencer_context,
+        observability_helper,
     )
 
     service = plan.add_service(service_name, config)
@@ -127,13 +124,10 @@ def launch(
         plan, service_name, RPC_PORT_ID
     )
 
-    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    nethermind_metrics_info = ethereum_package_el_node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metrics_url
-    )
-
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
     ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
+
+    metrics_info = observability.new_metrics_info(observability_helper, service)
 
     return ethereum_package_el_context.new_el_context(
         client_name="op-nethermind",
@@ -145,7 +139,7 @@ def launch(
         rpc_http_url=http_url,
         ws_url=ws_url,
         service_name=service_name,
-        el_metrics_info=[nethermind_metrics_info],
+        el_metrics_info=[metrics_info],
     )
 
 
@@ -162,9 +156,11 @@ def get_config(
     cl_client_name,
     sequencer_enabled,
     sequencer_context,
+    observability_helper,
 ):
     discovery_port = DISCOVERY_PORT_NUM
-    used_ports = get_used_ports(discovery_port)
+    ports = dict(get_used_ports(discovery_port))
+
     cmd = [
         "--log=debug",
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -182,10 +178,38 @@ def get_config(
         "--Network.P2PPort={0}".format(discovery_port),
         "--JsonRpc.JwtSecretFile="
         + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--Metrics.Enabled=true",
-        "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
-        "--Metrics.ExposeHost=0.0.0.0",
     ]
+
+    # configure files
+
+    files = {
+        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+    }
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+            size=int(participant.el_volume_size)
+            if int(participant.el_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.EL_TYPE.op_nethermind + "_volume_size"
+            ],
+        )
+    # configure environment variables
+
+    env_vars = dict(participant.el_extra_env_vars)
+
+    # apply customizations
+
+    if observability_helper.enabled:
+        cmd += [
+            "--Metrics.Enabled=true",
+            "--Metrics.ExposeHost=0.0.0.0",
+            "--Metrics.ExposePort={0}".format(observability.METRICS_PORT_NUM),
+        ]
+
+        observability.expose_metrics_port(ports)
+
     if not sequencer_enabled:
         cmd.append("--Optimism.SequencerUrl={0}".format(sequencer_context.rpc_http_url))
 
@@ -206,29 +230,17 @@ def get_config(
     cmd.append("--config=none.cfg")
     cmd.append(
         "--Init.ChainSpecPath="
-        + ethereum_package_constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/chainspec-{0}.json".format(launcher.network_id)
+        + "{0}/chainspec-{1}.json".format(
+            ethereum_package_constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
+            launcher.network_id,
+        ),
     )
 
-    files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
-        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
-    }
-    if persistent:
-        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.op_nethermind + "_volume_size"
-            ],
-        )
-
     cmd += participant.el_extra_params
-    env_vars = participant.el_extra_env_vars
+
     config_args = {
         "image": participant.el_image,
-        "ports": used_ports,
+        "ports": ports,
         "cmd": cmd,
         "files": files,
         "private_ip_address_placeholder": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -244,6 +256,8 @@ def get_config(
         "node_selectors": node_selectors,
     }
 
+    # configure resources
+
     if participant.el_min_cpu > 0:
         config_args["min_cpu"] = participant.el_min_cpu
     if participant.el_max_cpu > 0:
@@ -252,6 +266,7 @@ def get_config(
         config_args["min_memory"] = participant.el_min_mem
     if participant.el_max_mem > 0:
         config_args["max_memory"] = participant.el_max_mem
+
     return ServiceConfig(**config_args)
 
 

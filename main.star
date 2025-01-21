@@ -1,8 +1,18 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 l2_launcher = import_module("./src/l2.star")
+op_supervisor_launcher = import_module(
+    "./src/interop/op-supervisor/op_supervisor_launcher.star"
+)
+
+observability = import_module("./src/observability/observability.star")
+prometheus = import_module("./src/observability/prometheus/prometheus_launcher.star")
+
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
+ethereum_package_static_files = import_module(
+    "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
+)
 
 
 def run(plan, args):
@@ -34,6 +44,11 @@ def run(plan, args):
     global_log_level = optimism_args_with_right_defaults.global_log_level
     persistent = optimism_args_with_right_defaults.persistent
 
+    observability_params = optimism_args_with_right_defaults.observability
+    interop_params = optimism_args_with_right_defaults.interop
+
+    observability_helper = observability.make_helper(observability_params)
+
     # Deploy the L1
     l1_network = ""
     if external_l1_args:
@@ -50,6 +65,9 @@ def run(plan, args):
             "L1_WS_URL": external_l1_args.el_ws_url,
             "L1_CHAIN_ID": external_l1_args.network_id,
         }
+
+        plan.print("Waiting for network to sync")
+        wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
     else:
         plan.print("Deploying a local L1")
         l1 = ethereum_package.run(plan, ethereum_args)
@@ -66,13 +84,8 @@ def run(plan, args):
         l1_config_env_vars = get_l1_config(
             all_l1_participants, l1_network_params, l1_network_id
         )
-
-    if l1_network == "kurtosis":
         plan.print("Waiting for L1 to start up")
         wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
-    else:
-        plan.print("Waiting for network to sync")
-        wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
 
     deployment_output = contract_deployer.deploy_contracts(
         plan,
@@ -82,12 +95,19 @@ def run(plan, args):
         l1_network,
     )
 
+    jwt_file = plan.upload_files(
+        src=ethereum_package_static_files.JWT_PATH_FILEPATH,
+        name="op_jwt_file",
+    )
+
+    all_participants = []
     for l2_num, chain in enumerate(optimism_args_with_right_defaults.chains):
-        l2_launcher.launch_l2(
+        all_participants += l2_launcher.launch_l2(
             plan,
             l2_num,
             chain.network_params.name,
             chain,
+            jwt_file,
             deployment_output,
             l1_config_env_vars,
             l1_priv_key,
@@ -96,6 +116,27 @@ def run(plan, args):
             global_node_selectors,
             global_tolerations,
             persistent,
+            observability_helper,
+            interop_params,
+        )
+
+    if interop_params.enabled:
+        op_supervisor_launcher.launch(
+            plan,
+            l1_config_env_vars,
+            optimism_args_with_right_defaults.chains,
+            all_participants,
+            jwt_file,
+            interop_params.supervisor_params,
+            observability_helper,
+        )
+
+    if observability_helper.enabled:
+        plan.print("Launching prometheus...")
+        prometheus_private_url = prometheus.launch_prometheus(
+            plan,
+            observability_helper,
+            global_node_selectors,
         )
 
 
