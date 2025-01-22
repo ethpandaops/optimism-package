@@ -131,7 +131,7 @@ def launch(
         client_name="hildr",
         enr="",  # beacon_node_enr,
         ip_addr=service.ip_address,
-        http_port=constants.get_service_http_port_num(service),
+        http_port=util.get_service_http_port_num(service),
         beacon_http_url=service_url,
         cl_nodes_metrics_info=[metrics_info],
         beacon_service_name=service_name,

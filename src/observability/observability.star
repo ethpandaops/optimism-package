@@ -29,7 +29,7 @@ def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
     if not helper.enabled:
         return None
 
-    metrics_url = util.make_service_url_authority(service)
+    metrics_url = util.make_service_url_authority(service, METRICS_PORT_ID)
     metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
         service.name, metrics_path, metrics_url
     )
@@ -86,7 +86,7 @@ def register_op_service_metrics_job(helper, service):
     register_service_metrics_job(
         helper,
         service_name=service.name,
-        endpoint=util.make_service_url_authority(service),
+        endpoint=util.make_service_url_authority(service, METRICS_PORT_ID),
     )
 
 
