@@ -22,6 +22,7 @@ ethereum_package_input_parser = import_module(
 
 constants = import_module("../../package_io/constants.star")
 observability = import_module("../../observability/observability.star")
+util = import_module("../../util.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -243,7 +244,7 @@ def get_config(
         "labels": ethereum_package_shared_utils.label_maker(
             client=constants.EL_TYPE.op_reth,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
+            image=util.label_from_image(participant.el_image),
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
         ),

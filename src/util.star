@@ -37,3 +37,32 @@ def to_hex_chain_id(chain_id):
     out = "%x" % int(chain_id)
     pad = 64 - len(out)
     return "0x" + "0" * pad + out
+
+
+def label_from_image(image):
+    """Generate a label from an image name.
+
+    Truncate the image label to 63 characters max to comply with k8s label length limit.
+    The label is expected to be in the format of <registry>/<image>:<tag>.
+    But it case it's too long, we take the longest meaningful suffix
+    (so that it's still recognizable), breaking at slashes (so that it's valid).
+
+    Args:
+        image: The image to label.
+
+    Returns:
+        The potentially truncated label.
+    """
+    max_length = 63
+    if len(image) <= max_length:
+        return image
+    cpts = image.split("/")
+    label = cpts[-1]
+    for cpt in reversed(cpts[:-1]):
+        if len(label) + len(cpt) + 1 > max_length:
+            break
+        label = cpt + "/" + label
+    # just in case the last part is already too long
+    if len(label) > max_length:
+        label = label[-max_length:]
+    return label
