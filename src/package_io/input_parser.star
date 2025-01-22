@@ -213,6 +213,9 @@ def input_parser(plan, input_args):
                     cannon_prestates_url=result["challenger_params"][
                         "cannon_prestates_url"
                     ],
+                    cannon_trace_types=result["challenger_params"][
+                        "cannon_trace_types"
+                    ],
                 ),
                 proposer_params=struct(
                     image=result["proposer_params"]["image"],
@@ -525,6 +528,7 @@ def default_challenger_params():
         "extra_params": [],
         "cannon_prestate_path": "",
         "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
+        "cannon_trace_types": ["cannon", "permissioned"],
     }
 
 

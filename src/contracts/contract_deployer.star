@@ -12,12 +12,11 @@ ethereum_package_genesis_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
-
-CANNED_VALUES = (
-    ("int", "eip1559Denominator", 50),
-    ("int", "eip1559DenominatorCanyon", 250),
-    ("int", "eip1559Elasticity", 6),
-)
+CANNED_VALUES = {
+    "eip1559Denominator": 50,
+    "eip1559DenominatorCanyon": 250,
+    "eip1559Elasticity": 6,
+}
 
 
 def deploy_contracts(
@@ -59,7 +58,8 @@ def deploy_contracts(
         description="Collect keys, and fund addresses",
         image=utils.DEPLOYMENT_UTILS_IMAGE,
         env_vars={
-            "PRIVATE_KEY": ethereum_package_genesis_constants.PRE_FUNDED_ACCOUNTS[
+            "DEPLOYER_PRIVATE_KEY": priv_key,
+            "FUND_PRIVATE_KEY": ethereum_package_genesis_constants.PRE_FUNDED_ACCOUNTS[
                 19
             ].private_key,
             "FUND_VALUE": "10ether",
@@ -98,145 +98,92 @@ def deploy_contracts(
             if activation_timestamp != None:
                 hardfork_schedule.append((index, fork_key, activation_timestamp))
 
-    intent_updates = [
-        (
-            "bool",
-            "useInterop",
-            optimism_args.interop.enabled,
-        ),
-        (
-            "string",
-            "l1ContractsLocator",
-            optimism_args.op_contract_deployer_params.l1_artifacts_locator,
-        ),
-        (
-            "string",
-            "l2ContractsLocator",
-            optimism_args.op_contract_deployer_params.l2_artifacts_locator,
-        ),
-        address_update(
-            "superchainRoles.guardian", "l1ProxyAdmin", l2_chain_ids_list[0]
-        ),
-        address_update(
-            "superchainRoles.protocolVersionsOwner",
-            "l1ProxyAdmin",
-            l2_chain_ids_list[0],
-        ),
-        address_update(
-            "superchainRoles.proxyAdminOwner", "l1ProxyAdmin", l2_chain_ids_list[0]
-        ),
-    ]
+    intent = {
+        "useInterop": optimism_args.interop.enabled,
+        "l1ContractsLocator": optimism_args.op_contract_deployer_params.l1_artifacts_locator,
+        "l2ContractsLocator": optimism_args.op_contract_deployer_params.l2_artifacts_locator,
+        "superchainRoles": {
+            "guardian": read_chain_cmd("l1ProxyAdmin", l2_chain_ids_list[0]),
+            "protocolVersionsOwner": read_chain_cmd(
+                "l1ProxyAdmin", l2_chain_ids_list[0]
+            ),
+            "proxyAdminOwner": read_chain_cmd("l1ProxyAdmin", l2_chain_ids_list[0]),
+        },
+        "chains": [],
+    }
+
+    absolute_prestate = ""
     if optimism_args.op_contract_deployer_params.global_deploy_overrides[
         "faultGameAbsolutePrestate"
     ]:
-        intent_updates.extend(
-            [
-                (
-                    "bool",
-                    "globalDeployOverrides.dangerouslyAllowCustomDisputeParameters",
-                    "true",
-                ),
-                (
-                    "string",
-                    "globalDeployOverrides.faultGameAbsolutePrestate",
-                    optimism_args.op_contract_deployer_params.global_deploy_overrides[
-                        "faultGameAbsolutePrestate"
-                    ],
-                ),
+        absolute_prestate = (
+            optimism_args.op_contract_deployer_params.global_deploy_overrides[
+                "faultGameAbsolutePrestate"
             ]
         )
-    intent_updates.extend(
-        [
-            (
-                "string",
-                chain_key(index, "deployOverrides.{0}".format(fork_key)),
-                "0x%x" % activation_timestamp,
-            )
-            for index, fork_key, activation_timestamp in hardfork_schedule
-        ]
-    )
+        intent["globalDeployOverrides"] = {
+            "dangerouslyAllowCustomDisputeParameters": True,
+            "faultGameAbsolutePrestate": absolute_prestate,
+        }
 
     for i, chain in enumerate(optimism_args.chains):
         chain_id = str(chain.network_params.network_id)
-
-        intent_updates.extend(
-            [
-                (
-                    "int",
-                    chain_key(i, "deployOverrides.l2BlockTime"),
-                    str(chain.network_params.seconds_per_slot),
+        intent_chain = dict(CANNED_VALUES)
+        intent_chain.update(
+            {
+                "deployOverrides": {
+                    "l2BlockTime": chain.network_params.seconds_per_slot,
+                    "fundDevAccounts": True
+                    if chain.network_params.fund_dev_accounts
+                    else False,
+                },
+                "baseFeeVaultRecipient": read_chain_cmd(
+                    "baseFeeVaultRecipient", chain_id
                 ),
-                (
-                    "bool",
-                    chain_key(i, "deployOverrides.fundDevAccounts"),
-                    "true" if chain.network_params.fund_dev_accounts else "false",
+                "l1FeeVaultRecipient": read_chain_cmd("l1FeeVaultRecipient", chain_id),
+                "sequencerFeeVaultRecipient": read_chain_cmd(
+                    "sequencerFeeVaultRecipient", chain_id
                 ),
-                address_update(
-                    chain_key(i, "baseFeeVaultRecipient"),
-                    "baseFeeVaultRecipient",
-                    chain_id,
-                ),
-                address_update(
-                    chain_key(i, "l1FeeVaultRecipient"), "l1FeeVaultRecipient", chain_id
-                ),
-                address_update(
-                    chain_key(i, "sequencerFeeVaultRecipient"),
-                    "sequencerFeeVaultRecipient",
-                    chain_id,
-                ),
-                address_update(chain_key(i, "roles.batcher"), "batcher", chain_id),
-                address_update(
-                    chain_key(i, "roles.challenger"), "challenger", chain_id
-                ),
-                address_update(
-                    chain_key(i, "roles.l1ProxyAdminOwner"), "l1ProxyAdmin", chain_id
-                ),
-                address_update(
-                    chain_key(i, "roles.l2ProxyAdminOwner"), "l2ProxyAdmin", chain_id
-                ),
-                address_update(chain_key(i, "roles.proposer"), "proposer", chain_id),
-                address_update(
-                    chain_key(i, "roles.systemConfigOwner"),
-                    "systemConfigOwner",
-                    chain_id,
-                ),
-                address_update(
-                    chain_key(i, "roles.unsafeBlockSigner"), "sequencer", chain_id
-                ),
-                # altda deploy config
-                (
-                    "bool",
-                    chain_key(i, "dangerousAltDAConfig.useAltDA"),
-                    altda_args.use_altda,
-                ),
-                (
-                    "string",
-                    chain_key(i, "dangerousAltDAConfig.daCommitmentType"),
-                    altda_args.da_commitment_type,
-                ),
-                (
-                    "int",
-                    chain_key(i, "dangerousAltDAConfig.daChallengeWindow"),
-                    altda_args.da_challenge_window,
-                ),
-                (
-                    "int",
-                    chain_key(i, "dangerousAltDAConfig.daResolveWindow"),
-                    altda_args.da_resolve_window,
-                ),
-                (
-                    "int",
-                    chain_key(i, "dangerousAltDAConfig.daBondSize"),
-                    altda_args.da_bond_size,
-                ),
-                (
-                    "int",
-                    chain_key(i, "dangerousAltDAConfig.daResolverRefundPercentage"),
-                    altda_args.da_resolver_refund_percentage,
-                ),
-            ]
+                "roles": {
+                    "batcher": read_chain_cmd("batcher", chain_id),
+                    "challenger": read_chain_cmd("challenger", chain_id),
+                    "l1ProxyAdminOwner": read_chain_cmd("l1ProxyAdmin", chain_id),
+                    "l2ProxyAdminOwner": read_chain_cmd("l2ProxyAdmin", chain_id),
+                    "proposer": read_chain_cmd("proposer", chain_id),
+                    "systemConfigOwner": read_chain_cmd("systemConfigOwner", chain_id),
+                    "unsafeBlockSigner": read_chain_cmd("sequencer", chain_id),
+                },
+                "dangerousAdditionalDisputeGames": [
+                    {
+                        "respectedGameType": 0,
+                        "faultGameAbsolutePrestate": absolute_prestate,
+                        "faultGameMaxDepth": 73,
+                        "faultGameSplitDepth": 30,
+                        "faultGameClockExtension": 10800,
+                        "faultGameMaxClockDuration": 302400,
+                        "dangerouslyAllowCustomDisputeParameters": True,
+                        "vmType": "CANNON1",
+                        "useCustomOracle": False,
+                        "oracleMinProposalSize": 0,
+                        "oracleChallengePeriodSeconds": 0,
+                        "makeRespected": False,
+                    }
+                ],
+                "dangerousAltDAConfig": {
+                    "useAltDA": altda_args.use_altda,
+                    "daCommitmentType": altda_args.da_commitment_type,
+                    "daChallengeWindow": altda_args.da_challenge_window,
+                    "daResolveWindow": altda_args.da_resolve_window,
+                    "daBondSize": altda_args.da_bond_size,
+                },
+            }
         )
-        intent_updates.extend([(t, chain_key(i, k), v) for t, k, v in CANNED_VALUES])
+        for index, fork_key, activation_timestamp in hardfork_schedule:
+            intent_chain["deployOverrides"][fork_key] = "0x%x" % activation_timestamp
+        intent["chains"].append(intent_chain)
+
+    intent_json = json.encode(intent)
+    intent_json_artifact = utils.write_to_file(plan, intent_json, "/tmp", "intent.json")
 
     op_deployer_configure = plan.run_sh(
         name="op-deployer-configure",
@@ -250,13 +197,21 @@ def deploy_contracts(
         ],
         files={
             "/network-data": op_deployer_init.files_artifacts[0],
+            "/tmp": intent_json_artifact,
         },
         run=" && ".join(
             [
-                "dasel put -r toml -t {0} -v {2} '{1}' -o /network-data/intent.toml < /network-data/intent.toml".format(
-                    t, k, v
-                )
-                for t, k, v in intent_updates
+                # zhwrd: this mess is temporary until we implement json reading for op-deployer intent file
+                # convert intent_json to yaml. this is necessary because its unreliable to evaluate command substitutions in json.
+                """cat /tmp/intent.json | dasel -r json -w yaml > /network-data/intent.yaml""",
+                # evaluate the command substitutions
+                "eval \"echo '$(cat /network-data/intent.yaml)'\" | dasel -r yaml -w json > /network-data/intent-b.json",
+                # convert op-deployer generated intent.toml to json
+                "dasel -r toml -w json -f /network-data/intent.toml > /network-data/intent-a.json",
+                # merge the two intent.json files, ensuring that the chains array is merged correctly
+                "jq -s 'add + {chains: map(.chains) | transpose | map(add)}' /network-data/intent-a.json /network-data/intent-b.json > /network-data/intent-merged.json",
+                # convert the merged intent.json back to toml
+                "cat /network-data/intent-merged.json | dasel -r json -w toml > /network-data/intent.toml",
             ]
         ),
     )
@@ -320,14 +275,5 @@ def chain_key(index, key):
     return "chains.[{0}].{1}".format(index, key)
 
 
-def address_update(key, filename, l2_chain_id):
-    return (
-        "string",
-        key,
-        read_address_cmd(filename + "-" + l2_chain_id),
-    )
-
-
-def read_address_cmd(filename):
-    cmd = "jq -r .address /network-data/{0}.json".format(filename)
-    return "`{0}`".format(cmd)
+def read_chain_cmd(filename, l2_chain_id):
+    return "`jq -r .address /network-data/{0}-{1}.json`".format(filename, l2_chain_id)

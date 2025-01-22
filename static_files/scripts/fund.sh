@@ -4,10 +4,14 @@ set -euo pipefail
 
 export ETH_RPC_URL="$L1_RPC_URL"
 
-addr=$(cast wallet address "$PRIVATE_KEY")
+addr=$(cast wallet address "$FUND_PRIVATE_KEY")
 nonce=$(cast nonce "$addr")
+
+deployer_addr=$(cast wallet address "$DEPLOYER_PRIVATE_KEY")
+
 mnemonic="test test test test test test test test test test test junk"
-roles=("proposer" "batcher" "sequencer" "challenger" "l2ProxyAdmin" "l1ProxyAdmin" "baseFeeVaultRecipient" "l1FeeVaultRecipient" "sequencerFeeVaultRecipient" "systemConfigOwner")
+roles=("l2ProxyAdmin" "l1ProxyAdmin" "baseFeeVaultRecipient" "l1FeeVaultRecipient" "sequencerFeeVaultRecipient" "systemConfigOwner")
+funded_roles=("proposer" "batcher" "sequencer" "challenger")
 
 IFS=',';read -r -a chain_ids <<< "$1"
 
@@ -16,7 +20,7 @@ write_keyfile() {
 }
 
 send() {
-  cast send $1 --value "$FUND_VALUE" --private-key "$PRIVATE_KEY" --timeout 60 --nonce "$nonce" &
+  cast send $1 --value "$FUND_VALUE" --private-key "$FUND_PRIVATE_KEY" --timeout 60 --nonce "$nonce" &
   nonce=$((nonce+1))
 }
 
@@ -24,8 +28,9 @@ send() {
 wallets_json=$(jq -n '{}')
 for chain_id in "${chain_ids[@]}"; do
   chain_wallets=$(jq -n '{}')
-  for index in "${!roles[@]}"; do
-    role="${roles[$index]}"
+
+  for index in "${!funded_roles[@]}"; do
+    role="${funded_roles[$index]}"
     role_idx=$((index+1))
 
     private_key=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/$role_idx")
@@ -37,6 +42,19 @@ for chain_id in "${chain_ids[@]}"; do
       --arg role "$role" \
       --arg private_key "$private_key" \
       --arg address "$address" \
+      '.[$role + "PrivateKey"] = $private_key | .[$role + "Address"] = $address')
+  done
+
+  for index in "${!roles[@]}"; do
+    role="${roles[$index]}"
+    role_idx=$((index+1))
+
+    write_keyfile "${deployer_addr}" "${DEPLOYER_PRIVATE_KEY}" "${role}-$chain_id"
+
+    chain_wallets=$(echo "$chain_wallets" | jq \
+      --arg role "$role" \
+      --arg private_key "$DEPLOYER_PRIVATE_KEY" \
+      --arg address "$deployer_addr" \
       '.[$role + "PrivateKey"] = $private_key | .[$role + "Address"] = $address')
   done
 
