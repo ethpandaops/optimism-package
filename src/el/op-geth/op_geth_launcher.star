@@ -26,7 +26,6 @@ util = import_module("../../util.star")
 
 observability = import_module("../../observability/observability.star")
 interop_constants = import_module("../../interop/constants.star")
-util = import_module("../../util.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546

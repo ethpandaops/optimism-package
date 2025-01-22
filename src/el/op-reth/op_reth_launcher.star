@@ -23,7 +23,6 @@ ethereum_package_input_parser = import_module(
 constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 observability = import_module("../../observability/observability.star")
-util = import_module("../../util.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
