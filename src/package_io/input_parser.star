@@ -119,7 +119,9 @@ def input_parser(plan, input_args):
                         el_builder_type=participant["el_builder_type"],
                         el_builder_image=participant["el_builder_image"],
                         el_builder_log_level=participant["el_builder_log_level"],
-                        el_builder_extra_env_vars=participant["el_builder_extra_env_vars"],
+                        el_builder_extra_env_vars=participant[
+                            "el_builder_extra_env_vars"
+                        ],
                         el_builder_extra_labels=participant["el_builder_extra_labels"],
                         el_builder_extra_params=participant["el_builder_extra_params"],
                         el_builder_tolerations=participant["el_builder_tolerations"],
@@ -131,7 +133,9 @@ def input_parser(plan, input_args):
                         cl_builder_type=participant["cl_builder_type"],
                         cl_builder_image=participant["cl_builder_image"],
                         cl_builder_log_level=participant["cl_builder_log_level"],
-                        cl_builder_extra_env_vars=participant["cl_builder_extra_env_vars"],
+                        cl_builder_extra_env_vars=participant[
+                            "cl_builder_extra_env_vars"
+                        ],
                         cl_builder_extra_labels=participant["cl_builder_extra_labels"],
                         cl_builder_extra_params=participant["cl_builder_extra_params"],
                         cl_builder_tolerations=participant["cl_builder_tolerations"],

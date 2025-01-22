@@ -26,6 +26,7 @@ op_geth_builder = import_module("./el/op-geth/op_geth_builder_launcher.star")
 op_reth_builder = import_module("./el/op-reth/op_reth_builder_launcher.star")
 op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
 
+
 def launch(
     plan,
     jwt_file,
@@ -295,7 +296,6 @@ def launch(
                     rpc_http_url="http://{0}:{1}".format(
                         mev_params.builder_host, mev_params.builder_port
                     ),
-    
                     client_name="external-builder",
                 )
 
@@ -328,7 +328,9 @@ def launch(
             persistent,
             cl_tolerations,
             node_selectors,
-            sidecar_context if rollup_boost_enabled and sequencer_enabled else el_context,
+            sidecar_context
+            if rollup_boost_enabled and sequencer_enabled
+            else el_context,
             all_cl_contexts,
             l1_config_env_vars,
             sequencer_enabled,
