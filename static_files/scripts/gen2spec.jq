@@ -65,6 +65,7 @@ def optimism:
           "fjordTimestamp": .config.fjordTime|to_hex,
           "graniteTimestamp": .config.graniteTime|to_hex,
           "holoceneTimestamp": .config.holoceneTime|to_hex,
+          "isthmusTimestamp": .config.isthmusTime|to_hex,
           "l1FeeRecipient": "0x420000000000000000000000000000000000001A",
           "l1BlockAddress": "0x4200000000000000000000000000000000000015",
           "canyonBaseFeeChangeDenominator": "250"
@@ -164,6 +165,7 @@ def clique:
     "rip7212TransitionTimestamp": .config.fjordTime|to_hex,
     "opGraniteTransitionTimestamp": .config.graniteTime|to_hex,
     "opHoloceneTransitionTimestamp": .config.holoceneTime|to_hex,
+    "opIsthmusTransitionTimestamp": .config.isthmusTime|to_hex,
 
     #Prague
 
