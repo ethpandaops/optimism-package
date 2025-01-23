@@ -21,13 +21,12 @@ ethereum_package_input_parser = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
-observability = import_module("../../observability/observability.star")
-util = import_module("../../util.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 9551
+METRICS_PORT_NUM = 9001
 
 # The min/max CPU/memory that the execution node can use
 EXECUTION_MIN_CPU = 100
@@ -39,6 +38,7 @@ WS_PORT_ID = "ws"
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
+METRICS_PORT_ID = "metrics"
 
 # Paths
 METRICS_PATH = "/metrics"
@@ -66,6 +66,9 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
         ENGINE_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             ENGINE_RPC_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
         ),
+        METRICS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+            METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
+        ),
     }
     return used_ports
 
@@ -91,11 +94,9 @@ def launch(
     existing_el_clients,
     sequencer_enabled,
     sequencer_context,
-    observability_helper,
-    interop_params,
 ):
     log_level = ethereum_package_input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
+        participant.el_builder_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
     cl_client_name = service_name.split("-")[4]
@@ -113,7 +114,6 @@ def launch(
         cl_client_name,
         sequencer_enabled,
         sequencer_context,
-        observability_helper,
     )
 
     service = plan.add_service(service_name, config)
@@ -122,11 +122,12 @@ def launch(
         plan, service_name, RPC_PORT_ID
     )
 
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-
-    metrics_info = observability.new_metrics_info(
-        observability_helper, service, METRICS_PATH
+    metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+    op_reth_metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
+        service_name, METRICS_PATH, metric_url
     )
+
+    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
     return ethereum_package_el_context.new_el_context(
         client_name="reth",
@@ -137,7 +138,7 @@ def launch(
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
         rpc_http_url=http_url,
         service_name=service_name,
-        el_metrics_info=[metrics_info],
+        el_metrics_info=[op_reth_metrics_info],
     )
 
 
@@ -154,10 +155,10 @@ def get_config(
     cl_client_name,
     sequencer_enabled,
     sequencer_context,
-    observability_helper,
 ):
+    public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
-    ports = dict(get_used_ports(discovery_port))
+    used_ports = get_used_ports(discovery_port)
 
     cmd = [
         "node",
@@ -184,37 +185,11 @@ def get_config(
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.jwtsecret=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",
+        "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port),
         "--port={0}".format(discovery_port),
         "--rpc.eth-proof-window=302400",
     ]
-
-    # configure files
-
-    files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
-        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
-    }
-    if persistent:
-        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.op_reth + "_volume_size"
-            ],
-        )
-
-    # configure environment variables
-
-    env_vars = participant.el_extra_env_vars
-
-    # apply customizations
-
-    if observability_helper.enabled:
-        cmd.append("--metrics=0.0.0.0:{0}".format(observability.METRICS_PORT_NUM))
-
-        observability.expose_metrics_port(ports)
 
     if not sequencer_enabled:
         cmd.append("--rollup.sequencer-http={0}".format(sequencer_context.rpc_http_url))
@@ -232,11 +207,25 @@ def get_config(
             )
         )
 
-    cmd += participant.el_extra_params
+    files = {
+        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+    }
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+            size=int(participant.el_builder_volume_size)
+            if int(participant.el_builder_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.EL_TYPE.op_reth + "_volume_size"
+            ],
+        )
 
+    cmd += participant.el_builder_extra_params
+    env_vars = participant.el_builder_extra_env_vars
     config_args = {
-        "image": participant.el_image,
-        "ports": ports,
+        "image": participant.el_builder_image,
+        "ports": used_ports,
         "cmd": cmd,
         "files": files,
         "private_ip_address_placeholder": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -244,29 +233,26 @@ def get_config(
         "labels": ethereum_package_shared_utils.label_maker(
             client=constants.EL_TYPE.op_reth,
             client_type=constants.CLIENT_TYPES.el,
-            image=util.label_from_image(participant.el_image),
+            image=participant.el_builder_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
-            extra_labels=participant.el_extra_labels,
+            extra_labels=participant.el_builder_extra_labels,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
 
-    # configure resources
-
     if participant.el_min_cpu > 0:
-        config_args["min_cpu"] = participant.el_min_cpu
-    if participant.el_max_cpu > 0:
-        config_args["max_cpu"] = participant.el_max_cpu
-    if participant.el_min_mem > 0:
-        config_args["min_memory"] = participant.el_min_mem
-    if participant.el_max_mem > 0:
-        config_args["max_memory"] = participant.el_max_mem
-
+        config_args["min_cpu"] = participant.el_builder_min_cpu
+    if participant.el_builder_max_cpu > 0:
+        config_args["max_cpu"] = participant.el_builder_max_cpu
+    if participant.el_builder_min_mem > 0:
+        config_args["min_memory"] = participant.el_builder_min_mem
+    if participant.el_builder_max_mem > 0:
+        config_args["max_memory"] = participant.el_builder_max_mem
     return ServiceConfig(**config_args)
 
 
-def new_op_reth_launcher(
+def new_op_reth_builder_launcher(
     deployment_output,
     jwt_file,
     network,
