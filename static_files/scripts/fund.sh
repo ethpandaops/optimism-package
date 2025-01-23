@@ -29,7 +29,7 @@ for chain_id in "${chain_ids[@]}"; do
     role_idx=$((index+1))
     chain_id_mnemonic=$(perl -e "print $chain_id % 4294967296")
 
-    private_key=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/$role_idx")
+    private_key=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id_mnemonic/$role_idx")
     address=$(cast wallet address "${private_key}")
     write_keyfile "${address}" "${private_key}" "${role}-$chain_id"
     send "${address}"
