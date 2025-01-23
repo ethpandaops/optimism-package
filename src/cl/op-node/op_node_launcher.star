@@ -170,7 +170,7 @@ def get_beacon_config(
         "op-node",
         "--l2={0}".format(EXECUTION_ENGINE_ENDPOINT),
         "--l2.jwt-secret=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--verifier.l1-confs=4",
+        "--verifier.l1-confs=1",
         "--rollup.config="
         + "{0}/rollup-{1}.json".format(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
@@ -252,7 +252,7 @@ def get_beacon_config(
         cmd += [
             "--p2p.sequencer.key=" + sequencer_private_key,
             "--sequencer.enabled",
-            "--sequencer.l1-confs=5",
+            "--sequencer.l1-confs=2",
         ]
 
     if len(existing_cl_clients) > 0:
