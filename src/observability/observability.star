@@ -97,6 +97,8 @@ def register_service_metrics_job(
 ):
     labels = {
         "service": service_name,
+        "namespace": "kurtosis",
+        "stack_optimism_io_network": "kurtosis",
     }
     labels.update(additional_labels)
 

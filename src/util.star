@@ -66,3 +66,7 @@ def label_from_image(image):
     if len(label) > max_length:
         label = label[-max_length:]
     return label
+
+
+def join_cmds(commands):
+    return " && ".join(commands)

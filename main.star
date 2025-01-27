@@ -7,6 +7,7 @@ op_supervisor_launcher = import_module(
 
 observability = import_module("./src/observability/observability.star")
 prometheus = import_module("./src/observability/prometheus/prometheus_launcher.star")
+grafana = import_module("./src/observability/grafana/grafana_launcher.star")
 
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
@@ -131,12 +132,20 @@ def run(plan, args):
             observability_helper,
         )
 
-    if observability_helper.enabled:
+    if observability_helper.enabled and len(observability_helper.metrics_jobs) > 0:
         plan.print("Launching prometheus...")
         prometheus_private_url = prometheus.launch_prometheus(
             plan,
             observability_helper,
             global_node_selectors,
+        )
+
+        plan.print("Launching grafana...")
+        grafana.launch_grafana(
+            plan,
+            prometheus_private_url,
+            global_node_selectors,
+            observability_params.grafana_params,
         )
 
 

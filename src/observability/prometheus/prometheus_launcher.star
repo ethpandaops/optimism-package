@@ -6,9 +6,6 @@ def launch_prometheus(
     observability_helper,
     global_node_selectors,
 ):
-    if len(observability_helper.metrics_jobs) == 0:
-        return None
-
     prometheus_params = observability_helper.params.prometheus_params
 
     prometheus_url = prometheus.run(

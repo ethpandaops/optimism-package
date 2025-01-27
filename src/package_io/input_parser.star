@@ -77,6 +77,16 @@ def input_parser(plan, input_args):
                 min_mem=results["observability"]["prometheus_params"]["min_mem"],
                 max_mem=results["observability"]["prometheus_params"]["max_mem"],
             ),
+            grafana_params=struct(
+                image=results["observability"]["grafana_params"]["image"],
+                dashboard_sources=results["observability"]["grafana_params"][
+                    "dashboard_sources"
+                ],
+                min_cpu=results["observability"]["grafana_params"]["min_cpu"],
+                max_cpu=results["observability"]["grafana_params"]["max_cpu"],
+                min_mem=results["observability"]["grafana_params"]["min_mem"],
+                max_mem=results["observability"]["grafana_params"]["max_mem"],
+            ),
         ),
         interop=struct(
             enabled=results["interop"]["enabled"],
@@ -223,6 +233,11 @@ def parse_network_params(plan, input_args):
     results["observability"]["prometheus_params"] = default_prometheus_params()
     results["observability"]["prometheus_params"].update(
         input_args.get("observability", {}).get("prometheus_params", {})
+    )
+
+    results["observability"]["grafana_params"] = default_grafana_params()
+    results["observability"]["grafana_params"].update(
+        input_args.get("observability", {}).get("grafana_params", {})
     )
 
     # configure interop
@@ -376,6 +391,17 @@ def default_prometheus_params():
         "image": "prom/prometheus:latest",
         "storage_tsdb_retention_time": "1d",
         "storage_tsdb_retention_size": "512MB",
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
+    }
+
+
+def default_grafana_params():
+    return {
+        "image": "grafana/grafana:latest",
+        "dashboard_sources": [],
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,
