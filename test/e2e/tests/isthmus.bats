@@ -11,7 +11,7 @@ setup() {
     assert_success
 
     # We get the UUID of the op-geth service
-    local OP_GETH_SERVICE_UUID=$(kurtosis enclave inspect $ENCLAVE_ID --full-uuids| grep op-el-1-op-geth-op-node-op-kurtosis | awk '{print $1;}')
+    local OP_GETH_SERVICE_UUID=$(kurtosis enclave inspect $ENCLAVE_ID --full-uuids | grep op-el-1-op-geth-op-node-op-kurtosis | awk '{print $1;}')
     assert [ -n "$OP_GETH_SERVICE_UUID" ]
 
     # Now we find its RPC URL
