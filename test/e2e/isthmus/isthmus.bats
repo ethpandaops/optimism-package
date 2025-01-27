@@ -1,13 +1,15 @@
 setup() {
-    load "../lib/bats-support/load.bash"
-    load "../lib/bats-assert/load.bash"
+    load "../../lib/bats-support/load.bash"
+    load "../../lib/bats-assert/load.bash"
 }
 
 @test "should have isthmus time if isthmus_time_offset is configured" {
     local ENCLAVE_ID=op-isthmus--001
+    local ARGS_FILE=$BATS_TEST_DIRNAME/assets/kurtosis_args_isthmus.yaml
+    assert [ -f "$ARGS_FILE" ]
 
     # First we start the enclave
-    run kurtosis run --enclave $ENCLAVE_ID . --args-file test/e2e/tests/assets/kurtosis_args_isthmus.yaml
+    run kurtosis run --enclave $ENCLAVE_ID . --args-file $BATS_TEST_DIRNAME/assets/kurtosis_args_isthmus.yaml
     assert_success
 
     # We get the UUID of the op-geth service
