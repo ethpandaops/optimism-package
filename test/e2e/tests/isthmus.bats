@@ -3,10 +3,6 @@ setup() {
     load "../lib/bats-assert/load.bash"
 }
 
-teardown() {
-
-}
-
 @test "should have isthmus time if isthmus_time_offset is configured" {
     local ENCLAVE_ID=op-isthmus--001
 
