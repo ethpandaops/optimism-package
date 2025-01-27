@@ -1,6 +1,7 @@
 [tools]
 
 # Core dependencies
+bats = "1.11.1"
 jq = "1.7.1"
 just = "1.37.0"
 "ubi:kurtosis-tech/kurtosis-cli-release-artifacts[exe=kurtosis]" = "1.4.3"
