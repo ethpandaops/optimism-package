@@ -67,5 +67,6 @@ def label_from_image(image):
         label = label[-max_length:]
     return label
 
+
 def join_cmds(commands):
     return " && ".join(commands)
