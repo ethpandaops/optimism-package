@@ -63,9 +63,7 @@ def launch(
     service = plan.add_service(service_name, config)
     http_url = util.make_service_http_url(service)
 
-    observability.register_op_service_metrics_job(
-        observability_helper, service
-    )
+    observability.register_op_service_metrics_job(observability_helper, service)
 
     return http_url
 

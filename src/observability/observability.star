@@ -25,6 +25,7 @@ METRICS_INFO_URL_KEY = "url"
 METRICS_INFO_PATH_KEY = "path"
 METRICS_INFO_ADDITIONAL_CONFIG_KEY = "config"
 
+
 def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
     if not helper.enabled:
         return None
