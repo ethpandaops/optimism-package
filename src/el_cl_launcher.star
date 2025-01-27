@@ -22,6 +22,9 @@ hildr = import_module("./cl/hildr/hildr_launcher.star")
 
 # MEV
 rollup_boost = import_module("./mev/rollup-boost/rollup_boost_launcher.star")
+op_geth_builder = import_module("./el/op-geth/op_geth_builder_launcher.star")
+op_reth_builder = import_module("./el/op-reth/op_reth_builder_launcher.star")
+op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
 
 
 def launch(
@@ -90,6 +93,27 @@ def launch(
         },
     }
 
+    el_builder_launchers = {
+        "op-geth": {
+            "launcher": op_geth_builder.new_op_geth_builder_launcher(
+                deployment_output,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": op_geth_builder.launch,
+        },
+        "op-reth": {
+            "launcher": op_reth_builder.new_op_reth_builder_launcher(
+                deployment_output,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": op_reth_builder.launch,
+        },
+    }
+
     cl_launchers = {
         "op-node": {
             "launcher": op_node.new_op_node_launcher(
@@ -102,6 +126,15 @@ def launch(
                 deployment_output, jwt_file, network_params
             ),
             "launch_method": hildr.launch,
+        },
+    }
+
+    cl_builder_launchers = {
+        "op-node": {
+            "launcher": op_node_builder.new_op_node_builder_launcher(
+                deployment_output, jwt_file, network_params
+            ),
+            "launch_method": op_node_builder.launch,
         },
     }
 
@@ -154,17 +187,17 @@ def launch(
                 )
             )
 
-        if el_builder_type not in el_launchers:
+        if el_builder_type not in el_builder_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    el_builder_type, ",".join(el_launchers.keys())
+                    el_builder_type, ",".join(el_builder_launchers.keys())
                 )
             )
 
-        if cl_builder_type not in cl_launchers:
+        if cl_builder_type not in cl_builder_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    cl_builder_type, ",".join(cl_launchers.keys())
+                    cl_builder_type, ",".join(cl_builder_launchers.keys())
                 )
             )
 
@@ -179,13 +212,13 @@ def launch(
         )
 
         el_builder_launcher, el_builder_launch_method = (
-            el_launchers[el_builder_type]["launcher"],
-            el_launchers[el_builder_type]["launch_method"],
+            el_builder_launchers[el_builder_type]["launcher"],
+            el_builder_launchers[el_builder_type]["launch_method"],
         )
 
         cl_builder_launcher, cl_builder_launch_method = (
-            cl_launchers[cl_builder_type]["launcher"],
-            cl_launchers[cl_builder_type]["launch_method"],
+            cl_builder_launchers[cl_builder_type]["launcher"],
+            cl_builder_launchers[cl_builder_type]["launch_method"],
         )
 
         sidecar_launcher, sidecar_launch_method = (
@@ -236,8 +269,8 @@ def launch(
                 observability_helper, el_context.client_name, "execution", metrics_info
             )
 
-        if rollup_boost_enabled:
-            plan.print("Rollup boost enabled")
+        if rollup_boost_enabled and sequencer_enabled:
+            plan.print("Starting rollup boost")
 
             if mev_params.builder_host == "" or mev_params.builder_port == "":
                 el_builder_context = el_builder_launch_method(
@@ -259,6 +292,11 @@ def launch(
                 el_builder_context = struct(
                     ip_addr=mev_params.builder_host,
                     engine_rpc_port_num=mev_params.builder_port,
+                    rpc_port_num=mev_params.builder_port,
+                    rpc_http_url="http://{0}:{1}".format(
+                        mev_params.builder_host, mev_params.builder_port
+                    ),
+                    client_name="external-builder",
                 )
 
             rollup_boost_image = (
@@ -278,7 +316,6 @@ def launch(
             )
 
             all_el_contexts.append(el_builder_context)
-            all_el_contexts.append(sidecar_context)
         else:
             sidecar_context = None
 
@@ -291,7 +328,9 @@ def launch(
             persistent,
             cl_tolerations,
             node_selectors,
-            sidecar_context if rollup_boost_enabled else el_context,
+            sidecar_context
+            if rollup_boost_enabled and sequencer_enabled
+            else el_context,
             all_cl_contexts,
             l1_config_env_vars,
             sequencer_enabled,
@@ -315,7 +354,7 @@ def launch(
         all_el_contexts.append(el_context)
         all_cl_contexts.append(cl_context)
 
-        if rollup_boost_enabled:
+        if rollup_boost_enabled and sequencer_enabled:
             cl_builder_context = cl_builder_launch_method(
                 plan,
                 cl_builder_launcher,
