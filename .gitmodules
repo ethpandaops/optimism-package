@@ -1,6 +1,6 @@
 [submodule "test/e2e/lib/bats-support"]
-	path = test/e2e/lib/bats-support
+	path = test/lib/bats-support
 	url = https://github.com/bats-core/bats-support.git
 [submodule "test/e2e/lib/bats-assert"]
-	path = test/e2e/lib/bats-assert
+	path = test/lib/bats-assert
 	url = https://github.com/bats-core/bats-assert.git
