@@ -3,7 +3,7 @@
 # Core dependencies
 jq = "1.7.1"
 just = "1.37.0"
-"ubi:kurtosis-tech/kurtosis-cli-release-artifacts[exe=kurtosis]" = "2.1.0"
+"ubi:kurtosis-tech/kurtosis-cli-release-artifacts[exe=kurtosis]" = "1.4.3"
 
 # Code coverage
 "ubi:codecov/codecov-cli" = "v10.0.1"
