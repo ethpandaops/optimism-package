@@ -57,6 +57,9 @@ jobs:
       - name: Install dependencies
         uses: jdx/mise-action@v2
 
+      - name: Start kurtosis engine
+        run: kurtosis engine start
+
       - name: Run E2E tests
         run: just test-e2e
 
