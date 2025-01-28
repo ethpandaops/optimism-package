@@ -34,7 +34,7 @@ def launch_grafana(
 ):
     datasource_config_template = read_file(DATASOURCE_CONFIG_TEMPLATE_FILEPATH)
 
-    grafana_config_artifact_name = upload_grafana_config(
+    config_artifact_name = create_grafana_config_artifact(
         plan,
         datasource_config_template,
         prometheus_private_url,
@@ -57,7 +57,7 @@ def launch_grafana(
     return service_url
 
 
-def upload_grafana_config(
+def create_grafana_config_artifact(
     plan,
     datasource_config_template,
     prometheus_private_url,
@@ -95,7 +95,6 @@ def get_config(
             "GF_AUTH_ANONYMOUS_ENABLED": "true",
             "GF_AUTH_ANONYMOUS_ORG_ROLE": "Admin",
             "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
-            # "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
         },
         files={
             CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifact_name,
@@ -138,6 +137,7 @@ def provision_dashboards(plan, service_url, dashboard_sources):
 
     plan.run_sh(
         description="upload dashboards",
+        # latest version, no tagged release yet
         image="grafana/grizzly:main-0b88d01",
         env_vars={
             "GRAFANA_URL": service_url,
