@@ -236,7 +236,7 @@ def get_beacon_config(
         "labels": ethereum_package_shared_utils.label_maker(
             client=constants.CL_TYPE.op_node,
             client_type=constants.CLIENT_TYPES.cl,
-            image=participant.cl_builder_image[-constants.MAX_LABEL_LENGTH :],
+            image=util.label_from_image(participant.cl_builder_image),
             connected_client=el_context.client_name,
             extra_labels=participant.cl_builder_extra_labels,
         ),
