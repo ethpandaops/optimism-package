@@ -77,7 +77,7 @@ The full YAML schema that can be passed in is as follows with the defaults provi
 optimism_package:
   # Observability configuration
   observability:
-    # Whether to provision an observability stack (prometheus, grafana, loki)
+    # Whether to provision an observability stack (prometheus, loki, promtail, grafana)
     enabled: true
     # Default prometheus configuration
     prometheus_params:
@@ -92,6 +92,28 @@ optimism_package:
       max_mem: 2048
       # Prometheus docker image to use
       image: "prom/prometheus:v3.1.0"
+    # Default loki configuration
+    loki_params:
+      # Loki docker image to use
+      image: "grafana/loki:3.3.2"
+      # Resource management for loki container
+      # CPU is milicores
+      # RAM is in MB
+      min_cpu: 10
+      max_cpu: 1000
+      min_mem: 128
+      max_mem: 2048
+    # Default promtail configuration
+    promtail_params:
+      # Promtail docker image to use
+      image: "grafana/promtail:3.3.2"
+      # Resource management for promtail container
+      # CPU is milicores
+      # RAM is in MB
+      min_cpu: 10
+      max_cpu: 1000
+      min_mem: 128
+      max_mem: 2048
     # Default grafana configuration
     grafana_params:
       # A list of locators for grafana dashboards to be loaded be the grafana service
@@ -107,17 +129,6 @@ optimism_package:
       max_mem: 2048
       # Grafana docker image to use
       image: "grafana/grafana:11.5.0"
-    # Default loki configuration
-    loki_params:
-      # Loki docker image to use
-      image: "grafana/loki:3.3.2"
-      # Resource management for grafana container
-      # CPU is milicores
-      # RAM is in MB
-      min_cpu: 10
-      max_cpu: 1000
-      min_mem: 128
-      max_mem: 2048
   # Interop configuration
   interop:
     # Whether or not to enable interop mode
