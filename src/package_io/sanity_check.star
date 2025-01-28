@@ -2,6 +2,7 @@ OBSERVABILITY_PARAMS = [
     "enabled",
     "prometheus_params",
     "grafana_params",
+    "loki_params",
 ]
 
 PROMETHEUS_PARAMS = [
@@ -17,6 +18,14 @@ PROMETHEUS_PARAMS = [
 GRAFANA_PARAMS = [
     "image",
     "dashboard_sources",
+    "min_cpu",
+    "max_cpu",
+    "min_mem",
+    "max_mem",
+]
+
+LOKI_PARAMS = [
+    "image",
     "min_cpu",
     "max_cpu",
     "min_mem",
@@ -199,6 +208,13 @@ def sanity_check(plan, optimism_config):
                 optimism_config["observability"],
                 "grafana_params",
                 GRAFANA_PARAMS,
+
+        if "loki_params" in optimism_config["observability"]:
+            validate_params(
+                plan,
+                optimism_config["observability"],
+                "loki_params",
+                LOKI_PARAMS,
             )
 
     if "interop" in optimism_config:

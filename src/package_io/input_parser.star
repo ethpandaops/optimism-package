@@ -270,6 +270,11 @@ def parse_network_params(plan, input_args):
         input_args.get("observability", {}).get("grafana_params", {})
     )
 
+    results["observability"]["loki_params"] = default_loki_params()
+    results["observability"]["loki_params"].update(
+        input_args.get("observability", {}).get("loki_params", {})
+    )
+
     # configure interop
 
     results["interop"] = default_interop_params()
@@ -439,6 +444,15 @@ def default_grafana_params():
         "dashboard_sources": [
             "github.com/ethereum-optimism/grafana-dashboards-public/resources"
         ],
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
+    }
+
+def default_loki_params():
+    return {
+        "image": "grafana/loki:3.3.2",
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,
