@@ -21,12 +21,12 @@ USED_PORTS = {
         HTTP_PORT_NUMBER,
         ethereum_package_shared_utils.TCP_PROTOCOL,
         ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
+    ),
     "grpc": ethereum_package_shared_utils.new_port_spec(
         GRPC_PORT_NUMBER,
         ethereum_package_shared_utils.TCP_PROTOCOL,
         "grpc",
-    )
+    ),
 }
 
 
@@ -40,7 +40,6 @@ def launch_loki(
     config_artifact_name = create_config_artifact(
         plan,
         config_template,
-        prometheus_private_url,
     )
 
     service_config = get_service_config(
@@ -59,7 +58,6 @@ def launch_loki(
 def create_config_artifact(
     plan,
     config_template,
-    prometheus_private_url,
 ):
     config_data = {
         "Ports": {
@@ -92,7 +90,7 @@ def get_service_config(
         ports=USED_PORTS,
         cmd=[
             "-config.file=" + CONFIG_DIRPATH_ON_SERVICE
-        ]
+        ],
         files={
             CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
         },

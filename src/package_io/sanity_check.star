@@ -208,6 +208,7 @@ def sanity_check(plan, optimism_config):
                 optimism_config["observability"],
                 "grafana_params",
                 GRAFANA_PARAMS,
+            )
 
         if "loki_params" in optimism_config["observability"]:
             validate_params(

@@ -98,6 +98,13 @@ def input_parser(plan, input_args):
                 min_mem=results["observability"]["grafana_params"]["min_mem"],
                 max_mem=results["observability"]["grafana_params"]["max_mem"],
             ),
+            loki_params=struct(
+                image=results["observability"]["loki_params"]["image"],
+                min_cpu=results["observability"]["loki_params"]["min_cpu"],
+                max_cpu=results["observability"]["loki_params"]["max_cpu"],
+                min_mem=results["observability"]["loki_params"]["min_mem"],
+                max_mem=results["observability"]["loki_params"]["max_mem"],
+            ),
         ),
         interop=struct(
             enabled=results["interop"]["enabled"],
