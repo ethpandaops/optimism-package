@@ -95,11 +95,9 @@ optimism_package:
       image: "prom/prometheus:latest"
     # Default grafana configuration
     grafana_params:
-      # A list of locators for grafana dashboards to be loaded by the grafana service.
-      # Each locator should be a URL to a directory containing a /folders and a /dashboards directory.
-      # Those will be uploaded to the grafana service by using grizzly.
-      # See https://github.com/ethereum-optimism/grafana-dashboards-public for more info.
+      # A list of locators for grafana dashboards to be loaded be the grafana service
       dashboard_sources:
+        # Default public Optimism dashboards
         - github.com/ethereum-optimism/grafana-dashboards-public/resources
       # Resource management for grafana container
       # CPU is milicores
