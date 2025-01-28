@@ -431,7 +431,7 @@ def default_observability_params():
 
 def default_prometheus_params():
     return {
-        "image": "prom/prometheus:latest",
+        "image": "prom/prometheus:v3.1.0",
         "storage_tsdb_retention_time": "1d",
         "storage_tsdb_retention_size": "512MB",
         "min_cpu": 10,
@@ -443,7 +443,7 @@ def default_prometheus_params():
 
 def default_grafana_params():
     return {
-        "image": "grafana/grafana:latest",
+        "image": "grafana/grafana:11.5.0",
         "dashboard_sources": [
             "github.com/ethereum-optimism/grafana-dashboards-public/resources"
         ],

@@ -91,8 +91,7 @@ optimism_package:
       min_mem: 128
       max_mem: 2048
       # Prometheus docker image to use
-      # Defaults to the latest image
-      image: "prom/prometheus:latest"
+      image: "prom/prometheus:v3.1.0"
     # Default grafana configuration
     grafana_params:
       # A list of locators for grafana dashboards to be loaded be the grafana service
@@ -107,7 +106,7 @@ optimism_package:
       min_mem: 128
       max_mem: 2048
       # Grafana docker image to use
-      # Defaults to the latest image
+      image: "grafana/grafana:11.5.0"
       image: "grafana/grafana:latest"
   # Interop configuration
   interop:
