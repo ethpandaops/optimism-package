@@ -11,6 +11,7 @@ op_challenger_launcher = import_module(
 observability = import_module("./src/observability/observability.star")
 prometheus = import_module("./src/observability/prometheus/prometheus_launcher.star")
 loki = import_module("./src/observability/loki/loki_launcher.star")
+promtail = import_module("./src/observability/promtail/promtail_launcher.star")
 grafana = import_module("./src/observability/grafana/grafana_launcher.star")
 
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
@@ -177,6 +178,14 @@ def run(plan, args):
             plan,
             global_node_selectors,
             observability_params.loki_params,
+        )
+        
+        plan.print("Launching promtail...")
+        promtail.launch_promtail(
+            plan,
+            global_node_selectors,
+            loki_url,
+            observability_params.promtail_params,
         )
 
         plan.print("Launching grafana...")
