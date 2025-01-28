@@ -96,7 +96,9 @@ optimism_package:
     # Default grafana configuration
     grafana_params:
       # A list of locators for grafana dashboards to be loaded be the grafana service
-      dashboard_sources: []
+      dashboard_sources:
+        # Default public Optimism dashboards
+        - github.com/ethereum-optimism/grafana-dashboards-public/resources
       # Resource management for grafana container
       # CPU is milicores
       # RAM is in MB
