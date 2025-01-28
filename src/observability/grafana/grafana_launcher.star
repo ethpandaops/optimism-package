@@ -28,16 +28,18 @@ USED_PORTS = {
 
 def launch_grafana(
     plan,
-    prometheus_private_url,
+    prometheus_url,
+    loki_url,
     global_node_selectors,
     grafana_params,
 ):
     datasource_config_template = read_file(DATASOURCE_CONFIG_TEMPLATE_FILEPATH)
 
-    config_artifact_name = create_grafana_config_artifact(
+    config_artifact_name = create_config_artifact(
         plan,
         datasource_config_template,
-        prometheus_private_url,
+        prometheus_url,
+        loki_url,
     )
 
     config = get_config(
@@ -57,12 +59,13 @@ def launch_grafana(
     return service_url
 
 
-def create_grafana_config_artifact(
+def create_config_artifact(
     plan,
     datasource_config_template,
-    prometheus_private_url,
+    prometheus_url,
+    loki_url,
 ):
-    datasource_data = new_datasource_config_template_data(prometheus_private_url)
+    datasource_data = new_datasource_config_template_data(prometheus_url, loki_url)
     datasource_template_and_data = ethereum_package_shared_utils.new_template_and_data(
         datasource_config_template, datasource_data
     )
@@ -78,8 +81,13 @@ def create_grafana_config_artifact(
     return grafana_config_artifact_name
 
 
-def new_datasource_config_template_data(prometheus_url):
-    return {"PrometheusUID": DATASOURCE_UID, "PrometheusURL": prometheus_url}
+def new_datasource_config_template_data(prometheus_url, loki_url):
+    return {
+            "PrometheusUID": DATASOURCE_UID,
+            "PrometheusURL": prometheus_url,
+            "LokiUID": DATASOURCE_UID,
+            "LokiURL": loki_url,
+        }
 
 
 def get_config(
