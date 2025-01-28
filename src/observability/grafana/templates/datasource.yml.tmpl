@@ -10,3 +10,12 @@ datasources:
     basicAuth: false
     isDefault: true
     editable: true
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    uid: {{ .LokiUID }}
+    url: {{ .LokiURL }}
+    basicAuth: false
+    isDefault: true
+    editable: true
