@@ -1,8 +1,9 @@
 OBSERVABILITY_PARAMS = [
     "enabled",
     "prometheus_params",
-    "grafana_params",
     "loki_params",
+    "promtail_params",
+    "grafana_params",
 ]
 
 PROMETHEUS_PARAMS = [

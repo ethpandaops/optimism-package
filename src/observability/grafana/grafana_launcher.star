@@ -11,7 +11,6 @@ HTTP_PORT_NUMBER_UINT16 = 3000
 
 TEMPLATES_FILEPATH = "./templates"
 
-DATASOURCE_UID = "grafanacloud-prom"
 DATASOURCE_CONFIG_TEMPLATE_FILEPATH = TEMPLATES_FILEPATH + "/datasource.yml.tmpl"
 DATASOURCE_CONFIG_REL_FILEPATH = "datasources/datasource.yml"
 
@@ -83,9 +82,9 @@ def create_config_artifact(
 
 def new_datasource_config_template_data(prometheus_url, loki_url):
     return {
-            "PrometheusUID": DATASOURCE_UID,
+            "PrometheusUID": "grafanacloud-prom",
             "PrometheusURL": prometheus_url,
-            "LokiUID": DATASOURCE_UID,
+            "LokiUID": "grafanacloud-logs",
             "LokiURL": loki_url,
         }
 
