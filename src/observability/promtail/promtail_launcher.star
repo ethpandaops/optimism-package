@@ -22,11 +22,11 @@ USED_PORTS = {
         ethereum_package_shared_utils.TCP_PROTOCOL,
         ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     ),
-    "grpc": ethereum_package_shared_utils.new_port_spec(
-        GRPC_PORT_NUMBER,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
-        "grpc",
-    ),
+    # "grpc": ethereum_package_shared_utils.new_port_spec(
+    #     GRPC_PORT_NUMBER,
+    #     ethereum_package_shared_utils.TCP_PROTOCOL,
+    #     "grpc",
+    # ),
 }
 
 
@@ -93,7 +93,7 @@ def get_service_config(
         image=promtail_params.image,
         ports=USED_PORTS,
         cmd=[
-            "-config.file=" + CONFIG_DIRPATH_ON_SERVICE
+            "-config.file={0}/{1}".format(CONFIG_DIRPATH_ON_SERVICE, CONFIG_REL_FILEPATH)
         ],
         files={
             CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
