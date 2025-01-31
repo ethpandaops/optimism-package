@@ -469,6 +469,7 @@ def default_grafana_params():
         "max_mem": 2048,
     }
 
+
 def default_loki_params():
     return {
         "image": "grafana/loki:3.3.2",
@@ -477,6 +478,7 @@ def default_loki_params():
         "min_mem": 128,
         "max_mem": 2048,
     }
+
 
 def default_promtail_params():
     return {

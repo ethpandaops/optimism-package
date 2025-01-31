@@ -172,14 +172,14 @@ def run(plan, args):
             observability_helper,
             global_node_selectors,
         )
-        
+
         plan.print("Launching loki...")
         loki_url = loki.launch_loki(
             plan,
             global_node_selectors,
             observability_params.loki_params,
         )
-        
+
         plan.print("Launching promtail...")
         promtail.launch_promtail(
             plan,
