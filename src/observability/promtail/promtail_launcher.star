@@ -5,30 +5,15 @@ ethereum_package_shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
 
-SERVICE_NAME = "promtail"
 HTTP_PORT_NUMBER = 9080
 GRPC_PORT_NUMBER = 0
 
 TEMPLATES_FILEPATH = "./templates"
 
-CONFIG_TEMPLATE_FILEPATH = TEMPLATES_FILEPATH + "/promtail-config.yaml.tmpl"
-CONFIG_REL_FILEPATH = "promtail-config.yaml"
+VALUES_FILE_NAME = "values.yaml"
+VALUES_TEMPLATE_FILEPATH = "{0}/{1}.tmpl".format(TEMPLATES_FILEPATH, VALUES_FILE_NAME)
 
-CONFIG_DIRPATH_ON_SERVICE = "/config"
-
-USED_PORTS = {
-    constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-        HTTP_PORT_NUMBER,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
-        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
-    ),
-    # "grpc": ethereum_package_shared_utils.new_port_spec(
-    #     GRPC_PORT_NUMBER,
-    #     ethereum_package_shared_utils.TCP_PROTOCOL,
-    #     "grpc",
-    # ),
-}
-
+K8S_NAMESPACE_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
 
 def launch_promtail(
     plan,
@@ -36,30 +21,21 @@ def launch_promtail(
     loki_url,
     promtail_params,
 ):
-    config_template = read_file(CONFIG_TEMPLATE_FILEPATH)
+    values_template = read_file(VALUES_TEMPLATE_FILEPATH)
 
-    config_artifact_name = create_config_artifact(
+    values_artifact_name = create_values_artifact(
         plan,
-        config_template,
+        values_template,
+        global_node_selectors,
         loki_url,
     )
 
-    service_config = get_service_config(
-        config_artifact_name,
-        global_node_selectors,
-        promtail_params,
-    )
+    install_helm_chart(plan, values_artifact_name, "promtail", "grafana", "https://grafana.github.io/helm-charts", override_name=True)
 
-    service = plan.add_service(SERVICE_NAME, service_config)
-
-    service_url = util.make_service_http_url(service)
-
-    return service_url
-
-
-def create_config_artifact(
+def create_values_artifact(
     plan,
-    config_template,
+    values_template,
+    node_selectors,
     loki_url,
 ):
     config_data = {
@@ -68,39 +44,41 @@ def create_config_artifact(
             "grpc": GRPC_PORT_NUMBER,
         },
         "LokiURL": loki_url,
-    }
-    config_template_and_data = ethereum_package_shared_utils.new_template_and_data(
-        config_template, config_data
-    )
-
-    template_and_data_by_rel_dest_filepath = {
-        CONFIG_REL_FILEPATH: config_template_and_data,
+        "NodeSelectors": node_selectors,
     }
 
-    config_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, name="promtail-config"
+    values_template_and_data = ethereum_package_shared_utils.new_template_and_data(
+        values_template, config_data
     )
 
-    return config_artifact_name
+    values_artifact_name = plan.render_templates(
+        {
+        '/': values_template_and_data,
+    }, name="promtail-config"
+    )
 
+    return values_artifact_name
 
-def get_service_config(
-    config_artifact_name,
-    node_selectors,
-    promtail_params,
-):
-    return ServiceConfig(
-        image=promtail_params.image,
-        ports=USED_PORTS,
-        cmd=[
-            "-config.file={0}/{1}".format(CONFIG_DIRPATH_ON_SERVICE, CONFIG_REL_FILEPATH)
-        ],
+def install_helm_chart(plan, values_artifact_name, chart_name, repo_name=None, repo_url=None, override_name=False):
+    cmds = []
+
+    if repo_name != None && repo_url != None:
+        cmds += [
+            "helm repo add {0} {1}".format(repo_name, repo_url),
+            "helm repo update",
+        ]
+
+    install_cmd = "helm upgrade --values {2} --install {1} {0}/{1}".format(repo_name, chart_name, VALUES_FILE_NAME)
+
+    if override_name:
+        install_cmd += " --set nameOverride=$(cat {0})".format(K8S_NAMESPACE_FILE)
+
+    cmds.append(install_cmd)
+
+    plan.run_sh(
+        image="alpine/helm",
         files={
-            CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
+            '/': values_artifact_name,
         },
-        min_cpu=promtail_params.min_cpu,
-        max_cpu=promtail_params.max_cpu,
-        min_memory=promtail_params.min_mem,
-        max_memory=promtail_params.max_mem,
-        node_selectors=node_selectors,
+        run=util.join_cmds(cmd),
     )
