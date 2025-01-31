@@ -1,0 +1,18 @@
+replicaCount: 1
+
+image:
+  repository: bitnami/kubectl
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  name: ns-authz-sa
+  create: true
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
