@@ -82,11 +82,11 @@ def create_config_artifact(
 
 def new_datasource_config_template_data(prometheus_url, loki_url):
     return {
-            "PrometheusUID": "grafanacloud-prom",
-            "PrometheusURL": prometheus_url,
-            "LokiUID": "grafanacloud-logs",
-            "LokiURL": loki_url,
-        }
+        "PrometheusUID": "grafanacloud-prom",
+        "PrometheusURL": prometheus_url,
+        "LokiUID": "grafanacloud-logs",
+        "LokiURL": loki_url,
+    }
 
 
 def get_config(
