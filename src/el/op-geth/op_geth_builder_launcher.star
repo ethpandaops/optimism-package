@@ -23,6 +23,8 @@ ethereum_package_constants = import_module(
 
 constants = import_module("../../package_io/constants.star")
 
+util = import_module("../../util.star")
+
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
@@ -104,6 +106,8 @@ def launch(
     existing_el_clients,
     sequencer_enabled,
     sequencer_context,
+    observability_helper,
+    interop_params,
 ):
     log_level = ethereum_package_input_parser.get_client_log_level_or_default(
         participant.el_builder_log_level, global_log_level, VERBOSITY_LEVELS
@@ -260,7 +264,7 @@ def get_config(
         "labels": ethereum_package_shared_utils.label_maker(
             client=constants.EL_TYPE.op_geth,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_builder_image[-constants.MAX_LABEL_LENGTH :],
+            image=util.label_from_image(participant.el_builder_image),
             connected_client=cl_client_name,
             extra_labels=participant.el_builder_extra_labels,
         ),
