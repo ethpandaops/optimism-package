@@ -44,6 +44,7 @@ def launch(
     additional_services,
     observability_helper,
     interop_params,
+    da_server_context,
 ):
     el_launchers = {
         "op-geth": {
@@ -336,6 +337,7 @@ def launch(
             sequencer_enabled,
             observability_helper,
             interop_params,
+            da_server_context,
         )
 
         for metrics_info in [x for x in cl_context.cl_nodes_metrics_info if x != None]:

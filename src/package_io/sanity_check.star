@@ -34,6 +34,15 @@ SUPERVISOR_PARAMS = [
     "extra_params",
 ]
 
+ALTDA_DEPLOY_CONFIG_PARAMS = [
+    "use_altda",
+    "da_commitment_type",
+    "da_challenge_window",
+    "da_resolve_window",
+    "da_bond_size",
+    "da_resolver_refund_percentage",
+]
+
 PARTICIPANT_CATEGORIES = {
     "participants": [
         "el_type",
@@ -92,6 +101,10 @@ SUBCATEGORY_PARAMS = {
     ],
     "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
     "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
+    "da_server_params": [
+        "image",
+        "cmd",
+    ],
 }
 
 OP_CONTRACT_DEPLOYER_PARAMS = [
@@ -106,11 +119,13 @@ OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES = ["faultGameAbsolutePrestate"]
 ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
     "rollup-boost",
+    "da_server",
 ]
 
 ROOT_PARAMS = [
     "observability",
     "interop",
+    "altda_deploy_config",
     "chains",
     "op_contract_deployer_params",
     "global_log_level",
@@ -199,6 +214,14 @@ def sanity_check(plan, optimism_config):
                 "supervisor_params",
                 SUPERVISOR_PARAMS,
             )
+
+    if "altda_deploy_config" in optimism_config:
+        validate_params(
+            plan,
+            optimism_config["altda_deploy_config"],
+            "altda_deploy_config",
+            ALTDA_DEPLOY_CONFIG_PARAMS,
+        )
 
     chains = optimism_config.get("chains", [])
 

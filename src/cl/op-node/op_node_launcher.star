@@ -77,6 +77,7 @@ def launch(
     sequencer_enabled,
     observability_helper,
     interop_params,
+    da_server_context,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
         endpoint="/",
@@ -110,6 +111,7 @@ def launch(
         sequencer_enabled,
         observability_helper,
         interop_params,
+        da_server_context,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -158,6 +160,7 @@ def get_beacon_config(
     sequencer_enabled,
     observability_helper,
     interop_params,
+    da_server_context,
 ):
     ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
 
@@ -190,6 +193,8 @@ def get_beacon_config(
         "--p2p.listen.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--p2p.listen.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--safedb.path={0}".format(BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER),
+        "--altda.enabled=" + str(da_server_context.enabled),
+        "--altda.da-server=" + da_server_context.http_url,
     ]
 
     # configure files

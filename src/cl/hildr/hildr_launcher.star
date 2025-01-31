@@ -78,6 +78,7 @@ def launch(
     sequencer_enabled,
     observability_helper,
     interop_params,
+    da_server_context,
 ):
     # beacon_node_identity_recipe = PostHttpRequestRecipe(
     #     endpoint="/",
@@ -109,6 +110,7 @@ def launch(
         l1_config_env_vars,
         sequencer_enabled,
         observability_helper,
+        da_server_context,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -155,6 +157,7 @@ def get_beacon_config(
     l1_config_env_vars,
     sequencer_enabled,
     observability_helper,
+    da_server_context,
 ):
     EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -183,6 +186,9 @@ def get_beacon_config(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
             launcher.network_params.network_id,
         ),
+        # TODO: support altda flags once they are implemented.
+        # See https://github.com/optimism-java/hildr/issues/134
+        # eg: "--altda.enabled=" + str(da_server_context.enabled),
     ]
 
     # configure files

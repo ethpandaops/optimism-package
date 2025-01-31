@@ -1,4 +1,11 @@
 optimism_package:
+  altda_deploy_config:
+    use_altda: true
+    da_commitment_type: KeccakCommitment
+    da_challenge_window: 100
+    da_resolve_window: 100
+    da_bond_size: 0
+    da_resolver_refund_percentage: 0
   chains:
     - participants:
       - el_type: op-geth
@@ -39,7 +46,17 @@ optimism_package:
       mev_params:
         builder_host: ""
         builder_port: ""
-      additional_services: []
+      da_server_params:
+        image: us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest
+        # A list of optional extra params that will be passed to the da-server container for modifying its behaviour
+        cmd:
+          - "da-server"
+          - "--file.path=/home"
+          - "--addr=0.0.0.0"
+          - "--port=3100"
+          - "--log.level=debug"
+      additional_services:
+        - da_server
   op_contract_deployer_params:
     image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.11
     l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz
