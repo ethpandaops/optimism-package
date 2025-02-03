@@ -15,6 +15,7 @@ VALUES_TEMPLATE_FILEPATH = "{0}/{1}.tmpl".format(TEMPLATES_FILEPATH, VALUES_FILE
 
 K8S_NAMESPACE_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
 
+
 def launch_promtail(
     plan,
     global_node_selectors,
@@ -30,7 +31,15 @@ def launch_promtail(
         loki_url,
     )
 
-    install_helm_chart(plan, values_artifact_name, "promtail", "grafana", "https://grafana.github.io/helm-charts", override_name=True)
+    install_helm_chart(
+        plan,
+        values_artifact_name,
+        "promtail",
+        "grafana",
+        "https://grafana.github.io/helm-charts",
+        override_name=True,
+    )
+
 
 def create_values_artifact(
     plan,
@@ -53,22 +62,33 @@ def create_values_artifact(
 
     values_artifact_name = plan.render_templates(
         {
-        '/': values_template_and_data,
-    }, name="promtail-config"
+            "/": values_template_and_data,
+        },
+        name="promtail-config",
     )
 
     return values_artifact_name
 
-def install_helm_chart(plan, values_artifact_name, chart_name, repo_name=None, repo_url=None, override_name=False):
+
+def install_helm_chart(
+    plan,
+    values_artifact_name,
+    chart_name,
+    repo_name=None,
+    repo_url=None,
+    override_name=False,
+):
     cmds = []
 
-    if repo_name != None && repo_url != None:
+    if repo_name != None and repo_url != None:
         cmds += [
             "helm repo add {0} {1}".format(repo_name, repo_url),
             "helm repo update",
         ]
 
-    install_cmd = "helm upgrade --values {2} --install {1} {0}/{1}".format(repo_name, chart_name, VALUES_FILE_NAME)
+    install_cmd = "helm upgrade --values {2} --install {1} {0}/{1}".format(
+        repo_name, chart_name, VALUES_FILE_NAME
+    )
 
     if override_name:
         install_cmd += " --set nameOverride=$(cat {0})".format(K8S_NAMESPACE_FILE)
@@ -78,7 +98,7 @@ def install_helm_chart(plan, values_artifact_name, chart_name, repo_name=None, r
     plan.run_sh(
         image="alpine/helm",
         files={
-            '/': values_artifact_name,
+            "/": values_artifact_name,
         },
         run=util.join_cmds(cmd),
     )
