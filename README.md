@@ -663,6 +663,26 @@ kurtosis service stop <enclave-name> <service-name>
 kurtosis service start <enclave-name> <service-name>
 ```
 
+## Development
+
+### Development environment
+
+We use [`mise`](https://mise.jdx.dev/) as a dependency manager for these tools.
+Once properly installed, `mise` will provide the correct versions for each tool. `mise` does not
+replace any other installations of these binaries and will only serve these binaries when you are
+working inside of the `optimism-package` directory.
+
+#### Install `mise`
+
+Install `mise` by following the instructions provided on the
+[Getting Started page](https://mise.jdx.dev/getting-started.html#_1-install-mise-cli).
+
+#### Install dependencies
+
+```sh
+mise install
+```
+
 ## Contributing
 
 If you have made changes and would like to submit a PR, test locally and make sure to run `lint` on your changes
