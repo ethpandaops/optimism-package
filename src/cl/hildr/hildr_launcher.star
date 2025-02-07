@@ -169,6 +169,7 @@ def get_beacon_config(
 
     cmd = [
         "--devnet",
+        "--log.level=" + log_level,
         "--jwt-file=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--l1-beacon-url={0}".format(l1_config_env_vars["CL_RPC_URL"]),
         "--l1-rpc-url={0}".format(l1_config_env_vars["L1_RPC_URL"]),
