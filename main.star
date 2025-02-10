@@ -44,6 +44,7 @@ def run(plan, args):
     global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
     global_log_level = optimism_args_with_right_defaults.global_log_level
     persistent = optimism_args_with_right_defaults.persistent
+    altda_deploy_config = optimism_args_with_right_defaults.altda_deploy_config
 
     observability_params = optimism_args_with_right_defaults.observability
     interop_params = optimism_args_with_right_defaults.interop
@@ -94,6 +95,7 @@ def run(plan, args):
         l1_config_env_vars,
         optimism_args_with_right_defaults,
         l1_network,
+        altda_deploy_config,
     )
 
     jwt_file = plan.upload_files(

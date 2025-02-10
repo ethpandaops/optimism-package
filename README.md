@@ -121,6 +121,29 @@ optimism_package:
 
       # A list of optional extra params that will be passed to the supervisor container for modifying its behaviour
       extra_params: []
+
+  # AltDA Deploy Configuration, which is passed to op-deployer.
+  #
+  # For simplicity we currently enforce chains to all be altda or all rollups.
+  # Adding a single altda chain to a cluster essentially makes all chains have altda levels of security.
+  #
+  # To setup an altda cluster, make sure to
+  # 1. Set altda_deploy_config.use_altda to true (and da_commitment_type to KeccakCommitment, see TODO below)
+  # 2. For each chain,
+  #    - Add "da_server" to the additional_services list if it should use alt-da
+  #    - For altda chains, set da_server_params to use an image and cmd of your choice (one could use da-server, another eigenda-proxy, another celestia proxy, etc). If unset, op's default da-server image will be used.
+  altda_deploy_config:
+    use_altda: false
+    # TODO: Is this field redundant? Afaiu setting it to GenericCommitment will not deploy the
+    # DAChallengeContract, and hence is equivalent to setting use_altda to false.
+    # Furthermore, altda rollups using generic commitments might anyways need to support failing over
+    # to keccak commitments if the altda layer is down.
+    da_commitment_type: KeccakCommitment
+    da_challenge_window: 100
+    da_resolve_window: 100
+    da_bond_size: 0
+    da_resolver_refund_percentage: 0
+
   # An array of L2 networks to run
   chains:
     # Specification of the optimism-participants in the network
@@ -391,7 +414,24 @@ optimism_package:
       # Available services:
       # - blockscout
       # - rollup-boost
+      # - da_server
       additional_services: []
+
+      # Configuration for da-server - https://specs.optimism.io/experimental/alt-da.html#da-server
+      # TODO: each op-node and op-batcher should potentially have their own da-server, instead of sharing one like we currently do. For eg batcher needs to write via its da-server, whereas op-nodes don't.
+      da_server_params:
+        image: us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest
+        # Command to pass to the container.
+        # This is kept maximally generic to allow for any possible configuration, given that different
+        # da layer da-servers might have completely different flags.
+        # The below arguments are also the default, so can be omitted, and will work as long as the image
+        # is the da-server above (which is also the default, so can also be omitted).
+        cmd:
+          - "da-server"
+          - "--file.path=/home"
+          - "--addr=0.0.0.0"
+          - "--port=3100"
+          - "--log.level=debug"
 
   # L2 contract deployer configuration - used for all L2 networks
   # The docker image that should be used for the L2 contract deployer

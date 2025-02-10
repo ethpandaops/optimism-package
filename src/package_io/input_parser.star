@@ -37,6 +37,22 @@ DEFAULT_SIDECAR_IMAGES = {
     "rollup-boost": "flashbots/rollup-boost:latest",
 }
 
+DEFAULT_DA_SERVER_PARAMS = {
+    "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
+    "cmd": [
+        "da-server",  # uses keccak commitments by default
+        # We use the file storage backend instead of s3 for simplicity.
+        # Blobs and commitments are stored in the /home directory (which already exists).
+        # Note that this storage is ephemeral because we aren't mounting an external kurtosis file.
+        # This means that the data is lost when the container is deleted.
+        "--file.path=/home",
+        "--addr=0.0.0.0",
+        "--port=3100",
+        "--log.level=debug",
+    ],
+}
+
+
 DEFAULT_ADDITIONAL_SERVICES = []
 
 
@@ -97,6 +113,16 @@ def input_parser(plan, input_args):
                 ],
                 extra_params=results["interop"]["supervisor_params"]["extra_params"],
             ),
+        ),
+        altda_deploy_config=struct(
+            use_altda=results["altda_deploy_config"]["use_altda"],
+            da_commitment_type=results["altda_deploy_config"]["da_commitment_type"],
+            da_challenge_window=results["altda_deploy_config"]["da_challenge_window"],
+            da_resolve_window=results["altda_deploy_config"]["da_resolve_window"],
+            da_bond_size=results["altda_deploy_config"]["da_bond_size"],
+            da_resolver_refund_percentage=results["altda_deploy_config"][
+                "da_resolver_refund_percentage"
+            ],
         ),
         chains=[
             struct(
@@ -199,6 +225,11 @@ def input_parser(plan, input_args):
                     builder_host=result["mev_params"]["builder_host"],
                     builder_port=result["mev_params"]["builder_port"],
                 ),
+                da_server_params=struct(
+                    enabled=result["da_server_params"]["enabled"],
+                    image=result["da_server_params"]["image"],
+                    cmd=result["da_server_params"]["cmd"],
+                ),
                 additional_services=result["additional_services"],
             )
             for result in results["chains"]
@@ -250,6 +281,11 @@ def parse_network_params(plan, input_args):
         input_args.get("interop", {}).get("supervisor_params", {})
     )
 
+    # configure altda
+
+    results["altda_deploy_config"] = default_altda_deploy_config()
+    results["altda_deploy_config"].update(input_args.get("altda_deploy_config", {}))
+
     # configure chains
 
     chains = []
@@ -271,6 +307,8 @@ def parse_network_params(plan, input_args):
 
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
+        da_server_params = default_da_server_params()
+        da_server_params.update(chain.get("da_server_params", {}))
 
         network_name = network_params["name"]
         network_id = network_params["network_id"]
@@ -347,6 +385,7 @@ def parse_network_params(plan, input_args):
             "challenger_params": challenger_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
+            "da_server_params": da_server_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
@@ -371,6 +410,7 @@ def default_optimism_params():
     return {
         "observability": default_observability_params(),
         "interop": default_interop_params(),
+        "altda": default_altda_deploy_config(),
         "chains": default_chains(),
         "op_contract_deployer_params": default_op_contract_deployer_params(),
         "global_log_level": "info",
@@ -415,6 +455,17 @@ def default_interop_params():
     }
 
 
+def default_altda_deploy_config():
+    return {
+        "use_altda": "false",
+        "da_commitment_type": "KeccakCommitment",
+        "da_challenge_window": 100,
+        "da_resolve_window": 100,
+        "da_bond_size": 0,
+        "da_resolver_refund_percentage": 0,
+    }
+
+
 def default_supervisor_params():
     return {
         "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
@@ -440,6 +491,7 @@ def default_chains():
             "challenger_params": default_challenger_params(),
             "proposer_params": default_proposer_params(),
             "mev_params": default_mev_params(),
+            "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
         }
     ]
@@ -573,4 +625,12 @@ def default_ethereum_package_network_params():
                 }
             ),
         }
+    }
+
+
+def default_da_server_params():
+    return {
+        "enabled": False,
+        "image": DEFAULT_DA_SERVER_PARAMS["image"],
+        "cmd": DEFAULT_DA_SERVER_PARAMS["cmd"],
     }
