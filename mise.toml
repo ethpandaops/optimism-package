@@ -1,4 +1,4 @@
 [tools]
 
 # Core dependencies
-"ubi:ethereum-optimism/kurtestosis" = "0.0.4"
+"ubi:ethereum-optimism/kurtestosis" = "0.0.5"
