@@ -690,3 +690,16 @@ If you have made changes and would like to submit a PR, test locally and make su
 ```bash
 kurtosis lint --format .
 ```
+
+### Testing
+
+#### Unit tests
+
+We are using [`kurtestosis`](https://github.com/ethereum-optimism/kurtestosis) to run a set of unit tests against the starlark code:
+
+```bash
+# To run all unit tests
+kurtestosis .
+```
+
+The tests can be found in `*_test.star` scripts located in the `test` directory.
