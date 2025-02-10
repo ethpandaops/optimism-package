@@ -40,7 +40,6 @@ def test_label_from_image_long_image_name_one_slash(plan):
     image_name = "/".join(["tenletters" * 6, image_suffix])
 
     image_label = util.label_from_image(image_name)
-    expect.eq(len(image_label), 63)
     expect.eq(image_suffix, image_label)
 
 
@@ -49,7 +48,6 @@ def test_label_from_image_long_image_name_more_slashes(plan):
     image_name = "/".join(["tenletters" * 8, image_suffix])
 
     image_label = util.label_from_image(image_name)
-    expect.eq(len(image_label), 63)
     expect.eq(image_suffix, image_label)
 
 
