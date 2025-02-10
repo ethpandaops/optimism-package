@@ -49,6 +49,9 @@ optimism_package:
   global_tolerations: []
   persistent: false
 ethereum_package:
+  participants:
+    - cl_type: lighthouse
+      cl_image: ethpandaops/lighthouse:unstable
   network_params:
     preset: minimal
     genesis_delay: 5
