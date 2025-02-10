@@ -46,3 +46,15 @@ jobs:
       - name: Kurtosis Lint
         run: kurtosis lint ${{ github.workspace }}
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+
+      - name: Run kurtestosis tests
+        run: kurtestosis .
+
