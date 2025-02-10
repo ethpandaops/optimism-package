@@ -460,7 +460,7 @@ def default_interop_params():
 
 def default_altda_deploy_config():
     return {
-        "use_altda": "false",
+        "use_altda": False,
         "da_commitment_type": "KeccakCommitment",
         "da_challenge_window": 100,
         "da_resolve_window": 100,
