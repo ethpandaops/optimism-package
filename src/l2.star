@@ -45,7 +45,7 @@ def launch_l2(
         )
         plan.print("Successfully launched da-server")
 
-    all_l2_participants = participant_network.launch_participant_network(
+    l2 = participant_network.launch_participant_network(
         plan,
         l2_args.participants,
         jwt_file,
@@ -70,7 +70,7 @@ def launch_l2(
 
     all_el_contexts = []
     all_cl_contexts = []
-    for participant in all_l2_participants:
+    for participant in l2.participants:
         all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
 
@@ -98,11 +98,11 @@ def launch_l2(
             )
             plan.print("Successfully launched op-blockscout")
 
-    plan.print(all_l2_participants)
+    plan.print(l2.participants)
     plan.print(
         "Begin your L2 adventures by depositing some L1 Kurtosis ETH to: {0}".format(
             l1_bridge_address
         )
     )
 
-    return all_l2_participants
+    return l2
