@@ -123,6 +123,7 @@ SUBCATEGORY_PARAMS = {
     "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
     "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
     "da_server_params": [
+        "enabled",
         "image",
         "cmd",
     ],

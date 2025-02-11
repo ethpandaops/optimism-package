@@ -413,7 +413,7 @@ def default_optimism_params():
     return {
         "observability": default_observability_params(),
         "interop": default_interop_params(),
-        "altda": default_altda_deploy_config(),
+        "altda_deploy_config": default_altda_deploy_config(),
         "chains": default_chains(),
         "op_contract_deployer_params": default_op_contract_deployer_params(),
         "global_log_level": "info",
@@ -614,6 +614,12 @@ def default_op_contract_deployer_params():
 
 def default_ethereum_package_network_params():
     return {
+        "participants": [
+            {
+                "el_type": "geth",
+                "cl_type": "teku",
+            }
+        ],
         "network_params": {
             "preset": "minimal",
             "genesis_delay": 5,
