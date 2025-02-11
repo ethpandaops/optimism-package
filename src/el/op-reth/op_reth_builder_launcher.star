@@ -256,7 +256,7 @@ def get_config(
 
     # configure resources
 
-    if participant.el_min_cpu > 0:
+    if participant.el_builder_min_cpu > 0:
         config_args["min_cpu"] = participant.el_builder_min_cpu
     if participant.el_builder_max_cpu > 0:
         config_args["max_cpu"] = participant.el_builder_max_cpu
