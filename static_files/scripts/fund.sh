@@ -20,7 +20,7 @@ write_keyfile() {
 }
 
 send() {
-  cast send $1 --value "$FUND_VALUE" --private-key "$FUND_PRIVATE_KEY" --timeout 60 --nonce "$nonce" &
+  cast send $1 --value "$FUND_VALUE" --private-key "$FUND_PRIVATE_KEY" --timeout 60 --nonce "$nonce" --priority-gas-price 1gwei &
   nonce=$((nonce+1))
 }
 
@@ -47,7 +47,6 @@ for chain_id in "${chain_ids[@]}"; do
 
   for index in "${!roles[@]}"; do
     role="${roles[$index]}"
-    role_idx=$((index+1))
 
     write_keyfile "${deployer_addr}" "${DEPLOYER_PRIVATE_KEY}" "${role}-$chain_id"
 
