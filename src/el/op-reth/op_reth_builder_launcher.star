@@ -24,6 +24,8 @@ constants = import_module("../../package_io/constants.star")
 observability = import_module("../../observability/observability.star")
 util = import_module("../../util.star")
 
+util = import_module("../../util.star")
+
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
