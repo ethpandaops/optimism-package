@@ -36,6 +36,9 @@ optimism_package:
         fund_dev_accounts: true
       batcher_params:
         extra_params: []
+      challenger_params:
+        enabled: true
+        extra_params: []
       mev_params:
         builder_host: ""
         builder_port: ""
@@ -44,6 +47,8 @@ optimism_package:
     image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.12
     l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz
     l2_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz
+  observability:
+    enabled: true
   global_log_level: "info"
   global_node_selectors: {}
   global_tolerations: []
