@@ -44,7 +44,7 @@ def test_launch_with_defaults(plan):
 
     # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
     sequencer_private_key_mock = "sequencer_private_key"
-    read_network_config_value_mock = kurtestosis.mock(
+    read_network_config_value_mock = kurtosistest.mock(
         util, "read_network_config_value"
     ).mock_return_value(sequencer_private_key_mock)
 
@@ -71,7 +71,7 @@ def test_launch_with_defaults(plan):
     el_service_name = "op-el-1-op-reth-op-node-"
     el_sevice = plan.get_service(el_service_name)
 
-    cl_service_config = kurtestosis.get_service_config(
+    cl_service_config = kurtosistest.get_service_config(
         service_name="op-cl-1-op-node-op-reth-"
     )
     expect.ne(cl_service_config, None)
@@ -115,7 +115,7 @@ def test_launch_with_defaults(plan):
         ],
     )
 
-    el_service_config = kurtestosis.get_service_config(
+    el_service_config = kurtosistest.get_service_config(
         service_name="op-el-1-op-reth-op-node-"
     )
     expect.ne(el_service_config, None)
