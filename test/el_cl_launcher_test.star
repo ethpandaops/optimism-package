@@ -6,9 +6,9 @@ ethereum_package_constants = import_module(
 )
 util = import_module("/src/util.star")
 
-# 
+#
 # Default test inputs
-# 
+#
 
 jwt_file = "/path/to/jwt_file"
 
@@ -24,6 +24,7 @@ da_server_context = struct(
     enabled=False,
     http_url="da_server_http_url",
 )
+
 
 def test_launch_with_defaults(plan):
     parsed_input_args = input_parser.input_parser(
@@ -47,12 +48,12 @@ def test_launch_with_defaults(plan):
     observability_helper = observability.make_helper(parsed_input_args.observability)
     chains = parsed_input_args.chains
     chain = chains[0]
-    
+
     # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
     sequencer_private_key_mock = "sequencer_private_key"
-    kurtosistest.mock(
-        util, "read_network_config_value"
-    ).mock_return_value(sequencer_private_key_mock)
+    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+        sequencer_private_key_mock
+    )
 
     all_el_contexts, all_cl_contexts = el_cl_launcher.launch(
         plan=plan,
@@ -155,6 +156,7 @@ def test_launch_with_defaults(plan):
         ],
     )
 
+
 def test_launch_with_el_op_besu(plan):
     parsed_input_args = input_parser.input_parser(
         plan,
@@ -178,9 +180,9 @@ def test_launch_with_el_op_besu(plan):
 
     # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
     sequencer_private_key_mock = "sequencer_private_key"
-    kurtosistest.mock(
-        util, "read_network_config_value"
-    ).mock_return_value(sequencer_private_key_mock)
+    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+        sequencer_private_key_mock
+    )
 
     all_el_contexts, all_cl_contexts = el_cl_launcher.launch(
         plan=plan,
@@ -211,40 +213,46 @@ def test_launch_with_el_op_besu(plan):
     expect.eq(
         el_service_config.cmd,
         [
-            " ".join([
-                "besu",
-                "--genesis-file=/network-configs/genesis-{0}.json".format(
-                    chain.network_params.network_id
-                ),
-                "--network-id={0}".format(
-                    chain.network_params.network_id
-                ),
-                "--data-path=/data/besu/execution-data",
-                "--host-allowlist=*",
-                "--rpc-http-enabled=true",
-                "--rpc-http-host=0.0.0.0",
-                "--rpc-http-port=8545",
-                "--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3,MINER",
-                "--rpc-http-cors-origins=*",
-                "--rpc-http-max-active-connections=300",
-                "--rpc-ws-enabled=true",
-                "--rpc-ws-host=0.0.0.0",
-                "--rpc-ws-port=8546",
-                "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3,MINER",
-                "--p2p-enabled=true",
-                "--p2p-host={0}".format(ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER),
-                "--p2p-port=30303",
-                "--engine-rpc-enabled=true",
-                "--engine-jwt-secret={0}".format(ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER),
-                "--engine-host-allowlist=*",
-                "--engine-rpc-port={0}".format(el_sevice.ports["engine-rpc"].number),
-                "--sync-mode=FULL",
-                "--bonsai-limit-trie-logs-enabled=false",
-                "--version-compatibility-protection=false",
-                "--metrics-enabled=true",
-                "--metrics-host=0.0.0.0",
-                "--metrics-port=9001"
-            ])
+            " ".join(
+                [
+                    "besu",
+                    "--genesis-file=/network-configs/genesis-{0}.json".format(
+                        chain.network_params.network_id
+                    ),
+                    "--network-id={0}".format(chain.network_params.network_id),
+                    "--data-path=/data/besu/execution-data",
+                    "--host-allowlist=*",
+                    "--rpc-http-enabled=true",
+                    "--rpc-http-host=0.0.0.0",
+                    "--rpc-http-port=8545",
+                    "--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3,MINER",
+                    "--rpc-http-cors-origins=*",
+                    "--rpc-http-max-active-connections=300",
+                    "--rpc-ws-enabled=true",
+                    "--rpc-ws-host=0.0.0.0",
+                    "--rpc-ws-port=8546",
+                    "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3,MINER",
+                    "--p2p-enabled=true",
+                    "--p2p-host={0}".format(
+                        ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
+                    ),
+                    "--p2p-port=30303",
+                    "--engine-rpc-enabled=true",
+                    "--engine-jwt-secret={0}".format(
+                        ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER
+                    ),
+                    "--engine-host-allowlist=*",
+                    "--engine-rpc-port={0}".format(
+                        el_sevice.ports["engine-rpc"].number
+                    ),
+                    "--sync-mode=FULL",
+                    "--bonsai-limit-trie-logs-enabled=false",
+                    "--version-compatibility-protection=false",
+                    "--metrics-enabled=true",
+                    "--metrics-host=0.0.0.0",
+                    "--metrics-port=9001",
+                ]
+            )
         ],
     )
 
