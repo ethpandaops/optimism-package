@@ -4,6 +4,9 @@ l2_launcher = import_module("./src/l2.star")
 op_supervisor_launcher = import_module(
     "./src/interop/op-supervisor/op_supervisor_launcher.star"
 )
+op_challenger_launcher = import_module(
+    "./src/challenger/op-challenger/op_challenger_launcher.star"
+)
 
 observability = import_module("./src/observability/observability.star")
 prometheus = import_module("./src/observability/prometheus/prometheus_launcher.star")
@@ -44,6 +47,7 @@ def run(plan, args):
     global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
     global_log_level = optimism_args_with_right_defaults.global_log_level
     persistent = optimism_args_with_right_defaults.persistent
+    altda_deploy_config = optimism_args_with_right_defaults.altda_deploy_config
 
     observability_params = optimism_args_with_right_defaults.observability
     interop_params = optimism_args_with_right_defaults.interop
@@ -94,6 +98,7 @@ def run(plan, args):
         l1_config_env_vars,
         optimism_args_with_right_defaults,
         l1_network,
+        altda_deploy_config,
     )
 
     jwt_file = plan.upload_files(
@@ -101,24 +106,26 @@ def run(plan, args):
         name="op_jwt_file",
     )
 
-    all_participants = []
+    l2s = []
     for l2_num, chain in enumerate(optimism_args_with_right_defaults.chains):
-        all_participants += l2_launcher.launch_l2(
-            plan,
-            l2_num,
-            chain.network_params.name,
-            chain,
-            jwt_file,
-            deployment_output,
-            l1_config_env_vars,
-            l1_priv_key,
-            l1_rpc_url,
-            global_log_level,
-            global_node_selectors,
-            global_tolerations,
-            persistent,
-            observability_helper,
-            interop_params,
+        l2s.append(
+            l2_launcher.launch_l2(
+                plan,
+                l2_num,
+                chain.network_params.name,
+                chain,
+                jwt_file,
+                deployment_output,
+                l1_config_env_vars,
+                l1_priv_key,
+                l1_rpc_url,
+                global_log_level,
+                global_node_selectors,
+                global_tolerations,
+                persistent,
+                observability_helper,
+                interop_params,
+            )
         )
 
     if interop_params.enabled:
@@ -126,9 +133,32 @@ def run(plan, args):
             plan,
             l1_config_env_vars,
             optimism_args_with_right_defaults.chains,
-            all_participants,
+            l2s,
             jwt_file,
             interop_params.supervisor_params,
+            observability_helper,
+        )
+
+    # challenger must launch after supervisor because it depends on it for interop
+    for l2_num, l2 in enumerate(l2s):
+        chain = optimism_args_with_right_defaults.chains[l2_num]
+        op_challenger_image = (
+            chain.challenger_params.image
+            if chain.challenger_params.image != ""
+            else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
+        )
+        op_challenger_launcher.launch(
+            plan,
+            l2_num,
+            "op-challenger-{0}".format(chain.network_params.name),
+            chain.challenger_params.image,
+            l2.participants[0].el_context,
+            l2.participants[0].cl_context,
+            l1_config_env_vars,
+            deployment_output,
+            chain.network_params,
+            chain.challenger_params,
+            interop_params,
             observability_helper,
         )
 

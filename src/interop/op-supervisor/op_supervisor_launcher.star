@@ -47,7 +47,7 @@ def launch(
     plan,
     l1_config_env_vars,
     chains,
-    all_participants,
+    l2s,
     jwt_file,
     supervisor_params,
     observability_helper,
@@ -64,7 +64,7 @@ def launch(
     config = get_supervisor_config(
         plan,
         l1_config_env_vars,
-        all_participants,
+        l2s,
         jwt_file,
         dependency_set_artifact,
         supervisor_params,
@@ -85,7 +85,7 @@ def launch(
 def get_supervisor_config(
     plan,
     l1_config_env_vars,
-    all_participants,
+    l2s,
     jwt_file,
     dependency_set_artifact,
     supervisor_params,
@@ -119,7 +119,8 @@ def get_supervisor_config(
                         participant.cl_context.ip_addr,
                         interop_constants.INTEROP_WS_PORT_NUM,
                     )
-                    for participant in all_participants
+                    for l2 in l2s
+                    for participant in l2.participants
                 ]
             ),
             "OP_SUPERVISOR_L2_CONSENSUS_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
