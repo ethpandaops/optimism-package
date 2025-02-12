@@ -44,7 +44,7 @@ def test_launch_with_defaults(plan):
 
     # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
     sequencer_private_key_mock = "sequencer_private_key"
-    read_network_config_value_mock = kurtosistest.mock(
+    kurtosistest.mock(
         util, "read_network_config_value"
     ).mock_return_value(sequencer_private_key_mock)
 
