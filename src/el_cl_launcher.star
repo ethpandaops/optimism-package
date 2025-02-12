@@ -351,8 +351,6 @@ def launch(
                 },
             )
 
-        sequencer_enabled = False
-
         all_el_contexts.append(el_context)
         all_cl_contexts.append(cl_context)
 
@@ -372,8 +370,11 @@ def launch(
                 False,
                 observability_helper,
                 interop_params,
+                da_server_context,
             )
             all_cl_contexts.append(cl_builder_context)
+
+        sequencer_enabled = False
 
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts
