@@ -55,6 +55,6 @@ jobs:
       - name: Install mise
         uses: jdx/mise-action@v2
 
-      - name: Run kurtestosis tests
-        run: kurtestosis .
+      - name: Run kurtosis-test tests
+        run: kurtosis-test .
 
