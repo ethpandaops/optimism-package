@@ -404,5 +404,7 @@ def launch(
                 )
             all_cl_contexts.append(cl_builder_context)
 
+        sequencer_enabled = False
+
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts
