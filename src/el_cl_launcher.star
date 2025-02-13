@@ -404,10 +404,10 @@ def launch(
                 )
             all_cl_contexts.append(cl_builder_context)
 
-        sequencer_enabled = False
-
-        all_el_contexts.append(el_context)
-        all_cl_contexts.append(cl_context)
+        # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
+        # and all_cl_contexts[0] are used
+        all_el_contexts.insert(0, el_context)
+        all_cl_contexts.insert(0, cl_context)
 
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts
