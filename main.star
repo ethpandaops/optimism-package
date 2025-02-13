@@ -9,10 +9,6 @@ op_challenger_launcher = import_module(
 )
 
 observability = import_module("./src/observability/observability.star")
-prometheus = import_module("./src/observability/prometheus/prometheus_launcher.star")
-loki = import_module("./src/observability/loki/loki_launcher.star")
-promtail = import_module("./src/observability/promtail/promtail_launcher.star")
-grafana = import_module("./src/observability/grafana/grafana_launcher.star")
 
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
@@ -165,37 +161,7 @@ def run(plan, args):
                 observability_helper,
             )
 
-    if observability_helper.enabled and len(observability_helper.metrics_jobs) > 0:
-        plan.print("Launching prometheus...")
-        prometheus_private_url = prometheus.launch_prometheus(
-            plan,
-            observability_helper,
-            global_node_selectors,
-        )
-
-        plan.print("Launching loki...")
-        loki_url = loki.launch_loki(
-            plan,
-            global_node_selectors,
-            observability_params.loki_params,
-        )
-
-        plan.print("Launching promtail...")
-        promtail.launch_promtail(
-            plan,
-            global_node_selectors,
-            loki_url,
-            observability_params.promtail_params,
-        )
-
-        plan.print("Launching grafana...")
-        grafana.launch_grafana(
-            plan,
-            prometheus_private_url,
-            loki_url,
-            global_node_selectors,
-            observability_params.grafana_params,
-        )
+    observability.launch(plan, observability_helper, global_node_selectors, observability_params)
 
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
