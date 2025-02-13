@@ -165,20 +165,22 @@ def launch(plan, observability_helper, global_node_selectors, observability_para
         global_node_selectors,
     )
 
-    plan.print("Launching loki...")
-    loki_url = loki.launch_loki(
-        plan,
-        global_node_selectors,
-        observability_params.loki_params,
-    )
+    loki_url = None
+    if observability_params.enable_k8s_features:
+        plan.print("Launching loki...")
+        loki_url = loki.launch_loki(
+            plan,
+            global_node_selectors,
+            observability_params.loki_params,
+        )
 
-    plan.print("Launching promtail...")
-    promtail.launch_promtail(
-        plan,
-        global_node_selectors,
-        loki_url,
-        observability_params.promtail_params,
-    )
+        plan.print("Launching promtail...")
+        promtail.launch_promtail(
+            plan,
+            global_node_selectors,
+            loki_url,
+            observability_params.promtail_params,
+        )
 
     plan.print("Launching grafana...")
     grafana.launch_grafana(

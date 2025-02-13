@@ -75,6 +75,7 @@ def input_parser(plan, input_args):
     return struct(
         observability=struct(
             enabled=results["observability"]["enabled"],
+            enable_k8s_features=results["observability"]["enable_k8s_features"],
             prometheus_params=struct(
                 image=results["observability"]["prometheus_params"]["image"],
                 storage_tsdb_retention_time=results["observability"][
@@ -442,6 +443,7 @@ def parse_network_params(plan, input_args):
 def default_observability_params():
     return {
         "enabled": True,
+        "enable_k8s_features": False,
     }
 
 
