@@ -62,7 +62,7 @@ def create_values_artifact(
 
     values_artifact_name = plan.render_templates(
         {
-            "/": values_template_and_data,
+            "/{0}".format(VALUES_FILE_NAME): values_template_and_data,
         },
         name="promtail-config",
     )
@@ -86,7 +86,7 @@ def install_helm_chart(
             "helm repo update",
         ]
 
-    install_cmd = "helm upgrade --values {2} --install {1} {0}/{1}".format(
+    install_cmd = "helm upgrade --values /helm/{2} --install {1} {0}/{1}".format(
         repo_name, chart_name, VALUES_FILE_NAME
     )
 
@@ -98,7 +98,7 @@ def install_helm_chart(
     plan.run_sh(
         image="alpine/helm",
         files={
-            "/": values_artifact_name,
+            "/helm": values_artifact_name,
         },
-        run=util.join_cmds(cmd),
+        run=util.join_cmds(cmds),
     )
