@@ -413,5 +413,8 @@ def launch(
         if sequencer_enabled:
             sequencer_enabled = False
 
+        all_el_contexts.append(el_context)
+        all_cl_contexts.append(cl_context)
+
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts
