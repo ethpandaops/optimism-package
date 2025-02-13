@@ -719,6 +719,44 @@ kurtosis service stop <enclave-name> <service-name>
 kurtosis service start <enclave-name> <service-name>
 ```
 
+## Observability
+
+This package optionally provisions an in-enclave observability stack consiisting of Grafana, prometheus, promtail, and loki, which collects logs and metrics from the enclave.
+
+This feature is enabled by default, but can be disabled like so:
+
+```yaml
+optimism_package:
+  observability:
+    enabled: false
+```
+
+You can provide custom dashboard sources to have Grafana pre-populated with your preferred dashboards:
+
+```yaml
+optimism_package:
+  observability:
+    grafana_params:
+      dashboard_sources:
+        - github.com/<org>/<repo>/<path-to-resources>
+```
+
+To access the Grafana UI, you can use the following command after starting the enclave:
+
+```bash
+just open-grafana <enclave name>
+```
+
+### Logs
+
+Note that due to `kurtosis` limitations, log collection is not enabled by default, and is only supported for the Kubernetes backend. To enable log collection, you must set the following parameter:
+
+```yaml
+optimism_package:
+  observability:
+    enable_k8s_features: true
+```
+
 ## Development
 
 ### Development environment
