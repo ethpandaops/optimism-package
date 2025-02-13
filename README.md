@@ -79,6 +79,8 @@ optimism_package:
   observability:
     # Whether to provision an observability stack (prometheus, loki, promtail, grafana)
     enabled: true
+    # Whether to enable features exclusive to the K8s backend (ie log collection)
+    enable_k8s_features: false
     # Default prometheus configuration
     prometheus_params:
       storage_tsdb_retention_time: "1d"
