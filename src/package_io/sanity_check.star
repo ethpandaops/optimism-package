@@ -1,5 +1,18 @@
+ROOT_PARAMS = [
+    "observability",
+    "interop",
+    "altda_deploy_config",
+    "chains",
+    "op_contract_deployer_params",
+    "global_log_level",
+    "global_node_selectors",
+    "global_tolerations",
+    "persistent",
+]
+
 OBSERVABILITY_PARAMS = [
     "enabled",
+    "enable_k8s_features",
     "prometheus_params",
     "loki_params",
     "promtail_params",
@@ -139,18 +152,6 @@ ADDITIONAL_SERVICES_PARAMS = [
     "blockscout",
     "rollup-boost",
     "da_server",
-]
-
-ROOT_PARAMS = [
-    "observability",
-    "interop",
-    "altda_deploy_config",
-    "chains",
-    "op_contract_deployer_params",
-    "global_log_level",
-    "global_node_selectors",
-    "global_tolerations",
-    "persistent",
 ]
 
 EXTERNAL_L1_NETWORK_PARAMS = [
