@@ -6,6 +6,14 @@ ethereum_package_node_metrics = import_module(
     "github.com/ethpandaops/ethereum-package/src/node_metrics_info.star"
 )
 
+util = import_module("../util.star")
+
+prometheus = import_module("./prometheus/prometheus_launcher.star")
+loki = import_module("./loki/loki_launcher.star")
+promtail = import_module("./promtail/promtail_launcher.star")
+grafana = import_module("./grafana/grafana_launcher.star")
+
+
 DEFAULT_SCRAPE_INTERVAL = "15s"
 
 METRICS_PORT_ID = "metrics"
@@ -144,4 +152,39 @@ def register_node_metrics_job(
         metrics_path=node_metrics_info[METRICS_INFO_PATH_KEY],
         additional_labels=labels,
         scrape_interval=scrape_interval,
+    )
+
+def launch(plan, observability_helper, global_node_selectors, observability_params):
+    if not observability_helper.enabled or len(observability_helper.metrics_jobs) == 0:
+        return
+
+    plan.print("Launching prometheus...")
+    prometheus_private_url = prometheus.launch_prometheus(
+        plan,
+        observability_helper,
+        global_node_selectors,
+    )
+
+    plan.print("Launching loki...")
+    loki_url = loki.launch_loki(
+        plan,
+        global_node_selectors,
+        observability_params.loki_params,
+    )
+
+    plan.print("Launching promtail...")
+    promtail.launch_promtail(
+        plan,
+        global_node_selectors,
+        loki_url,
+        observability_params.promtail_params,
+    )
+
+    plan.print("Launching grafana...")
+    grafana.launch_grafana(
+        plan,
+        prometheus_private_url,
+        loki_url,
+        global_node_selectors,
+        observability_params.grafana_params,
     )
