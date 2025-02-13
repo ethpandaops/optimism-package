@@ -351,9 +351,6 @@ def launch(
                 },
             )
 
-        all_el_contexts.append(el_context)
-        all_cl_contexts.append(cl_context)
-
         if rollup_boost_enabled and sequencer_enabled:
             cl_builder_context = cl_builder_launch_method(
                 plan,
@@ -375,6 +372,9 @@ def launch(
             all_cl_contexts.append(cl_builder_context)
 
         sequencer_enabled = False
+
+        all_el_contexts.append(el_context)
+        all_cl_contexts.append(cl_context)
 
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts

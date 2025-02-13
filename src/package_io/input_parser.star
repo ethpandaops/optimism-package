@@ -572,6 +572,7 @@ def default_participant():
         "cl_min_mem": 0,
         "cl_max_mem": 0,
         "el_builder_type": "op-geth",
+        "el_builder_key": "",
         "el_builder_image": "",
         "el_builder_log_level": "",
         "el_builder_extra_env_vars": {},
