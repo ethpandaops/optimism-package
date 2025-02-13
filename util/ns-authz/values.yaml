@@ -1,5 +1,3 @@
-replicaCount: 1
-
 image:
   repository: bitnami/kubectl
   tag: latest

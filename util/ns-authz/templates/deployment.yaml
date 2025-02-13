@@ -5,7 +5,7 @@ metadata:
   labels:
     app: ns-authz
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       app: ns-authz
