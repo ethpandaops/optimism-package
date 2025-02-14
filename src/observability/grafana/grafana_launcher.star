@@ -11,7 +11,6 @@ HTTP_PORT_NUMBER_UINT16 = 3000
 
 TEMPLATES_FILEPATH = "./templates"
 
-DATASOURCE_UID = "grafanacloud-prom"
 DATASOURCE_CONFIG_TEMPLATE_FILEPATH = TEMPLATES_FILEPATH + "/datasource.yml.tmpl"
 DATASOURCE_CONFIG_REL_FILEPATH = "datasources/datasource.yml"
 
@@ -28,16 +27,18 @@ USED_PORTS = {
 
 def launch_grafana(
     plan,
-    prometheus_private_url,
+    prometheus_url,
+    loki_url,
     global_node_selectors,
     grafana_params,
 ):
     datasource_config_template = read_file(DATASOURCE_CONFIG_TEMPLATE_FILEPATH)
 
-    grafana_config_artifact_name = upload_grafana_config(
+    config_artifact_name = create_config_artifact(
         plan,
         datasource_config_template,
-        prometheus_private_url,
+        prometheus_url,
+        loki_url,
     )
 
     config = get_config(
@@ -57,12 +58,13 @@ def launch_grafana(
     return service_url
 
 
-def upload_grafana_config(
+def create_config_artifact(
     plan,
     datasource_config_template,
-    prometheus_private_url,
+    prometheus_url,
+    loki_url,
 ):
-    datasource_data = new_datasource_config_template_data(prometheus_private_url)
+    datasource_data = new_datasource_config_template_data(prometheus_url, loki_url)
     datasource_template_and_data = ethereum_package_shared_utils.new_template_and_data(
         datasource_config_template, datasource_data
     )
@@ -78,8 +80,13 @@ def upload_grafana_config(
     return grafana_config_artifact_name
 
 
-def new_datasource_config_template_data(prometheus_url):
-    return {"PrometheusUID": DATASOURCE_UID, "PrometheusURL": prometheus_url}
+def new_datasource_config_template_data(prometheus_url, loki_url):
+    return {
+        "PrometheusUID": "grafanacloud-prom",
+        "PrometheusURL": prometheus_url,
+        "LokiUID": "grafanacloud-logs",
+        "LokiURL": loki_url,
+    }
 
 
 def get_config(
@@ -95,7 +102,6 @@ def get_config(
             "GF_AUTH_ANONYMOUS_ENABLED": "true",
             "GF_AUTH_ANONYMOUS_ORG_ROLE": "Admin",
             "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
-            # "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
         },
         files={
             CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifact_name,
@@ -135,6 +141,7 @@ def provision_dashboards(plan, service_url, dashboard_sources):
 
     plan.run_sh(
         description="upload dashboards",
+        # latest version, no tagged release yet
         image="grafana/grizzly:main-0b88d01",
         env_vars={
             "GRAFANA_URL": service_url,
