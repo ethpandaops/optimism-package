@@ -154,6 +154,7 @@ def register_node_metrics_job(
         scrape_interval=scrape_interval,
     )
 
+
 def launch(plan, observability_helper, global_node_selectors, observability_params):
     if not observability_helper.enabled or len(observability_helper.metrics_jobs) == 0:
         return
