@@ -205,6 +205,7 @@ def input_parser(plan, input_args):
                     extra_params=result["batcher_params"]["extra_params"],
                 ),
                 challenger_params=struct(
+                    enabled=result["challenger_params"]["enabled"],
                     image=result["challenger_params"]["image"],
                     extra_params=result["challenger_params"]["extra_params"],
                     cannon_prestate_path=result["challenger_params"][
@@ -302,11 +303,11 @@ def parse_network_params(plan, input_args):
         batcher_params = default_batcher_params()
         batcher_params.update(chain.get("batcher_params", {}))
 
-        challenger_params = default_challenger_params()
-        challenger_params.update(chain.get("challenger_params", {}))
-
         proposer_params = default_proposer_params()
         proposer_params.update(chain.get("proposer_params", {}))
+
+        challenger_params = default_challenger_params()
+        challenger_params.update(chain.get("challenger_params", {}))
 
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
@@ -491,8 +492,8 @@ def default_chains():
             "participants": [default_participant()],
             "network_params": default_network_params(),
             "batcher_params": default_batcher_params(),
-            "challenger_params": default_challenger_params(),
             "proposer_params": default_proposer_params(),
+            "challenger_params": default_challenger_params(),
             "mev_params": default_mev_params(),
             "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
@@ -524,6 +525,7 @@ def default_batcher_params():
 
 def default_challenger_params():
     return {
+        "enabled": True,
         "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
         "extra_params": [],
         "cannon_prestate_path": "",

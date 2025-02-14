@@ -93,14 +93,15 @@ SUBCATEGORY_PARAMS = {
         "fund_dev_accounts",
     ],
     "batcher_params": ["image", "extra_params"],
+    "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
     "challenger_params": [
+        "enabled",
         "image",
         "extra_params",
         "cannon_prestate_path",
         "cannon_prestates_url",
         "cannon_trace_types",
     ],
-    "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
     "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
     "da_server_params": [
         "image",
