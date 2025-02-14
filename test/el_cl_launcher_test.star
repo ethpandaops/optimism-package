@@ -81,6 +81,7 @@ def test_launch_with_defaults(plan):
         cl_service_config.cmd,
         [
             "op-node",
+            "--log.level=INFO",
             "--l2=http://{0}:{1}".format(
                 el_sevice.ip_address, el_sevice.ports["engine-rpc"].number
             ),

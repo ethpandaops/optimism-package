@@ -171,6 +171,7 @@ def get_beacon_config(
 
     cmd = [
         "op-node",
+        "--log.level=" + log_level,
         "--l2={0}".format(EXECUTION_ENGINE_ENDPOINT),
         "--l2.jwt-secret=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--verifier.l1-confs=1",
