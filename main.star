@@ -161,7 +161,9 @@ def run(plan, args):
                 observability_helper,
             )
 
-    observability.launch(plan, observability_helper, global_node_selectors, observability_params)
+    observability.launch(
+        plan, observability_helper, global_node_selectors, observability_params
+    )
 
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
