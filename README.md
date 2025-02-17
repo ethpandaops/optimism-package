@@ -371,6 +371,9 @@ optimism_package:
 
       # Default challenger configuration
       challenger_params:
+        # Whether or not to enable the challenger
+        enabled: true
+
         # The Docker image that should be used for the challenger; leave blank to use the default op-challenger image
         image: ""
 
