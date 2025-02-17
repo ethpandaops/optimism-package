@@ -627,6 +627,35 @@ Compile [tx-fuzz](https://github.com/MariusVanDerWijden/tx-fuzz) locally per ins
 ./livefuzzer spam  --sk "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" --rpc http://127.0.0.1:<port> --slot-time 2
 ```
 
+#### Run contender to send l2 transactions
+
+Install the latest [contender](https://github.com/flashbots/contender) version via cargo:
+```bash
+cargo install --git https://github.com/flashbots/contender --bin contender --force 
+```
+
+Browse the available [scenarios](https://github.com/flashbots/contender/tree/main/scenarios) and pick one that fits your needs. For example, to download the `stress` scenario:
+```bash
+wget https://raw.githubusercontent.com/flashbots/contender/refs/heads/main/scenarios/stress.toml -O scenario.toml
+```
+
+In the snippet below, we use Docker to inspect the container named `op-el-1` and dynamically extract the port. You can replace this approach with a specific L2 RPC port if you prefer::
+```bash
+L2_PORT=$(docker inspect --format='{{(index .NetworkSettings.Ports "8545/tcp" 0).HostPort}}' $(docker ps --filter "name=op-el-1" -q)) &&
+contender setup -p 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 scenario.toml http://localhost:$L2_PORT
+```
+
+Once setup is complete, you can start spamming transactions. In this example, we send 5 transactions per second for 10,000 seconds:
+```bash
+contender spam \
+  -p 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+  --txs-per-second 5 \
+  -d 10000 \
+  scenario.toml \
+  http://localhost:$L2_PORT
+```
+Note: For more complex scenarios like [spamBundles](https://github.com/flashbots/contender/blob/main/scenarios/spamBundles.toml), you'll need to provide L2 builder URL that supports the `eth_sendBundle` method.
+
 ### Additional configurations
 
 Please find examples of additional configurations in the [test folder](.github/tests/).
