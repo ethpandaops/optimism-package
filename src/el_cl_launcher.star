@@ -300,6 +300,10 @@ def launch(
                     observability_helper,
                     interop_params,
                 )
+                for metrics_info in [x for x in el_builder_context.el_metrics_info if x != None]:
+                    observability.register_node_metrics_job(
+                        observability_helper, el_builder_context.client_name, "execution-builder", metrics_info
+                    )
             rollup_boost_image = (
                 mev_params.rollup_boost_image
                 if mev_params.rollup_boost_image != ""
@@ -370,6 +374,16 @@ def launch(
                 interop_params,
                 da_server_context,
             )
+            for metrics_info in [x for x in cl_builder_context.cl_nodes_metrics_info if x != None]:
+                observability.register_node_metrics_job(
+                    observability_helper,
+                    cl_builder_context.client_name,
+                    "beacon-builder",
+                    metrics_info,
+                    {
+                        "supernode": str(cl_builder_context.supernode),
+                    },
+                )
             all_cl_contexts.append(cl_builder_context)
 
         # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
