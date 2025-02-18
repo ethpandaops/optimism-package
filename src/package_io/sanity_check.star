@@ -102,6 +102,7 @@ PARTICIPANT_CATEGORIES = {
         "cl_max_mem",
         "el_builder_type",
         "el_builder_image",
+        "el_builder_key",
         "el_builder_log_level",
         "el_builder_extra_env_vars",
         "el_builder_extra_labels",
