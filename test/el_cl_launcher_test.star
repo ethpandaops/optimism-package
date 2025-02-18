@@ -205,7 +205,7 @@ def test_launch_with_el_op_besu(plan):
     )
 
     el_service_name = "op-el-1-op-besu-op-node-"
-    el_sevice = plan.get_service(el_service_name)
+    el_service = plan.get_service(el_service_name)
     el_service_config = kurtosistest.get_service_config(el_service_name)
     expect.ne(el_service_config, None)
     expect.eq(el_service_config.image, "op-besu:latest")
@@ -243,7 +243,7 @@ def test_launch_with_el_op_besu(plan):
                     ),
                     "--engine-host-allowlist=*",
                     "--engine-rpc-port={0}".format(
-                        el_sevice.ports["engine-rpc"].number
+                        el_service.ports["engine-rpc"].number
                     ),
                     "--sync-mode=FULL",
                     "--bonsai-limit-trie-logs-enabled=false",
