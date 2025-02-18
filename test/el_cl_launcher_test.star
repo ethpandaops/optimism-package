@@ -69,7 +69,7 @@ def test_launch_with_defaults(plan):
     )
 
     el_service_name = "op-el-1-op-reth-op-node-"
-    el_sevice = plan.get_service(el_service_name)
+    el_service = plan.get_service(el_service_name)
 
     cl_service_config = kurtosistest.get_service_config(
         service_name="op-cl-1-op-node-op-reth-"
@@ -83,7 +83,7 @@ def test_launch_with_defaults(plan):
             "op-node",
             "--log.level=INFO",
             "--l2=http://{0}:{1}".format(
-                el_sevice.ip_address, el_sevice.ports["engine-rpc"].number
+                el_service.ip_address, el_service.ports["engine-rpc"].number
             ),
             "--l2.jwt-secret=/jwt/jwtsecret",
             "--verifier.l1-confs=1",
@@ -143,7 +143,7 @@ def test_launch_with_defaults(plan):
             "--nat=extip:{0}".format(
                 ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
             ),
-            "--authrpc.port={0}".format(el_sevice.ports["engine-rpc"].number),
+            "--authrpc.port={0}".format(el_service.ports["engine-rpc"].number),
             "--authrpc.jwtsecret=/jwt/jwtsecret",
             "--authrpc.addr=0.0.0.0",
             "--discovery.port=30303",
