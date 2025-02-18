@@ -1,10 +1,13 @@
-op_challenger_launcher = import_module("/src/challenger/op-challenger/op_challenger_launcher.star")
+op_challenger_launcher = import_module(
+    "/src/challenger/op-challenger/op_challenger_launcher.star"
+)
 input_parser = import_module("/src/package_io/input_parser.star")
 observability = import_module("/src/observability/observability.star")
 ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 util = import_module("/src/util.star")
+
 
 def test_launch_with_defaults(plan):
     parsed_input_args = input_parser.input_parser(
@@ -22,7 +25,7 @@ def test_launch_with_defaults(plan):
                     ],
                     "challenger_params": {
                         "enabled": False,
-                    }
+                    },
                 }
             ]
         },
@@ -53,9 +56,13 @@ def test_launch_with_defaults(plan):
 
     # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
     dispute_game_factory_mock = "dispute_game_factory"
-    kurtosistest.mock(util, "read_network_config_value").mock_return_value(dispute_game_factory_mock)
+    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+        dispute_game_factory_mock
+    )
     challenger_private_key_mock = "challenger_private_key"
-    kurtosistest.mock(util, "read_network_config_value").mock_return_value(challenger_private_key_mock)
+    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+        challenger_private_key_mock
+    )
 
     op_challenger_launcher.launch(
         plan=plan,
@@ -71,7 +78,6 @@ def test_launch_with_defaults(plan):
         interop_params=parsed_input_args.interop,
         observability_helper=observability_helper,
     )
-
 
     challenger_service_config = kurtosistest.get_service_config(
         service_name=challenger_service_name
