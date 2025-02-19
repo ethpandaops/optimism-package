@@ -108,6 +108,9 @@ def get_config(
     )
 
 
+# The dashboards pointed by the dashboard_sources locators are uploaded
+# as file artifacts, then mounted into a container and pushed to the Grafana
+# instance using https://grafana.github.io/grizzly/.
 def provision_dashboards(plan, service_url, dashboard_sources):
     if len(dashboard_sources) == 0:
         return
@@ -130,7 +133,7 @@ def provision_dashboards(plan, service_url, dashboard_sources):
         dashboard_name = "dashboards-{0}".format(index)
         dashboard_artifact_name = plan.upload_files(dashboard_src, name=dashboard_name)
 
-        files[dashboard_name] = dashboard_artifact_name
+        files["/" + dashboard_name] = dashboard_artifact_name
         grr_commands += grr_push_dashboards(dashboard_name)
 
     plan.run_sh(
