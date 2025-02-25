@@ -161,6 +161,7 @@ def get_config(
 
     cmd = [
         "node",
+        "-{0}".format(log_level),
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--chain={0}".format(
             launcher.network
@@ -187,7 +188,6 @@ def get_config(
         "--discovery.port={0}".format(discovery_port),
         "--port={0}".format(discovery_port),
         "--rpc.eth-proof-window=302400",
-        "-" + log_level,
     ]
 
     # configure files
