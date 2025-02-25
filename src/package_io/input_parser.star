@@ -72,11 +72,6 @@ def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     results = parse_network_params(plan, input_args)
 
-    results["global_log_level"] = "info"
-    results["global_node_selectors"] = {}
-    results["global_tolerations"] = []
-    results["persistent"] = False
-
     return struct(
         observability=struct(
             enabled=results["observability"]["enabled"],
@@ -405,23 +400,19 @@ def parse_network_params(plan, input_args):
         input_args.get("op_contract_deployer_params", {})
     )
 
+    # configure global args
+
+    results["global_log_level"] = "info"
+    results["global_node_selectors"] = {}
+    results["global_tolerations"] = []
+    results["persistent"] = False
+
     results["global_log_level"] = input_args.get("global_log_level", "info")
+    results["global_node_selectors"].update(input_args.get("global_node_selectors", {}))
+    results["global_tolerations"] = input_args.get("global_tolerations", [])
+    results["persistent"] = input_args.get("persistent", False)
 
     return results
-
-
-def default_optimism_params():
-    return {
-        "observability": default_observability_params(),
-        "interop": default_interop_params(),
-        "altda": default_altda_deploy_config(),
-        "chains": default_chains(),
-        "op_contract_deployer_params": default_op_contract_deployer_params(),
-        "global_log_level": "info",
-        "global_node_selectors": {},
-        "global_tolerations": [],
-        "persistent": False,
-    }
 
 
 def default_observability_params():

@@ -187,6 +187,7 @@ def get_config(
         "--discovery.port={0}".format(discovery_port),
         "--port={0}".format(discovery_port),
         "--rpc.eth-proof-window=302400",
+        "-" + log_level,
     ]
 
     # configure files
