@@ -731,7 +731,7 @@ optimism_package:
     enabled: false
 ```
 
-You can provide custom dashboard sources to have Grafana pre-populated with your preferred dashboards:
+You can provide custom dashboard sources to have Grafana pre-populated with your preferred dashboards. Each source should be a URL to a Github repository directory containing at minimum a `dashboards` directory:
 
 ```yaml
 optimism_package:
@@ -740,6 +740,8 @@ optimism_package:
       dashboard_sources:
         - github.com/<org>/<repo>/<path-to-resources>
 ```
+
+See [grafana-dashboards-public](https://github.com/ethereum-optimism/grafana-dashboards-public) for more info.
 
 To access the Grafana UI, you can use the following command after starting the enclave:
 
