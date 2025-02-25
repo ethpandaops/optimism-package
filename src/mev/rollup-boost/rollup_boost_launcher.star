@@ -96,11 +96,11 @@ def get_config(
 
     public_ports = {}
     cmd = [
-        "--jwt-path=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--l2-jwt-path=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--l2-url={0}".format(L2_EXECUTION_ENGINE_ENDPOINT),
+        "--builder-jwt-path=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--builder-url={0}".format(BUILDER_EXECUTION_ENGINE_ENDPOINT),
         "--rpc-port={0}".format(RPC_PORT_NUM),
-        "--boost-sync",
         "--log-level=debug",
     ]
 
