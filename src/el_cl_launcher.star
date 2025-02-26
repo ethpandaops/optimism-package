@@ -289,7 +289,9 @@ def launch(
                     client_name="external-builder",
                 )
             else:
-                sequencer_context = all_el_contexts[0] if len(all_el_contexts) > 0 else None
+                sequencer_context = (
+                    all_el_contexts[0] if len(all_el_contexts) > 0 else None
+                )
                 el_builder_context = el_builder_launch_method(
                     plan,
                     el_builder_launcher,
@@ -300,7 +302,7 @@ def launch(
                     el_tolerations,
                     node_selectors,
                     all_el_contexts,
-                    False, #sequencer_enabled
+                    False,  # sequencer_enabled
                     sequencer_context,
                     observability_helper,
                     interop_params,
