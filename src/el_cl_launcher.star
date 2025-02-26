@@ -22,8 +22,9 @@ hildr = import_module("./cl/hildr/hildr_launcher.star")
 
 # MEV
 rollup_boost = import_module("./mev/rollup-boost/rollup_boost_launcher.star")
-op_geth_builder = import_module("./el/op-geth/op_geth_builder_launcher.star")
-op_reth_builder = import_module("./el/op-reth/op_reth_builder_launcher.star")
+op_geth_builder = import_module("./builder/op-geth/op_geth_launcher.star")
+op_reth_builder = import_module("./builder/op-reth/op_reth_launcher.star")
+op_rbuilder_builder = import_module("./builder/op-rbuilder/op_rbuilder_launcher.star")
 op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
 
 
@@ -112,6 +113,15 @@ def launch(
                 network_params.network_id,
             ),
             "launch_method": op_reth_builder.launch,
+        },
+        "op-rbuilder": {
+            "launcher": op_rbuilder_builder.new_op_rbuilder_builder_launcher(
+                deployment_output,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": op_rbuilder_builder.launch,
         },
     }
 
@@ -403,6 +413,11 @@ def launch(
                     },
                 )
             all_cl_contexts.append(cl_builder_context)
+
+        # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
+        # and all_cl_contexts[0] are used
+        all_el_contexts.insert(0, el_context)
+        all_cl_contexts.insert(0, cl_context)
 
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts

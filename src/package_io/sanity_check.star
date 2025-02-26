@@ -71,6 +71,7 @@ PARTICIPANT_CATEGORIES = {
         "cl_max_mem",
         "el_builder_type",
         "el_builder_image",
+        "el_builder_key",
         "cl_builder_type",
         "cl_builder_image",
         "node_selectors",
