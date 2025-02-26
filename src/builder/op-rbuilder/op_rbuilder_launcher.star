@@ -23,6 +23,7 @@ ethereum_package_input_parser = import_module(
 constants = import_module("../../package_io/constants.star")
 observability = import_module("../../observability/observability.star")
 util = import_module("../../util.star")
+interop_constants = import_module("../../interop/constants.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -114,6 +115,7 @@ def launch(
         sequencer_enabled,
         sequencer_context,
         observability_helper,
+        interop_params,
     )
 
     service = plan.add_service(service_name, config)
@@ -155,6 +157,7 @@ def get_config(
     sequencer_enabled,
     sequencer_context,
     observability_helper,
+    interop_params,
 ):
     discovery_port = DISCOVERY_PORT_NUM
     ports = dict(get_used_ports(discovery_port))
@@ -237,6 +240,11 @@ def get_config(
     builder_secret_key = participant.el_builder_key
     if builder_secret_key != "":
         cmd.append("--rollup.builder-secret-key={0}".format(builder_secret_key))
+
+    if interop_params.enabled:
+        cmd.append(
+            "--rollup.supervisor-url={0}".format(interop_constants.SUPERVISOR_ENDPOINT)
+        )
 
     config_args = {
         "image": participant.el_builder_image,
