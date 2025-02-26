@@ -266,6 +266,10 @@ def launch(
             interop_params,
         )
 
+        # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
+        # and all_cl_contexts[0] are used
+        all_el_contexts.insert(0, el_context)
+
         for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
             observability.register_node_metrics_job(
                 observability_helper, el_context.client_name, "execution", metrics_info
@@ -285,6 +289,9 @@ def launch(
                     client_name="external-builder",
                 )
             else:
+                sequencer_context = (
+                    all_el_contexts[0] if len(all_el_contexts) > 0 else None
+                )
                 el_builder_context = el_builder_launch_method(
                     plan,
                     el_builder_launcher,
@@ -295,7 +302,7 @@ def launch(
                     el_tolerations,
                     node_selectors,
                     all_el_contexts,
-                    sequencer_enabled,
+                    False,  # sequencer_enabled
                     sequencer_context,
                     observability_helper,
                     interop_params,
@@ -349,6 +356,10 @@ def launch(
             da_server_context,
         )
 
+        # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
+        # and all_cl_contexts[0] are used
+        all_cl_contexts.insert(0, cl_context)
+
         for metrics_info in [x for x in cl_context.cl_nodes_metrics_info if x != None]:
             observability.register_node_metrics_job(
                 observability_helper,
@@ -392,11 +403,6 @@ def launch(
                     },
                 )
             all_cl_contexts.append(cl_builder_context)
-
-        # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
-        # and all_cl_contexts[0] are used
-        all_el_contexts.insert(0, el_context)
-        all_cl_contexts.insert(0, cl_context)
 
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts
