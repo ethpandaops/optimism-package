@@ -19,9 +19,34 @@ CANNED_VALUES = {
 }
 
 
+def deploy_prestate_builder(
+    plan, image):
+    return plan.add_service(
+        name="prestate-builder",
+        description = "add a prestate builder svc",
+        config = ServiceConfig(
+            image = image,
+            ports = {
+                "http": PortSpec(
+                    number = 8080,
+                    application_protocol = "http",
+                ),
+            }
+        )
+    )
+
 def deploy_contracts(
     plan, priv_key, l1_config_env_vars, optimism_args, l1_network, altda_args
 ):
+    prestate_builder_image = optimism_args.op_contract_deployer_params.prestate_builder_image
+    prestate_builder_url = None
+    if prestate_builder_image:
+        prestate_builder = deploy_prestate_builder(
+            plan,
+            prestate_builder_image,
+        )
+        prestate_builder_url = "http://{0}:{1}".format(prestate_builder.hostname, prestate_builder.ports["http"].number)
+
     l2_chain_ids_list = [
         str(chain.network_params.network_id) for chain in optimism_args.chains
     ]
@@ -230,7 +255,7 @@ def deploy_contracts(
                     network_id
                 ),
             ]
-        )
+        )    
 
     op_deployer_output = plan.run_sh(
         name="op-deployer-apply",
@@ -248,6 +273,26 @@ def deploy_contracts(
         },
         run=" && ".join(apply_cmds),
     )
+
+    # TODO: actually integrate prestate builder into apply command
+    # The curl command shown here is just to demonstrate the prestate generation.
+    # We need the dispute games to be configured
+    # We also need to upload the interop dependency set if applicable
+    if prestate_builder_url:
+        prestate_build_cmd = " && ".join([
+            "cd /network-data",
+            "find . -name \"rollup-*.json\" -o -name \"genesis-*.json\" | xargs printf \" -F \\\"files[]=@%s\\\"\" | xargs curl -X POST -H 'Content-Type: multipart/form-data' " + prestate_builder_url,
+            "curl -q " + prestate_builder_url + "/info.json",
+        ])
+        plan.run_sh(
+            name="prestate-builder",
+            description=prestate_build_cmd,
+            image=utils.DEPLOYMENT_UTILS_IMAGE,
+            files={
+                "/network-data": op_deployer_output.files_artifacts[0],
+            },
+            run=prestate_build_cmd,
+        )
 
     for chain in optimism_args.chains:
         plan.run_sh(
@@ -268,7 +313,10 @@ def deploy_contracts(
             run='jq --from-file /fund-script/gen2spec.jq < "/network-data/genesis-$CHAIN_ID.json" > "/network-data/chainspec-$CHAIN_ID.json"',
         )
 
-    return op_deployer_output.files_artifacts[0]
+    return struct(
+        output = op_deployer_output.files_artifacts[0],
+        prestate_builder_url = prestate_builder_url,
+    )
 
 
 def chain_key(index, key):

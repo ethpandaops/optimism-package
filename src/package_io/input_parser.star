@@ -248,6 +248,9 @@ def input_parser(plan, input_args):
             global_deploy_overrides=results["op_contract_deployer_params"][
                 "global_deploy_overrides"
             ],
+            prestate_builder_image=results["op_contract_deployer_params"][
+                "prestate_builder_image"
+            ],
         ),
         global_log_level=results["global_log_level"],
         global_node_selectors=results["global_node_selectors"],
@@ -609,6 +612,7 @@ def default_op_contract_deployer_params():
         "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz",
         "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz",
         "global_deploy_overrides": default_op_contract_deployer_global_deploy_overrides(),
+        "prestate_builder_image": "",
     }
 
 
