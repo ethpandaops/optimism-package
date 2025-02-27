@@ -129,6 +129,7 @@ def test_launch_with_defaults(plan):
         el_service_config.cmd,
         [
             "node",
+            "-vvv",
             "--datadir=/data/op-reth/execution-data",
             "--chain=/network-configs/genesis-{0}.json".format(
                 chain.network_params.network_id
