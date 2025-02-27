@@ -1,3 +1,4 @@
+constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 
 ethereum_package_shared_utils = import_module(
@@ -5,8 +6,6 @@ ethereum_package_shared_utils = import_module(
 )
 
 SERVICE_NAME = "grafana"
-
-HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER_UINT16 = 3000
 
 TEMPLATES_FILEPATH = "./templates"
@@ -18,7 +17,7 @@ DATASOURCE_CONFIG_REL_FILEPATH = "datasources/datasource.yml"
 CONFIG_DIRPATH_ON_SERVICE = "/config"
 
 USED_PORTS = {
-    HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+    constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
         HTTP_PORT_NUMBER_UINT16,
         ethereum_package_shared_utils.TCP_PROTOCOL,
         ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -34,23 +33,21 @@ def launch_grafana(
 ):
     datasource_config_template = read_file(DATASOURCE_CONFIG_TEMPLATE_FILEPATH)
 
-    grafana_config_artifact_name = upload_grafana_config(
+    config_artifact_name = upload_grafana_config(
         plan,
         datasource_config_template,
         prometheus_private_url,
     )
 
     config = get_config(
-        grafana_config_artifact_name,
+        config_artifact_name,
         global_node_selectors,
         grafana_params,
     )
 
     service = plan.add_service(SERVICE_NAME, config)
 
-    service_url = "http://{0}:{1}".format(
-        service.ip_address, service.ports[HTTP_PORT_ID].number
-    )
+    service_url = util.make_service_http_url(service)
 
     provision_dashboards(plan, service_url, grafana_params.dashboard_sources)
 
@@ -71,11 +68,11 @@ def upload_grafana_config(
         DATASOURCE_CONFIG_REL_FILEPATH: datasource_template_and_data,
     }
 
-    grafana_config_artifact_name = plan.render_templates(
+    config_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, name="grafana-config"
     )
 
-    return grafana_config_artifact_name
+    return config_artifact_name
 
 
 def new_datasource_config_template_data(prometheus_url):
@@ -83,7 +80,7 @@ def new_datasource_config_template_data(prometheus_url):
 
 
 def get_config(
-    grafana_config_artifact_name,
+    config_artifact_name,
     node_selectors,
     grafana_params,
 ):
@@ -98,7 +95,7 @@ def get_config(
             # "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
         },
         files={
-            CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifact_name,
+            CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
         },
         min_cpu=grafana_params.min_cpu,
         max_cpu=grafana_params.max_cpu,
