@@ -20,7 +20,17 @@ CANNED_VALUES = {
 
 
 def deploy_prestate_builder(
-    plan, image):
+    plan,
+    image,
+):
+    """Deploys the prestate builder service
+
+    Args:
+        plan: The plan object.
+        image (str): The image to use for the service.
+    Returns:
+        Service: The prestate builder service.
+    """
     return plan.add_service(
         name="prestate-builder",
         description = "add a prestate builder svc",
@@ -36,14 +46,31 @@ def deploy_prestate_builder(
     )
 
 def deploy_contracts(
-    plan, priv_key, l1_config_env_vars, optimism_args, l1_network, altda_args
+    plan,
+    priv_key,
+    l1_config_env_vars,
+    optimism_args,
+    l1_network,
+    altda_args,
 ):
+    """Deploys the contracts
+
+    Args:
+        plan: The plan object.
+        priv_key (str): The private key.
+        l1_config_env_vars (dict): The L1 config environment variables.
+        optimism_args (dict): The optimism arguments.
+        l1_network (str): The L1 network.
+        altda_args (dict): The altda arguments.
+    Returns:
+        struct: The op-deployer output and prestate builder URL.
+    """
     prestate_builder_image = optimism_args.op_contract_deployer_params.prestate_builder_image
     prestate_builder_url = None
     if prestate_builder_image:
         prestate_builder = deploy_prestate_builder(
-            plan,
-            prestate_builder_image,
+            plan = plan,
+            image = prestate_builder_image,
         )
         prestate_builder_url = "http://{0}:{1}".format(prestate_builder.hostname, prestate_builder.ports["http"].number)
 
@@ -151,7 +178,7 @@ def deploy_contracts(
             "faultGameAbsolutePrestate": absolute_prestate,
         }
 
-    for i, chain in enumerate(optimism_args.chains):
+    for chain in optimism_args.chains:
         chain_id = str(chain.network_params.network_id)
         intent_chain = dict(CANNED_VALUES)
         intent_chain.update(

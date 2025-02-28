@@ -38,6 +38,25 @@ def launch(
     observability_helper,
     prestates_url,
 ):
+    """Launches the op-challenger service
+
+    Args:
+        plan: The plan object.
+        l2_num (int): The L2 chain index.
+        service_name (str): The name of the service.
+        image (str): The image to use for the service.
+        el_context (dict): The EL context.
+        cl_context (dict): The CL context.
+        l1_config_env_vars (dict): The L1 config environment variables.
+        deployment_output (dict): The deployment output.
+        network_params (dict): The network parameters.
+        challenger_params (dict): The challenger parameters.
+        interop_params (dict): The interop parameters.
+        observability_helper (dict): The observability helper.
+        prestates_url (str): The prestate URL.
+    Returns:
+        str: The name of the challenger service.
+    """
     challenger_service_name = "{0}".format(service_name)
 
     config = get_challenger_config(
@@ -78,6 +97,24 @@ def get_challenger_config(
     observability_helper,
     prestates_url,
 ):
+    """Gets the challenger config
+
+    Args:
+        plan (dict): The plan object.
+        l2_num (int): The L2 chain index.
+        image (str): The image to use for the service.
+        el_context (dict): The EL context.
+        cl_context (dict): The CL context.
+        l1_config_env_vars (dict): The L1 config environment variables.
+        deployment_output (dict): The deployment output.
+        network_params (dict): The network parameters.
+        challenger_params (dict): The challenger parameters.
+        interop_params (dict): The interop parameters.
+        observability_helper (dict): The observability helper.
+        prestates_url (str): The prestate URL.
+    Returns:
+        ServiceConfig: The challenger config.
+    """
     ports = dict(get_used_ports())
 
     game_factory_address = util.read_network_config_value(
@@ -140,19 +177,25 @@ def get_challenger_config(
     )
 
     return ServiceConfig(
-        image=image,
-        ports=ports,
-        entrypoint=ENTRYPOINT_ARGS,
-        cmd=[cmd],
-        files=files,
-        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        image = image,
+        ports = ports,
+        entrypoint = ENTRYPOINT_ARGS,
+        cmd = [cmd],
+        files = files,
+        private_ip_address_placeholder = ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
 
 def get_prestates_flag(prestates_url, challenger_params):
+    """Gets the prestates flag
+
+    Args:
+        prestates_url (str): The prestate URL.
+        challenger_params (dict): The challenger parameters.
+    Returns:
+        str: The prestates flag.
+    """
     if (
-        challenger_params.cannon_prestate_path
-        and challenger_params.cannon_prestates_url
-    ):
+        challenger_params.cannon_prestate_path and challenger_params.cannon_prestates_url):
         fail("Only one of cannon_prestate_path and cannon_prestates_url can be set")
 
     if prestates_url:

@@ -144,11 +144,6 @@ def run(plan, args):
     # challenger must launch after supervisor because it depends on it for interop
     for l2_num, l2 in enumerate(l2s):
         chain = optimism_args_with_right_defaults.chains[l2_num]
-        op_challenger_image = (
-            chain.challenger_params.image
-            if chain.challenger_params.image != ""
-            else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
-        )
         op_challenger_launcher.launch(
             plan = plan,
             l2_num = l2_num,
