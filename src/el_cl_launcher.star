@@ -272,7 +272,11 @@ def launch(
 
         for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
             observability.register_node_metrics_job(
-                observability_helper, el_context.client_name, "execution", metrics_info
+                observability_helper,
+                el_context.client_name,
+                "execution",
+                network_params.network,
+                metrics_info,
             )
 
         if rollup_boost_enabled and sequencer_enabled:
@@ -314,6 +318,7 @@ def launch(
                         observability_helper,
                         el_builder_context.client_name,
                         "execution-builder",
+                        network_params.network,
                         metrics_info,
                     )
             rollup_boost_image = (
@@ -365,6 +370,7 @@ def launch(
                 observability_helper,
                 cl_context.client_name,
                 "beacon",
+                network_params.network,
                 metrics_info,
                 {
                     "supernode": str(cl_context.supernode),
@@ -397,6 +403,7 @@ def launch(
                     observability_helper,
                     cl_builder_context.client_name,
                     "beacon-builder",
+                    network_params.network,
                     metrics_info,
                     {
                         "supernode": str(cl_builder_context.supernode),

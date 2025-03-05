@@ -44,6 +44,7 @@ def launch(
     gs_proposer_private_key,
     game_factory_address,
     proposer_params,
+    network_params,
     observability_helper,
 ):
     proposer_service_name = "{0}".format(service_name)
@@ -63,7 +64,9 @@ def launch(
     service = plan.add_service(service_name, config)
     http_url = util.make_service_http_url(service)
 
-    observability.register_op_service_metrics_job(observability_helper, service)
+    observability.register_op_service_metrics_job(
+        observability_helper, service, network_params.network
+    )
 
     return http_url
 

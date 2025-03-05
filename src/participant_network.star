@@ -90,6 +90,7 @@ def launch_participant_network(
         l1_config_env_vars,
         batcher_key,
         batcher_params,
+        network_params,
         observability_helper,
         da_server_context,
     )
@@ -120,6 +121,7 @@ def launch_participant_network(
         proposer_key,
         game_factory_address,
         proposer_params,
+        network_params,
         observability_helper,
     )
 

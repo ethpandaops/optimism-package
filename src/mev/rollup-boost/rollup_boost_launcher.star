@@ -66,7 +66,6 @@ def launch(
         engine_rpc_port_num=RPC_PORT_NUM,
         rpc_http_url=http_url,
         service_name=service_name,
-        el_metrics_info=None,
     )
 
 
