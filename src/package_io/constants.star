@@ -1,3 +1,5 @@
+NETWORK_NAME = "kurtosis"
+
 HTTP_PORT_ID = "http"
 RPC_PORT_ID = "rpc"
 WS_PORT_ID = "ws"

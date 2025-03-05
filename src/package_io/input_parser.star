@@ -2,6 +2,7 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
 
 DEFAULT_EL_IMAGES = {
@@ -542,7 +543,7 @@ def default_chains():
 
 def default_network_params():
     return {
-        "network": "kurtosis",
+        "network": constants.NETWORK_NAME,
         "network_id": "2151908",
         "name": "op-kurtosis",
         "seconds_per_slot": 2,
