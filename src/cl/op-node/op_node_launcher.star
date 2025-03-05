@@ -15,7 +15,6 @@ ethereum_package_input_parser = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
-
 util = import_module("../../util.star")
 observability = import_module("../../observability/observability.star")
 interop_constants = import_module("../../interop/constants.star")
@@ -24,10 +23,6 @@ interop_constants = import_module("../../interop/constants.star")
 
 # The Docker container runs as the "op-node" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-node/op-node-beacon-data"
-# Port IDs
-BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
-BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
-BEACON_HTTP_PORT_ID = "http"
 
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9003
@@ -36,13 +31,13 @@ BEACON_HTTP_PORT_NUM = 8547
 
 def get_used_ports(discovery_port):
     used_ports = {
-        BEACON_TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             discovery_port, ethereum_package_shared_utils.TCP_PROTOCOL, wait=None
         ),
-        BEACON_UDP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.UDP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             discovery_port, ethereum_package_shared_utils.UDP_PROTOCOL, wait=None
         ),
-        BEACON_HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             BEACON_HTTP_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -83,7 +78,7 @@ def launch(
         endpoint="/",
         content_type="application/json",
         body='{"jsonrpc":"2.0","method":"opp2p_self","params":[],"id":1}',
-        port_id=BEACON_HTTP_PORT_ID,
+        port_id=constants.HTTP_PORT_ID,
         extract={
             "enr": ".result.ENR",
             "multiaddr": ".result.addresses[0]",
@@ -114,14 +109,10 @@ def launch(
         da_server_context,
     )
 
-    beacon_service = plan.add_service(service_name, config)
+    service = plan.add_service(service_name, config)
+    service_url = util.make_service_http_url(service)
 
-    beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
-    beacon_http_url = "http://{0}:{1}".format(
-        beacon_service.ip_address, beacon_http_port.number
-    )
-
-    metrics_info = observability.new_metrics_info(observability_helper, beacon_service)
+    metrics_info = observability.new_metrics_info(observability_helper, service)
 
     response = plan.request(
         recipe=beacon_node_identity_recipe, service_name=service_name
@@ -134,9 +125,9 @@ def launch(
     return ethereum_package_cl_context.new_cl_context(
         client_name="op-node",
         enr=beacon_node_enr,
-        ip_addr=beacon_service.ip_address,
-        http_port=beacon_http_port.number,
-        beacon_http_url=beacon_http_url,
+        ip_addr=service.ip_address,
+        http_port=util.get_service_http_port_num(service),
+        beacon_http_url=service_url,
         cl_nodes_metrics_info=[metrics_info],
         beacon_service_name=service_name,
         multiaddr=beacon_multiaddr,
@@ -164,10 +155,7 @@ def get_beacon_config(
 ):
     ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
 
-    EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-        el_context.ip_addr,
-        el_context.engine_rpc_port_num,
-    )
+    EXECUTION_ENGINE_ENDPOINT = util.make_execution_engine_url(el_context)
 
     cmd = [
         "op-node",

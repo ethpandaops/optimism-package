@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ns-authz-script
+data:
+  watcher.sh: |-
+{{ (.Files.Get "watcher.sh") | indent 4 }}

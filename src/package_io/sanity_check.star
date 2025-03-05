@@ -1,6 +1,21 @@
+ROOT_PARAMS = [
+    "observability",
+    "interop",
+    "altda_deploy_config",
+    "chains",
+    "op_contract_deployer_params",
+    "global_log_level",
+    "global_node_selectors",
+    "global_tolerations",
+    "persistent",
+]
+
 OBSERVABILITY_PARAMS = [
     "enabled",
+    "enable_k8s_features",
     "prometheus_params",
+    "loki_params",
+    "promtail_params",
     "grafana_params",
 ]
 
@@ -8,6 +23,22 @@ PROMETHEUS_PARAMS = [
     "image",
     "storage_tsdb_retention_time",
     "storage_tsdb_retention_size",
+    "min_cpu",
+    "max_cpu",
+    "min_mem",
+    "max_mem",
+]
+
+LOKI_PARAMS = [
+    "image",
+    "min_cpu",
+    "max_cpu",
+    "min_mem",
+    "max_mem",
+]
+
+PROMTAIL_PARAMS = [
+    "image",
     "min_cpu",
     "max_cpu",
     "min_mem",
@@ -124,18 +155,6 @@ ADDITIONAL_SERVICES_PARAMS = [
     "da_server",
 ]
 
-ROOT_PARAMS = [
-    "observability",
-    "interop",
-    "altda_deploy_config",
-    "chains",
-    "op_contract_deployer_params",
-    "global_log_level",
-    "global_node_selectors",
-    "global_tolerations",
-    "persistent",
-]
-
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",
     "rpc_kind",
@@ -191,6 +210,22 @@ def sanity_check(plan, optimism_config):
                 optimism_config["observability"],
                 "prometheus_params",
                 PROMETHEUS_PARAMS,
+            )
+
+        if "loki_params" in optimism_config["observability"]:
+            validate_params(
+                plan,
+                optimism_config["observability"],
+                "loki_params",
+                LOKI_PARAMS,
+            )
+
+        if "promtail_params" in optimism_config["observability"]:
+            validate_params(
+                plan,
+                optimism_config["observability"],
+                "promtail_params",
+                PROMTAIL_PARAMS,
             )
 
         if "grafana_params" in optimism_config["observability"]:
