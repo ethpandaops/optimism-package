@@ -83,10 +83,11 @@ def new_metrics_job(
     }
 
 
-def register_op_service_metrics_job(helper, service):
+def register_op_service_metrics_job(helper, service, network_name):
     register_service_metrics_job(
         helper,
         service_name=service.name,
+        network_name=network_name,
         endpoint=util.make_service_url_authority(service, METRICS_PORT_ID),
     )
 
@@ -94,6 +95,7 @@ def register_op_service_metrics_job(helper, service):
 def register_service_metrics_job(
     helper,
     service_name,
+    network_name,
     endpoint,
     metrics_path="",
     additional_labels={},
@@ -101,8 +103,8 @@ def register_service_metrics_job(
 ):
     labels = {
         "service": service_name,
-        "namespace": "kurtosis",
-        "stack_optimism_io_network": "kurtosis",
+        "namespace": service_name,
+        "stack_optimism_io_network": network_name,
     }
     labels.update(additional_labels)
 
@@ -119,7 +121,12 @@ def register_service_metrics_job(
 
 
 def register_node_metrics_job(
-    helper, client_name, client_type, node_metrics_info, additional_labels={}
+    helper,
+    client_name,
+    client_type,
+    network_name,
+    node_metrics_info,
+    additional_labels={},
 ):
     labels = {
         "client_type": client_type,
@@ -144,6 +151,7 @@ def register_node_metrics_job(
     register_service_metrics_job(
         helper,
         service_name=node_metrics_info[METRICS_INFO_NAME_KEY],
+        network_name=network_name,
         endpoint=node_metrics_info[METRICS_INFO_URL_KEY],
         metrics_path=node_metrics_info[METRICS_INFO_PATH_KEY],
         additional_labels=labels,
