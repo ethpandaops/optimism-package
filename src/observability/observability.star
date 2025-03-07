@@ -83,7 +83,7 @@ def new_metrics_job(
     }
 
 
-def register_op_service_metrics_job(helper, service, network_name):
+def register_op_service_metrics_job(helper, service, network_name=None):
     register_service_metrics_job(
         helper,
         service_name=service.name,
@@ -95,8 +95,8 @@ def register_op_service_metrics_job(helper, service, network_name):
 def register_service_metrics_job(
     helper,
     service_name,
-    network_name,
     endpoint,
+    network_name=None,
     metrics_path="",
     additional_labels={},
     scrape_interval=DEFAULT_SCRAPE_INTERVAL,
