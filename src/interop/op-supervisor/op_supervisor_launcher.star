@@ -72,12 +72,11 @@ def launch(
         observability_helper,
     )
 
-    supervisor_service = plan.add_service(
-        interop_constants.SUPERVISOR_SERVICE_NAME, config
-    )
+    service = plan.add_service(interop_constants.SUPERVISOR_SERVICE_NAME, config)
 
     observability.register_op_service_metrics_job(
-        observability_helper, supervisor_service, supervisor_params.network
+        observability_helper,
+        service,
     )
 
     return "op_supervisor"

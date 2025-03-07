@@ -123,7 +123,6 @@ def input_parser(plan, input_args):
                     "dependency_set"
                 ],
                 extra_params=results["interop"]["supervisor_params"]["extra_params"],
-                network=results["interop"]["supervisor_params"]["network"],
             ),
         ),
         altda_deploy_config=struct(
@@ -516,7 +515,6 @@ def default_supervisor_params():
         "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
         "dependency_set": "",
         "extra_params": [],
-        "network": constants.NETWORK_NAME,
     }
 
 

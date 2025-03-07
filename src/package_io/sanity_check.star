@@ -63,7 +63,6 @@ SUPERVISOR_PARAMS = [
     "image",
     "dependency_set",
     "extra_params",
-    "network",
 ]
 
 ALTDA_DEPLOY_CONFIG_PARAMS = [
