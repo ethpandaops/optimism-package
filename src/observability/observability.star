@@ -104,8 +104,10 @@ def register_service_metrics_job(
     labels = {
         "service": service_name,
         "namespace": service_name,
-        "stack_optimism_io_network": network_name,
     }
+    if(network_name != None):
+        labels["stack_optimism_io_network"] = network_name
+
     labels.update(additional_labels)
 
     add_metrics_job(
