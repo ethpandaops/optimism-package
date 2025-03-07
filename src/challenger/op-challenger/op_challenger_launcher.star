@@ -125,6 +125,11 @@ def get_challenger_config(
 
     if interop_params.enabled:
         cmd.append("--supervisor-rpc=" + interop_constants.SUPERVISOR_ENDPOINT)
+        # TraceTypeSupper{Cannon|Permissioned} needs --cannon-depset-config to be set
+        # Added at https://github.com/ethereum-optimism/optimism/pull/14666
+        # Temporary fix: Add a dummy flag
+        # Tracked at issue https://github.com/ethpandaops/optimism-package/issues/189
+        cmd.append("--cannon-depset-config=dummy-file.json")
 
     if (
         challenger_params.cannon_prestate_path
