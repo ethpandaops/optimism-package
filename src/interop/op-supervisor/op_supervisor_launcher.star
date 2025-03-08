@@ -77,7 +77,7 @@ def launch(
     )
 
     observability.register_op_service_metrics_job(
-        observability_helper, supervisor_service, supervisor_params.network
+        observability_helper, supervisor_service
     )
 
     return "op_supervisor"
