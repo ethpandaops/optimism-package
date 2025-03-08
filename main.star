@@ -1,19 +1,21 @@
-ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
-contract_deployer = import_module("./src/contracts/contract_deployer.star")
-l2_launcher = import_module("./src/l2.star")
-op_supervisor_launcher = import_module(
-    "./src/interop/op-supervisor/op_supervisor_launcher.star"
+imports = import_module("/imports.star")
+
+ethereum_package = imports.load_module("main.star", package_id="ethereum-package")
+contract_deployer = imports.load_module("src/contracts/contract_deployer.star")
+l2_launcher = imports.load_module("src/l2.star")
+op_supervisor_launcher = imports.load_module(
+    "src/interop/op-supervisor/op_supervisor_launcher.star"
 )
-op_challenger_launcher = import_module(
-    "./src/challenger/op-challenger/op_challenger_launcher.star"
+op_challenger_launcher = imports.load_module(
+    "src/challenger/op-challenger/op_challenger_launcher.star"
 )
 
-observability = import_module("./src/observability/observability.star")
+observability = imports.load_module("src/observability/observability.star")
 
-wait_for_sync = import_module("./src/wait/wait_for_sync.star")
-input_parser = import_module("./src/package_io/input_parser.star")
-ethereum_package_static_files = import_module(
-    "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
+wait_for_sync = imports.load_module("src/wait/wait_for_sync.star")
+input_parser = imports.load_module("src/package_io/input_parser.star")
+ethereum_package_static_files = imports.load_module(
+    "src/static_files/static_files.star", package_id="ethereum-package"
 )
 
 
