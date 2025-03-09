@@ -1,6 +1,6 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-prometheus = imports.load_module("main.star", package_id="prometheus-package")
+_prometheus = _imports.load_module("main.star", package_id="prometheus-package")
 
 
 def launch_prometheus(
@@ -10,7 +10,7 @@ def launch_prometheus(
 ):
     prometheus_params = observability_helper.params.prometheus_params
 
-    prometheus_url = prometheus.run(
+    prometheus_url = _prometheus.run(
         plan,
         observability_helper.metrics_jobs,
         "prometheus",

@@ -1,14 +1,14 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-el_cl_client_launcher = imports.load_module("src/el_cl_launcher.star")
-participant_module = imports.load_module("src/participant.star")
-input_parser = imports.load_module("src/package_io/input_parser.star")
-op_batcher_launcher = imports.load_module("src/batcher/op-batcher/op_batcher_launcher.star")
-op_challenger_launcher = imports.load_module(
+_el_cl_client_launcher = _imports.load_module("src/el_cl_launcher.star")
+_participant_module = _imports.load_module("src/participant.star")
+_input_parser = _imports.load_module("src/package_io/input_parser.star")
+_op_batcher_launcher = _imports.load_module("src/batcher/op-batcher/op_batcher_launcher.star")
+_op_challenger_launcher = _imports.load_module(
     "src/challenger/op-challenger/op_challenger_launcher.star"
 )
-op_proposer_launcher = imports.load_module("src/proposer/op-proposer/op_proposer_launcher.star")
-util = imports.load_module("src/util.star")
+_op_proposer_launcher = _imports.load_module("src/proposer/op-proposer/op_proposer_launcher.star")
+_util = _imports.load_module("src/util.star")
 
 
 def launch_participant_network(
@@ -35,7 +35,7 @@ def launch_participant_network(
 ):
     num_participants = len(participants)
     # First EL and sequencer CL
-    all_el_contexts, all_cl_contexts = el_cl_client_launcher.launch(
+    all_el_contexts, all_cl_contexts = _el_cl_client_launcher.launch(
         plan,
         jwt_file,
         network_params,
@@ -63,7 +63,7 @@ def launch_participant_network(
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
 
-        participant_entry = participant_module.new_participant(
+        participant_entry = _participant_module.new_participant(
             el_type,
             cl_type,
             el_context,
@@ -72,7 +72,7 @@ def launch_participant_network(
 
         all_participants.append(participant_entry)
 
-    batcher_key = util.read_network_config_value(
+    batcher_key = _util.read_network_config_value(
         plan,
         deployment_output,
         "batcher-{0}".format(network_params.network_id),
@@ -81,9 +81,9 @@ def launch_participant_network(
     op_batcher_image = (
         batcher_params.image
         if batcher_params.image != ""
-        else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
+        else _input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
     )
-    op_batcher_launcher.launch(
+    _op_batcher_launcher.launch(
         plan,
         "op-batcher-{0}".format(l2_services_suffix),
         op_batcher_image,
@@ -97,13 +97,13 @@ def launch_participant_network(
         da_server_context,
     )
 
-    game_factory_address = util.read_network_config_value(
+    game_factory_address = _util.read_network_config_value(
         plan,
         deployment_output,
         "state",
         ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
     )
-    proposer_key = util.read_network_config_value(
+    proposer_key = _util.read_network_config_value(
         plan,
         deployment_output,
         "proposer-{0}".format(network_params.network_id),
@@ -112,9 +112,9 @@ def launch_participant_network(
     op_proposer_image = (
         proposer_params.image
         if proposer_params.image != ""
-        else input_parser.DEFAULT_PROPOSER_IMAGES["op-proposer"]
+        else _input_parser.DEFAULT_PROPOSER_IMAGES["op-proposer"]
     )
-    op_proposer_launcher.launch(
+    _op_proposer_launcher.launch(
         plan,
         "op-proposer-{0}".format(l2_services_suffix),
         op_proposer_image,

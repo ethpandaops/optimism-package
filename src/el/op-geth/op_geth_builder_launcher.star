@@ -1,38 +1,38 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-ethereum_package_shared_utils = imports.load_module(
+_ethereum_package_shared_utils = _imports.load_module(
     "src/shared_utils/shared_utils.star",
     package_id="ethereum-package"
 )
 
-ethereum_package_el_context = imports.load_module(
+_ethereum_package_el_context = _imports.load_module(
     "src/el/el_context.star",
     package_id="ethereum-package"
 )
-ethereum_package_el_admin_node_info = imports.load_module(
+_ethereum_package_el_admin_node_info = _imports.load_module(
     "src/el/el_admin_node_info.star",
     package_id="ethereum-package"
 )
 
-ethereum_package_node_metrics = imports.load_module(
+_ethereum_package_node_metrics = _imports.load_module(
     "src/node_metrics_info.star",
     package_id="ethereum-package"
 )
 
-ethereum_package_input_parser = imports.load_module(
+_ethereum_package_input_parser = _imports.load_module(
     "src/package_io/input_parser.star",
     package_id="ethereum-package"
 )
 
-ethereum_package_constants = imports.load_module(
-    "src/package_io/constants.star",
+_ethereum_package_constants = _imports.load_module(
+    "src/package_io/_constants.star",
     package_id="ethereum-package"
 )
 
-constants = imports.load_module("src/package_io/constants.star")
-observability = imports.load_module("src/observability/observability.star")
-interop_constants = imports.load_module("src/interop/constants.star")
-util = imports.load_module("src/util.star")
+_constants = _imports.load_module("src/package_io/constants.star")
+_observability = _imports.load_module("src/observability/observability.star")
+_interop_constants = _imports.load_module("src/interop/constants.star")
+_util = _imports.load_module("src/util.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -61,23 +61,23 @@ EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
 def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
     used_ports = {
-        RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        RPC_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
             RPC_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+            _ethereum_package_shared_utils.TCP_PROTOCOL,
+            _ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
-        WS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            WS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
+        WS_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
+            WS_PORT_NUM, _ethereum_package_shared_utils.TCP_PROTOCOL
         ),
-        TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            discovery_port, ethereum_package_shared_utils.TCP_PROTOCOL
+        TCP_DISCOVERY_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
+            discovery_port, _ethereum_package_shared_utils.TCP_PROTOCOL
         ),
-        UDP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            discovery_port, ethereum_package_shared_utils.UDP_PROTOCOL
+        UDP_DISCOVERY_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
+            discovery_port, _ethereum_package_shared_utils.UDP_PROTOCOL
         ),
-        ENGINE_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        ENGINE_RPC_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
             ENGINE_RPC_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
+            _ethereum_package_shared_utils.TCP_PROTOCOL,
         ),
     }
     return used_ports
@@ -86,11 +86,11 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "1",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "2",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "3",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "4",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "5",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "1",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "2",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "3",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "4",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "5",
 }
 
 BUILDER_IMAGE_STR = "builder"
@@ -112,7 +112,7 @@ def launch(
     observability_helper,
     interop_params,
 ):
-    log_level = ethereum_package_input_parser.get_client_log_level_or_default(
+    log_level = _ethereum_package_input_parser.get_client_log_level_or_default(
         participant.el_builder_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
@@ -137,15 +137,15 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = ethereum_package_el_admin_node_info.get_enode_enr_for_node(
+    enode, enr = _ethereum_package_el_admin_node_info.get_enode_enr_for_node(
         plan, service_name, RPC_PORT_ID
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
-    metrics_info = observability.new_metrics_info(observability_helper, service)
+    metrics_info = _observability.new_metrics_info(observability_helper, service)
 
-    return ethereum_package_el_context.new_el_context(
+    return _ethereum_package_el_context.new_el_context(
         client_name="op-geth",
         enode=enode,
         ip_addr=service.ip_address,
@@ -201,9 +201,9 @@ def get_config(
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
-        "--authrpc.jwtsecret=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--authrpc.jwtsecret=" + _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--syncmode=full",
-        "--nat=extip:" + ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--rpc.allow-unprotected-txs",
         "--discovery.port={0}".format(discovery_port),
         "--port={0}".format(discovery_port),
@@ -212,8 +212,8 @@ def get_config(
     # configure files
 
     files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
-        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+        _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
     if persistent:
@@ -221,16 +221,16 @@ def get_config(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_builder_volume_size)
             if int(participant.el_builder_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.op_geth + "_volume_size"
+            else _constants.VOLUME_SIZE[launcher.network][
+                _constants.EL_TYPE.op_geth + "_volume_size"
             ],
         )
 
-    if launcher.network not in ethereum_package_constants.PUBLIC_NETWORKS:
+    if launcher.network not in _ethereum_package_constants.PUBLIC_NETWORKS:
         init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             "{0}/genesis-{1}.json".format(
-                ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+                _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
                 launcher.network_id,
             ),
         )
@@ -247,13 +247,13 @@ def get_config(
         cmd += [
             "--metrics",
             "--metrics.addr=0.0.0.0",
-            "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
+            "--metrics.port={0}".format(_observability.METRICS_PORT_NUM),
         ]
 
-        observability.expose_metrics_port(ports)
+        _observability.expose_metrics_port(ports)
 
     if interop_params.enabled:
-        env_vars["GETH_ROLLUP_INTEROPRPC"] = interop_constants.SUPERVISOR_ENDPOINT
+        env_vars["GETH_ROLLUP_INTEROPRPC"] = _interop_constants.SUPERVISOR_ENDPOINT
 
     if not sequencer_enabled:
         cmd.append("--rollup.sequencerhttp={0}".format(sequencer_context.rpc_http_url))
@@ -265,7 +265,7 @@ def get_config(
                 [
                     ctx.enode
                     for ctx in existing_el_clients[
-                        : ethereum_package_constants.MAX_ENODE_ENTRIES
+                        : _ethereum_package_constants.MAX_ENODE_ENTRIES
                     ]
                 ]
             )
@@ -278,7 +278,7 @@ def get_config(
     command_str = " && ".join(subcommand_strs)
 
     plan.print(">>>", participant.el_builder_image)
-    plan.print(">>>", util.label_from_image(participant.el_builder_image))
+    plan.print(">>>", _util.label_from_image(participant.el_builder_image))
 
     config_args = {
         "image": participant.el_builder_image,
@@ -286,12 +286,12 @@ def get_config(
         "cmd": [command_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
-        "private_ip_address_placeholder": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "private_ip_address_placeholder": _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
-        "labels": ethereum_package_shared_utils.label_maker(
-            client=constants.EL_TYPE.op_geth,
-            client_type=constants.CLIENT_TYPES.el,
-            image=util.label_from_image(participant.el_builder_image),
+        "labels": _ethereum_package_shared_utils.label_maker(
+            client=_constants.EL_TYPE.op_geth,
+            client_type=_constants.CLIENT_TYPES.el,
+            image=_util.label_from_image(participant.el_builder_image),
             connected_client=cl_client_name,
             extra_labels=participant.el_builder_extra_labels,
         ),

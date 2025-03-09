@@ -1,13 +1,13 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-ethereum_package_shared_utils = imports.load_module(
+_ethereum_package_shared_utils = _imports.load_module(
     "src/shared_utils/shared_utils.star",
     package_id="ethereum-package"
 )
 
-postgres = imports.load_module("main.star", package_id="postgres-package")
+_postgres = _imports.load_module("main.star", package_id="postgres-package")
 
-util = imports.load_module("src/util.star")
+_util = _imports.load_module("src/util.star")
 
 IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout-optimism:6.8.0"
 IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
@@ -29,18 +29,18 @@ BLOCKSCOUT_VERIF_MIN_MEMORY = 10
 BLOCKSCOUT_VERIF_MAX_MEMORY = 1024
 
 USED_PORTS = {
-    HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+    HTTP_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
-        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+        _ethereum_package_shared_utils.TCP_PROTOCOL,
+        _ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
 }
 
 VERIF_USED_PORTS = {
-    HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+    HTTP_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
         HTTP_PORT_NUMBER_VERIF,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
-        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+        _ethereum_package_shared_utils.TCP_PROTOCOL,
+        _ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
 }
 
@@ -55,14 +55,14 @@ def launch_blockscout(
     network_id,
 ):
     rollup_filename = "rollup-{0}".format(network_id)
-    portal_address = util.read_network_config_value(
+    portal_address = _util.read_network_config_value(
         plan, deployment_output, rollup_filename, ".deposit_contract_address"
     )
-    l1_deposit_start_block = util.read_network_config_value(
+    l1_deposit_start_block = _util.read_network_config_value(
         plan, deployment_output, rollup_filename, ".genesis.l1.number"
     )
 
-    postgres_output = postgres.run(
+    postgres_output = _postgres.run(
         plan,
         service_name="{0}-postgres{1}".format(
             SERVICE_NAME_BLOCKSCOUT, l2_services_suffix

@@ -1,30 +1,30 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-utils = imports.load_module("src/util.star")
+_utils = _imports.load_module("src/util.star")
 
-ethereum_package_shared_utils = imports.load_module(
+_ethereum_package_shared_utils = _imports.load_module(
     "src/shared_utils/shared_utils.star", 
     package_id="ethereum-package",
 )
 
-ethereum_package_constants = imports.load_module(
-    "src/package_io/constants.star",
+_ethereum_package_constants = _imports.load_module(
+    "src/package_io/_constants.star",
     package_id="ethereum-package",
 )
 
-constants = imports.load_module("src/package_io/constants.star")
-observability = imports.load_module("src/observability/observability.star")
-prometheus = imports.load_module("src/observability/prometheus/prometheus_launcher.star")
+_constants = _imports.load_module("src/package_io/constants.star")
+_observability = _imports.load_module("src/observability/observability.star")
+_prometheus = _imports.load_module("src/observability/prometheus/prometheus_launcher.star")
 
-interop_constants = imports.load_module("src/interop/constants.star")
+_interop_constants = _imports.load_module("src/interop/constants.star")
 
 
 def get_used_ports():
     used_ports = {
-        constants.RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            interop_constants.SUPERVISOR_RPC_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+        _constants.RPC_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
+            _interop_constants.SUPERVISOR_RPC_PORT_NUM,
+            _ethereum_package_shared_utils.TCP_PROTOCOL,
+            _ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
     return used_ports
@@ -62,7 +62,7 @@ def launch(
         dependency_set = create_dependency_set(chains)
         dependency_set_json = json.encode(dependency_set)
 
-    dependency_set_artifact = utils.write_to_file(
+    dependency_set_artifact = _utils.write_to_file(
         plan, dependency_set_json, DATA_DIR, DEPENDENCY_SET_FILE_NAME
     )
 
@@ -77,10 +77,10 @@ def launch(
     )
 
     supervisor_service = plan.add_service(
-        interop_constants.SUPERVISOR_SERVICE_NAME, config
+        _interop_constants.SUPERVISOR_SERVICE_NAME, config
     )
 
-    observability.register_op_service_metrics_job(
+    _observability.register_op_service_metrics_job(
         observability_helper, supervisor_service, supervisor_params.network
     )
 
@@ -103,14 +103,14 @@ def get_supervisor_config(
     # apply customizations
 
     if observability_helper.enabled:
-        observability.configure_op_service_metrics(cmd, ports)
+        _observability.configure_op_service_metrics(cmd, ports)
 
     return ServiceConfig(
         image=supervisor_params.image,
         ports=ports,
         files={
             DATA_DIR: dependency_set_artifact,
-            ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+            _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         env_vars={
             "OP_SUPERVISOR_DATADIR": "/db",
@@ -122,17 +122,17 @@ def get_supervisor_config(
                 [
                     "ws://{0}:{1}".format(
                         participant.cl_context.ip_addr,
-                        interop_constants.INTEROP_WS_PORT_NUM,
+                        _interop_constants.INTEROP_WS_PORT_NUM,
                     )
                     for l2 in l2s
                     for participant in l2.participants
                 ]
             ),
-            "OP_SUPERVISOR_L2_CONSENSUS_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+            "OP_SUPERVISOR_L2_CONSENSUS_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "OP_SUPERVISOR_RPC_ADDR": "0.0.0.0",
-            "OP_SUPERVISOR_RPC_PORT": str(interop_constants.SUPERVISOR_RPC_PORT_NUM),
+            "OP_SUPERVISOR_RPC_PORT": str(_interop_constants.SUPERVISOR_RPC_PORT_NUM),
             "OP_SUPERVISOR_RPC_ENABLE_ADMIN": "true",
         },
         cmd=cmd,
-        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

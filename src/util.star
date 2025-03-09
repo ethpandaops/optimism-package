@@ -1,5 +1,5 @@
-imports = import_module("/imports.star")
-constants = imports.load_module("src/package_io/constants.star")
+_imports = import_module("/imports.star")
+_constants = _imports.load_module("src/package_io/constants.star")
 
 DEPLOYMENT_UTILS_IMAGE = "mslipper/deployment-utils:latest"
 
@@ -90,7 +90,7 @@ def get_service_port_num(service, port_id):
 
 
 def get_service_http_port_num(service):
-    return get_service_port_num(service, constants.HTTP_PORT_ID)
+    return get_service_port_num(service, _constants.HTTP_PORT_ID)
 
 
 def make_url_authority(host, port_num):
@@ -123,11 +123,11 @@ def make_service_url_authority(service, port_id):
     )
 
 
-def make_service_http_url(service, port_id=constants.HTTP_PORT_ID):
+def make_service_http_url(service, port_id=_constants.HTTP_PORT_ID):
     return prefix_url_scheme_http(make_service_url_authority(service, port_id))
 
 
-def make_service_ws_url(service, port_id=constants.WS_PORT_ID):
+def make_service_ws_url(service, port_id=_constants.WS_PORT_ID):
     return prefix_url_scheme_ws(make_service_url_authority(service, port_id))
 
 

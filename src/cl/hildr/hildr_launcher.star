@@ -1,29 +1,29 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-ethereum_package_shared_utils = imports.load_module(
+_ethereum_package_shared_utils = _imports.load_module(
     "src/shared_utils/shared_utils.star",
     package_id="ethereum-package"
 )
 
-ethereum_package_cl_context = imports.load_module(
+_ethereum_package_cl_context = _imports.load_module(
     "src/cl/cl_context.star",
     package_id="ethereum-package"
 )
 
-ethereum_package_constants = imports.load_module(
-    "src/package_io/constants.star",
+_ethereum_package_constants = _imports.load_module(
+    "src/package_io/_constants.star",
     package_id="ethereum-package"
 )
 
-ethereum_package_input_parser = imports.load_module(
+_ethereum_package_input_parser = _imports.load_module(
     "src/package_io/input_parser.star",
     package_id="ethereum-package"
 )
 
-constants = imports.load_module("src/package_io/constants.star")
-observability = imports.load_module("src/observability/observability.star")
+_constants = _imports.load_module("src/package_io/constants.star")
+_observability = _imports.load_module("src/observability/observability.star")
 
-util = imports.load_module("src/util.star")
+_util = _imports.load_module("src/util.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 
@@ -42,16 +42,16 @@ METRICS_PATH = "/metrics"
 
 def get_used_ports(discovery_port):
     used_ports = {
-        BEACON_TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            discovery_port, ethereum_package_shared_utils.TCP_PROTOCOL, wait=None
+        BEACON_TCP_DISCOVERY_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
+            discovery_port, _ethereum_package_shared_utils.TCP_PROTOCOL, wait=None
         ),
-        BEACON_UDP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            discovery_port, ethereum_package_shared_utils.UDP_PROTOCOL, wait=None
+        BEACON_UDP_DISCOVERY_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
+            discovery_port, _ethereum_package_shared_utils.UDP_PROTOCOL, wait=None
         ),
-        constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        _constants.HTTP_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
             BEACON_HTTP_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+            _ethereum_package_shared_utils.TCP_PROTOCOL,
+            _ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
     return used_ports
@@ -60,11 +60,11 @@ def get_used_ports(discovery_port):
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "ERROR",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "WARN",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "INFO",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "ERROR",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "WARN",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "INFO",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
 }
 
 
@@ -89,7 +89,7 @@ def launch(
     #     endpoint="/",
     #     content_type="application/json",
     #     body='{"jsonrpc":"2.0","method":"opp2p_self","params":[],"id":1}',
-    #     port_id=constants.HTTP_PORT_ID,
+    #     port_id=_constants.HTTP_PORT_ID,
     #     extract={
     #         "enr": ".result.ENR",
     #         "multiaddr": ".result.addresses[0]",
@@ -97,7 +97,7 @@ def launch(
     #     },
     # )
 
-    log_level = ethereum_package_input_parser.get_client_log_level_or_default(
+    log_level = _ethereum_package_input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
@@ -119,9 +119,9 @@ def launch(
     )
 
     service = plan.add_service(service_name, config)
-    service_url = util.make_service_http_url(service)
+    service_url = _util.make_service_http_url(service)
 
-    metrics_info = observability.new_metrics_info(
+    metrics_info = _observability.new_metrics_info(
         observability_helper, service, METRICS_PATH
     )
 
@@ -133,11 +133,11 @@ def launch(
     # beacon_multiaddr = response["extract.multiaddr"]
     # beacon_peer_id = response["extract.peer_id"]
 
-    return ethereum_package_cl_context.new_cl_context(
+    return _ethereum_package_cl_context.new_cl_context(
         client_name="hildr",
         enr="",  # beacon_node_enr,
         ip_addr=service.ip_address,
-        http_port=util.get_service_http_port_num(service),
+        http_port=_util.get_service_http_port_num(service),
         beacon_http_url=service_url,
         cl_nodes_metrics_info=[metrics_info],
         beacon_service_name=service_name,
@@ -160,15 +160,15 @@ def get_beacon_config(
     observability_helper,
     da_server_context,
 ):
-    EXECUTION_ENGINE_ENDPOINT = util.make_execution_engine_url(el_context)
-    EXECUTION_RPC_ENDPOINT = util.make_execution_rpc_url(el_context)
+    EXECUTION_ENGINE_ENDPOINT = _util.make_execution_engine_url(el_context)
+    EXECUTION_RPC_ENDPOINT = _util.make_execution_rpc_url(el_context)
 
     ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
 
     cmd = [
         "--devnet",
         "--log.level=" + log_level,
-        "--jwt-file=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--jwt-file=" + _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--l1-beacon-url={0}".format(l1_config_env_vars["CL_RPC_URL"]),
         "--l1-rpc-url={0}".format(l1_config_env_vars["L1_RPC_URL"]),
         "--l1-ws-rpc-url={0}".format(l1_config_env_vars["L1_WS_URL"]),
@@ -179,7 +179,7 @@ def get_beacon_config(
         "--sync-mode=full",
         "--network="
         + "{0}/rollup-{1}.json".format(
-            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
             launcher.network_params.network_id,
         ),
         # TODO: support altda flags once they are implemented.
@@ -190,16 +190,16 @@ def get_beacon_config(
     # configure files
 
     files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
-        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+        _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.CL_TYPE.hildr + "_volume_size"
+            else _constants.VOLUME_SIZE[launcher.network][
+                _constants.CL_TYPE.hildr + "_volume_size"
             ],
         )
 
@@ -212,14 +212,14 @@ def get_beacon_config(
     if observability_helper.enabled:
         cmd += [
             "--metrics-enable",
-            "--metrics-port={0}".format(observability.METRICS_PORT_NUM),
+            "--metrics-port={0}".format(_observability.METRICS_PORT_NUM),
         ]
 
-        observability.expose_metrics_port(ports)
+        _observability.expose_metrics_port(ports)
 
     if sequencer_enabled:
         # sequencer private key can't be used by hildr yet
-        # sequencer_private_key = util.read_network_config_value(
+        # sequencer_private_key = _util.read_network_config_value(
         #     plan,
         #     launcher.deployment_output,
         #     "sequencer-{0}".format(launcher.network_params.network_id),
@@ -235,7 +235,7 @@ def get_beacon_config(
                 [
                     ctx.enr
                     for ctx in existing_cl_clients[
-                        : ethereum_package_constants.MAX_ENR_ENTRIES
+                        : _ethereum_package_constants.MAX_ENR_ENTRIES
                     ]
                 ]
             )
@@ -248,12 +248,12 @@ def get_beacon_config(
         "ports": ports,
         "cmd": cmd,
         "files": files,
-        "private_ip_address_placeholder": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "private_ip_address_placeholder": _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
-        "labels": ethereum_package_shared_utils.label_maker(
-            client=constants.CL_TYPE.op_node,
-            client_type=constants.CLIENT_TYPES.cl,
-            image=util.label_from_image(participant.cl_image),
+        "labels": _ethereum_package_shared_utils.label_maker(
+            client=_constants.CL_TYPE.op_node,
+            client_type=_constants.CLIENT_TYPES.cl,
+            image=_util.label_from_image(participant.cl_image),
             connected_client=el_context.client_name,
             extra_labels=participant.cl_extra_labels,
         ),

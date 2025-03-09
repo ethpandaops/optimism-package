@@ -1,12 +1,12 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-el_cl_launcher = imports.load_module("src/el_cl_launcher.star")
-input_parser = imports.load_module("src/package_io/input_parser.star")
-observability = imports.load_module("src/observability/observability.star")
-ethereum_package_constants = imports.load_module(
+_el_cl_launcher = _imports.load_module("src/el_cl_launcher.star")
+_input_parser = _imports.load_module("src/package_io/input_parser.star")
+_observability = _imports.load_module("src/observability/observability.star")
+_ethereum_package_constants = _imports.load_module(
     "src/package_io/constants.star", "ethereum-package"
 )
-util = imports.load_module("src/util.star")
+_util = _imports.load_module("src/util.star")
 
 #
 # Default test inputs
@@ -29,7 +29,7 @@ da_server_context = struct(
 
 
 def test_launch_with_defaults(plan):
-    parsed_input_args = input_parser.input_parser(
+    parsed_input_args = _input_parser.input_parser(
         plan,
         {
             "chains": [
@@ -47,7 +47,7 @@ def test_launch_with_defaults(plan):
         },
     )
 
-    observability_helper = observability.make_helper(parsed_input_args.observability)
+    observability_helper = _observability.make_helper(parsed_input_args.observability)
     chains = parsed_input_args.chains
     chain = chains[0]
 
@@ -57,7 +57,7 @@ def test_launch_with_defaults(plan):
         sequencer_private_key_mock
     )
 
-    all_el_contexts, all_cl_contexts = el_cl_launcher.launch(
+    all_el_contexts, all_cl_contexts = _el_cl_launcher.launch(
         plan=plan,
         jwt_file=jwt_file,
         network_params=chain.network_params,
@@ -105,7 +105,7 @@ def test_launch_with_defaults(plan):
             "--l1.rpckind={0}".format(l1_config_env_vars["L1_RPC_KIND"]),
             "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
             "--p2p.advertise.ip={0}".format(
-                ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
+                _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
             ),
             "--p2p.advertise.tcp=9003",
             "--p2p.advertise.udp=9003",
@@ -147,7 +147,7 @@ def test_launch_with_defaults(plan):
             "--ws.api=net,eth",
             "--ws.origins=*",
             "--nat=extip:{0}".format(
-                ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
+                _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
             ),
             "--authrpc.port={0}".format(el_service.ports["engine-rpc"].number),
             "--authrpc.jwtsecret=/jwt/jwtsecret",
@@ -161,7 +161,7 @@ def test_launch_with_defaults(plan):
 
 
 def test_launch_with_el_op_besu(plan):
-    parsed_input_args = input_parser.input_parser(
+    parsed_input_args = _input_parser.input_parser(
         plan,
         {
             "chains": [
@@ -177,7 +177,7 @@ def test_launch_with_el_op_besu(plan):
         },
     )
 
-    observability_helper = observability.make_helper(parsed_input_args.observability)
+    observability_helper = _observability.make_helper(parsed_input_args.observability)
     chains = parsed_input_args.chains
     chain = chains[0]
 
@@ -187,7 +187,7 @@ def test_launch_with_el_op_besu(plan):
         sequencer_private_key_mock
     )
 
-    all_el_contexts, all_cl_contexts = el_cl_launcher.launch(
+    all_el_contexts, all_cl_contexts = _el_cl_launcher.launch(
         plan=plan,
         jwt_file=jwt_file,
         network_params=chain.network_params,
@@ -237,12 +237,12 @@ def test_launch_with_el_op_besu(plan):
                     "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3,MINER",
                     "--p2p-enabled=true",
                     "--p2p-host={0}".format(
-                        ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
+                        _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
                     ),
                     "--p2p-port=30303",
                     "--engine-rpc-enabled=true",
                     "--engine-jwt-secret={0}".format(
-                        ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER
+                        _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER
                     ),
                     "--engine-host-allowlist=*",
                     "--engine-rpc-port={0}".format(

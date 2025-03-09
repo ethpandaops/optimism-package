@@ -1,21 +1,21 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-ethereum_package_shared_utils = imports.load_module(
+_ethereum_package_shared_utils = _imports.load_module(
     "src/shared_utils/shared_utils.star",
     package_id="ethereum-package",
 )
 
-ethereum_package_node_metrics = imports.load_module(
+_ethereum_package_node_metrics = _imports.load_module(
     "src/node_metrics_info.star",
     package_id="ethereum-package",
 )
 
-util = imports.load_module("src/util.star")
+_util = _imports.load_module("src/util.star")
 
-prometheus = imports.load_module("src/observability/prometheus/prometheus_launcher.star")
-loki = imports.load_module("src/observability/loki/loki_launcher.star")
-promtail = imports.load_module("src/observability/promtail/promtail_launcher.star")
-grafana = imports.load_module("src/observability/grafana/grafana_launcher.star")
+_prometheus = _imports.load_module("src/observability/prometheus/prometheus_launcher.star")
+_loki = _imports.load_module("src/observability/loki/loki_launcher.star")
+_promtail = _imports.load_module("src/observability/promtail/promtail_launcher.star")
+_grafana = _imports.load_module("src/observability/grafana/grafana_launcher.star")
 
 
 DEFAULT_SCRAPE_INTERVAL = "15s"
@@ -34,8 +34,8 @@ def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
     if not helper.enabled:
         return None
 
-    metrics_url = util.make_service_url_authority(service, METRICS_PORT_ID)
-    metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
+    metrics_url = _util.make_service_url_authority(service, METRICS_PORT_ID)
+    metrics_info = _ethereum_package_node_metrics.new_node_metrics_info(
         service.name, metrics_path, metrics_url
     )
 
@@ -43,8 +43,8 @@ def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
 
 
 def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NUM):
-    ports[port_id] = ethereum_package_shared_utils.new_port_spec(
-        port_num, ethereum_package_shared_utils.TCP_PROTOCOL
+    ports[port_id] = _ethereum_package_shared_utils.new_port_spec(
+        port_num, _ethereum_package_shared_utils.TCP_PROTOCOL
     )
 
 
@@ -92,7 +92,7 @@ def register_op_service_metrics_job(helper, service, network_name):
         helper,
         service_name=service.name,
         network_name=network_name,
-        endpoint=util.make_service_url_authority(service, METRICS_PORT_ID),
+        endpoint=_util.make_service_url_authority(service, METRICS_PORT_ID),
     )
 
 
@@ -168,7 +168,7 @@ def launch(plan, observability_helper, global_node_selectors, observability_para
         return
 
     plan.print("Launching prometheus...")
-    prometheus_private_url = prometheus.launch_prometheus(
+    prometheus_private_url = _prometheus.launch_prometheus(
         plan,
         observability_helper,
         global_node_selectors,
@@ -177,14 +177,14 @@ def launch(plan, observability_helper, global_node_selectors, observability_para
     loki_url = None
     if observability_params.enable_k8s_features:
         plan.print("Launching loki...")
-        loki_url = loki.launch_loki(
+        loki_url = _loki.launch_loki(
             plan,
             global_node_selectors,
             observability_params.loki_params,
         )
 
         plan.print("Launching promtail...")
-        promtail.launch_promtail(
+        _promtail.launch_promtail(
             plan,
             global_node_selectors,
             loki_url,
@@ -192,7 +192,7 @@ def launch(plan, observability_helper, global_node_selectors, observability_para
         )
 
     plan.print("Launching grafana...")
-    grafana.launch_grafana(
+    _grafana.launch_grafana(
         plan,
         prometheus_private_url,
         loki_url,

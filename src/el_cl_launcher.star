@@ -1,34 +1,34 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-ethereum_package_shared_utils = imports.load_module(
+_ethereum_package_shared_utils = _imports.load_module(
     "src/shared_utils/shared_utils.star",
     package_id="ethereum-package"
 )
 
-ethereum_package_input_parser = imports.load_module(
-    "src/package_io/input_parser.star",
+_ethereum_package_input_parser = _imports.load_module(
+    "src/package_io/_input_parser.star",
     package_id="ethereum-package"
 )
 
-input_parser = imports.load_module("src/package_io/input_parser.star")
+_input_parser = _imports.load_module("src/package_io/input_parser.star")
 
-observability = imports.load_module("src/observability/observability.star")
+_observability = _imports.load_module("src/observability/observability.star")
 
 # EL
-op_geth = imports.load_module("src/el/op-geth/op_geth_launcher.star")
-op_reth = imports.load_module("src/el/op-reth/op_reth_launcher.star")
-op_erigon = imports.load_module("src/el/op-erigon/op_erigon_launcher.star")
-op_nethermind = imports.load_module("src/el/op-nethermind/op_nethermind_launcher.star")
-op_besu = imports.load_module("src/el/op-besu/op_besu_launcher.star")
+_op_geth = _imports.load_module("src/el/op-geth/op_geth_launcher.star")
+_op_reth = _imports.load_module("src/el/op-reth/op_reth_launcher.star")
+_op_erigon = _imports.load_module("src/el/op-erigon/op_erigon_launcher.star")
+_op_nethermind = _imports.load_module("src/el/op-nethermind/op_nethermind_launcher.star")
+_op_besu = _imports.load_module("src/el/op-besu/op_besu_launcher.star")
 # CL
-op_node = imports.load_module("src/cl/op-node/op_node_launcher.star")
-hildr = imports.load_module("src/cl/hildr/hildr_launcher.star")
+_op_node = _imports.load_module("src/cl/op-node/op_node_launcher.star")
+_hildr = _imports.load_module("src/cl/hildr/hildr_launcher.star")
 
 # MEV
-rollup_boost = imports.load_module("src/mev/rollup-boost/rollup_boost_launcher.star")
-op_geth_builder = imports.load_module("src/el/op-geth/op_geth_builder_launcher.star")
-op_reth_builder = imports.load_module("src/el/op-reth/op_reth_builder_launcher.star")
-op_node_builder = imports.load_module("src/cl/op-node/op_node_builder_launcher.star")
+_rollup_boost = _imports.load_module("src/mev/rollup-boost/rollup_boost_launcher.star")
+_op_geth_builder = _imports.load_module("src/el/op-geth/op_geth_builder_launcher.star")
+_op_reth_builder = _imports.load_module("src/el/op-reth/op_reth_builder_launcher.star")
+_op_node_builder = _imports.load_module("src/cl/op-node/op_node_builder_launcher.star")
 
 
 def launch(
@@ -52,106 +52,106 @@ def launch(
 ):
     el_launchers = {
         "op-geth": {
-            "launcher": op_geth.new_op_geth_launcher(
+            "launcher": _op_geth.new_op_geth_launcher(
                 deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": op_geth.launch,
+            "launch_method": _op_geth.launch,
         },
         "op-reth": {
-            "launcher": op_reth.new_op_reth_launcher(
+            "launcher": _op_reth.new_op_reth_launcher(
                 deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": op_reth.launch,
+            "launch_method": _op_reth.launch,
         },
         "op-erigon": {
-            "launcher": op_erigon.new_op_erigon_launcher(
+            "launcher": _op_erigon.new_op_erigon_launcher(
                 deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": op_erigon.launch,
+            "launch_method": _op_erigon.launch,
         },
         "op-nethermind": {
-            "launcher": op_nethermind.new_nethermind_launcher(
+            "launcher": _op_nethermind.new_nethermind_launcher(
                 deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": op_nethermind.launch,
+            "launch_method": _op_nethermind.launch,
         },
         "op-besu": {
-            "launcher": op_besu.new_op_besu_launcher(
+            "launcher": _op_besu.new_op_besu_launcher(
                 deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": op_besu.launch,
+            "launch_method": _op_besu.launch,
         },
     }
 
     el_builder_launchers = {
         "op-geth": {
-            "launcher": op_geth_builder.new_op_geth_builder_launcher(
+            "launcher": _op_geth_builder.new_op_geth_builder_launcher(
                 deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": op_geth_builder.launch,
+            "launch_method": _op_geth_builder.launch,
         },
         "op-reth": {
-            "launcher": op_reth_builder.new_op_reth_builder_launcher(
+            "launcher": _op_reth_builder.new_op_reth_builder_launcher(
                 deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": op_reth_builder.launch,
+            "launch_method": _op_reth_builder.launch,
         },
     }
 
     cl_launchers = {
         "op-node": {
-            "launcher": op_node.new_op_node_launcher(
+            "launcher": _op_node.new_op_node_launcher(
                 deployment_output, jwt_file, network_params
             ),
-            "launch_method": op_node.launch,
+            "launch_method": _op_node.launch,
         },
         "hildr": {
-            "launcher": hildr.new_hildr_launcher(
+            "launcher": _hildr.new_hildr_launcher(
                 deployment_output, jwt_file, network_params
             ),
-            "launch_method": hildr.launch,
+            "launch_method": _hildr.launch,
         },
     }
 
     cl_builder_launchers = {
         "op-node": {
-            "launcher": op_node_builder.new_op_node_builder_launcher(
+            "launcher": _op_node_builder.new_op_node_builder_launcher(
                 deployment_output, jwt_file, network_params
             ),
-            "launch_method": op_node_builder.launch,
+            "launch_method": _op_node_builder.launch,
         },
     }
 
     sidecar_launchers = {
         "rollup-boost": {
-            "launcher": rollup_boost.new_rollup_boost_launcher(
+            "launcher": _rollup_boost.new_rollup_boost_launcher(
                 deployment_output,
                 jwt_file,
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": rollup_boost.launch,
+            "launch_method": _rollup_boost.launch,
         }
     }
 
@@ -167,16 +167,16 @@ def launch(
         cl_builder_type = participant.cl_builder_type
         el_builder_type = participant.el_builder_type
 
-        node_selectors = ethereum_package_input_parser.get_client_node_selectors(
+        node_selectors = _ethereum_package_input_parser.get_client_node_selectors(
             participant.node_selectors,
             global_node_selectors,
         )
 
-        el_tolerations = ethereum_package_input_parser.get_client_tolerations(
+        el_tolerations = _ethereum_package_input_parser.get_client_tolerations(
             participant.el_tolerations, participant.tolerations, global_tolerations
         )
 
-        cl_tolerations = ethereum_package_input_parser.get_client_tolerations(
+        cl_tolerations = _ethereum_package_input_parser.get_client_tolerations(
             participant.cl_tolerations, participant.tolerations, global_tolerations
         )
 
@@ -233,7 +233,7 @@ def launch(
         )
 
         # Zero-pad the index using the calculated zfill value
-        index_str = ethereum_package_shared_utils.zfill_custom(
+        index_str = _ethereum_package_shared_utils.zfill_custom(
             index + 1, len(str(len(participants)))
         )
 
@@ -275,7 +275,7 @@ def launch(
         all_el_contexts.insert(0, el_context)
 
         for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
-            observability.register_node_metrics_job(
+            _observability.register_node_metrics_job(
                 observability_helper,
                 el_context.client_name,
                 "execution",
@@ -318,7 +318,7 @@ def launch(
                 for metrics_info in [
                     x for x in el_builder_context.el_metrics_info if x != None
                 ]:
-                    observability.register_node_metrics_job(
+                    _observability.register_node_metrics_job(
                         observability_helper,
                         el_builder_context.client_name,
                         "execution-builder",
@@ -328,7 +328,7 @@ def launch(
             rollup_boost_image = (
                 mev_params.rollup_boost_image
                 if mev_params.rollup_boost_image != ""
-                else input_parser.DEFAULT_SIDECAR_IMAGES["rollup-boost"]
+                else _input_parser.DEFAULT_SIDECAR_IMAGES["rollup-boost"]
             )
 
             sidecar_context = sidecar_launch_method(
@@ -370,7 +370,7 @@ def launch(
         all_cl_contexts.insert(0, cl_context)
 
         for metrics_info in [x for x in cl_context.cl_nodes_metrics_info if x != None]:
-            observability.register_node_metrics_job(
+            _observability.register_node_metrics_job(
                 observability_helper,
                 cl_context.client_name,
                 "beacon",
@@ -403,7 +403,7 @@ def launch(
             for metrics_info in [
                 x for x in cl_builder_context.cl_nodes_metrics_info if x != None
             ]:
-                observability.register_node_metrics_job(
+                _observability.register_node_metrics_job(
                     observability_helper,
                     cl_builder_context.client_name,
                     "beacon-builder",

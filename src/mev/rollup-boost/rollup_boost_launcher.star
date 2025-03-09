@@ -1,19 +1,19 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-shared_utils = imports.load_module(
-    "src/shared_utils/shared_utils.star",
+_shared_utils = _imports.load_module(
+    "src/shared_utils/_shared_utils.star",
     package_id="ethereum-package"
 )
-el_context = imports.load_module(
-    "src/el/el_context.star",
+_el_context = _imports.load_module(
+    "src/el/_el_context.star",
     package_id="ethereum-package"
 )
-el_admin_node_info = imports.load_module(
-    "src/el/el_admin_node_info.star",
+_el_admin_node_info = _imports.load_module(
+    "src/el/_el_admin_node_info.star",
     package_id="ethereum-package"
 )
-constants = imports.load_module(
-    "src/package_io/constants.star",
+_constants = _imports.load_module(
+    "src/package_io/_constants.star",
     package_id="ethereum-package"
 )
 
@@ -26,10 +26,10 @@ DEFAULT_IMAGE = "flashbots/rollup-boost:latest"
 
 def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
     used_ports = {
-        RPC_PORT_ID: shared_utils.new_port_spec(
+        RPC_PORT_ID: _shared_utils.new_port_spec(
             RPC_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-            shared_utils.HTTP_APPLICATION_PROTOCOL,
+            _shared_utils.TCP_PROTOCOL,
+            _shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
     return used_ports
@@ -44,7 +44,7 @@ def launch(
     sequencer_context,
     builder_context,
 ):
-    network_name = shared_utils.get_network_name(launcher.network)
+    network_name = _shared_utils.get_network_name(launcher.network)
 
     config = get_config(
         plan,
@@ -63,7 +63,7 @@ def launch(
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
-    return el_context.new_el_context(
+    return _el_context.new_el_context(
         client_name="rollup-boost",
         enode=None,
         ip_addr=service.ip_address,
@@ -101,16 +101,16 @@ def get_config(
 
     public_ports = {}
     cmd = [
-        "--l2-jwt-path=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--l2-jwt-path=" + _constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--l2-url={0}".format(L2_EXECUTION_ENGINE_ENDPOINT),
-        "--builder-jwt-path=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--builder-jwt-path=" + _constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--builder-url={0}".format(BUILDER_EXECUTION_ENGINE_ENDPOINT),
         "--rpc-port={0}".format(RPC_PORT_NUM),
         "--log-level=debug",
     ]
 
     files = {
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+        _constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
     return ServiceConfig(
@@ -119,7 +119,7 @@ def get_config(
         public_ports=public_ports,
         cmd=cmd,
         files=files,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
 
 

@@ -3,11 +3,6 @@ _imports = import_module("/imports.star")
 _ethereum_package_shared_utils = _imports.ext.ethereum_package_shared_utils
 _ethereum_package_constants = _imports.ext.ethereum_package_constants
 
-ethereum_package_constants = _imports.load_module(
-    "src/package_io/constants.star",
-    package_id="ethereum-package"
-)
-
 _constants = _imports.load_module("src/package_io/constants.star")
 _util = _imports.load_module("src/util.star")
 

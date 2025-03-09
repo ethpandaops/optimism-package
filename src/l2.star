@@ -1,11 +1,11 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-participant_network = imports.load_module("src/participant_network.star")
-blockscout = imports.load_module("src/blockscout/blockscout_launcher.star")
-da_server_launcher = imports.load_module("src/alt-da/da-server/da_server_launcher.star")
-contract_deployer = imports.load_module("src/contracts/contract_deployer.star")
-input_parser = imports.load_module("src/package_io/input_parser.star")
-util = imports.load_module("src/util.star")
+_participant_network = _imports.load_module("src/participant_network.star")
+_blockscout = _imports.load_module("src/blockscout/blockscout_launcher.star")
+_da_server_launcher = _imports.load_module("src/alt-da/da-server/da_server_launcher.star")
+_contract_deployer = _imports.load_module("src/contracts/contract_deployer.star")
+_input_parser = _imports.load_module("src/package_io/input_parser.star")
+_util = _imports.load_module("src/util.star")
 
 
 def launch_l2(
@@ -35,11 +35,11 @@ def launch_l2(
 
     # we need to launch da-server before launching the participant network
     # because op-batcher and op-node(s) need to know the da-server url, if present
-    da_server_context = da_server_launcher.disabled_da_server_context()
+    da_server_context = _da_server_launcher.disabled_da_server_context()
     if "da_server" in l2_args.additional_services:
         da_server_image = l2_args.da_server_params.image
         plan.print("Launching da-server")
-        da_server_context = da_server_launcher.launch_da_server(
+        da_server_context = _da_server_launcher.launch_da_server(
             plan,
             "da-server-{0}".format(l2_services_suffix),
             da_server_image,
@@ -47,7 +47,7 @@ def launch_l2(
         )
         plan.print("Successfully launched da-server")
 
-    l2 = participant_network.launch_participant_network(
+    l2 = _participant_network.launch_participant_network(
         plan,
         l2_args.participants,
         jwt_file,
@@ -76,8 +76,8 @@ def launch_l2(
         all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
 
-    network_id_as_hex = util.to_hex_chain_id(network_params.network_id)
-    l1_bridge_address = util.read_network_config_value(
+    network_id_as_hex = _util.to_hex_chain_id(network_params.network_id)
+    l1_bridge_address = _util.read_network_config_value(
         plan,
         deployment_output,
         "state",
@@ -89,7 +89,7 @@ def launch_l2(
     for additional_service in l2_args.additional_services:
         if additional_service == "blockscout":
             plan.print("Launching op-blockscout")
-            blockscout.launch_blockscout(
+            _blockscout.launch_blockscout(
                 plan,
                 l2_services_suffix,
                 l1_rpc_url,

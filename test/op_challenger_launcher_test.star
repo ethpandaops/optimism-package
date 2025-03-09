@@ -1,18 +1,18 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-op_challenger_launcher = imports.load_module(
+_op_challenger_launcher = _imports.load_module(
     "src/challenger/op-challenger/op_challenger_launcher.star"
 )
-input_parser = imports.load_module("src/package_io/input_parser.star")
-observability = imports.load_module("src/observability/observability.star")
-ethereum_package_constants = imports.load_module(
+_input_parser = _imports.load_module("src/package_io/input_parser.star")
+_observability = _imports.load_module("src/observability/observability.star")
+_ethereum_package_constants = _imports.load_module(
     "src/package_io/constants.star", "ethereum-package"
 )
-util = imports.load_module("src/util.star")
+_util = _imports.load_module("src/util.star")
 
 
 def test_launch_with_defaults(plan):
-    parsed_input_args = input_parser.input_parser(
+    parsed_input_args = _input_parser.input_parser(
         plan,
         {
             "chains": [
@@ -41,13 +41,13 @@ def test_launch_with_defaults(plan):
     )
     # el_context, cl_context = launch_test_el_cl(plan, parsed_input_args)
 
-    observability_helper = observability.make_helper(parsed_input_args.observability)
+    observability_helper = _observability.make_helper(parsed_input_args.observability)
 
     chains = parsed_input_args.chains
     chain = chains[0]
     l2_num = 0
     challenger_service_name = "op-challenger"
-    challenger_image = input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
+    challenger_image = _input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
 
     deployment_output = "/path/to/deployment_output"
     l1_config_env_vars = {
@@ -58,15 +58,15 @@ def test_launch_with_defaults(plan):
 
     # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
     dispute_game_factory_mock = "dispute_game_factory"
-    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+    kurtosistest.mock(_util, "read_network_config_value").mock_return_value(
         dispute_game_factory_mock
     )
     challenger_private_key_mock = "challenger_private_key"
-    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+    kurtosistest.mock(_util, "read_network_config_value").mock_return_value(
         challenger_private_key_mock
     )
 
-    op_challenger_launcher.launch(
+    _op_challenger_launcher.launch(
         plan=plan,
         l2_num=l2_num,
         service_name=challenger_service_name,

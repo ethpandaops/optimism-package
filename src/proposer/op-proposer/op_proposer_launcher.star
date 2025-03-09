@@ -1,20 +1,20 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-ethereum_package_shared_utils = imports.load_module(
+_ethereum_package_shared_utils = _imports.load_module(
     "src/shared_utils/shared_utils.star",
     package_id="ethereum-package"
 )
 
-ethereum_package_constants = imports.load_module(
-    "src/package_io/constants.star",
+_ethereum_package_constants = _imports.load_module(
+    "src/package_io/_constants.star",
     package_id="ethereum-package"
 )
 
-constants = imports.load_module("src/package_io/constants.star")
-util = imports.load_module("src/util.star")
+_constants = _imports.load_module("src/package_io/constants.star")
+_util = _imports.load_module("src/util.star")
 
-observability = imports.load_module("src/observability/observability.star")
-prometheus = imports.load_module("src/observability/prometheus/prometheus_launcher.star")
+_observability = _imports.load_module("src/observability/observability.star")
+_prometheus = _imports.load_module("src/observability/prometheus/prometheus_launcher.star")
 
 #
 #  ---------------------------------- Batcher client -------------------------------------
@@ -27,10 +27,10 @@ HTTP_PORT_NUM = 8560
 
 def get_used_ports():
     used_ports = {
-        constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        _constants.HTTP_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
             HTTP_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+            _ethereum_package_shared_utils.TCP_PROTOCOL,
+            _ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
     return used_ports
@@ -66,9 +66,9 @@ def launch(
     )
 
     service = plan.add_service(service_name, config)
-    http_url = util.make_service_http_url(service)
+    http_url = _util.make_service_http_url(service)
 
-    observability.register_op_service_metrics_job(
+    _observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
     )
 
@@ -105,7 +105,7 @@ def get_proposer_config(
     # apply customizations
 
     if observability_helper.enabled:
-        observability.configure_op_service_metrics(cmd, ports)
+        _observability.configure_op_service_metrics(cmd, ports)
 
     cmd += proposer_params.extra_params
 
@@ -113,5 +113,5 @@ def get_proposer_config(
         image=image,
         ports=ports,
         cmd=cmd,
-        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

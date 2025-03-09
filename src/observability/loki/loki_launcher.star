@@ -1,9 +1,9 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-constants = imports.load_module("src/package_io/constants.star")
-util = imports.load_module("src/util.star")
+_constants = _imports.load_module("src/package_io/constants.star")
+_util = _imports.load_module("src/util.star")
 
-ethereum_package_shared_utils = imports.load_module(
+_ethereum_package_shared_utils = _imports.load_module(
     "src/shared_utils/shared_utils.star",
     package_id="ethereum-package"
 )
@@ -20,14 +20,14 @@ CONFIG_REL_FILEPATH = "loki-config.yaml"
 CONFIG_DIRPATH_ON_SERVICE = "/config"
 
 USED_PORTS = {
-    constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+    _constants.HTTP_PORT_ID: _ethereum_package_shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
-        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+        _ethereum_package_shared_utils.TCP_PROTOCOL,
+        _ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     ),
-    "grpc": ethereum_package_shared_utils.new_port_spec(
+    "grpc": _ethereum_package_shared_utils.new_port_spec(
         GRPC_PORT_NUMBER,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
+        _ethereum_package_shared_utils.TCP_PROTOCOL,
         "grpc",
     ),
 }
@@ -53,7 +53,7 @@ def launch_loki(
 
     service = plan.add_service(SERVICE_NAME, service_config)
 
-    service_url = util.make_service_http_url(service)
+    service_url = _util.make_service_http_url(service)
 
     return service_url
 
@@ -68,7 +68,7 @@ def create_config_artifact(
             "grpc": GRPC_PORT_NUMBER,
         },
     }
-    config_template_and_data = ethereum_package_shared_utils.new_template_and_data(
+    config_template_and_data = _ethereum_package_shared_utils.new_template_and_data(
         config_template, config_data
     )
 

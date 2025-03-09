@@ -1,12 +1,12 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-ethereum_package_input_parser = imports.load_module(
+_ethereum_package_input_parser = _imports.load_module(
     "src/package_io/input_parser.star",
     package_id="ethereum-package"
 )
 
-constants = imports.load_module("src/package_io/constants.star")
-sanity_check = imports.load_module("src/package_io/sanity_check.star")
+_constants = _imports.load_module("src/package_io/constants.star")
+_sanity_check = _imports.load_module("src/package_io/sanity_check.star")
 
 DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
@@ -61,7 +61,7 @@ DEFAULT_ADDITIONAL_SERVICES = []
 
 
 def external_l1_network_params_input_parser(plan, input_args):
-    sanity_check.external_l1_network_params_input_parser(plan, input_args)
+    _sanity_check.external_l1_network_params_input_parser(plan, input_args)
     return struct(
         network_id=input_args["network_id"],
         rpc_kind=input_args["rpc_kind"],
@@ -73,7 +73,7 @@ def external_l1_network_params_input_parser(plan, input_args):
 
 
 def input_parser(plan, input_args):
-    sanity_check.sanity_check(plan, input_args)
+    _sanity_check.sanity_check(plan, input_args)
     results = parse_network_params(plan, input_args)
 
     return struct(
@@ -402,7 +402,7 @@ def parse_network_params(plan, input_args):
                 participant["cl_builder_image"] = default_image
 
             for _ in range(0, participant["count"]):
-                participant_copy = ethereum_package_input_parser.deep_copy_participant(
+                participant_copy = _ethereum_package_input_parser.deep_copy_participant(
                     participant
                 )
                 participants.append(participant_copy)
@@ -519,7 +519,7 @@ def default_supervisor_params():
         "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
         "dependency_set": "",
         "extra_params": [],
-        "network": constants.NETWORK_NAME,
+        "network": _constants.NETWORK_NAME,
     }
 
 
@@ -548,7 +548,7 @@ def default_chains():
 
 def default_network_params():
     return {
-        "network": constants.NETWORK_NAME,
+        "network": _constants.NETWORK_NAME,
         "network_id": "2151908",
         "name": "op-kurtosis",
         "seconds_per_slot": 2,

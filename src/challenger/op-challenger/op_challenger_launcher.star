@@ -1,20 +1,20 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-ethereum_package_shared_utils = imports.load_module(
+_ethereum_package_shared_utils = _imports.load_module(
     "src/shared_utils/shared_utils.star",
     package_id="ethereum-package"
 )
 
-ethereum_package_constants = imports.load_module(
+_ethereum_package_constants = _imports.load_module(
     "src/package_io/constants.star",
     package_id="ethereum-package"
 )
 
-observability = imports.load_module("src/observability/observability.star")
-prometheus = imports.load_module("src/observability/prometheus/prometheus_launcher.star")
+_observability = _imports.load_module("src/observability/observability.star")
+_prometheus = _imports.load_module("src/observability/prometheus/prometheus_launcher.star")
 
-interop_constants = imports.load_module("src/interop/constants.star")
-util = imports.load_module("src/util.star")
+_interop_constants = _imports.load_module("src/interop/constants.star")
+_util = _imports.load_module("src/util.star")
 
 #
 #  ---------------------------------- Challenger client -------------------------------------
@@ -58,7 +58,7 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    observability.register_op_service_metrics_job(
+    _observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
     )
 
@@ -81,13 +81,13 @@ def get_challenger_config(
 ):
     ports = dict(get_used_ports())
 
-    game_factory_address = util.read_network_config_value(
+    game_factory_address = _util.read_network_config_value(
         plan,
         deployment_output,
         "state",
         ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
     )
-    challenger_key = util.read_network_config_value(
+    challenger_key = _util.read_network_config_value(
         plan,
         deployment_output,
         "challenger-{0}".format(network_params.network_id),
@@ -98,12 +98,12 @@ def get_challenger_config(
         "op-challenger",
         "--cannon-l2-genesis="
         + "{0}/genesis-{1}.json".format(
-            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
             network_params.network_id,
         ),
         "--cannon-rollup-config="
         + "{0}/rollup-{1}.json".format(
-            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
             network_params.network_id,
         ),
         "--game-factory-address=" + game_factory_address,
@@ -119,16 +119,16 @@ def get_challenger_config(
     # configure files
 
     files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
+        _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
     }
 
     # apply customizations
 
     if observability_helper.enabled:
-        observability.configure_op_service_metrics(cmd, ports)
+        _observability.configure_op_service_metrics(cmd, ports)
 
     if interop_params.enabled:
-        cmd.append("--supervisor-rpc=" + interop_constants.SUPERVISOR_ENDPOINT)
+        cmd.append("--supervisor-rpc=" + _interop_constants.SUPERVISOR_ENDPOINT)
 
     if (
         challenger_params.cannon_prestate_path
@@ -158,5 +158,5 @@ def get_challenger_config(
         entrypoint=ENTRYPOINT_ARGS,
         cmd=[cmd],
         files=files,
-        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

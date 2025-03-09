@@ -1,9 +1,9 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-constants = imports.load_module("src/package_io/constants.star")
-util = imports.load_module("src/util.star")
+_constants = _imports.load_module("src/package_io/constants.star")
+_util = _imports.load_module("src/util.star")
 
-ethereum_package_shared_utils = imports.load_module(
+_ethereum_package_shared_utils = _imports.load_module(
     "src/shared_utils/shared_utils.star",
     package_id="ethereum-package"
 )
@@ -59,7 +59,7 @@ def create_values_artifact(
         "NodeSelectors": node_selectors,
     }
 
-    values_template_and_data = ethereum_package_shared_utils.new_template_and_data(
+    values_template_and_data = _ethereum_package_shared_utils.new_template_and_data(
         values_template, config_data
     )
 
@@ -103,5 +103,5 @@ def install_helm_chart(
         files={
             "/helm": values_artifact_name,
         },
-        run=util.join_cmds(cmds),
+        run=_util.join_cmds(cmds),
     )

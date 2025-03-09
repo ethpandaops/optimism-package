@@ -1,3 +1,5 @@
+_imports = import_module("/imports.star")
+
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
 FACTORY_ADDRESS = "0x4e59b44847b379578588920cA78FbF26c0B4956C"
@@ -6,11 +8,11 @@ FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806
 
 FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
-imports = import_module("/imports.star")
+_imports = _imports.load_module("imports.star")
 
-utils = imports.load_module("src/util.star")
+_utils = _imports.load_module("src/util.star")
 
-ethereum_package_genesis_constants = imports.load_module(
+_ethereum_package_genesis_constants = _imports.load_module(
     "src/prelaunch_data_generator/genesis_constants/genesis_constants.star",
     package_id="ethereum-package"
 )
@@ -59,10 +61,10 @@ def deploy_contracts(
     plan.run_sh(
         name="op-deployer-fund",
         description="Collect keys, and fund addresses",
-        image=utils.DEPLOYMENT_UTILS_IMAGE,
+        image=_utils.DEPLOYMENT_UTILS_IMAGE,
         env_vars={
             "DEPLOYER_PRIVATE_KEY": priv_key,
-            "FUND_PRIVATE_KEY": ethereum_package_genesis_constants.PRE_FUNDED_ACCOUNTS[
+            "FUND_PRIVATE_KEY": _ethereum_package_genesis_constants.PRE_FUNDED_ACCOUNTS[
                 19
             ].private_key,
             "FUND_VALUE": "10ether",
@@ -186,12 +188,12 @@ def deploy_contracts(
         intent["chains"].append(intent_chain)
 
     intent_json = json.encode(intent)
-    intent_json_artifact = utils.write_to_file(plan, intent_json, "/tmp", "intent.json")
+    intent_json_artifact = _utils.write_to_file(plan, intent_json, "/tmp", "intent.json")
 
     op_deployer_configure = plan.run_sh(
         name="op-deployer-configure",
         description="Configure L2 contract deployments",
-        image=utils.DEPLOYMENT_UTILS_IMAGE,
+        image=_utils.DEPLOYMENT_UTILS_IMAGE,
         store=[
             StoreSpec(
                 src="/network-data",
@@ -256,7 +258,7 @@ def deploy_contracts(
         plan.run_sh(
             name="op-deployer-generate-chainspec",
             description="Generate chainspec",
-            image=utils.DEPLOYMENT_UTILS_IMAGE,
+            image=_utils.DEPLOYMENT_UTILS_IMAGE,
             env_vars={"CHAIN_ID": str(chain.network_params.network_id)},
             store=[
                 StoreSpec(
