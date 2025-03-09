@@ -55,7 +55,7 @@ def test_launch_with_defaults(plan):
         sequencer_private_key_mock
     )
 
-    all_el_contexts, all_cl_contexts = _el_cl_launcher.launch(
+    _el_cl_launcher.launch(
         plan=plan,
         jwt_file=jwt_file,
         network_params=chain.network_params,
@@ -185,7 +185,7 @@ def test_launch_with_el_op_besu(plan):
         sequencer_private_key_mock
     )
 
-    all_el_contexts, all_cl_contexts = _el_cl_launcher.launch(
+    _el_cl_launcher.launch(
         plan=plan,
         jwt_file=jwt_file,
         network_params=chain.network_params,

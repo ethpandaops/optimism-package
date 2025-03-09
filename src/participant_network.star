@@ -4,9 +4,6 @@ _el_cl_client_launcher = _imports.load_module("src/el_cl_launcher.star")
 _participant_module = _imports.load_module("src/participant.star")
 _input_parser = _imports.load_module("src/package_io/input_parser.star")
 _op_batcher_launcher = _imports.load_module("src/batcher/op-batcher/op_batcher_launcher.star")
-_op_challenger_launcher = _imports.load_module(
-    "src/challenger/op-challenger/op_challenger_launcher.star"
-)
 _op_proposer_launcher = _imports.load_module("src/proposer/op-proposer/op_proposer_launcher.star")
 _util = _imports.load_module("src/util.star")
 
@@ -17,7 +14,6 @@ def launch_participant_network(
     jwt_file,
     network_params,
     batcher_params,
-    challenger_params,
     proposer_params,
     mev_params,
     deployment_output,

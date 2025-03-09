@@ -43,12 +43,8 @@ def launch(
     network_params,
     observability_helper,
 ):
-    proposer_service_name = "{0}".format(service_name)
-
-    config = get_proposer_config(
-        plan,
+    config = _get_proposer_config(
         image,
-        service_name,
         cl_context,
         l1_config_env_vars,
         gs_proposer_private_key,
@@ -67,10 +63,8 @@ def launch(
     return http_url
 
 
-def get_proposer_config(
-    plan,
+def _get_proposer_config(
     image,
-    service_name,
     cl_context,
     l1_config_env_vars,
     gs_proposer_private_key,

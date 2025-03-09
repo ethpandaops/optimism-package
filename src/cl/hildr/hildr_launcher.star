@@ -89,8 +89,7 @@ def launch(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    config = get_beacon_config(
-        plan,
+    config = _get_beacon_config(
         launcher,
         service_name,
         participant,
@@ -103,7 +102,6 @@ def launch(
         l1_config_env_vars,
         sequencer_enabled,
         observability_helper,
-        da_server_context,
     )
 
     service = plan.add_service(service_name, config)
@@ -132,8 +130,7 @@ def launch(
     )
 
 
-def get_beacon_config(
-    plan,
+def _get_beacon_config(
     launcher,
     service_name,
     participant,
@@ -146,7 +143,6 @@ def get_beacon_config(
     l1_config_env_vars,
     sequencer_enabled,
     observability_helper,
-    da_server_context,
 ):
     EXECUTION_ENGINE_ENDPOINT = _util.make_execution_engine_url(el_context)
     EXECUTION_RPC_ENDPOINT = _util.make_execution_rpc_url(el_context)

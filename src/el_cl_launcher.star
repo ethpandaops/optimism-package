@@ -275,6 +275,7 @@ def launch(
                 metrics_info,
             )
 
+        el_builder_context = None
         if rollup_boost_enabled and sequencer_enabled:
             plan.print("Starting rollup boost")
 

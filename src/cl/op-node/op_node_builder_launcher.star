@@ -86,12 +86,11 @@ def launch(
         participant.cl_builder_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    config = get_beacon_config(
+    config = _get_beacon_config(
         plan,
         launcher,
         service_name,
         participant,
-        log_level,
         persistent,
         tolerations,
         node_selectors,
@@ -135,12 +134,11 @@ def launch(
     )
 
 
-def get_beacon_config(
+def _get_beacon_config(
     plan,
     launcher,
     service_name,
     participant,
-    log_level,
     persistent,
     tolerations,
     node_selectors,

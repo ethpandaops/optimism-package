@@ -43,11 +43,11 @@ def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NU
 
 # configures the CLI flags and ports for a service using the standard op-service setup
 def configure_op_service_metrics(cmd, ports):
-    cmd += [
+    cmd.extend([
         "--metrics.enabled",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-    ]
+    ])
 
     expose_metrics_port(ports)
 
@@ -60,11 +60,11 @@ def make_helper(observability_params):
     )
 
 
-def add_metrics_job(helper, job):
+def _add_metrics_job(helper, job):
     helper.metrics_jobs.append(job)
 
 
-def new_metrics_job(
+def _new_metrics_job(
     job_name,
     endpoint,
     metrics_path,
@@ -81,7 +81,7 @@ def new_metrics_job(
 
 
 def register_op_service_metrics_job(helper, service, network_name):
-    register_service_metrics_job(
+    _register_service_metrics_job(
         helper,
         service_name=service.name,
         network_name=network_name,
@@ -89,7 +89,7 @@ def register_op_service_metrics_job(helper, service, network_name):
     )
 
 
-def register_service_metrics_job(
+def _register_service_metrics_job(
     helper,
     service_name,
     network_name,
@@ -105,9 +105,9 @@ def register_service_metrics_job(
     }
     labels.update(additional_labels)
 
-    add_metrics_job(
+    _add_metrics_job(
         helper,
-        new_metrics_job(
+        _new_metrics_job(
             job_name=service_name,
             endpoint=endpoint,
             metrics_path=metrics_path,
@@ -145,7 +145,7 @@ def register_node_metrics_job(
         ):
             scrape_interval = additional_config.scrape_interval
 
-    register_service_metrics_job(
+    _register_service_metrics_job(
         helper,
         service_name=node_metrics_info[METRICS_INFO_NAME_KEY],
         network_name=network_name,
@@ -181,7 +181,6 @@ def launch(plan, observability_helper, global_node_selectors, observability_para
             plan,
             global_node_selectors,
             loki_url,
-            observability_params.promtail_params,
         )
 
     plan.print("Launching grafana...")

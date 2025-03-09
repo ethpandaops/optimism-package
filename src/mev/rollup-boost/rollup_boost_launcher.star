@@ -11,7 +11,7 @@ RPC_PORT_ID = "rpc"
 DEFAULT_IMAGE = "flashbots/rollup-boost:latest"
 
 
-def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
+def _get_used_ports():
     used_ports = {
         RPC_PORT_ID: _shared_utils.new_port_spec(
             RPC_PORT_NUM,
@@ -31,19 +31,11 @@ def launch(
     sequencer_context,
     builder_context,
 ):
-    network_name = _shared_utils.get_network_name(launcher.network)
-
-    config = get_config(
-        plan,
-        launcher.el_cl_genesis_data,
-        launcher.jwt_file,
-        launcher.network,
-        launcher.network_id,
-        image,
-        service_name,
-        existing_el_clients,
-        sequencer_context,
-        builder_context,
+    config = _get_config(
+        jwt_file=launcher.jwt_file,
+        image=image,
+        sequencer_context=sequencer_context,
+        builder_context=builder_context,
     )
 
     service = plan.add_service(service_name, config)
@@ -62,15 +54,9 @@ def launch(
     )
 
 
-def get_config(
-    plan,
-    el_cl_genesis_data,
+def _get_config(
     jwt_file,
-    network,
-    network_id,
     image,
-    service_name,
-    existing_el_clients,
     sequencer_context,
     builder_context,
 ):
@@ -84,7 +70,7 @@ def get_config(
         builder_context.engine_rpc_port_num,
     )
 
-    used_ports = get_used_ports(DISCOVERY_PORT_NUM)
+    used_ports = _get_used_ports()
 
     public_ports = {}
     cmd = [

@@ -19,7 +19,6 @@ def launch_promtail(
     plan,
     global_node_selectors,
     loki_url,
-    promtail_params,
 ):
     values_template = read_file(VALUES_TEMPLATE_FILEPATH)
 

@@ -23,6 +23,7 @@ def run(plan, args):
     """Deploy Optimism L2s on an Ethereum L1.
 
     Args:
+        plan: The Kurtosis plan object.
         args(json): Configures other aspects of the environment.
     Returns:
         A full deployment of Optimism L2(s)
@@ -117,7 +118,6 @@ def run(plan, args):
                 jwt_file,
                 deployment_output,
                 l1_config_env_vars,
-                l1_priv_key,
                 l1_rpc_url,
                 global_log_level,
                 global_node_selectors,
@@ -142,11 +142,6 @@ def run(plan, args):
     # challenger must launch after supervisor because it depends on it for interop
     for l2_num, l2 in enumerate(l2s):
         chain = optimism_args_with_right_defaults.chains[l2_num]
-        op_challenger_image = (
-            chain.challenger_params.image
-            if chain.challenger_params.image != ""
-            else _input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
-        )
         if chain.challenger_params.enabled:
             _op_challenger_launcher.launch(
                 plan,

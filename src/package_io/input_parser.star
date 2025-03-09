@@ -71,7 +71,7 @@ def external_l1_network_params_input_parser(input_args):
 
 def input_parser(plan, input_args):
     _sanity_check.sanity_check(plan, input_args)
-    results = parse_network_params(plan, input_args)
+    results = _parse_network_params(input_args)
 
     return struct(
         observability=struct(
@@ -269,7 +269,7 @@ def input_parser(plan, input_args):
     )
 
 
-def parse_network_params(plan, input_args):
+def _parse_network_params(input_args):
     results = {}
 
     # configure observability
@@ -346,7 +346,7 @@ def parse_network_params(plan, input_args):
             fail("Network id {0} is duplicated".format(network_id))
 
         participants = []
-        for i, p in enumerate(chain.get("participants", [default_participant()])):
+        for p in chain.get("participants", [default_participant()]):
             participant = default_participant()
             participant.update(p)
 
