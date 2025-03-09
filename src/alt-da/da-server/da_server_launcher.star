@@ -1,13 +1,7 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-shared_utils = imports.load_module(
-    "src/shared_utils/shared_utils.star",
-    package_id="ethereum-package"
-)
-constants = imports.load_module(
-    "src/package_io/constants.star",
-    package_id="ethereum-package"
-)
+_shared_utils = _imports.ext.ethereum_package_shared_utils
+_constants = _imports.ext.ethereum_package_constants
 
 # Port IDs
 DA_SERVER_HTTP_PORT_ID = "http"
@@ -18,10 +12,10 @@ DA_SERVER_HTTP_PORT_NUM = 3100
 
 def get_used_ports():
     used_ports = {
-        DA_SERVER_HTTP_PORT_ID: shared_utils.new_port_spec(
+        DA_SERVER_HTTP_PORT_ID: _shared_utils.new_port_spec(
             DA_SERVER_HTTP_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-            shared_utils.HTTP_APPLICATION_PROTOCOL,
+            _shared_utils.TCP_PROTOCOL,
+            _shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
     return used_ports
@@ -63,7 +57,7 @@ def get_da_server_config(
         image=image,
         ports=ports,
         cmd=cmd,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
 
 

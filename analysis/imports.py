@@ -42,6 +42,24 @@ class ImportModuleAnalyzer(ast.NodeVisitor):
         
         # Continue visiting child nodes
         self.generic_visit(node)
+    
+    def visit_Assign(self, node):
+        """Visit assignment nodes to check that import_module results are stored in private variables."""
+        # Check if this is an assignment from import_module
+        if (isinstance(node.value, ast.Call) and 
+            isinstance(node.value.func, ast.Name) and 
+            node.value.func.id == IMPORT_MODULE_FUNC):
+            
+            # Check that all target variables start with underscore
+            for target in node.targets:
+                if isinstance(target, ast.Name) and not target.id.startswith('_'):
+                    self.violations.append((
+                        node.lineno,
+                        f"Results of {IMPORT_MODULE_FUNC} should be stored in private variables (starting with '_') to keep imports scoped to the current file"
+                    ))
+        
+        # Continue visiting child nodes
+        self.generic_visit(node)
 
 
 class LoadModuleAnalyzer(ast.NodeVisitor):
@@ -56,9 +74,10 @@ class LoadModuleAnalyzer(ast.NodeVisitor):
         self.file_path = file_path
         self.workspace_root = workspace_root or os.getcwd()
         self.check_file_exists = check_file_exists
+        self.is_imports_star = os.path.basename(file_path) == IMPORTS_STAR_FILENAME
     
     def visit_Assign(self, node):
-        """Visit assignment nodes to track import_module assignments."""
+        """Visit assignment nodes to track import_module assignments and check load_module assignments."""
         # Check if this is an assignment from import_module("/imports.star")
         if (isinstance(node.value, ast.Call) and 
             isinstance(node.value.func, ast.Name) and 
@@ -72,6 +91,23 @@ class LoadModuleAnalyzer(ast.NodeVisitor):
             for target in node.targets:
                 if isinstance(target, ast.Name):
                     self.import_vars.add(target.id)
+        
+        # Check if this is an assignment from load_module
+        elif (isinstance(node.value, ast.Call) and 
+              isinstance(node.value.func, ast.Attribute) and 
+              node.value.func.attr == LOAD_MODULE_FUNC and
+              isinstance(node.value.func.value, ast.Name) and
+              node.value.func.value.id in self.import_vars):
+            
+            # Skip check for imports.star file
+            if not self.is_imports_star:
+                # Check that all target variables start with underscore
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and not target.id.startswith('_'):
+                        self.violations.append((
+                            node.lineno,
+                            f"Results of {LOAD_MODULE_FUNC} should be stored in private variables (starting with '_') to keep imports scoped to the current file"
+                        ))
         
         # Continue visiting child nodes
         self.generic_visit(node)

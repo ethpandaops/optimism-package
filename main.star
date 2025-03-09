@@ -1,20 +1,20 @@
-imports = import_module("/imports.star")
+_imports = import_module("/imports.star")
 
-ethereum_package = imports.load_module("main.star", package_id="ethereum-package")
-contract_deployer = imports.load_module("src/contracts/contract_deployer.star")
-l2_launcher = imports.load_module("src/l2.star")
-op_supervisor_launcher = imports.load_module(
+_ethereum_package = _imports.load_module("main.star", package_id="ethereum-package")
+_contract_deployer = _imports.load_module("src/contracts/contract_deployer.star")
+_l2_launcher = _imports.load_module("src/l2.star")
+_op_supervisor_launcher = _imports.load_module(
     "src/interop/op-supervisor/op_supervisor_launcher.star"
 )
-op_challenger_launcher = imports.load_module(
+_op_challenger_launcher = _imports.load_module(
     "src/challenger/op-challenger/op_challenger_launcher.star"
 )
 
-observability = imports.load_module("src/observability/observability.star")
+_observability = _imports.load_module("src/observability/observability.star")
 
-wait_for_sync = imports.load_module("src/wait/wait_for_sync.star")
-input_parser = imports.load_module("src/package_io/input_parser.star")
-ethereum_package_static_files = imports.load_module(
+_wait_for_sync = _imports.load_module("src/wait/wait_for_sync.star")
+_input_parser = _imports.load_module("src/package_io/input_parser.star")
+_ethereum_package_static_files = _imports.load_module(
     "src/static_files/static_files.star", package_id="ethereum-package"
 )
 
@@ -32,17 +32,17 @@ def run(plan, args):
     ethereum_args = args.get("ethereum_package", {})
     external_l1_args = args.get("external_l1_network_params", {})
     if external_l1_args:
-        external_l1_args = input_parser.external_l1_network_params_input_parser(
+        external_l1_args = _input_parser.external_l1_network_params_input_parser(
             plan, external_l1_args
         )
     else:
         if "network_params" not in ethereum_args:
-            ethereum_args.update(input_parser.default_ethereum_package_network_params())
+            ethereum_args.update(_input_parser.default_ethereum_package_network_params())
 
     # need to do a raw get here in case only optimism_package is provided.
     # .get will return None if the key is in the config with a None value.
-    optimism_args = args.get("optimism_package") or input_parser.default_optimism_args()
-    optimism_args_with_right_defaults = input_parser.input_parser(plan, optimism_args)
+    optimism_args = args.get("optimism_package") or {}
+    optimism_args_with_right_defaults = _input_parser.input_parser(plan, optimism_args)
     global_tolerations = optimism_args_with_right_defaults.global_tolerations
     global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
     global_log_level = optimism_args_with_right_defaults.global_log_level
@@ -52,7 +52,7 @@ def run(plan, args):
     observability_params = optimism_args_with_right_defaults.observability
     interop_params = optimism_args_with_right_defaults.interop
 
-    observability_helper = observability.make_helper(observability_params)
+    observability_helper = _observability.make_helper(observability_params)
 
     # Deploy the L1
     l1_network = ""
@@ -72,10 +72,10 @@ def run(plan, args):
         }
 
         plan.print("Waiting for network to sync")
-        wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
+        _wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
     else:
         plan.print("Deploying a local L1")
-        l1 = ethereum_package.run(plan, ethereum_args)
+        l1 = _ethereum_package.run(plan, ethereum_args)
         plan.print(l1.network_params)
         # Get L1 info
         all_l1_participants = l1.all_participants
@@ -90,9 +90,9 @@ def run(plan, args):
             all_l1_participants, l1_network_params, l1_network_id
         )
         plan.print("Waiting for L1 to start up")
-        wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
+        _wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
 
-    deployment_output = contract_deployer.deploy_contracts(
+    deployment_output = _contract_deployer.deploy_contracts(
         plan,
         l1_priv_key,
         l1_config_env_vars,
@@ -102,14 +102,14 @@ def run(plan, args):
     )
 
     jwt_file = plan.upload_files(
-        src=ethereum_package_static_files.JWT_PATH_FILEPATH,
+        src=_ethereum_package_static_files.JWT_PATH_FILEPATH,
         name="op_jwt_file",
     )
 
     l2s = []
     for l2_num, chain in enumerate(optimism_args_with_right_defaults.chains):
         l2s.append(
-            l2_launcher.launch_l2(
+            _l2_launcher.launch_l2(
                 plan,
                 l2_num,
                 chain.network_params.name,
@@ -129,7 +129,7 @@ def run(plan, args):
         )
 
     if interop_params.enabled:
-        op_supervisor_launcher.launch(
+        _op_supervisor_launcher.launch(
             plan,
             l1_config_env_vars,
             optimism_args_with_right_defaults.chains,
@@ -145,10 +145,10 @@ def run(plan, args):
         op_challenger_image = (
             chain.challenger_params.image
             if chain.challenger_params.image != ""
-            else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
+            else _input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
         )
         if chain.challenger_params.enabled:
-            op_challenger_launcher.launch(
+            _op_challenger_launcher.launch(
                 plan,
                 l2_num,
                 "op-challenger-{0}".format(chain.network_params.name),
@@ -163,7 +163,7 @@ def run(plan, args):
                 observability_helper,
             )
 
-    observability.launch(
+    _observability.launch(
         plan, observability_helper, global_node_selectors, observability_params
     )
 

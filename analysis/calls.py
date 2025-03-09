@@ -7,6 +7,25 @@ from typing import List, Tuple, Dict, Set, Optional, NamedTuple, Any
 # Global verbose flag
 VERBOSE = False
 
+builtin_functions = set([
+    # Starlark built-in functions
+    "all", "any", "bool", "bytes", "dict", "dir", "enumerate", "fail", "float", "getattr", "hasattr",
+    "hash", "int", "len", "list", "max", "min", "print", "range", "repr", "reversed", "set", "sorted",
+    "str", "tuple", "type", "zip",
+    # Kurtosis stdlib
+    "import_module", "read_file", "struct",
+    "Directory", "ExecRecipe", "GetHttpRequestRecipe", "ImageBuildSpec", "NixBuildSpec", "PortSpec",
+    "PostHttpRequestRecipe", "ReadyCondition", "ServiceConfig", "StoreSpec", "Toleration", "User",
+])
+
+# Built-in modules that don't need to be checked
+builtin_modules = set([
+    # Kurtosis stdlib
+    "json", "time",
+    # Kurtosis-test modules
+    "kurtosistest", "expect",
+])
+
 def debug_print(*args, **kwargs):
     """Print debug messages only when verbose mode is enabled."""
     if VERBOSE:
@@ -223,27 +242,227 @@ class CallAnalyzer(ast.NodeVisitor):
         self.all_functions = all_functions  # file_path -> {function_name -> FunctionSignature}
         self.module_to_file = module_to_file  # module_path -> file_path
         self.violations = []
+        
+        # Initialize scope tracking
+        # We use a stack of sets to track variables in different scopes
+        # The first set is the global scope
+        self.scope_stack = [set()]
+    
+    def _enter_scope(self):
+        """Enter a new scope, inheriting variables from parent scope."""
+        # Create a new scope that inherits all variables from the parent scope
+        new_scope = set(self.scope_stack[-1])
+        self.scope_stack.append(new_scope)
+    
+    def _exit_scope(self):
+        """Exit the current scope."""
+        if len(self.scope_stack) > 1:  # Always keep at least the global scope
+            self.scope_stack.pop()
+    
+    def _add_to_current_scope(self, var_name: str):
+        """Add a variable to the current scope."""
+        self.scope_stack[-1].add(var_name)
+    
+    def _is_in_scope(self, var_name: str) -> bool:
+        """Check if a variable is in the current scope."""
+        return var_name in self.scope_stack[-1]
+    
+    def visit_Module(self, node):
+        """Visit the module node (file root)."""
+        # Start with a clean global scope
+        self.scope_stack = [set()]
+        self.generic_visit(node)
+    
+    def visit_FunctionDef(self, node):
+        """Visit a function definition."""
+        # Enter a new scope for the function
+        self._enter_scope()
+        
+        # Add function arguments to the current scope
+        for arg in node.args.args:
+            self._add_to_current_scope(arg.arg)
+        
+        # Visit the function body
+        for stmt in node.body:
+            self.visit(stmt)
+        
+        # Exit the function scope
+        self._exit_scope()
+    
+    def visit_ClassDef(self, node):
+        """Visit a class definition."""
+        # Enter a new scope for the class
+        self._enter_scope()
+        
+        # Visit the class body
+        for stmt in node.body:
+            self.visit(stmt)
+        
+        # Exit the class scope
+        self._exit_scope()
+    
+    def visit_For(self, node):
+        """Visit a for loop."""
+        # Process the iterable expression first (outside the loop scope)
+        self.visit(node.iter)
+        
+        # Enter a new scope for the loop
+        self._enter_scope()
+        
+        # Add loop variables to the current scope
+        if isinstance(node.target, ast.Name):
+            self._add_to_current_scope(node.target.id)
+        elif isinstance(node.target, ast.Tuple):
+            for elt in node.target.elts:
+                if isinstance(elt, ast.Name):
+                    self._add_to_current_scope(elt.id)
+        
+        # Visit the loop body
+        for stmt in node.body:
+            self.visit(stmt)
+        
+        # Visit the else clause if it exists
+        if node.orelse:
+            for stmt in node.orelse:
+                self.visit(stmt)
+        
+        # Exit the loop scope
+        self._exit_scope()
+    
+    def visit_While(self, node):
+        """Visit a while loop."""
+        # Process the test expression first (outside the loop scope)
+        self.visit(node.test)
+        
+        # Enter a new scope for the loop
+        self._enter_scope()
+        
+        # Visit the loop body
+        for stmt in node.body:
+            self.visit(stmt)
+        
+        # Visit the else clause if it exists
+        if node.orelse:
+            for stmt in node.orelse:
+                self.visit(stmt)
+        
+        # Exit the loop scope
+        self._exit_scope()
+    
+    def visit_If(self, node):
+        """Visit an if statement."""
+        # Process the test expression first (outside the if scope)
+        self.visit(node.test)
+        
+        # Enter a new scope for the if branch
+        self._enter_scope()
+        
+        # Visit the if body
+        for stmt in node.body:
+            self.visit(stmt)
+        
+        # Exit the if scope
+        self._exit_scope()
+        
+        # Enter a new scope for the else branch
+        self._enter_scope()
+        
+        # Visit the else clause if it exists
+        if node.orelse:
+            for stmt in node.orelse:
+                self.visit(stmt)
+        
+        # Exit the else scope
+        self._exit_scope()
+    
+    def visit_With(self, node):
+        """Visit a with statement."""
+        # Process the context expressions first (outside the with scope)
+        for item in node.items:
+            self.visit(item.context_expr)
+            if item.optional_vars:
+                self.visit(item.optional_vars)
+        
+        # Enter a new scope for the with block
+        self._enter_scope()
+        
+        # Add variables from optional_vars to the current scope
+        for item in node.items:
+            if item.optional_vars:
+                if isinstance(item.optional_vars, ast.Name):
+                    self._add_to_current_scope(item.optional_vars.id)
+                elif isinstance(item.optional_vars, ast.Tuple):
+                    for elt in item.optional_vars.elts:
+                        if isinstance(elt, ast.Name):
+                            self._add_to_current_scope(elt.id)
+        
+        # Visit the with body
+        for stmt in node.body:
+            self.visit(stmt)
+        
+        # Exit the with scope
+        self._exit_scope()
+    
+    def visit_Assign(self, node):
+        """Visit an assignment statement."""
+        # Process the value expression first
+        self.visit(node.value)
+        
+        # Add assigned variables to the current scope
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                self._add_to_current_scope(target.id)
+            elif isinstance(target, ast.Tuple):
+                for elt in target.elts:
+                    if isinstance(elt, ast.Name):
+                        self._add_to_current_scope(elt.id)
     
     def visit_Call(self, node):
         """Visit function call nodes."""
+        # Visit all arguments first to ensure any variables defined in them are in scope
+        for arg in node.args:
+            self.visit(arg)
+        for kw in node.keywords:
+            self.visit(kw.value)
+        
         # Determine the function being called
         if isinstance(node.func, ast.Name):
             # Direct function call (e.g., my_function())
             func_name = node.func.id
             
-            # Only check against local functions defined in the current file
-            # Do not try to resolve against built-in functions
+            # Check if it's a local function
             if func_name in self.local_functions:
                 target_signature = self.local_functions[func_name]
                 self._check_call_compatibility(node, target_signature)
+            # Check if it's a built-in function
+            elif func_name in builtin_functions:
+                # Built-in function, no need to check
+                pass
+            # Check if it's a variable in scope
+            elif self._is_in_scope(func_name):
+                # It's a variable in scope, but we can't trace it to a function
+                # Skip the check as we can't determine if it's valid or not
+                debug_print(f"Skipping check for function call through variable: {func_name}")
+            else:
+                # Not a local function, not a built-in, and not a variable in scope
+                # This is definitely an error
+                self.violations.append((
+                    node.lineno,
+                    f"Call to non-existing function or variable '{func_name}'"
+                ))
         
         elif isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
             # Module attribute call (e.g., module.function())
             module_name = node.func.value.id
             func_name = node.func.attr
             
+            # Check if this is a built-in module
+            if module_name in builtin_modules:
+                # Built-in module, no need to check
+                debug_print(f"Skipping check for built-in module call: {module_name}.{func_name}")
+                pass
             # Check if this is a call to an imported module
-            if module_name in self.imports:
+            elif module_name in self.imports:
                 import_info = self.imports[module_name]
                 
                 # Only verify calls to local modules (no package_id)
@@ -269,26 +488,34 @@ class CallAnalyzer(ast.NodeVisitor):
                             if module_path_with_ext in self.module_to_file:
                                 target_file = self.module_to_file[module_path_with_ext]
                     
-                    if target_file:
-                        debug_print(f"  Found target file: {target_file}")
-                        
-                        # Look for the function in the target file
-                        if target_file in self.all_functions and func_name in self.all_functions[target_file]:
-                            target_signature = self.all_functions[target_file][func_name]
-                            debug_print(f"  Found function signature: {target_signature}")
+                    if target_file and target_file in self.all_functions:
+                        # Check if the function exists in the target file
+                        target_functions = self.all_functions[target_file]
+                        if func_name in target_functions:
+                            target_signature = target_functions[func_name]
                             self._check_call_compatibility(node, target_signature)
                         else:
-                            if target_file not in self.all_functions:
-                                debug_print(f"  Error: Target file {target_file} not found in all_functions")
-                            elif func_name not in self.all_functions[target_file]:
-                                debug_print(f"  Error: Function {func_name} not found in {target_file}")
-                                debug_print(f"  Available functions: {list(self.all_functions[target_file].keys()) if target_file in self.all_functions else 'None'}")
+                            self.violations.append((
+                                node.lineno,
+                                f"Call to non-existing function '{module_name}.{func_name}'"
+                            ))
                     else:
-                        debug_print(f"  Error: Could not find target file for module {module_path}")
-                        debug_print(f"  Available modules: {list(self.module_to_file.keys())}")
-        
-        # Continue visiting child nodes
-        self.generic_visit(node)
+                        debug_print(f"  Could not find target file for module {module_path}")
+            # Check if it's a variable in scope
+            elif self._is_in_scope(module_name):
+                # It's a variable in scope, but we can't trace what it refers to
+                # Skip the check as we can't determine if it's valid or not
+                debug_print(f"Skipping check for attribute call through variable: {module_name}.{func_name}")
+            else:
+                # Not an imported module and not a variable in scope
+                # This is definitely an error
+                self.violations.append((
+                    node.lineno,
+                    f"Call to non-existing module or variable '{module_name}'"
+                ))
+        else:
+            # For other types of calls (e.g., complex expressions), visit the function expression
+            self.visit(node.func)
     
     def _normalize_module_path(self, module_path: str) -> str:
         """Convert a module path to a file path."""
