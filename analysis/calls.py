@@ -542,25 +542,28 @@ class CallAnalyzer(ast.NodeVisitor):
                 # This is a valid call to _imports.load_module or _imports.ext
                 debug_print(f"Valid call to {module_name}.{func_name}")
                 
-                # For load_module, check that only valid arguments are passed
+                # For load_module, check that it takes exactly one argument (the module path)
                 if func_name == "load_module":
-                    # Valid arguments for load_module are:
-                    # - First positional argument: module_path (required)
-                    # - Or keyword argument: module_path
-                    
-                    # Check for invalid positional arguments (only one is allowed)
-                    if len(node.args) > 1:
-                        debug_print(f"Call to {module_name}.{func_name} at line {node.lineno} has too many positional arguments")
+                    # Check argument count and types
+                    if len(node.args) == 1:
+                        # One positional argument is correct
+                        pass
+                    elif len(node.args) > 1:
+                        # Too many positional arguments
                         self.violations.append((
                             node.lineno,
                             f"Call to {module_name}.{func_name} has too many positional arguments, only module_path is allowed"
                         ))
+                    elif not any(kw.arg == "module_path" for kw in node.keywords):
+                        # No module_path provided
+                        self.violations.append((
+                            node.lineno,
+                            f"Call to {module_name}.{func_name} requires a module_path argument"
+                        ))
                     
                     # Check for invalid keyword arguments
-                    valid_kwargs = {"module_path"}
                     for kw in node.keywords:
-                        if kw.arg and kw.arg not in valid_kwargs:
-                            debug_print(f"Call to {module_name}.{func_name} at line {node.lineno} has invalid keyword argument: {kw.arg}")
+                        if kw.arg and kw.arg != "module_path":
                             self.violations.append((
                                 node.lineno,
                                 f"Call to {module_name}.{func_name} has invalid keyword argument: {kw.arg}"
