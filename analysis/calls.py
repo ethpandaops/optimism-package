@@ -481,9 +481,8 @@ def main():
         if violations:
             files_with_violations += 1
             total_violations += len(violations)
-            print(f"\nViolations in {file_path}:")
             for line, message in violations:
-                print(f"  Line {line}: {message}")
+                print(f"{file_path}:{line}: {message}")
         else:
             debug_print(f"No violations in {file_path}")
     

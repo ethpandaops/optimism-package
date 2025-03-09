@@ -1,10 +1,12 @@
-el_cl_launcher = import_module("/src/el_cl_launcher.star")
-input_parser = import_module("/src/package_io/input_parser.star")
-observability = import_module("/src/observability/observability.star")
-ethereum_package_constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
+imports = import_module("/imports.star")
+
+el_cl_launcher = imports.load_module("src/el_cl_launcher.star")
+input_parser = imports.load_module("src/package_io/input_parser.star")
+observability = imports.load_module("src/observability/observability.star")
+ethereum_package_constants = imports.load_module(
+    "src/package_io/constants.star", "ethereum-package"
 )
-util = import_module("/src/util.star")
+util = imports.load_module("src/util.star")
 
 #
 # Default test inputs

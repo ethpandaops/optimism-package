@@ -1,4 +1,6 @@
-input_parser = import_module("/src/package_io/input_parser.star")
+imports = import_module("/imports.star")
+
+input_parser = imports.load_module("src/package_io/input_parser.star")
 
 
 def test_external_l1_network_params_input_parser_invalid_fields(plan):

@@ -15,9 +15,9 @@ PACKAGES = {
 
 def load_module(module_path, package_id=None):
     pkg = struct(id = "", version = None)
-    if package_id is not None:
+    if package_id:
         pkg = PACKAGES[package_id]
     locator = "{0}/{1}".format(pkg.id, module_path)
-    if pkg.version is not None:
+    if pkg.version:
         locator = "{0}@{1}".format(locator, pkg.version)
     return import_module(locator)

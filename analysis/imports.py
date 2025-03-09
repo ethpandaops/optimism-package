@@ -5,6 +5,15 @@ import glob
 import re
 from typing import List, Tuple, Dict, Set, Optional
 
+# Constants
+IMPORTS_STAR_FILENAME = "imports.star"
+IMPORT_MODULE_FUNC = "import_module"
+LOAD_MODULE_FUNC = "load_module"
+MODULE_PATH_ARG = "module_path"
+PACKAGE_ID_ARG = "package_id"
+STAR_FILE_EXTENSION = ".star"
+
+IMPORTS_STAR_LOCATOR = "/{0}".format(IMPORTS_STAR_FILENAME)
 
 class ImportModuleAnalyzer(ast.NodeVisitor):
     """AST visitor that finds calls to import_module and checks their arguments."""
@@ -15,20 +24,20 @@ class ImportModuleAnalyzer(ast.NodeVisitor):
     def visit_Call(self, node):
         """Visit a function call node in the AST."""
         # Check if this is a call to import_module
-        if isinstance(node.func, ast.Name) and node.func.id == 'import_module':
+        if isinstance(node.func, ast.Name) and node.func.id == IMPORT_MODULE_FUNC:
             # Check if it has exactly one argument
             if len(node.args) != 1:
                 self.violations.append((
                     node.lineno,
-                    f"import_module call has {len(node.args)} arguments, expected exactly 1"
+                    f"{IMPORT_MODULE_FUNC} call has {len(node.args)} arguments, expected exactly 1"
                 ))
             # Check if the argument is the string "/imports.star"
             elif not (isinstance(node.args[0], ast.Constant) and 
                      isinstance(node.args[0].value, str) and 
-                     node.args[0].value == "/imports.star"):
+                     node.args[0].value == IMPORTS_STAR_LOCATOR):
                 self.violations.append((
                     node.lineno,
-                    f"only /imports.star can be imported using import_module. Please use imports.load_module in other cases"
+                    f"only {IMPORTS_STAR_LOCATOR} can be imported using {IMPORT_MODULE_FUNC}. Please use imports.{LOAD_MODULE_FUNC} in other cases"
                 ))
         
         # Continue visiting child nodes
@@ -53,11 +62,11 @@ class LoadModuleAnalyzer(ast.NodeVisitor):
         # Check if this is an assignment from import_module("/imports.star")
         if (isinstance(node.value, ast.Call) and 
             isinstance(node.value.func, ast.Name) and 
-            node.value.func.id == 'import_module' and
+            node.value.func.id == IMPORT_MODULE_FUNC and
             len(node.value.args) == 1 and
             isinstance(node.value.args[0], ast.Constant) and
             isinstance(node.value.args[0].value, str) and
-            node.value.args[0].value == "/imports.star"):
+            node.value.args[0].value == IMPORTS_STAR_LOCATOR):
             
             # Add all target variables to our tracked set
             for target in node.targets:
@@ -71,22 +80,22 @@ class LoadModuleAnalyzer(ast.NodeVisitor):
         """Visit call nodes to check load_module calls."""
         # Check if this is a call to VARIABLE.load_module where VARIABLE is from import_module
         if (isinstance(node.func, ast.Attribute) and 
-            node.func.attr == 'load_module' and
+            node.func.attr == LOAD_MODULE_FUNC and
             isinstance(node.func.value, ast.Name) and
             node.func.value.id in self.import_vars):
             
             # Check if it has at least one argument (module_path)
-            if len(node.args) < 1 and not any(kw.arg == 'module_path' for kw in node.keywords):
+            if len(node.args) < 1 and not any(kw.arg == MODULE_PATH_ARG for kw in node.keywords):
                 self.violations.append((
                     node.lineno,
-                    f"load_module call missing required module_path argument"
+                    f"{LOAD_MODULE_FUNC} call missing required {MODULE_PATH_ARG} argument"
                 ))
             else:
                 # Check if package_id is provided (either as positional or keyword argument)
                 has_package_id = False
                 
                 # Check for package_id in keyword arguments
-                if any(kw.arg == 'package_id' for kw in node.keywords):
+                if any(kw.arg == PACKAGE_ID_ARG for kw in node.keywords):
                     has_package_id = True
                 
                 # Check for package_id in positional arguments (if it's the second argument)
@@ -103,7 +112,7 @@ class LoadModuleAnalyzer(ast.NodeVisitor):
                     # Or from keyword argument
                     else:
                         for kw in node.keywords:
-                            if kw.arg == 'module_path':
+                            if kw.arg == MODULE_PATH_ARG:
                                 module_path_node = kw.value
                                 break
                     
@@ -113,20 +122,20 @@ class LoadModuleAnalyzer(ast.NodeVisitor):
                         if not self._is_valid_relative_path(module_path):
                             self.violations.append((
                                 node.lineno,
-                                f"load_module without package_id must use a valid relative path, got '{module_path}'"
+                                f"{LOAD_MODULE_FUNC} without {PACKAGE_ID_ARG} must use a valid relative path, got '{module_path}'"
                             ))
                         else:
                             # Check if the module actually exists
                             if self.check_file_exists and not self._module_exists(module_path):
                                 self.violations.append((
                                     node.lineno,
-                                    f"load_module references non-existent module: '{module_path}'"
+                                    f"{LOAD_MODULE_FUNC} references non-existent module: '{module_path}'"
                                 ))
                     else:
                         # Non-constant module_path can't be statically analyzed
                         self.violations.append((
                             node.lineno,
-                            f"load_module path must be a string literal for static analysis"
+                            f"{LOAD_MODULE_FUNC} path must be a string literal for static analysis"
                         ))
         
         # Continue visiting child nodes
@@ -173,8 +182,8 @@ class LoadModuleAnalyzer(ast.NodeVisitor):
             module_path = module_path[1:]
         
         # If the path doesn't end with .star, add it
-        if not module_path.endswith('.star'):
-            module_path += '.star'
+        if not module_path.endswith(STAR_FILE_EXTENSION):
+            module_path += STAR_FILE_EXTENSION
         
         # Only check relative to the workspace root
         workspace_path = os.path.normpath(os.path.join(self.workspace_root, module_path))
@@ -209,10 +218,14 @@ def analyze_file(file_path: str, workspace_root: str = None, check_file_exists: 
         # Run both analyzers
         violations = []
         
-        # Check import_module calls
-        import_analyzer = ImportModuleAnalyzer()
-        import_analyzer.visit(tree)
-        violations.extend(import_analyzer.violations)
+        # Check if this is the imports.star file
+        is_imports_star = os.path.basename(file_path) == IMPORTS_STAR_FILENAME
+        
+        # Check import_module calls (skip for imports.star file)
+        if not is_imports_star:
+            import_analyzer = ImportModuleAnalyzer()
+            import_analyzer.visit(tree)
+            violations.extend(import_analyzer.violations)
         
         # Check load_module calls
         load_analyzer = LoadModuleAnalyzer(file_path, workspace_root, check_file_exists)
@@ -239,11 +252,11 @@ def find_star_files(path: str) -> List[str]:
         List of paths to *.star files
     """
     if os.path.isfile(path):
-        return [path] if path.endswith('.star') else []
+        return [path] if path.endswith(STAR_FILE_EXTENSION) else []
     
     star_files = []
     for root, _, _ in os.walk(path):
-        star_files.extend(glob.glob(os.path.join(root, "*.star")))
+        star_files.extend(glob.glob(os.path.join(root, f"*{STAR_FILE_EXTENSION}")))
     
     return star_files
 
@@ -321,9 +334,8 @@ def main():
             
             if violations:
                 files_with_violations += 1
-                print(f"\nViolations in {file_path}:")
                 for line, message in violations:
-                    print(f"  Line {line}: {message}")
+                    print(f"{file_path}:{line}: {message}")
     
     print(f"\nAnalyzed {total_files_analyzed} .star files")
     

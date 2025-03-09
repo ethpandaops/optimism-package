@@ -1,4 +1,6 @@
-util = import_module("/src/util.star")
+imports = import_module("/imports.star")
+
+util = imports.load_module("src/util.star")
 
 
 def test_label_from_image_short_image_name(plan):
