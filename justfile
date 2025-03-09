@@ -15,5 +15,5 @@ open-grafana enclaveName:
     just open-service {{enclaveName}} grafana
     
 validate SCOPE=".":
-    python analysis/imports.py {{SCOPE}}
-    python analysis/calls.py {{SCOPE}}
+    python -m analysis.imports {{SCOPE}}
+    python -m analysis.calls {{SCOPE}}
