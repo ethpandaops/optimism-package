@@ -58,66 +58,33 @@ VERBOSITY_LEVELS = {
 
 def launch(
     plan,
-    launcher,
-    service_name,
-    participant,
-    global_log_level,
-    persistent,
-    tolerations,
-    node_selectors,
-    el_context,
-    existing_cl_clients,
-    l1_config_env_vars,
-    sequencer_enabled,
-    observability_helper,
-    interop_params,
-    da_server_context,
+    cl_args,
 ):
-    # beacon_node_identity_recipe = PostHttpRequestRecipe(
-    #     endpoint="/",
-    #     content_type="application/json",
-    #     body='{"jsonrpc":"2.0","method":"opp2p_self","params":[],"id":1}',
-    #     port_id=_constants.HTTP_PORT_ID,
-    #     extract={
-    #         "enr": ".result.ENR",
-    #         "multiaddr": ".result.addresses[0]",
-    #         "peer_id": ".result.peerID",
-    #     },
-    # )
-
     log_level = _ethereum_package_input_parser.get_client_log_level_or_default(
-        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
+        cl_args.participant.cl_log_level, cl_args.global_log_level, VERBOSITY_LEVELS
     )
 
     config = _get_beacon_config(
-        launcher,
-        service_name,
-        participant,
+        cl_args.launcher,
+        cl_args.service_name,
+        cl_args.participant,
         log_level,
-        persistent,
-        tolerations,
-        node_selectors,
-        el_context,
-        existing_cl_clients,
-        l1_config_env_vars,
-        sequencer_enabled,
-        observability_helper,
+        cl_args.persistent,
+        cl_args.tolerations,
+        cl_args.node_selectors,
+        cl_args.el_context,
+        cl_args.existing_cl_clients,
+        cl_args.l1_config_env_vars,
+        cl_args.sequencer_enabled,
+        cl_args.observability_helper,
     )
 
-    service = plan.add_service(service_name, config)
+    service = plan.add_service(cl_args.service_name, config)
     service_url = _util.make_service_http_url(service)
 
     metrics_info = _observability.new_metrics_info(
-        observability_helper, service, METRICS_PATH
+        cl_args.observability_helper, service, METRICS_PATH
     )
-
-    # response = plan.request(
-    #     recipe=beacon_node_identity_recipe, service_name=service_name
-    # )
-
-    # beacon_node_enr = response["extract.enr"]
-    # beacon_multiaddr = response["extract.multiaddr"]
-    # beacon_peer_id = response["extract.peer_id"]
 
     return _ethereum_package_cl_context.new_cl_context(
         client_name="hildr",
@@ -126,7 +93,7 @@ def launch(
         http_port=_util.get_service_http_port_num(service),
         beacon_http_url=service_url,
         cl_nodes_metrics_info=[metrics_info],
-        beacon_service_name=service_name,
+        beacon_service_name=cl_args.service_name,
     )
 
 

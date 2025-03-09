@@ -3,7 +3,6 @@ _imports = import_module("/imports.star")
 _ethereum_package_shared_utils = _imports.ext.ethereum_package_shared_utils
 _ethereum_package_cl_context = _imports.ext.ethereum_package_cl_context
 _ethereum_package_constants = _imports.ext.ethereum_package_constants
-_ethereum_package_input_parser = _imports.ext.ethereum_package_input_parser
 
 _constants = _imports.load_module("src/package_io/constants.star")
 
@@ -55,20 +54,7 @@ VERBOSITY_LEVELS = {
 
 def launch(
     plan,
-    launcher,
-    service_name,
-    participant,
-    global_log_level,
-    persistent,
-    tolerations,
-    node_selectors,
-    el_context,
-    existing_cl_clients,
-    l1_config_env_vars,
-    sequencer_enabled,
-    observability_helper,
-    interop_params,
-    da_server_context,
+    cl_args,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
         endpoint="/",
@@ -82,39 +68,35 @@ def launch(
         },
     )
 
-    log_level = _ethereum_package_input_parser.get_client_log_level_or_default(
-        participant.cl_builder_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     config = _get_beacon_config(
         plan,
-        launcher,
-        service_name,
-        participant,
-        persistent,
-        tolerations,
-        node_selectors,
-        el_context,
-        existing_cl_clients,
-        l1_config_env_vars,
+        cl_args.launcher,
+        cl_args.service_name,
+        cl_args.participant,
+        cl_args.persistent,
+        cl_args.tolerations,
+        cl_args.node_selectors,
+        cl_args.el_context,
+        cl_args.existing_cl_clients,
+        cl_args.l1_config_env_vars,
         beacon_node_identity_recipe,
-        sequencer_enabled,
-        observability_helper,
-        interop_params,
-        da_server_context,
+        cl_args.sequencer_enabled,
+        cl_args.observability_helper,
+        cl_args.interop_params,
+        cl_args.da_server_context,
     )
 
-    beacon_service = plan.add_service(service_name, config)
+    beacon_service = plan.add_service(cl_args.service_name, config)
 
     beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(
         beacon_service.ip_address, beacon_http_port.number
     )
 
-    metrics_info = _observability.new_metrics_info(observability_helper, beacon_service)
+    metrics_info = _observability.new_metrics_info(cl_args.observability_helper, beacon_service)
 
     response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=service_name
+        recipe=beacon_node_identity_recipe, service_name=cl_args.service_name
     )
 
     beacon_node_enr = response["extract.enr"]
@@ -128,7 +110,7 @@ def launch(
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
         cl_nodes_metrics_info=[metrics_info],
-        beacon_service_name=service_name,
+        beacon_service_name=cl_args.service_name,
         multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
     )

@@ -3,7 +3,6 @@ _imports = import_module("/imports.star")
 _ethereum_package_shared_utils = _imports.ext.ethereum_package_shared_utils
 _ethereum_package_el_context = _imports.ext.ethereum_package_el_context
 _ethereum_package_el_admin_node_info = _imports.ext.ethereum_package_el_admin_node_info
-_ethereum_package_input_parser = _imports.ext.ethereum_package_input_parser
 _ethereum_package_constants = _imports.ext.ethereum_package_constants
 
 _constants = _imports.load_module("src/package_io/constants.star")
@@ -61,50 +60,33 @@ VERBOSITY_LEVELS = {
 
 def launch(
     plan,
-    launcher,
-    service_name,
-    participant,
-    global_log_level,
-    persistent,
-    tolerations,
-    node_selectors,
-    existing_el_clients,
-    sequencer_enabled,
-    sequencer_context,
-    observability_helper,
-    interop_params,
+    el_args,
 ):
-    log_level = _ethereum_package_input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
-    )
+    cl_client_name = el_args.service_name.split("-")[4]
 
-    cl_client_name = service_name.split("-")[4]
-
-    config = get_config(
-        plan,
-        launcher,
-        service_name,
-        participant,
-        log_level,
-        persistent,
-        tolerations,
-        node_selectors,
-        existing_el_clients,
+    config = _get_config(
+        el_args.launcher,
+        el_args.service_name,
+        el_args.participant,
+        el_args.persistent,
+        el_args.tolerations,
+        el_args.node_selectors,
+        el_args.existing_el_clients,
         cl_client_name,
-        sequencer_enabled,
-        sequencer_context,
-        observability_helper,
+        el_args.sequencer_enabled,
+        el_args.sequencer_context,
+        el_args.observability_helper,
     )
 
-    service = plan.add_service(service_name, config)
+    service = plan.add_service(el_args.service_name, config)
     http_url = _util.make_service_http_url(service, _constants.RPC_PORT_ID)
     ws_url = _util.make_service_ws_url(service)
 
     enode = _ethereum_package_el_admin_node_info.get_enode_for_node(
-        plan, service_name, _constants.RPC_PORT_ID
+        plan, el_args.service_name, _constants.RPC_PORT_ID
     )
 
-    metrics_info = _observability.new_metrics_info(observability_helper, service)
+    metrics_info = _observability.new_metrics_info(el_args.observability_helper, service)
 
     return _ethereum_package_el_context.new_el_context(
         client_name="op-nethermind",
@@ -115,17 +97,15 @@ def launch(
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
         rpc_http_url=http_url,
         ws_url=ws_url,
-        service_name=service_name,
+        service_name=el_args.service_name,
         el_metrics_info=[metrics_info],
     )
 
 
-def get_config(
-    plan,
+def _get_config(
     launcher,
     service_name,
     participant,
-    log_level,
     persistent,
     tolerations,
     node_selectors,

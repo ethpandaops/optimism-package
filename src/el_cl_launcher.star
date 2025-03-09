@@ -248,18 +248,20 @@ def launch(
         sequencer_context = all_el_contexts[0] if len(all_el_contexts) > 0 else None
         el_context = el_launch_method(
             plan,
-            el_launcher,
-            el_service_name,
-            participant,
-            global_log_level,
-            persistent,
-            el_tolerations,
-            node_selectors,
-            all_el_contexts,
-            sequencer_enabled,
-            sequencer_context,
-            observability_helper,
-            interop_params,
+            el_args(
+                el_launcher,
+                el_service_name,
+                participant,
+                global_log_level,
+                persistent,
+                el_tolerations,
+                node_selectors,
+                all_el_contexts,
+                sequencer_enabled,
+                sequencer_context,
+                observability_helper,
+                interop_params,
+            )
         )
 
         # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
@@ -295,18 +297,20 @@ def launch(
                 )
                 el_builder_context = el_builder_launch_method(
                     plan,
-                    el_builder_launcher,
-                    el_builder_service_name,
-                    participant,
-                    global_log_level,
-                    persistent,
-                    el_tolerations,
-                    node_selectors,
-                    all_el_contexts,
-                    False,  # sequencer_enabled
-                    sequencer_context,
-                    observability_helper,
-                    interop_params,
+                    el_args(
+                        el_builder_launcher,
+                        el_builder_service_name,
+                        participant,
+                        global_log_level,
+                        persistent,
+                        el_tolerations,
+                        node_selectors,
+                        all_el_contexts,
+                        False,  # sequencer_enabled
+                        sequencer_context,
+                        observability_helper,
+                        interop_params,
+                    )
                 )
                 for metrics_info in [
                     x for x in el_builder_context.el_metrics_info if x != None
@@ -326,12 +330,14 @@ def launch(
 
             sidecar_context = sidecar_launch_method(
                 plan,
-                sidecar_launcher,
-                sidecar_service_name,
-                rollup_boost_image,
-                all_el_contexts,
-                el_context,
-                el_builder_context,
+                sidecar_args(
+                    sidecar_launcher,
+                    sidecar_service_name,
+                    rollup_boost_image,
+                    all_el_contexts,
+                    el_context,
+                    el_builder_context,
+                )
             )
 
             all_el_contexts.append(el_builder_context)
@@ -340,22 +346,22 @@ def launch(
 
         cl_context = cl_launch_method(
             plan,
-            cl_launcher,
-            cl_service_name,
-            participant,
-            global_log_level,
-            persistent,
-            cl_tolerations,
-            node_selectors,
-            sidecar_context
-            if rollup_boost_enabled and sequencer_enabled
-            else el_context,
-            all_cl_contexts,
-            l1_config_env_vars,
-            sequencer_enabled,
-            observability_helper,
-            interop_params,
-            da_server_context,
+            cl_args(
+                cl_launcher,
+                cl_service_name,
+                participant,
+                global_log_level,
+                persistent,
+                cl_tolerations,
+                node_selectors,
+                sidecar_context if rollup_boost_enabled and sequencer_enabled else el_context,
+                all_cl_contexts,
+                l1_config_env_vars,
+                sequencer_enabled,
+                observability_helper,
+                interop_params,
+                da_server_context,
+            )
         )
 
         # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
@@ -378,20 +384,22 @@ def launch(
         if rollup_boost_enabled and sequencer_enabled and not external_builder:
             cl_builder_context = cl_builder_launch_method(
                 plan,
-                cl_builder_launcher,
-                cl_builder_service_name,
-                participant,
-                global_log_level,
-                persistent,
-                cl_tolerations,
-                node_selectors,
-                el_builder_context,
-                all_cl_contexts,
-                l1_config_env_vars,
-                False,
-                observability_helper,
-                interop_params,
-                da_server_context,
+                cl_args(
+                    cl_builder_launcher,
+                    cl_builder_service_name,
+                    participant,
+                    global_log_level,
+                    persistent,
+                    cl_tolerations,
+                    node_selectors,
+                    el_builder_context,
+                    all_cl_contexts,
+                    l1_config_env_vars,
+                    False,
+                    observability_helper,
+                    interop_params,
+                    da_server_context,
+                )
             )
             for metrics_info in [
                 x for x in cl_builder_context.cl_nodes_metrics_info if x != None
@@ -410,3 +418,83 @@ def launch(
 
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts
+
+
+def el_args(
+    launcher,
+    service_name,
+    participant,
+    global_log_level,
+    persistent,
+    tolerations,
+    node_selectors,
+    existing_el_clients,
+    sequencer_enabled,
+    sequencer_context,
+    observability_helper,
+    interop_params,
+):
+    return struct(
+        launcher=launcher,
+        service_name=service_name,
+        participant=participant,
+        global_log_level=global_log_level,
+        persistent=persistent,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        existing_el_clients=existing_el_clients,
+        sequencer_enabled=sequencer_enabled,
+        sequencer_context=sequencer_context,
+        observability_helper=observability_helper,
+        interop_params=interop_params,
+    )
+
+def cl_args(
+    launcher,
+    service_name,
+    participant,
+    global_log_level,
+    persistent,
+    tolerations,
+    node_selectors,
+    el_context,
+    existing_cl_clients,
+    l1_config_env_vars,
+    sequencer_enabled,
+    observability_helper,
+    interop_params,
+    da_server_context,
+):
+    return struct(
+        launcher=launcher,
+        service_name=service_name,
+        participant=participant,
+        global_log_level=global_log_level,
+        persistent=persistent,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        el_context=el_context,
+        existing_cl_clients=existing_cl_clients,
+        l1_config_env_vars=l1_config_env_vars,
+        sequencer_enabled=sequencer_enabled,
+        observability_helper=observability_helper,
+        interop_params=interop_params,
+        da_server_context=da_server_context,
+    )
+
+def sidecar_args(
+    launcher,
+    service_name,
+    image,
+    existing_el_clients,
+    sequencer_context,
+    builder_context,
+):
+    return struct(
+        launcher=launcher,
+        service_name=service_name,
+        image=image,
+        existing_el_clients=existing_el_clients,
+        sequencer_context=sequencer_context,
+        builder_context=builder_context,
+    )

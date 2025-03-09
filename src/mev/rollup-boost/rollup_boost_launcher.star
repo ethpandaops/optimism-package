@@ -24,21 +24,16 @@ def _get_used_ports():
 
 def launch(
     plan,
-    launcher,
-    service_name,
-    image,
-    existing_el_clients,
-    sequencer_context,
-    builder_context,
+    sidecar_args
 ):
     config = _get_config(
-        jwt_file=launcher.jwt_file,
-        image=image,
-        sequencer_context=sequencer_context,
-        builder_context=builder_context,
+        jwt_file=sidecar_args.launcher.jwt_file,
+        image=sidecar_args.image,
+        sequencer_context=sidecar_args.sequencer_context,
+        builder_context=sidecar_args.builder_context,
     )
 
-    service = plan.add_service(service_name, config)
+    service = plan.add_service(sidecar_args.service_name, config)
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
@@ -50,7 +45,7 @@ def launch(
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=RPC_PORT_NUM,
         rpc_http_url=http_url,
-        service_name=service_name,
+        service_name=sidecar_args.service_name,
     )
 
 
