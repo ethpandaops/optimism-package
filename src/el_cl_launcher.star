@@ -1,30 +1,34 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+imports = import_module("/imports.star")
+
+ethereum_package_shared_utils = imports.load_module(
+    "src/shared_utils/shared_utils.star",
+    package_id="ethereum-package"
 )
 
-ethereum_package_input_parser = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
+ethereum_package_input_parser = imports.load_module(
+    "src/package_io/input_parser.star",
+    package_id="ethereum-package"
 )
 
-input_parser = import_module("./package_io/input_parser.star")
+input_parser = imports.load_module("src/package_io/input_parser.star")
 
-observability = import_module("./observability/observability.star")
+observability = imports.load_module("src/observability/observability.star")
 
 # EL
-op_geth = import_module("./el/op-geth/op_geth_launcher.star")
-op_reth = import_module("./el/op-reth/op_reth_launcher.star")
-op_erigon = import_module("./el/op-erigon/op_erigon_launcher.star")
-op_nethermind = import_module("./el/op-nethermind/op_nethermind_launcher.star")
-op_besu = import_module("./el/op-besu/op_besu_launcher.star")
+op_geth = imports.load_module("src/el/op-geth/op_geth_launcher.star")
+op_reth = imports.load_module("src/el/op-reth/op_reth_launcher.star")
+op_erigon = imports.load_module("src/el/op-erigon/op_erigon_launcher.star")
+op_nethermind = imports.load_module("src/el/op-nethermind/op_nethermind_launcher.star")
+op_besu = imports.load_module("src/el/op-besu/op_besu_launcher.star")
 # CL
-op_node = import_module("./cl/op-node/op_node_launcher.star")
-hildr = import_module("./cl/hildr/hildr_launcher.star")
+op_node = imports.load_module("src/cl/op-node/op_node_launcher.star")
+hildr = imports.load_module("src/cl/hildr/hildr_launcher.star")
 
 # MEV
-rollup_boost = import_module("./mev/rollup-boost/rollup_boost_launcher.star")
-op_geth_builder = import_module("./el/op-geth/op_geth_builder_launcher.star")
-op_reth_builder = import_module("./el/op-reth/op_reth_builder_launcher.star")
-op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
+rollup_boost = imports.load_module("src/mev/rollup-boost/rollup_boost_launcher.star")
+op_geth_builder = imports.load_module("src/el/op-geth/op_geth_builder_launcher.star")
+op_reth_builder = imports.load_module("src/el/op-reth/op_reth_builder_launcher.star")
+op_node_builder = imports.load_module("src/cl/op-node/op_node_builder_launcher.star")
 
 
 def launch(

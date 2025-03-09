@@ -6,10 +6,13 @@ FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806
 
 FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
-utils = import_module("../util.star")
+imports = import_module("/imports.star")
 
-ethereum_package_genesis_constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+utils = imports.load_module("src/util.star")
+
+ethereum_package_genesis_constants = imports.load_module(
+    "src/prelaunch_data_generator/genesis_constants/genesis_constants.star",
+    package_id="ethereum-package"
 )
 
 CANNED_VALUES = {

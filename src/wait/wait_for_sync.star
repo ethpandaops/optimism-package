@@ -1,4 +1,6 @@
-utils = import_module("../util.star")
+imports = import_module("/imports.star")
+
+utils = imports.load_module("src/util.star")
 
 
 def wait_for_sync(plan, l1_config_env_vars):

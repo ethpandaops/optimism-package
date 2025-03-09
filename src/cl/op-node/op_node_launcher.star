@@ -1,23 +1,29 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+imports = import_module("/imports.star")
+
+ethereum_package_shared_utils = imports.load_module(
+    "src/shared_utils/shared_utils.star",
+    package_id="ethereum-package"
 )
 
-ethereum_package_cl_context = import_module(
-    "github.com/ethpandaops/ethereum-package/src/cl/cl_context.star"
+ethereum_package_cl_context = imports.load_module(
+    "src/cl/cl_context.star",
+    package_id="ethereum-package"
 )
 
-ethereum_package_constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
+ethereum_package_constants = imports.load_module(
+    "src/package_io/constants.star",
+    package_id="ethereum-package"
 )
 
-ethereum_package_input_parser = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
+ethereum_package_input_parser = imports.load_module(
+    "src/package_io/input_parser.star",
+    package_id="ethereum-package"
 )
 
-constants = import_module("../../package_io/constants.star")
-util = import_module("../../util.star")
-observability = import_module("../../observability/observability.star")
-interop_constants = import_module("../../interop/constants.star")
+constants = imports.load_module("src/package_io/constants.star")
+util = imports.load_module("src/util.star")
+observability = imports.load_module("src/observability/observability.star")
+interop_constants = imports.load_module("src/interop/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 

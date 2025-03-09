@@ -1,8 +1,12 @@
-shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+imports = import_module("/imports.star")
+
+shared_utils = imports.load_module(
+    "src/shared_utils/shared_utils.star",
+    package_id="ethereum-package"
 )
-constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
+constants = imports.load_module(
+    "src/package_io/constants.star",
+    package_id="ethereum-package"
 )
 
 # Port IDs

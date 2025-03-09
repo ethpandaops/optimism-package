@@ -1,10 +1,13 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+imports = import_module("/imports.star")
+
+ethereum_package_shared_utils = imports.load_module(
+    "src/shared_utils/shared_utils.star",
+    package_id="ethereum-package"
 )
 
-postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
+postgres = imports.load_module("main.star", package_id="postgres-package")
 
-util = import_module("../util.star")
+util = imports.load_module("src/util.star")
 
 IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout-optimism:6.8.0"
 IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"

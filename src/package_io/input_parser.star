@@ -1,9 +1,12 @@
-ethereum_package_input_parser = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
+imports = import_module("/imports.star")
+
+ethereum_package_input_parser = imports.load_module(
+    "src/package_io/input_parser.star",
+    package_id="ethereum-package"
 )
 
-constants = import_module("../package_io/constants.star")
-sanity_check = import_module("./sanity_check.star")
+constants = imports.load_module("src/package_io/constants.star")
+sanity_check = imports.load_module("src/package_io/sanity_check.star")
 
 DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",

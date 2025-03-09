@@ -1,28 +1,36 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+imports = import_module("/imports.star")
+
+ethereum_package_shared_utils = imports.load_module(
+    "src/shared_utils/shared_utils.star",
+    package_id="ethereum-package"
 )
 
-ethereum_package_el_context = import_module(
-    "github.com/ethpandaops/ethereum-package/src/el/el_context.star"
+ethereum_package_el_context = imports.load_module(
+    "src/el/el_context.star",
+    package_id="ethereum-package"
 )
-ethereum_package_el_admin_node_info = import_module(
-    "github.com/ethpandaops/ethereum-package/src/el/el_admin_node_info.star"
-)
-
-ethereum_package_node_metrics = import_module(
-    "github.com/ethpandaops/ethereum-package/src/node_metrics_info.star"
-)
-ethereum_package_constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
+ethereum_package_el_admin_node_info = imports.load_module(
+    "src/el/el_admin_node_info.star",
+    package_id="ethereum-package"
 )
 
-ethereum_package_input_parser = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
+ethereum_package_node_metrics = imports.load_module(
+    "src/node_metrics_info.star",
+    package_id="ethereum-package"
+)
+ethereum_package_constants = imports.load_module(
+    "src/package_io/constants.star",
+    package_id="ethereum-package"
 )
 
-constants = import_module("../../package_io/constants.star")
-util = import_module("../../util.star")
-observability = import_module("../../observability/observability.star")
+ethereum_package_input_parser = imports.load_module(
+    "src/package_io/input_parser.star",
+    package_id="ethereum-package"
+)
+
+constants = imports.load_module("src/package_io/constants.star")
+util = imports.load_module("src/util.star")
+observability = imports.load_module("src/observability/observability.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546

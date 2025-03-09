@@ -1,9 +1,11 @@
-participant_network = import_module("./participant_network.star")
-blockscout = import_module("./blockscout/blockscout_launcher.star")
-da_server_launcher = import_module("./alt-da/da-server/da_server_launcher.star")
-contract_deployer = import_module("./contracts/contract_deployer.star")
-input_parser = import_module("./package_io/input_parser.star")
-util = import_module("./util.star")
+imports = import_module("/imports.star")
+
+participant_network = imports.load_module("src/participant_network.star")
+blockscout = imports.load_module("src/blockscout/blockscout_launcher.star")
+da_server_launcher = imports.load_module("src/alt-da/da-server/da_server_launcher.star")
+contract_deployer = imports.load_module("src/contracts/contract_deployer.star")
+input_parser = imports.load_module("src/package_io/input_parser.star")
+util = imports.load_module("src/util.star")
 
 
 def launch_l2(

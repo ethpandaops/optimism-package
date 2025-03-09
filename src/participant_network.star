@@ -1,12 +1,14 @@
-el_cl_client_launcher = import_module("./el_cl_launcher.star")
-participant_module = import_module("./participant.star")
-input_parser = import_module("./package_io/input_parser.star")
-op_batcher_launcher = import_module("./batcher/op-batcher/op_batcher_launcher.star")
-op_challenger_launcher = import_module(
-    "./challenger/op-challenger/op_challenger_launcher.star"
+imports = import_module("/imports.star")
+
+el_cl_client_launcher = imports.load_module("src/el_cl_launcher.star")
+participant_module = imports.load_module("src/participant.star")
+input_parser = imports.load_module("src/package_io/input_parser.star")
+op_batcher_launcher = imports.load_module("src/batcher/op-batcher/op_batcher_launcher.star")
+op_challenger_launcher = imports.load_module(
+    "src/challenger/op-challenger/op_challenger_launcher.star"
 )
-op_proposer_launcher = import_module("./proposer/op-proposer/op_proposer_launcher.star")
-util = import_module("./util.star")
+op_proposer_launcher = imports.load_module("src/proposer/op-proposer/op_proposer_launcher.star")
+util = imports.load_module("src/util.star")
 
 
 def launch_participant_network(
