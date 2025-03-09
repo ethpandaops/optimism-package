@@ -3,10 +3,9 @@ _imports = import_module("/imports.star")
 _input_parser = _imports.load_module("src/package_io/input_parser.star")
 
 
-def test_external_l1_network_params_input_parser_invalid_fields(plan):
+def test_external_l1_network_params_input_parser_invalid_fields(_plan):
     expect.fails(
         lambda: _input_parser.external_l1_network_params_input_parser(
-            plan,
             {
                 "invalid_key": "invalid_value",
             },
@@ -16,7 +15,6 @@ def test_external_l1_network_params_input_parser_invalid_fields(plan):
 
     expect.fails(
         lambda: _input_parser.external_l1_network_params_input_parser(
-            plan,
             {
                 "empty_invalid_key": None,
             },
@@ -25,36 +23,29 @@ def test_external_l1_network_params_input_parser_invalid_fields(plan):
     )
 
 
-def test_external_l1_network_params_input_parser_missing_fields(plan):
+def test_external_l1_network_params_input_parser_missing_fields(_plan):
     expect.fails(
-        lambda: _input_parser.external_l1_network_params_input_parser(plan, {}),
+        lambda: _input_parser.external_l1_network_params_input_parser({}),
         'key "network_id" not in dict',
     )
 
     expect.fails(
-        lambda: _input_parser.external_l1_network_params_input_parser(
-            plan, {"network_id": None}
-        ),
+        lambda: _input_parser.external_l1_network_params_input_parser({"network_id": None}),
         'key "rpc_kind" not in dict',
     )
 
     expect.fails(
-        lambda: _input_parser.external_l1_network_params_input_parser(
-            plan, {"network_id": None, "rpc_kind": None}
-        ),
+        lambda: _input_parser.external_l1_network_params_input_parser({"network_id": None, "rpc_kind": None}),
         'key "el_rpc_url" not in dict',
     )
 
     expect.fails(
-        lambda: _input_parser.external_l1_network_params_input_parser(
-            plan, {"network_id": None, "rpc_kind": None, "el_rpc_url": None}
-        ),
+        lambda: _input_parser.external_l1_network_params_input_parser({"network_id": None, "rpc_kind": None, "el_rpc_url": None}),
         'key "el_ws_url" not in dict',
     )
 
     expect.fails(
         lambda: _input_parser.external_l1_network_params_input_parser(
-            plan,
             {
                 "network_id": None,
                 "rpc_kind": None,
@@ -67,7 +58,6 @@ def test_external_l1_network_params_input_parser_missing_fields(plan):
 
     expect.fails(
         lambda: _input_parser.external_l1_network_params_input_parser(
-            plan,
             {
                 "network_id": None,
                 "rpc_kind": None,
@@ -80,7 +70,7 @@ def test_external_l1_network_params_input_parser_missing_fields(plan):
     )
 
 
-def test_external_l1_network_params_input_parser_set_fields(plan):
+def test_external_l1_network_params_input_parser_set_fields(_plan):
     params = {
         "network_id": "network_id",
         "rpc_kind": "rpc_kind",
@@ -89,6 +79,6 @@ def test_external_l1_network_params_input_parser_set_fields(plan):
         "cl_rpc_url": "cl_rpc_url",
         "priv_key": "priv_key",
     }
-    parsed_params = _input_parser.external_l1_network_params_input_parser(plan, params)
+    parsed_params = _input_parser.external_l1_network_params_input_parser(params)
 
     expect.eq(parsed_params, struct(**params))

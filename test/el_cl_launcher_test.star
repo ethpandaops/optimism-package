@@ -3,9 +3,7 @@ _imports = import_module("/imports.star")
 _el_cl_launcher = _imports.load_module("src/el_cl_launcher.star")
 _input_parser = _imports.load_module("src/package_io/input_parser.star")
 _observability = _imports.load_module("src/observability/observability.star")
-_ethereum_package_constants = _imports.load_module(
-    "src/package_io/constants.star", "ethereum-package"
-)
+_ethereum_package_constants = _imports.ext.ethereum_package_constants
 _util = _imports.load_module("src/util.star")
 
 #
@@ -53,7 +51,7 @@ def test_launch_with_defaults(plan):
 
     # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
     sequencer_private_key_mock = "sequencer_private_key"
-    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+    kurtosistest.mock(_util, "read_network_config_value").mock_return_value(
         sequencer_private_key_mock
     )
 
@@ -183,7 +181,7 @@ def test_launch_with_el_op_besu(plan):
 
     # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
     sequencer_private_key_mock = "sequencer_private_key"
-    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+    kurtosistest.mock(_util, "read_network_config_value").mock_return_value(
         sequencer_private_key_mock
     )
 

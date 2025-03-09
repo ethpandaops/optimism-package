@@ -1,21 +1,11 @@
 _imports = import_module("/imports.star")
 
-_utils = _imports.load_module("src/util.star")
-
-_ethereum_package_shared_utils = _imports.load_module(
-    "src/shared_utils/shared_utils.star", 
-    package_id="ethereum-package",
-)
-
-_ethereum_package_constants = _imports.load_module(
-    "src/package_io/_constants.star",
-    package_id="ethereum-package",
-)
+_ethereum_package_shared_utils = _imports.ext.ethereum_package_shared_utils
+_ethereum_package_constants = _imports.ext.ethereum_package_constants
 
 _constants = _imports.load_module("src/package_io/constants.star")
 _observability = _imports.load_module("src/observability/observability.star")
-_prometheus = _imports.load_module("src/observability/prometheus/prometheus_launcher.star")
-
+_utils = _imports.load_module("src/util.star")
 _interop_constants = _imports.load_module("src/interop/constants.star")
 
 
@@ -66,8 +56,7 @@ def launch(
         plan, dependency_set_json, DATA_DIR, DEPENDENCY_SET_FILE_NAME
     )
 
-    config = get_supervisor_config(
-        plan,
+    config = _get_supervisor_config(
         l1_config_env_vars,
         l2s,
         jwt_file,
@@ -87,8 +76,7 @@ def launch(
     return "op_supervisor"
 
 
-def get_supervisor_config(
-    plan,
+def _get_supervisor_config(
     l1_config_env_vars,
     l2s,
     jwt_file,

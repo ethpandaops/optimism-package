@@ -44,10 +44,8 @@ def launch(
     observability_helper,
     da_server_context,
 ):
-    config = get_batcher_config(
-        plan,
+    config = _get_batcher_config(
         image,
-        service_name,
         el_context,
         cl_context,
         l1_config_env_vars,
@@ -67,10 +65,8 @@ def launch(
     return service_url
 
 
-def get_batcher_config(
-    plan,
+def _get_batcher_config(
     image,
-    service_name,
     el_context,
     cl_context,
     l1_config_env_vars,

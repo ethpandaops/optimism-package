@@ -5,9 +5,6 @@ _op_challenger_launcher = _imports.load_module(
 )
 _input_parser = _imports.load_module("src/package_io/input_parser.star")
 _observability = _imports.load_module("src/observability/observability.star")
-_ethereum_package_constants = _imports.load_module(
-    "src/package_io/constants.star", "ethereum-package"
-)
 _util = _imports.load_module("src/util.star")
 
 

@@ -1,17 +1,9 @@
 _imports = import_module("/imports.star")
 
-_ethereum_package_shared_utils = _imports.load_module(
-    "src/shared_utils/shared_utils.star",
-    package_id="ethereum-package"
-)
-
-_ethereum_package_input_parser = _imports.load_module(
-    "src/package_io/_input_parser.star",
-    package_id="ethereum-package"
-)
+_ethereum_package_shared_utils = _imports.ext.ethereum_package_shared_utils
+_ethereum_package_input_parser = _imports.ext.ethereum_package_input_parser
 
 _input_parser = _imports.load_module("src/package_io/input_parser.star")
-
 _observability = _imports.load_module("src/observability/observability.star")
 
 # EL

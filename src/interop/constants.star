@@ -1,6 +1,5 @@
 _imports = import_module("/imports.star")
 
-_constants = _imports.load_module("src/package_io/constants.star")
 _util = _imports.load_module("src/util.star")
 
 INTEROP_WS_PORT_ID = "interop-ws"

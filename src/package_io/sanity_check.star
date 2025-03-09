@@ -166,7 +166,7 @@ EXTERNAL_L1_NETWORK_PARAMS = [
 ]
 
 
-def deep_validate_params(plan, input_args, category, allowed_params):
+def _deep_validate_params(input_args, category, allowed_params):
     if category in input_args:
         for item in input_args[category]:
             for param in item.keys():
@@ -178,7 +178,7 @@ def deep_validate_params(plan, input_args, category, allowed_params):
                     )
 
 
-def validate_params(plan, input_args, category, allowed_params):
+def _validate_params(input_args, category, allowed_params):
     if category in input_args:
         for param in input_args[category].keys():
             if param not in allowed_params:
@@ -198,64 +198,56 @@ def sanity_check(plan, optimism_config):
             fail("Invalid parameter {0}, allowed fields: {1}".format(key, ROOT_PARAMS))
 
     if "observability" in optimism_config:
-        validate_params(
-            plan,
+        _validate_params(
             optimism_config,
             "observability",
             OBSERVABILITY_PARAMS,
         )
 
         if "prometheus_params" in optimism_config["observability"]:
-            validate_params(
-                plan,
+            _validate_params(
                 optimism_config["observability"],
                 "prometheus_params",
                 PROMETHEUS_PARAMS,
             )
 
         if "loki_params" in optimism_config["observability"]:
-            validate_params(
-                plan,
+            _validate_params(
                 optimism_config["observability"],
                 "loki_params",
                 LOKI_PARAMS,
             )
 
         if "promtail_params" in optimism_config["observability"]:
-            validate_params(
-                plan,
+            _validate_params(
                 optimism_config["observability"],
                 "promtail_params",
                 PROMTAIL_PARAMS,
             )
 
         if "grafana_params" in optimism_config["observability"]:
-            validate_params(
-                plan,
+            _validate_params(
                 optimism_config["observability"],
                 "grafana_params",
                 GRAFANA_PARAMS,
             )
 
     if "interop" in optimism_config:
-        validate_params(
-            plan,
+        _validate_params(
             optimism_config,
             "interop",
             INTEROP_PARAMS,
         )
 
         if "supervisor_params" in optimism_config["interop"]:
-            validate_params(
-                plan,
+            _validate_params(
                 optimism_config["interop"],
                 "supervisor_params",
                 SUPERVISOR_PARAMS,
             )
 
     if "altda_deploy_config" in optimism_config:
-        validate_params(
-            plan,
+        _validate_params(
             optimism_config["altda_deploy_config"],
             "altda_deploy_config",
             ALTDA_DEPLOY_CONFIG_PARAMS,
@@ -268,8 +260,8 @@ def sanity_check(plan, optimism_config):
 
     for input_args in chains:
         # Checks participants
-        deep_validate_params(
-            plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
+        _deep_validate_params(
+            input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
         )
 
         # Checks additional_services
@@ -284,8 +276,8 @@ def sanity_check(plan, optimism_config):
 
         # Checks subcategories
         for subcategories in SUBCATEGORY_PARAMS.keys():
-            validate_params(
-                plan, input_args, subcategories, SUBCATEGORY_PARAMS[subcategories]
+            _validate_params(
+                input_args, subcategories, SUBCATEGORY_PARAMS[subcategories]
             )
         # Checks everything else
         for param in input_args.keys():
@@ -306,14 +298,12 @@ def sanity_check(plan, optimism_config):
         # If everything passes, print a message
 
     if "op_contract_deployer_params" in optimism_config:
-        validate_params(
-            plan,
+        _validate_params(
             optimism_config,
             "op_contract_deployer_params",
             OP_CONTRACT_DEPLOYER_PARAMS,
         )
-        validate_params(
-            plan,
+        _validate_params(
             optimism_config["op_contract_deployer_params"],
             "global_deploy_overrides",
             OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES,
@@ -322,7 +312,7 @@ def sanity_check(plan, optimism_config):
     plan.print("Sanity check for OP package passed")
 
 
-def external_l1_network_params_input_parser(plan, external_l1_network_params):
+def external_l1_network_params_input_parser(external_l1_network_params):
     for key in external_l1_network_params.keys():
         if key not in EXTERNAL_L1_NETWORK_PARAMS:
             fail(

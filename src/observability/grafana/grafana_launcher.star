@@ -3,10 +3,7 @@ _imports = import_module("/imports.star")
 _constants = _imports.load_module("src/package_io/constants.star")
 _util = _imports.load_module("src/util.star")
 
-_ethereum_package_shared_utils = _imports.load_module(
-    "src/shared_utils/shared_utils.star",
-    package_id="ethereum-package"
-)
+_ethereum_package_shared_utils = _imports.ext.ethereum_package_shared_utils
 
 SERVICE_NAME = "grafana"
 HTTP_PORT_NUMBER_UINT16 = 3000

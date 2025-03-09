@@ -14,16 +14,7 @@ _PACKAGES = {
 }
 
 
-def load_module(module_path, package_id=None):
-    """Load a module from a package.
-
-    Args:
-        module_path(str): The path to the module to load. It must be relative to the package root.
-        package_id(str): The ID of the package to load the module from. If not provided, the module will be loaded from the current package.
-
-    Returns:
-        The loaded module.
-    """
+def _load_module(module_path, package_id=None):
     pkg = struct(id = "", version = None)
     if package_id:
         pkg = _PACKAGES[package_id]
@@ -34,7 +25,27 @@ def load_module(module_path, package_id=None):
 
 
 ext = struct(
-    ethereum_package = load_module("main.star", "ethereum-package"),
-    ethereum_package_shared_utils = load_module("src/shared_utils/shared_utils.star", "ethereum-package"),
-    ethereum_package_constants = load_module("src/package_io/constants.star", "ethereum-package"),
+    ethereum_package = _load_module("main.star", "ethereum-package"),
+    ethereum_package_shared_utils = _load_module("src/shared_utils/shared_utils.star", "ethereum-package"),
+    ethereum_package_constants = _load_module("src/package_io/constants.star", "ethereum-package"),
+    ethereum_package_cl_context = _load_module("src/cl/cl_context.star", "ethereum-package"),
+    ethereum_package_el_context = _load_module("src/el/el_context.star", "ethereum-package"),
+    ethereum_package_el_admin_node_info = _load_module("src/el/el_admin_node_info.star", "ethereum-package"),
+    ethereum_package_input_parser = _load_module("src/package_io/input_parser.star", "ethereum-package"),
+    ethereum_package_genesis_constants = _load_module("src/prelaunch_data_generator/genesis_constants/genesis_constants.star", "ethereum-package"),
+    ethereum_package_node_metrics = _load_module("src/node_metrics_info.star", "ethereum-package"),
+
+    postgres_package = _load_module("main.star", "postgres-package"),
+    prometheus_package = _load_module("main.star", "prometheus-package"),
 )
+
+def load_module(module_path):
+    """Load a module from the current package.
+
+    Args:
+        module_path(str): The path to the module to load. It must be relative to the package root.
+
+    Returns:
+        The loaded module.
+    """
+    return _load_module(module_path)

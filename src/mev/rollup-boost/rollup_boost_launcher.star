@@ -1,21 +1,8 @@
 _imports = import_module("/imports.star")
 
-_shared_utils = _imports.load_module(
-    "src/shared_utils/_shared_utils.star",
-    package_id="ethereum-package"
-)
-_el_context = _imports.load_module(
-    "src/el/_el_context.star",
-    package_id="ethereum-package"
-)
-_el_admin_node_info = _imports.load_module(
-    "src/el/_el_admin_node_info.star",
-    package_id="ethereum-package"
-)
-_constants = _imports.load_module(
-    "src/package_io/_constants.star",
-    package_id="ethereum-package"
-)
+_shared_utils = _imports.ext.ethereum_package_shared_utils
+_el_context = _imports.ext.ethereum_package_el_context
+_constants = _imports.ext.ethereum_package_constants
 
 RPC_PORT_NUM = 8541
 WS_PORT_NUM = 8546

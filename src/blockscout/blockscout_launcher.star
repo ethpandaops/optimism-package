@@ -1,11 +1,8 @@
 _imports = import_module("/imports.star")
 
-_ethereum_package_shared_utils = _imports.load_module(
-    "src/shared_utils/shared_utils.star",
-    package_id="ethereum-package"
-)
+_ethereum_package_shared_utils = _imports.ext.ethereum_package_shared_utils
 
-_postgres = _imports.load_module("main.star", package_id="postgres-package")
+_postgres = _imports.ext.postgres_package
 
 _util = _imports.load_module("src/util.star")
 

@@ -1,9 +1,6 @@
 _imports = import_module("/imports.star")
 
-_ethereum_package_input_parser = _imports.load_module(
-    "src/package_io/input_parser.star",
-    package_id="ethereum-package"
-)
+_ethereum_package_input_parser = _imports.ext.ethereum_package_input_parser
 
 _constants = _imports.load_module("src/package_io/constants.star")
 _sanity_check = _imports.load_module("src/package_io/sanity_check.star")
@@ -60,8 +57,8 @@ DEFAULT_DA_SERVER_PARAMS = {
 DEFAULT_ADDITIONAL_SERVICES = []
 
 
-def external_l1_network_params_input_parser(plan, input_args):
-    _sanity_check.external_l1_network_params_input_parser(plan, input_args)
+def external_l1_network_params_input_parser(input_args):
+    _sanity_check.external_l1_network_params_input_parser(input_args)
     return struct(
         network_id=input_args["network_id"],
         rpc_kind=input_args["rpc_kind"],

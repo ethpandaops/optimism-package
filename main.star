@@ -33,7 +33,7 @@ def run(plan, args):
     external_l1_args = args.get("external_l1_network_params", {})
     if external_l1_args:
         external_l1_args = _input_parser.external_l1_network_params_input_parser(
-            plan, external_l1_args
+            external_l1_args
         )
     else:
         if "network_params" not in ethereum_args:

@@ -1,37 +1,13 @@
 _imports = import_module("/imports.star")
 
-_ethereum_package_shared_utils = _imports.load_module(
-    "src/shared_utils/shared_utils.star",
-    package_id="ethereum-package"
-)
-
-_ethereum_package_el_context = _imports.load_module(
-    "src/el/el_context.star",
-    package_id="ethereum-package"
-)
-_ethereum_package_el_admin_node_info = _imports.load_module(
-    "src/el/el_admin_node_info.star",
-    package_id="ethereum-package"
-)
-
-_ethereum_package_node_metrics = _imports.load_module(
-    "src/node_metrics_info.star",
-    package_id="ethereum-package"
-)
-
-_ethereum_package_input_parser = _imports.load_module(
-    "src/package_io/input_parser.star",
-    package_id="ethereum-package"
-)
-
-_ethereum_package_constants = _imports.load_module(
-    "src/package_io/_constants.star",
-    package_id="ethereum-package"
-)
+_ethereum_package_shared_utils = _imports.ext.ethereum_package_shared_utils
+_ethereum_package_el_context = _imports.ext.ethereum_package_el_context
+_ethereum_package_el_admin_node_info = _imports.ext.ethereum_package_el_admin_node_info
+_ethereum_package_input_parser = _imports.ext.ethereum_package_input_parser
+_ethereum_package_constants = _imports.ext.ethereum_package_constants
 
 _constants = _imports.load_module("src/package_io/constants.star")
 _util = _imports.load_module("src/util.star")
-
 _observability = _imports.load_module("src/observability/observability.star")
 _interop_constants = _imports.load_module("src/interop/constants.star")
 

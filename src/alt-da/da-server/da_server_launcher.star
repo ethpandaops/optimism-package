@@ -27,9 +27,7 @@ def launch_da_server(
     image,
     cmd,
 ):
-    config = get_da_server_config(
-        plan,
-        service_name,
+    config = _get_da_server_config(
         image,
         cmd,
     )
@@ -45,9 +43,7 @@ def launch_da_server(
     )
 
 
-def get_da_server_config(
-    plan,
-    service_name,
+def _get_da_server_config(
     image,
     cmd,
 ):

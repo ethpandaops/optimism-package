@@ -1,6 +1,6 @@
 _imports = import_module("/imports.star")
 
-_prometheus = _imports.load_module("main.star", package_id="prometheus-package")
+_prometheus = _imports.ext.prometheus_package
 
 
 def launch_prometheus(

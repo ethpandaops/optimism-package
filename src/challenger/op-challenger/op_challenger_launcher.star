@@ -1,17 +1,8 @@
 _imports = import_module("/imports.star")
 
-_ethereum_package_shared_utils = _imports.load_module(
-    "src/shared_utils/shared_utils.star",
-    package_id="ethereum-package"
-)
-
-_ethereum_package_constants = _imports.load_module(
-    "src/package_io/constants.star",
-    package_id="ethereum-package"
-)
+_ethereum_package_constants = _imports.ext.ethereum_package_constants
 
 _observability = _imports.load_module("src/observability/observability.star")
-_prometheus = _imports.load_module("src/observability/prometheus/prometheus_launcher.star")
 
 _interop_constants = _imports.load_module("src/interop/constants.star")
 _util = _imports.load_module("src/util.star")

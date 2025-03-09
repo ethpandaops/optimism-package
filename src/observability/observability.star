@@ -1,14 +1,7 @@
 _imports = import_module("/imports.star")
 
-_ethereum_package_shared_utils = _imports.load_module(
-    "src/shared_utils/shared_utils.star",
-    package_id="ethereum-package",
-)
-
-_ethereum_package_node_metrics = _imports.load_module(
-    "src/node_metrics_info.star",
-    package_id="ethereum-package",
-)
+_ethereum_package_shared_utils = _imports.ext.ethereum_package_shared_utils
+_ethereum_package_node_metrics = _imports.ext.ethereum_package_node_metrics
 
 _util = _imports.load_module("src/util.star")
 
