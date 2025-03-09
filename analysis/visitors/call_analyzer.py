@@ -5,10 +5,12 @@ This module contains the CallAnalyzer visitor that analyzes function calls in a 
 """
 
 import ast
-from typing import Dict, Set, List, Tuple
+import os
+from typing import Dict, Set, List, Tuple, Optional
 
-from .base_visitor import BaseVisitor, debug_print
+from .base_visitor import BaseVisitor
 from .common import FunctionSignature, builtin_functions, builtin_modules, imports_valid_methods
+from .function_collector import FunctionCollector
 
 
 class CallAnalyzer(BaseVisitor):
@@ -56,7 +58,7 @@ class CallAnalyzer(BaseVisitor):
             elif self._is_in_scope(func_name):
                 # It's a variable in scope, but we can't trace it to a function
                 # Skip the check as we can't determine if it's valid or not
-                debug_print(f"Skipping check for function call through variable: {func_name}")
+                self.debug_print(f"Skipping check for function call through variable: {func_name}")
             else:
                 # Not a local function, not a built-in, and not a variable in scope
                 # This is definitely an error
@@ -73,7 +75,7 @@ class CallAnalyzer(BaseVisitor):
             # Check if this is a built-in module
             if module_name in builtin_modules:
                 # Built-in module, no need to check
-                debug_print(f"Skipping check for built-in module call: {module_name}.{func_name}")
+                self.debug_print(f"Skipping check for built-in module call: {module_name}.{func_name}")
                 pass
             # Check if this is a call to an imported module
             elif module_name in self.imports:
@@ -84,41 +86,81 @@ class CallAnalyzer(BaseVisitor):
                     module_path = import_info.module_path
                     
                     # Debug logging
-                    debug_print(f"Resolving call to {module_name}.{func_name} at line {node.lineno}")
-                    debug_print(f"  Module path: {module_path}")
+                    self.debug_print(f"Resolving call to {module_name}.{func_name} at line {node.lineno}")
+                    self.debug_print(f"  Module path: {module_path}")
                     
                     # Try to find the target file
                     target_file = None
                     if module_path in self.module_to_file:
                         target_file = self.module_to_file[module_path]
+                        self.debug_print(f"  Found target file: {target_file}")
                     else:
                         # Try with and without .star extension
                         if module_path.endswith('.star'):
                             module_path_no_ext = module_path[:-5]
                             if module_path_no_ext in self.module_to_file:
                                 target_file = self.module_to_file[module_path_no_ext]
+                                self.debug_print(f"  Found target file (without .star): {target_file}")
                         else:
                             module_path_with_ext = module_path + '.star'
                             if module_path_with_ext in self.module_to_file:
                                 target_file = self.module_to_file[module_path_with_ext]
+                                self.debug_print(f"  Found target file (with .star): {target_file}")
                     
-                    if target_file and target_file in self.all_functions:
-                        # Check if the function exists in the target file
-                        target_functions = self.all_functions[target_file]
-                        if func_name in target_functions:
-                            target_signature = target_functions[func_name]
-                            self._check_call_compatibility(node, target_signature)
+                    if target_file:
+                        # Check if we have already analyzed this file
+                        if target_file in self.all_functions:
+                            # Check if the function exists in the target file
+                            target_functions = self.all_functions[target_file]
+                            self.debug_print(f"  Target file has {len(target_functions)} functions: {list(target_functions.keys())}")
+                            if func_name in target_functions:
+                                target_signature = target_functions[func_name]
+                                self.debug_print(f"  Found function {func_name} in target file")
+                                self._check_call_compatibility(node, target_signature)
+                            else:
+                                self.debug_print(f"  Function {func_name} not found in target file")
+                                self.violations.append((
+                                    node.lineno,
+                                    f"Call to non-existing function '{module_name}.{func_name}'"
+                                ))
                         else:
-                            self.violations.append((
-                                node.lineno,
-                                f"Call to non-existing function '{module_name}.{func_name}'"
-                            ))
+                            # We haven't analyzed this file yet, so we can't check the function
+                            self.debug_print(f"  Target file exists but hasn't been analyzed yet: {target_file}")
+                            
+                            # Try to analyze it now
+                            try:
+                                with open(target_file, 'r') as f:
+                                    source = f.read()
+                                
+                                # Parse the source code into an AST
+                                tree = ast.parse(source, filename=target_file)
+                                
+                                # Collect function definitions
+                                collector = FunctionCollector(target_file)
+                                collector.visit(tree)
+                                
+                                # Add to all_functions
+                                self.all_functions[target_file] = collector.functions
+                                
+                                # Now check if the function exists
+                                if func_name in collector.functions:
+                                    target_signature = collector.functions[func_name]
+                                    self.debug_print(f"  Found function {func_name} in target file after analysis")
+                                    self._check_call_compatibility(node, target_signature)
+                                else:
+                                    self.debug_print(f"  Function {func_name} not found in target file after analysis")
+                                    self.violations.append((
+                                        node.lineno,
+                                        f"Call to non-existing function '{module_name}.{func_name}'"
+                                    ))
+                            except Exception as e:
+                                self.debug_print(f"  Error analyzing target file: {str(e)}")
                     else:
-                        debug_print(f"  Could not find target file for module {module_path}")
+                        self.debug_print(f"  Could not find target file for module {module_path}")
             # Special case for _imports.load_module and _imports.ext
             elif module_name in self.import_module_vars and func_name in imports_valid_methods:
                 # This is a valid call to _imports.load_module or _imports.ext
-                debug_print(f"Valid call to {module_name}.{func_name}")
+                self.debug_print(f"Valid call to {module_name}.{func_name}")
                 
                 # For load_module, check that it takes exactly one argument (the module path)
                 if func_name == "load_module":
@@ -149,13 +191,13 @@ class CallAnalyzer(BaseVisitor):
             # Check if it's a variable derived from _imports (e.g., _imports.ext.ethereum_package)
             elif module_name in self.imports_derived_vars:
                 # This is a variable derived from _imports, so it's valid
-                debug_print(f"Valid call through variable derived from _imports: {module_name}.{func_name}")
+                self.debug_print(f"Valid call through variable derived from _imports: {module_name}.{func_name}")
                 pass
             # Check if it's a variable in scope
             elif self._is_in_scope(module_name):
                 # It's a variable in scope, but we can't trace what it refers to
                 # Skip the check as we can't determine if it's valid or not
-                debug_print(f"Skipping check for attribute call through variable: {module_name}.{func_name}")
+                self.debug_print(f"Skipping check for attribute call through variable: {module_name}.{func_name}")
             else:
                 # Not an imported module and not a variable in scope
                 # This is definitely an error
@@ -191,7 +233,7 @@ class CallAnalyzer(BaseVisitor):
         # Check if too few positional arguments
         if pos_args_count < required_args_count and not any(kw.arg in signature.args[:required_args_count] for kw in call_node.keywords):
             missing_args = set(signature.args[:required_args_count]) - {kw.arg for kw in call_node.keywords}
-            debug_print(f"Call at line {call_node.lineno} is missing required arguments: {missing_args}")
+            self.debug_print(f"Call at line {call_node.lineno} is missing required arguments: {missing_args}")
             self.violations.append((
                 call_node.lineno,
                 f"Call to {signature.name} is missing required arguments: {', '.join(missing_args)}"
@@ -199,7 +241,7 @@ class CallAnalyzer(BaseVisitor):
         
         # Check if too many positional arguments
         if not signature.vararg and pos_args_count > len(signature.args):
-            debug_print(f"Call at line {call_node.lineno} has too many positional arguments")
+            self.debug_print(f"Call at line {call_node.lineno} has too many positional arguments")
             self.violations.append((
                 call_node.lineno,
                 f"Call to {signature.name} has too many positional arguments"
@@ -210,7 +252,7 @@ class CallAnalyzer(BaseVisitor):
         if not signature.kwarg:  # Only check if the function doesn't accept **kwargs
             for kw in call_node.keywords:
                 if kw.arg and kw.arg not in valid_kwargs:
-                    debug_print(f"Call at line {call_node.lineno} has unknown keyword argument: {kw.arg}")
+                    self.debug_print(f"Call at line {call_node.lineno} has unknown keyword argument: {kw.arg}")
                     self.violations.append((
                         call_node.lineno,
                         f"Call to {signature.name} has unknown keyword argument: {kw.arg}"

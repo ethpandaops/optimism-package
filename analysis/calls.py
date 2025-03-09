@@ -7,8 +7,7 @@ This module analyzes function calls in Starlark files to ensure they are valid.
 import sys
 import os
 import ast
-import re
-from typing import List, Tuple, Dict, Set, Optional, NamedTuple, Any
+from typing import List, Tuple, Dict, Set, Optional, Any
 
 # Handle imports for both module and script execution
 try:
@@ -17,17 +16,19 @@ try:
     from analysis.visitors.function_collector import FunctionCollector
     from analysis.visitors.import_collector import ImportCollector
     from analysis.visitors.call_analyzer import CallAnalyzer
-    from analysis.visitors.base_visitor import debug_print, VERBOSE
+    from analysis.visitors.base_visitor import BaseVisitor
+    from analysis.common import find_star_files, parse_file, run_analysis, debug_print, find_workspace_root
 except ModuleNotFoundError:
     # When run as a script
     from visitors.common import FunctionSignature, ImportInfo
     from visitors.function_collector import FunctionCollector
     from visitors.import_collector import ImportCollector
     from visitors.call_analyzer import CallAnalyzer
-    from visitors.base_visitor import debug_print, VERBOSE
+    from visitors.base_visitor import BaseVisitor
+    from common import find_star_files, parse_file, run_analysis, debug_print, find_workspace_root
 
 
-def analyze_file(file_path: str, all_functions: Dict[str, Dict[str, FunctionSignature]], module_to_file: Dict[str, str]) -> Tuple[Dict[str, FunctionSignature], List[Tuple[int, str]]]:
+def analyze_file(file_path: str, all_functions: Dict[str, Dict[str, FunctionSignature]] = None, module_to_file: Dict[str, str] = None, workspace_root: str = None) -> List[Tuple[int, str]]:
     """
     Analyze a file for function definitions and calls.
     
@@ -35,131 +36,151 @@ def analyze_file(file_path: str, all_functions: Dict[str, Dict[str, FunctionSign
         file_path: Path to the file to analyze
         all_functions: Dictionary mapping file paths to their function definitions
         module_to_file: Dictionary mapping module paths to file paths
+        workspace_root: Root directory of the workspace
         
     Returns:
-        Tuple of (functions defined in this file, violations found)
+        List of violations found
     """
     try:
         debug_print(f"Analyzing calls in file: {file_path}")
-        with open(file_path, 'r') as f:
-            source = f.read()
+        
+        # Initialize dictionaries if not provided
+        if all_functions is None:
+            all_functions = {}
+        if module_to_file is None:
+            module_to_file = {}
+        
+        # If workspace_root is not provided, try to determine it
+        if workspace_root is None:
+            try:
+                from analysis.common import find_workspace_root
+                workspace_root = find_workspace_root(file_path)
+            except ImportError:
+                from common import find_workspace_root
+                workspace_root = find_workspace_root(file_path)
+            
+            debug_print(f"Using workspace root: {workspace_root}")
         
         # Parse the source code into an AST
-        tree = ast.parse(source, filename=file_path)
+        tree = parse_file(file_path)
         
         # First pass: collect function definitions
-        collector = FunctionCollector(file_path)
-        collector.visit(tree)
+        function_collector = FunctionCollector(file_path)
+        function_collector.visit(tree)
+        local_functions = function_collector.functions
         
-        # Collect import information
+        # Store functions in the global dictionary
+        all_functions[file_path] = local_functions
+        
+        # Second pass: collect imports
         import_collector = ImportCollector()
         import_collector.visit(tree)
+        imports = import_collector.imports
+        import_module_vars = import_collector.import_module_vars
+        imports_derived_vars = import_collector.imports_derived_vars
         
-        # Second pass: analyze function calls
-        analyzer = CallAnalyzer(
-            file_path=file_path,
-            local_functions=collector.functions,
-            imports=import_collector.imports,
-            all_functions=all_functions,
-            module_to_file=module_to_file,
-            imports_derived_vars=import_collector.imports_derived_vars,
-            import_module_vars=import_collector.import_module_vars
+        # Update module_to_file mapping
+        for var_name, import_info in imports.items():
+            if import_info.package_id is None and import_info.module_path:
+                module_path = import_info.module_path
+                
+                # Remove leading slash if present
+                if module_path.startswith('/'):
+                    module_path = module_path[1:]
+                
+                # Resolve the module path to an absolute file path
+                resolved_path = os.path.join(workspace_root, module_path)
+                
+                # Check if the file exists
+                if os.path.isfile(resolved_path):
+                    debug_print(f"Found module {module_path} at {resolved_path}")
+                    
+                    # Store the mapping
+                    module_to_file[module_path] = resolved_path
+                else:
+                    debug_print(f"Could not find file for module {module_path} at {resolved_path}")
+        
+        # Third pass: analyze function calls
+        call_analyzer = CallAnalyzer(
+            file_path,
+            local_functions,
+            imports,
+            all_functions,
+            module_to_file,
+            imports_derived_vars,
+            import_module_vars
         )
-        analyzer.visit(tree)
+        call_analyzer.visit(tree)
         
-        return collector.functions, analyzer.violations
+        return call_analyzer.violations
     
     except Exception as e:
         print(f"Error analyzing file {file_path}: {str(e)}")
-        return {}, [(0, f"Error analyzing file {file_path}: {str(e)}")]
-
-
-def find_star_files(path: str) -> List[str]:
-    """Find all .star files in a directory or return the path if it's a file."""
-    if os.path.isfile(path):
-        if path.endswith('.star'):
-            return [path]
-        else:
-            return []
-    
-    result = []
-    debug_print(f"Searching for .star files in {path}")
-    
-    for root, _, files in os.walk(path):
-        for file in files:
-            if file.endswith('.star'):
-                result.append(os.path.join(root, file))
-    
-    return result
+        import traceback
+        traceback.print_exc()
+        return [(0, f"Error analyzing file {file_path}: {str(e)}")]
 
 
 def main():
     """Main entry point for the script."""
     # Parse command line arguments
     if len(sys.argv) < 2:
-        print("Usage: python calls.py <path>")
+        print("Usage: python -m analysis.calls <path> [-v|--verbose|-verbose]")
         sys.exit(1)
     
-    path = sys.argv[1]
+    # Extract path and verbose flag
+    args = sys.argv[1:]
+    path = None
+    verbose = False
+    
+    for arg in args:
+        if arg.startswith('-'):
+            # This is a flag
+            if arg in ['-v', '--verbose', '-verbose']:
+                verbose = True
+        else:
+            # This is the path
+            path = arg
+    
+    if not path:
+        print("Error: No path specified")
+        print("Usage: python -m analysis.calls <path> [-v|--verbose|-verbose]")
+        sys.exit(1)
+    
+    # Set verbose flag early
+    BaseVisitor.set_verbose(verbose)
+    
+    if verbose:
+        print(f"Analyzing path: {path}")
+        print(f"Verbose mode: {verbose}")
+    
+    # Find the workspace root
+    workspace_root = find_workspace_root(path)
+    if verbose:
+        print(f"Using workspace root: {workspace_root}")
     
     # Find all .star files
     star_files = find_star_files(path)
-    print(f"Found {len(star_files)} .star files to analyze")
+    if verbose:
+        print(f"Found {len(star_files)} .star files to analyze")
     
-    # First pass: collect function definitions from all files
+    # First pass: collect all function definitions
     print("First pass: collecting function definitions...")
     all_functions = {}  # file_path -> {function_name -> FunctionSignature}
     module_to_file = {}  # module_path -> file_path
     
-    for file_path in star_files:
-        # Convert file path to module path
-        module_path = file_path
-        if module_path.startswith('./'):
-            module_path = module_path[2:]
-        module_to_file[module_path] = file_path
-        
-        # Also add without .star extension
-        if module_path.endswith('.star'):
-            module_path_no_ext = module_path[:-5]
-            module_to_file[module_path_no_ext] = file_path
+    # Run the analysis
+    extra_args = {
+        "all_functions": all_functions,
+        "module_to_file": module_to_file,
+        "workspace_root": workspace_root
+    }
     
-    for file_path in star_files:
-        try:
-            with open(file_path, 'r') as f:
-                source = f.read()
-            
-            # Parse the source code into an AST
-            tree = ast.parse(source, filename=file_path)
-            
-            # Collect function definitions
-            collector = FunctionCollector(file_path)
-            collector.visit(tree)
-            
-            # Add to all_functions
-            all_functions[file_path] = collector.functions
-        
-        except Exception as e:
-            print(f"Error collecting functions from {file_path}: {str(e)}")
-    
-    # Second pass: analyze function calls
     print("\nSecond pass: analyzing function calls...")
-    all_violations = []
+    success = run_analysis(path, analyze_file, verbose, extra_args)
     
-    for file_path in star_files:
-        _, violations = analyze_file(file_path, all_functions, module_to_file)
-        if violations:
-            for lineno, message in violations:
-                print(f"{file_path}:{lineno}: {message}")
-            all_violations.extend([(file_path, lineno, message) for lineno, message in violations])
-    
-    # Print summary
-    print(f"\nAnalysis complete: found {len(all_violations)} violations in {len(set(v[0] for v in all_violations))} files")
-    
-    # Exit with error code if violations were found
-    if all_violations:
-        sys.exit(1)
-    else:
-        print("No violations found")
+    # Exit with appropriate code
+    sys.exit(0 if success else 1)
 
 
 if __name__ == "__main__":

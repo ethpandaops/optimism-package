@@ -7,21 +7,25 @@ This module contains the base visitor class that other visitors can inherit from
 import ast
 from typing import List, Tuple, Set
 
-# Global verbose flag
-VERBOSE = False
-
-def debug_print(*args, **kwargs):
-    """Print debug messages only when verbose mode is enabled."""
-    if VERBOSE:
-        print(*args, **kwargs)
-
-
 class BaseVisitor(ast.NodeVisitor):
     """Base visitor class with common functionality."""
+    
+    # Class-level verbosity setting
+    verbose = False
+    
+    @classmethod
+    def set_verbose(cls, verbose: bool):
+        """Set the verbosity for all BaseVisitor instances."""
+        cls.verbose = verbose
     
     def __init__(self):
         self.violations: List[Tuple[int, str]] = []
         self.scopes: List[Set[str]] = [set()]  # Stack of variable scopes
+    
+    def debug_print(self, *args, **kwargs):
+        """Print debug messages only when verbose mode is enabled."""
+        if self.verbose:
+            print(*args, **kwargs)
     
     def _enter_scope(self):
         """Enter a new variable scope."""

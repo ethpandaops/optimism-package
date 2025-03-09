@@ -8,7 +8,7 @@ import ast
 import os
 from typing import List, Tuple
 
-from .base_visitor import BaseVisitor, debug_print
+from .base_visitor import BaseVisitor
 
 # Constants
 IMPORTS_STAR_FILENAME = "imports.star"
@@ -39,7 +39,7 @@ class ImportModuleAnalyzer(BaseVisitor):
         if isinstance(node.func, ast.Name) and node.func.id == IMPORT_MODULE_FUNC:
             # Skip validation if we're in imports.star itself
             if self.file_path and os.path.basename(self.file_path) == IMPORTS_STAR_FILENAME:
-                debug_print(f"Allowing import_module in {IMPORTS_STAR_FILENAME} itself")
+                self.debug_print(f"Allowing import_module in {IMPORTS_STAR_FILENAME} itself")
                 self.generic_visit(node)
                 return
             
@@ -70,7 +70,7 @@ class ImportModuleAnalyzer(BaseVisitor):
             
             # Skip validation if we're in imports.star itself
             if self.file_path and os.path.basename(self.file_path) == IMPORTS_STAR_FILENAME:
-                debug_print(f"Allowing import_module assignment in {IMPORTS_STAR_FILENAME} itself")
+                self.debug_print(f"Allowing import_module assignment in {IMPORTS_STAR_FILENAME} itself")
                 super().visit_Assign(node)
                 return
             

@@ -4,7 +4,7 @@ Visitors package for AST analysis.
 This package contains various AST visitors used for analyzing Starlark code.
 """
 
-from .base_visitor import BaseVisitor, debug_print, VERBOSE
+from .base_visitor import BaseVisitor
 from .common import FunctionSignature, ImportInfo
 from .function_collector import FunctionCollector
 from .import_collector import ImportCollector

@@ -17,3 +17,13 @@ open-grafana enclaveName:
 validate SCOPE=".":
     python -m analysis.imports {{SCOPE}}
     python -m analysis.calls {{SCOPE}}
+
+validate-imports SCOPE=".":
+    python -m analysis.imports {{SCOPE}}
+
+validate-calls SCOPE=".":
+    python -m analysis.calls {{SCOPE}}
+
+validate-verbose SCOPE=".":
+    python -m analysis.imports {{SCOPE}} -verbose
+    python -m analysis.calls {{SCOPE}} -verbose
