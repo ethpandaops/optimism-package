@@ -230,9 +230,11 @@ class CallAnalyzer(ast.NodeVisitor):
         if isinstance(node.func, ast.Name):
             # Direct function call (e.g., my_function())
             func_name = node.func.id
-            target_signature = self._resolve_function(func_name)
             
-            if target_signature:
+            # Only check against local functions defined in the current file
+            # Do not try to resolve against built-in functions
+            if func_name in self.local_functions:
+                target_signature = self.local_functions[func_name]
                 self._check_call_compatibility(node, target_signature)
         
         elif isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
@@ -287,37 +289,6 @@ class CallAnalyzer(ast.NodeVisitor):
         
         # Continue visiting child nodes
         self.generic_visit(node)
-    
-    def _resolve_function(self, func_name: str) -> Optional[FunctionSignature]:
-        """Resolve a function name to its signature."""
-        # Check local functions first
-        if func_name in self.local_functions:
-            return self.local_functions[func_name]
-        
-        # Check imported functions
-        for import_name, import_info in self.imports.items():
-            if import_info.package_id is None:  # Only check local modules
-                module_path = import_info.module_path
-                
-                # Try to find the target file
-                target_file = None
-                if module_path in self.module_to_file:
-                    target_file = self.module_to_file[module_path]
-                else:
-                    # Try with and without .star extension
-                    if module_path.endswith('.star'):
-                        module_path_no_ext = module_path[:-5]
-                        if module_path_no_ext in self.module_to_file:
-                            target_file = self.module_to_file[module_path_no_ext]
-                    else:
-                        module_path_with_ext = module_path + '.star'
-                        if module_path_with_ext in self.module_to_file:
-                            target_file = self.module_to_file[module_path_with_ext]
-                
-                if target_file and target_file in self.all_functions and func_name in self.all_functions[target_file]:
-                    return self.all_functions[target_file][func_name]
-        
-        return None
     
     def _normalize_module_path(self, module_path: str) -> str:
         """Convert a module path to a file path."""
