@@ -21,9 +21,14 @@ builtin_functions = set([
 # Built-in modules that don't need to be checked
 builtin_modules = set([
     # Kurtosis stdlib
-    "json", "time",
+    "plan", "json", "time",
     # Kurtosis-test modules
     "kurtosistest", "expect",
+])
+
+# Special methods that are known to be valid on imports module
+imports_valid_methods = set([
+    "load_module", "ext",
 ])
 
 def debug_print(*args, **kwargs):
@@ -144,6 +149,7 @@ class ImportCollector(ast.NodeVisitor):
     def __init__(self):
         self.imports: Dict[str, ImportInfo] = {}  # Variable name -> ImportInfo
         self.import_module_vars: Set[str] = set()  # Variables assigned from import_module("/imports.star")
+        self.imports_derived_vars: Dict[str, str] = {}  # Variables derived from _imports (e.g., _imports.ext)
     
     def visit_Assign(self, node):
         """Visit assignment nodes to track imports."""
@@ -183,14 +189,16 @@ class ImportCollector(ast.NodeVisitor):
             for kw in node.value.keywords:
                 if kw.arg == 'module_path' and isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, str):
                     module_path = kw.value.value
-                elif kw.arg == 'package_id' and isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, str):
-                    package_id = kw.value.value
+                elif kw.arg == 'package_id' and isinstance(kw.value, ast.Constant):
+                    if isinstance(kw.value.value, str) or kw.value.value is None:
+                        package_id = kw.value.value
             
             # Get package_id from second positional argument if present
             if len(node.value.args) >= 2 and package_id is None:
                 arg = node.value.args[1]
-                if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-                    package_id = arg.value
+                if isinstance(arg, ast.Constant):
+                    if isinstance(arg.value, str) or arg.value is None:
+                        package_id = arg.value
             
             # If we have a valid module_path, record the import
             if module_path:
@@ -204,6 +212,24 @@ class ImportCollector(ast.NodeVisitor):
                             package_id=package_id,
                             imported_names={}  # Will be populated later if needed
                         )
+        
+        # Track variables derived from _imports (e.g., _imports.ext.ethereum_package)
+        elif isinstance(node.value, ast.Attribute) and isinstance(node.value.value, ast.Name):
+            base_var = node.value.value.id
+            if base_var in self.import_module_vars or base_var in self.imports_derived_vars:
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        self.imports_derived_vars[target.id] = base_var
+        
+        # Also track multi-level attribute access (e.g., _imports.ext.ethereum_package)
+        elif (isinstance(node.value, ast.Attribute) and 
+              isinstance(node.value.value, ast.Attribute) and 
+              isinstance(node.value.value.value, ast.Name)):
+            base_var = node.value.value.value.id
+            if base_var in self.import_module_vars:
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        self.imports_derived_vars[target.id] = base_var
         
         # Continue visiting child nodes
         self.generic_visit(node)
@@ -235,52 +261,66 @@ class CallAnalyzer(ast.NodeVisitor):
                  local_functions: Dict[str, FunctionSignature],
                  imports: Dict[str, ImportInfo],
                  all_functions: Dict[str, Dict[str, FunctionSignature]],
-                 module_to_file: Dict[str, str]):
+                 module_to_file: Dict[str, str],
+                 imports_derived_vars: Dict[str, str] = None,
+                 import_module_vars: Set[str] = None):
         self.file_path = file_path
         self.local_functions = local_functions
         self.imports = imports
-        self.all_functions = all_functions  # file_path -> {function_name -> FunctionSignature}
-        self.module_to_file = module_to_file  # module_path -> file_path
-        self.violations = []
-        
-        # Initialize scope tracking
-        # We use a stack of sets to track variables in different scopes
-        # The first set is the global scope
-        self.scope_stack = [set()]
+        self.all_functions = all_functions
+        self.module_to_file = module_to_file
+        self.imports_derived_vars = imports_derived_vars or {}
+        self.import_module_vars = import_module_vars or set()
+        self.violations: List[Tuple[int, str]] = []
+        self.scopes: List[Set[str]] = [set()]  # Stack of variable scopes
     
     def _enter_scope(self):
-        """Enter a new scope, inheriting variables from parent scope."""
-        # Create a new scope that inherits all variables from the parent scope
-        new_scope = set(self.scope_stack[-1])
-        self.scope_stack.append(new_scope)
+        """Enter a new variable scope."""
+        self.scopes.append(set())
     
     def _exit_scope(self):
-        """Exit the current scope."""
-        if len(self.scope_stack) > 1:  # Always keep at least the global scope
-            self.scope_stack.pop()
+        """Exit the current variable scope."""
+        if self.scopes:
+            self.scopes.pop()
     
     def _add_to_current_scope(self, var_name: str):
         """Add a variable to the current scope."""
-        self.scope_stack[-1].add(var_name)
+        if self.scopes:
+            self.scopes[-1].add(var_name)
     
     def _is_in_scope(self, var_name: str) -> bool:
-        """Check if a variable is in the current scope."""
-        return var_name in self.scope_stack[-1]
+        """Check if a variable is in any scope."""
+        return any(var_name in scope for scope in self.scopes)
     
     def visit_Module(self, node):
-        """Visit the module node (file root)."""
-        # Start with a clean global scope
-        self.scope_stack = [set()]
-        self.generic_visit(node)
+        """Visit the module node."""
+        # Enter the module scope
+        self._enter_scope()
+        
+        # Visit all statements in the module
+        for stmt in node.body:
+            self.visit(stmt)
+        
+        # Exit the module scope
+        self._exit_scope()
     
     def visit_FunctionDef(self, node):
-        """Visit a function definition."""
+        """Visit function definition nodes."""
         # Enter a new scope for the function
         self._enter_scope()
         
-        # Add function arguments to the current scope
+        # Add function parameters to the scope
         for arg in node.args.args:
             self._add_to_current_scope(arg.arg)
+        
+        if node.args.vararg:
+            self._add_to_current_scope(node.args.vararg.arg)
+        
+        for arg in node.args.kwonlyargs:
+            self._add_to_current_scope(arg.arg)
+        
+        if node.args.kwarg:
+            self._add_to_current_scope(node.args.kwarg.arg)
         
         # Visit the function body
         for stmt in node.body:
@@ -290,7 +330,7 @@ class CallAnalyzer(ast.NodeVisitor):
         self._exit_scope()
     
     def visit_ClassDef(self, node):
-        """Visit a class definition."""
+        """Visit class definition nodes."""
         # Enter a new scope for the class
         self._enter_scope()
         
@@ -302,14 +342,14 @@ class CallAnalyzer(ast.NodeVisitor):
         self._exit_scope()
     
     def visit_For(self, node):
-        """Visit a for loop."""
-        # Process the iterable expression first (outside the loop scope)
+        """Visit for loop nodes."""
+        # Visit the iterable expression
         self.visit(node.iter)
         
         # Enter a new scope for the loop
         self._enter_scope()
         
-        # Add loop variables to the current scope
+        # Add loop variables to the scope
         if isinstance(node.target, ast.Name):
             self._add_to_current_scope(node.target.id)
         elif isinstance(node.target, ast.Tuple):
@@ -321,7 +361,7 @@ class CallAnalyzer(ast.NodeVisitor):
         for stmt in node.body:
             self.visit(stmt)
         
-        # Visit the else clause if it exists
+        # Visit the else clause if present
         if node.orelse:
             for stmt in node.orelse:
                 self.visit(stmt)
@@ -330,8 +370,8 @@ class CallAnalyzer(ast.NodeVisitor):
         self._exit_scope()
     
     def visit_While(self, node):
-        """Visit a while loop."""
-        # Process the test expression first (outside the loop scope)
+        """Visit while loop nodes."""
+        # Visit the condition expression
         self.visit(node.test)
         
         # Enter a new scope for the loop
@@ -341,7 +381,7 @@ class CallAnalyzer(ast.NodeVisitor):
         for stmt in node.body:
             self.visit(stmt)
         
-        # Visit the else clause if it exists
+        # Visit the else clause if present
         if node.orelse:
             for stmt in node.orelse:
                 self.visit(stmt)
@@ -350,8 +390,8 @@ class CallAnalyzer(ast.NodeVisitor):
         self._exit_scope()
     
     def visit_If(self, node):
-        """Visit an if statement."""
-        # Process the test expression first (outside the if scope)
+        """Visit if statement nodes."""
+        # Visit the condition expression
         self.visit(node.test)
         
         # Enter a new scope for the if branch
@@ -367,7 +407,7 @@ class CallAnalyzer(ast.NodeVisitor):
         # Enter a new scope for the else branch
         self._enter_scope()
         
-        # Visit the else clause if it exists
+        # Visit the else clause if present
         if node.orelse:
             for stmt in node.orelse:
                 self.visit(stmt)
@@ -376,25 +416,21 @@ class CallAnalyzer(ast.NodeVisitor):
         self._exit_scope()
     
     def visit_With(self, node):
-        """Visit a with statement."""
-        # Process the context expressions first (outside the with scope)
+        """Visit with statement nodes."""
+        # Visit the context expressions
         for item in node.items:
             self.visit(item.context_expr)
             if item.optional_vars:
-                self.visit(item.optional_vars)
-        
-        # Enter a new scope for the with block
-        self._enter_scope()
-        
-        # Add variables from optional_vars to the current scope
-        for item in node.items:
-            if item.optional_vars:
+                # If there's an as clause, visit it
                 if isinstance(item.optional_vars, ast.Name):
                     self._add_to_current_scope(item.optional_vars.id)
                 elif isinstance(item.optional_vars, ast.Tuple):
                     for elt in item.optional_vars.elts:
                         if isinstance(elt, ast.Name):
                             self._add_to_current_scope(elt.id)
+        
+        # Enter a new scope for the with block
+        self._enter_scope()
         
         # Visit the with body
         for stmt in node.body:
@@ -501,6 +537,39 @@ class CallAnalyzer(ast.NodeVisitor):
                             ))
                     else:
                         debug_print(f"  Could not find target file for module {module_path}")
+            # Special case for _imports.load_module and _imports.ext
+            elif module_name in self.import_module_vars and func_name in imports_valid_methods:
+                # This is a valid call to _imports.load_module or _imports.ext
+                debug_print(f"Valid call to {module_name}.{func_name}")
+                
+                # For load_module, check that only valid arguments are passed
+                if func_name == "load_module":
+                    # Valid arguments for load_module are:
+                    # - First positional argument: module_path (required)
+                    # - Or keyword argument: module_path
+                    
+                    # Check for invalid positional arguments (only one is allowed)
+                    if len(node.args) > 1:
+                        debug_print(f"Call to {module_name}.{func_name} at line {node.lineno} has too many positional arguments")
+                        self.violations.append((
+                            node.lineno,
+                            f"Call to {module_name}.{func_name} has too many positional arguments, only module_path is allowed"
+                        ))
+                    
+                    # Check for invalid keyword arguments
+                    valid_kwargs = {"module_path"}
+                    for kw in node.keywords:
+                        if kw.arg and kw.arg not in valid_kwargs:
+                            debug_print(f"Call to {module_name}.{func_name} at line {node.lineno} has invalid keyword argument: {kw.arg}")
+                            self.violations.append((
+                                node.lineno,
+                                f"Call to {module_name}.{func_name} has invalid keyword argument: {kw.arg}"
+                            ))
+            # Check if it's a variable derived from _imports (e.g., _imports.ext.ethereum_package)
+            elif module_name in self.imports_derived_vars:
+                # This is a variable derived from _imports, so it's valid
+                debug_print(f"Valid call through variable derived from _imports: {module_name}.{func_name}")
+                pass
             # Check if it's a variable in scope
             elif self._is_in_scope(module_name):
                 # It's a variable in scope, but we can't trace what it refers to
@@ -548,22 +617,22 @@ class CallAnalyzer(ast.NodeVisitor):
             ))
         
         # Check if too many positional arguments
-        if pos_args_count > len(signature.args) and signature.vararg is None:
+        if not signature.vararg and pos_args_count > len(signature.args):
             debug_print(f"Call at line {call_node.lineno} has too many positional arguments")
             self.violations.append((
                 call_node.lineno,
-                f"Call to {signature.name} has too many positional arguments: got {pos_args_count}, expected at most {len(signature.args)}"
+                f"Call to {signature.name} has too many positional arguments"
             ))
         
-        # Check keyword arguments
+        # Check for unknown keyword arguments
         valid_kwargs = set(signature.args + signature.kwonlyargs)
-        if signature.kwarg is None:  # Only check if **kwargs is not present
+        if not signature.kwarg:  # Only check if the function doesn't accept **kwargs
             for kw in call_node.keywords:
-                if kw.arg is not None and kw.arg not in valid_kwargs:
-                    debug_print(f"Call at line {call_node.lineno} has invalid keyword argument: {kw.arg}")
+                if kw.arg and kw.arg not in valid_kwargs:
+                    debug_print(f"Call at line {call_node.lineno} has unknown keyword argument: {kw.arg}")
                     self.violations.append((
                         call_node.lineno,
-                        f"Call to {signature.name} has invalid keyword argument: {kw.arg}"
+                        f"Call to {signature.name} has unknown keyword argument: {kw.arg}"
                     ))
 
 
@@ -601,7 +670,9 @@ def analyze_file(file_path: str, all_functions: Dict[str, Dict[str, FunctionSign
             local_functions=collector.functions,
             imports=import_collector.imports,
             all_functions=all_functions,
-            module_to_file=module_to_file
+            module_to_file=module_to_file,
+            imports_derived_vars=import_collector.imports_derived_vars,
+            import_module_vars=import_collector.import_module_vars
         )
         analyzer.visit(tree)
         
