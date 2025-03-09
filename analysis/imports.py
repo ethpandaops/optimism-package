@@ -41,9 +41,12 @@ class LoadModuleAnalyzer(ast.NodeVisitor):
     load_module calls without package_id have valid relative paths.
     """
     
-    def __init__(self):
+    def __init__(self, file_path: str, workspace_root: str = None, check_file_exists: bool = True):
         self.violations = []  # List to store violations
         self.import_vars = set()  # Variables assigned from import_module("/imports.star")
+        self.file_path = file_path
+        self.workspace_root = workspace_root or os.getcwd()
+        self.check_file_exists = check_file_exists
     
     def visit_Assign(self, node):
         """Visit assignment nodes to track import_module assignments."""
@@ -110,8 +113,15 @@ class LoadModuleAnalyzer(ast.NodeVisitor):
                         if not self._is_valid_relative_path(module_path):
                             self.violations.append((
                                 node.lineno,
-                                f"load_module without package_id must use a valid relative path from the root dir, got '{module_path}'"
+                                f"load_module without package_id must use a valid relative path, got '{module_path}'"
                             ))
+                        else:
+                            # Check if the module actually exists
+                            if self.check_file_exists and not self._module_exists(module_path):
+                                self.violations.append((
+                                    node.lineno,
+                                    f"load_module references non-existent module: '{module_path}'"
+                                ))
                     else:
                         # Non-constant module_path can't be statically analyzed
                         self.violations.append((
@@ -147,14 +157,44 @@ class LoadModuleAnalyzer(ast.NodeVisitor):
             return False
         
         return True
+    
+    def _module_exists(self, module_path: str) -> bool:
+        """
+        Check if a module exists in the filesystem.
+        
+        Args:
+            module_path: The module path to check
+            
+        Returns:
+            True if the module exists, False otherwise
+        """
+        # Remove leading slash if present
+        if module_path.startswith('/'):
+            module_path = module_path[1:]
+        
+        # If the path doesn't end with .star, add it
+        if not module_path.endswith('.star'):
+            module_path += '.star'
+        
+        # Only check relative to the workspace root
+        workspace_path = os.path.normpath(os.path.join(self.workspace_root, module_path))
+        
+        # For debugging, print the path we tried
+        if not os.path.isfile(workspace_path):
+            print(f"DEBUG: Module not found: {module_path}")
+            print(f"  Tried path: {workspace_path}")
+        
+        return os.path.isfile(workspace_path)
 
 
-def analyze_file(file_path: str) -> List[Tuple[int, str]]:
+def analyze_file(file_path: str, workspace_root: str = None, check_file_exists: bool = True) -> List[Tuple[int, str]]:
     """
     Analyze a Python file for import_module and load_module calls.
     
     Args:
         file_path: Path to the Python file to analyze
+        workspace_root: Root directory of the workspace
+        check_file_exists: Whether to check if imported modules exist
         
     Returns:
         List of (line_number, violation_message) tuples
@@ -175,7 +215,7 @@ def analyze_file(file_path: str) -> List[Tuple[int, str]]:
         violations.extend(import_analyzer.violations)
         
         # Check load_module calls
-        load_analyzer = LoadModuleAnalyzer()
+        load_analyzer = LoadModuleAnalyzer(file_path, workspace_root, check_file_exists)
         load_analyzer.visit(tree)
         violations.extend(load_analyzer.violations)
         
@@ -208,22 +248,76 @@ def find_star_files(path: str) -> List[str]:
     return star_files
 
 
+def find_workspace_root(start_path: str = None) -> str:
+    """
+    Find the workspace root by looking for the src directory.
+    
+    Args:
+        start_path: Path to start the search from
+        
+    Returns:
+        The workspace root path
+    """
+    if start_path is None:
+        start_path = os.getcwd()
+    
+    # If the current directory contains a src directory, it's the workspace root
+    if os.path.isdir(os.path.join(start_path, 'src')):
+        return start_path
+    
+    # If we're in the src directory, the parent is the workspace root
+    if os.path.basename(start_path) == 'src' and os.path.isdir(start_path):
+        return os.path.dirname(start_path)
+    
+    # If we're in a subdirectory of src, navigate up to find the workspace root
+    parent = os.path.dirname(start_path)
+    if parent == start_path:  # We've reached the filesystem root
+        return start_path
+    
+    return find_workspace_root(parent)
+
+
 def main():
     """Main entry point for the script."""
     if len(sys.argv) < 2:
         print("Usage: python imports.py <file_or_directory_path> [<file_or_directory_path> ...]")
+        print("Options:")
+        print("  --no-check-exists: Disable checking if imported modules exist")
+        print("  --workspace-root=PATH: Specify the workspace root directory")
         sys.exit(1)
     
     files_with_violations = 0
     total_files_analyzed = 0
+    check_file_exists = True
+    workspace_root = None
     
-    for path in sys.argv[1:]:
+    # Process command line arguments
+    paths = []
+    for arg in sys.argv[1:]:
+        if arg == "--no-check-exists":
+            check_file_exists = False
+        elif arg.startswith("--workspace-root="):
+            workspace_root = arg.split("=", 1)[1]
+        else:
+            paths.append(arg)
+    
+    if not paths:
+        print("Error: No paths specified")
+        sys.exit(1)
+    
+    # If workspace root wasn't specified, try to find it
+    if workspace_root is None:
+        workspace_root = find_workspace_root()
+    
+    print(f"Using workspace root: {workspace_root}")
+    
+    for path in paths:
         # Find all .star files if path is a directory
         files_to_analyze = find_star_files(path)
         
         for file_path in files_to_analyze:
             total_files_analyzed += 1
-            violations = analyze_file(file_path)
+            violations = analyze_file(file_path, workspace_root, check_file_exists)
             
             if violations:
                 files_with_violations += 1

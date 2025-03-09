@@ -1,18 +1,22 @@
-utils = import_module("../../util.star")
+imports = import_module("/imports.star")
 
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+utils = imports.load_module("src/util.star")
+
+ethereum_package_shared_utils = imports.load_module(
+    "src/shared_utils/shared_utils.star", 
+    package_id="ethereum-package",
 )
 
-ethereum_package_constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
+ethereum_package_constants = imports.load_module(
+    "src/package_io/constants.star",
+    package_id="ethereum-package",
 )
 
-constants = import_module("../../package_io/constants.star")
-observability = import_module("../../observability/observability.star")
-prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+constants = imports.load_module("src/package_io/constants.star")
+observability = imports.load_module("src/observability/observability.star")
+prometheus = imports.load_module("src/observability/prometheus/prometheus_launcher.star")
 
-interop_constants = import_module("../constants.star")
+interop_constants = imports.load_module("src/interop/constants.star")
 
 
 def get_used_ports():

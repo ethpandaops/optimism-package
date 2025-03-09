@@ -1,17 +1,21 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+imports = import_module("/imports.star")
+
+ethereum_package_shared_utils = imports.load_module(
+    "src/shared_utils/shared_utils.star",
+    package_id="ethereum-package",
 )
 
-ethereum_package_node_metrics = import_module(
-    "github.com/ethpandaops/ethereum-package/src/node_metrics_info.star"
+ethereum_package_node_metrics = imports.load_module(
+    "src/node_metrics_info.star",
+    package_id="ethereum-package",
 )
 
-util = import_module("../util.star")
+util = imports.load_module("src/util.star")
 
-prometheus = import_module("./prometheus/prometheus_launcher.star")
-loki = import_module("./loki/loki_launcher.star")
-promtail = import_module("./promtail/promtail_launcher.star")
-grafana = import_module("./grafana/grafana_launcher.star")
+prometheus = imports.load_module("src/observability/prometheus/prometheus_launcher.star")
+loki = imports.load_module("src/observability/loki/loki_launcher.star")
+promtail = imports.load_module("src/observability/promtail/promtail_launcher.star")
+grafana = imports.load_module("src/observability/grafana/grafana_launcher.star")
 
 
 DEFAULT_SCRAPE_INTERVAL = "15s"

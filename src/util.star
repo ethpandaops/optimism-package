@@ -1,4 +1,5 @@
-constants = import_module("./package_io/constants.star")
+imports = import_module("/imports.star")
+constants = imports.load_module("src/package_io/constants.star")
 
 DEPLOYMENT_UTILS_IMAGE = "mslipper/deployment-utils:latest"
 
