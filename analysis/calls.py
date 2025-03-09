@@ -7,6 +7,7 @@ This module analyzes function calls in Starlark files to ensure they are valid.
 import sys
 import os
 import ast
+import argparse
 from typing import List, Tuple, Dict, Set, Optional, Any
 
 # Handle imports for both module and script execution
@@ -124,44 +125,26 @@ def analyze_file(file_path: str, all_functions: Dict[str, Dict[str, FunctionSign
 def main():
     """Main entry point for the script."""
     # Parse command line arguments
-    if len(sys.argv) < 2:
-        print("Usage: python -m analysis.calls <path> [-v|--verbose|-verbose]")
-        sys.exit(1)
-    
-    # Extract path and verbose flag
-    args = sys.argv[1:]
-    path = None
-    verbose = False
-    
-    for arg in args:
-        if arg.startswith('-'):
-            # This is a flag
-            if arg in ['-v', '--verbose', '-verbose']:
-                verbose = True
-        else:
-            # This is the path
-            path = arg
-    
-    if not path:
-        print("Error: No path specified")
-        print("Usage: python -m analysis.calls <path> [-v|--verbose|-verbose]")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Analyze function calls in Starlark files")
+    parser.add_argument("path", nargs="?", default=".", help="Path to the directory or file to analyze")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
+    args = parser.parse_args()
     
     # Set verbose flag early
-    BaseVisitor.set_verbose(verbose)
+    BaseVisitor.set_verbose(args.verbose)
     
-    if verbose:
-        print(f"Analyzing path: {path}")
-        print(f"Verbose mode: {verbose}")
+    if args.verbose:
+        print(f"Analyzing path: {args.path}")
+        print(f"Verbose mode: {args.verbose}")
     
     # Find the workspace root
-    workspace_root = find_workspace_root(path)
-    if verbose:
+    workspace_root = find_workspace_root(args.path)
+    if args.verbose:
         print(f"Using workspace root: {workspace_root}")
     
     # Find all .star files
-    star_files = find_star_files(path)
-    if verbose:
+    star_files = find_star_files(args.path)
+    if args.verbose:
         print(f"Found {len(star_files)} .star files to analyze")
     
     # First pass: collect all function definitions
@@ -177,7 +160,7 @@ def main():
     }
     
     print("\nSecond pass: analyzing function calls...")
-    success = run_analysis(path, analyze_file, verbose, extra_args)
+    success = run_analysis(args.path, analyze_file, args.verbose, extra_args)
     
     # Exit with appropriate code
     sys.exit(0 if success else 1)
