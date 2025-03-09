@@ -1,6 +1,6 @@
 _imports = import_module("/imports.star")
 
-_ethereum_package = _imports.load_module("main.star", package_id="ethereum-package")
+_ethereum_package = _imports.ext.ethereum_package
 _contract_deployer = _imports.load_module("src/contracts/contract_deployer.star")
 _l2_launcher = _imports.load_module("src/l2.star")
 _op_supervisor_launcher = _imports.load_module(
@@ -14,9 +14,7 @@ _observability = _imports.load_module("src/observability/observability.star")
 
 _wait_for_sync = _imports.load_module("src/wait/wait_for_sync.star")
 _input_parser = _imports.load_module("src/package_io/input_parser.star")
-_ethereum_package_static_files = _imports.load_module(
-    "src/static_files/static_files.star", package_id="ethereum-package"
-)
+_ethereum_package_static_files = _imports.ext.ethereum_package_static_files
 
 
 def run(plan, args):

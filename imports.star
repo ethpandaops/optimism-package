@@ -34,6 +34,7 @@ ext = struct(
     ethereum_package_input_parser = _load_module("src/package_io/input_parser.star", "ethereum-package"),
     ethereum_package_genesis_constants = _load_module("src/prelaunch_data_generator/genesis_constants/genesis_constants.star", "ethereum-package"),
     ethereum_package_node_metrics = _load_module("src/node_metrics_info.star", "ethereum-package"),
+    ethereum_package_static_files = _load_module("src/static_files/static_files.star", "ethereum-package"),
 
     postgres_package = _load_module("main.star", "postgres-package"),
     prometheus_package = _load_module("main.star", "prometheus-package"),
