@@ -1,0 +1,25 @@
+[server]
+rpc_host = "0.0.0.0"
+rpc_port = {{ .Ports.rpc }}
+
+[metrics]
+enabled = {{ .Metrics.enabled }}
+{{ if .Metrics.enabled }}
+host = "0.0.0.0"
+port = {{ .Metrics.port }}
+{{ end }}
+
+[backends]
+{{ range .Replicas }}
+[backends.replica-{{ .Key }}]
+rpc_url = {{ .Value }}
+ws_url = "ws://dummy"
+{{ end }}
+
+[backend_groups]
+[backend_groups.replica]
+backends = [
+    {{ range .Replicas }}
+    "replica-{{ .Key }}",
+    {{ end }}
+]
