@@ -11,7 +11,7 @@ port = {{ .Metrics.port }}
 
 [backends]
 {{ range .Replicas }}
-[backends.replica-{{ .Key }}]
+[backends.{{ .Key }}]
 rpc_url = {{ .Value }}
 ws_url = "ws://dummy"
 {{ end }}
@@ -20,6 +20,6 @@ ws_url = "ws://dummy"
 [backend_groups.replica]
 backends = [
     {{ range .Replicas }}
-    "replica-{{ .Key }}",
+    "{{ .Key }}",
     {{ end }}
 ]

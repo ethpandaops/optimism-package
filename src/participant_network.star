@@ -75,10 +75,8 @@ def launch_participant_network(
     proxyd_launcher.launch(
         plan,
         proxyd_params,
-        all_el_contexts[0],
-        all_cl_contexts[0],
-        l1_config_env_vars,
         network_params,
+        all_el_contexts,
         observability_helper,
     )
 
