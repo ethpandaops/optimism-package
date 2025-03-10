@@ -146,10 +146,6 @@ optimism_package:
       # A list of optional extra params that will be passed to the supervisor container for modifying its behaviour
       extra_params: []
 
-      # Network name, used to enable syncing of alternative networks
-      # Defaults to "kurtosis"
-      network: "kurtosis"
-
   # AltDA Deploy Configuration, which is passed to op-deployer.
   #
   # For simplicity we currently enforce chains to all be altda or all rollups.
