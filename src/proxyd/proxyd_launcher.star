@@ -6,11 +6,11 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-constants = import_module("../../package_io/constants.star")
-util = import_module("../../util.star")
+constants = import_module("../package_io/constants.star")
+util = import_module("../util.star")
 
-observability = import_module("../../observability/observability.star")
-prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+observability = import_module("../observability/observability.star")
+prometheus = import_module("../observability/prometheus/prometheus_launcher.star")
 
 # Port nums
 HTTP_PORT_NUM = 8080
@@ -48,7 +48,7 @@ def launch(
     el_contexts,
     observability_helper,
 ):
-    config_template = read_file(VALUES_TEMPLATE_FILEPATH)
+    config_template = read_file(CONFIG_TEMPLATE_FILEPATH)
 
     config_artifact_name = create_config_artifact(
         plan,
@@ -64,7 +64,7 @@ def launch(
         observability_helper,
     )
 
-    service = plan.add_service(service_name, config)
+    service = plan.add_service("proxyd-{0}".format(network_params.network_id), config)
     service_url = util.make_service_http_url(service)
 
     observability.register_op_service_metrics_job(
@@ -81,16 +81,15 @@ def create_config_artifact(
 ):
     config_data = {
         "Ports": {
-            "rpc": HTTP_PORT_NUMBER,
-            "grpc": GRPC_PORT_NUMBER,
+            "rpc": HTTP_PORT_NUM,
         },
         "Metrics": {
             "enabled": observability_helper.enabled,
             "port": METRICS_PORT_NUM,
         },
         "Replicas": {
-            for num, el_context in enumerate(el_contexts):
-                "{0}-{1}".format(el_context.client_name, num): el_context.rpc_http_url,
+            "{0}-{1}".format(el_context.client_name, num): el_context.rpc_http_url
+            for num, el_context in enumerate(el_contexts)
         },
     }
 
@@ -109,7 +108,7 @@ def create_config_artifact(
 
 def get_proxyd_config(
     plan,
-    proxyd_params
+    proxyd_params,
     config_artifact_name,
     observability_helper,
 ):
@@ -123,12 +122,12 @@ def get_proxyd_config(
     # apply customizations
 
     if observability_helper.enabled:
-        observability.expose_metrics_port(ports, METRICS_PORT_NUM)
+        observability.expose_metrics_port(ports, port_num=METRICS_PORT_NUM)
 
     cmd += proxyd_params.extra_params
 
     return ServiceConfig(
-        image=image,
+        image="{0}:{1}".format(proxyd_params.image, proxyd_params.tag),
         ports=ports,
         cmd=cmd,
         files={
