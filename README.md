@@ -385,6 +385,17 @@ optimism_package:
         # Defaults to True
         fund_dev_accounts: true
 
+      # Default proxyd configuration
+      proxyd_params:
+        # The Docker image that should be used for proxyd; leave blank to use the default image
+        image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd"
+
+        # The Docker tag that should be used for proxyd; leave blank to use the default tag
+        tag: ""
+
+        # A list of optional extra params that will be passed to the proxyd container
+        extra_params: []
+
       # Default batcher configuration
       batcher_params:
         # The Docker image that should be used for the batcher; leave blank to use the default op-batcher image
@@ -653,7 +664,7 @@ Compile [tx-fuzz](https://github.com/MariusVanDerWijden/tx-fuzz) locally per ins
 
 Install the latest [contender](https://github.com/flashbots/contender) version via cargo:
 ```bash
-cargo install --git https://github.com/flashbots/contender --bin contender --force 
+cargo install --git https://github.com/flashbots/contender --bin contender --force
 ```
 
 Browse the available [scenarios](https://github.com/flashbots/contender/tree/main/scenarios) and pick one that fits your needs. For example, to download the `stress` scenario:
