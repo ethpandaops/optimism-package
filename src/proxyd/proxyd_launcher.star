@@ -41,27 +41,19 @@ def get_used_ports():
     return used_ports
 
 
-ENTRYPOINT_ARGS = ["sh", "-c"]
-
-
 def launch(
     plan,
     proxyd_params,
-    el_context,
-    cl_context,
-    l1_config_env_vars,
-    gs_batcher_private_key,
     network_params,
+    el_contexts,
     observability_helper,
-    da_server_context,
 ):
     config_template = read_file(VALUES_TEMPLATE_FILEPATH)
 
     config_artifact_name = create_config_artifact(
         plan,
         config_template,
-        el_context,
-        cl_context,
+        el_contexts,
         observability_helper,
     )
 
@@ -84,8 +76,7 @@ def launch(
 def create_config_artifact(
     plan,
     config_template,
-    el_context,
-    cl_context,
+    el_contexts,
     observability_helper,
 ):
     config_data = {
@@ -96,7 +87,11 @@ def create_config_artifact(
         "Metrics": {
             "enabled": observability_helper.enabled,
             "port": METRICS_PORT_NUM,
-        }
+        },
+        "Replicas": {
+            for num, el_context in enumerate(el_contexts):
+                "{0}-{1}".format(el_context.client_name, num): el_context.rpc_http_url,
+        },
     }
 
     config_template_and_data = ethereum_package_shared_utils.new_template_and_data(
