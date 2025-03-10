@@ -11,10 +11,11 @@ GRPC_PORT_NUMBER = 9096
 
 TEMPLATES_FILEPATH = "./templates"
 
-CONFIG_TEMPLATE_FILEPATH = TEMPLATES_FILEPATH + "/loki-config.yaml.tmpl"
-CONFIG_REL_FILEPATH = "loki-config.yaml"
+CONFIG_FILE_NAME = "loki-config.yaml"
+CONFIG_TEMPLATE_FILEPATH = "{0}/{1}.tmpl".format(TEMPLATES_FILEPATH, CONFIG_FILE_NAME)
 
 CONFIG_DIRPATH_ON_SERVICE = "/config"
+
 
 USED_PORTS = {
     constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
@@ -70,7 +71,7 @@ def create_config_artifact(
     )
 
     template_and_data_by_rel_dest_filepath = {
-        CONFIG_REL_FILEPATH: config_template_and_data,
+        CONFIG_FILE_NAME: config_template_and_data,
     }
 
     config_artifact_name = plan.render_templates(
@@ -90,7 +91,7 @@ def get_service_config(
         ports=USED_PORTS,
         cmd=[
             "-config.file={0}/{1}".format(
-                CONFIG_DIRPATH_ON_SERVICE, CONFIG_REL_FILEPATH
+                CONFIG_DIRPATH_ON_SERVICE, CONFIG_FILE_NAME
             ),
         ],
         files={
