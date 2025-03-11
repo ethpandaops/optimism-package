@@ -95,8 +95,12 @@ optimism_package:
       image: "prom/prometheus:latest"
     # Default grafana configuration
     grafana_params:
-      # A list of locators for grafana dashboards to be loaded be the grafana service
-      dashboard_sources: []
+      # A list of locators for grafana dashboards to be loaded by the grafana service.
+      # Each locator should be a URL to a directory containing a /folders and a /dashboards directory.
+      # Those will be uploaded to the grafana service by using grizzly.
+      # See https://github.com/ethereum-optimism/grafana-dashboards-public for more info.
+      dashboard_sources:
+        - github.com/ethereum-optimism/grafana-dashboards-public/resources
       # Resource management for grafana container
       # CPU is milicores
       # RAM is in MB
@@ -371,6 +375,9 @@ optimism_package:
 
       # Default challenger configuration
       challenger_params:
+        # Whether or not to enable the challenger
+        enabled: true
+
         # The Docker image that should be used for the challenger; leave blank to use the default op-challenger image
         image: ""
 
@@ -695,11 +702,11 @@ kurtosis lint --format .
 
 #### Unit tests
 
-We are using [`kurtestosis`](https://github.com/ethereum-optimism/kurtestosis) to run a set of unit tests against the starlark code:
+We are using [`kurtosis-test`](https://github.com/ethereum-optimism/kurtosis-test) to run a set of unit tests against the starlark code:
 
 ```bash
 # To run all unit tests
-kurtestosis .
+kurtosis-test .
 ```
 
 The tests can be found in `*_test.star` scripts located in the `test` directory.

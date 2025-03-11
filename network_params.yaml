@@ -36,6 +36,9 @@ optimism_package:
         fund_dev_accounts: true
       batcher_params:
         extra_params: []
+      challenger_params:
+        enabled: true
+        extra_params: []
       mev_params:
         builder_host: ""
         builder_port: ""

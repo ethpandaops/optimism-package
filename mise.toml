@@ -1,4 +1,5 @@
 [tools]
 
 # Core dependencies
-"ubi:ethereum-optimism/kurtestosis" = "0.0.5"
+"ubi:ethereum-optimism/kurtosis-test" = "0.0.1"
+"ubi:kurtosis-tech/kurtosis-cli-release-artifacts[exe=kurtosis]" = "1.4.4"

@@ -147,20 +147,21 @@ def run(plan, args):
             if chain.challenger_params.image != ""
             else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
         )
-        op_challenger_launcher.launch(
-            plan,
-            l2_num,
-            "op-challenger-{0}".format(chain.network_params.name),
-            chain.challenger_params.image,
-            l2.participants[0].el_context,
-            l2.participants[0].cl_context,
-            l1_config_env_vars,
-            deployment_output,
-            chain.network_params,
-            chain.challenger_params,
-            interop_params,
-            observability_helper,
-        )
+        if chain.challenger_params.enabled:
+            op_challenger_launcher.launch(
+                plan,
+                l2_num,
+                "op-challenger-{0}".format(chain.network_params.name),
+                chain.challenger_params.image,
+                l2.participants[0].el_context,
+                l2.participants[0].cl_context,
+                l1_config_env_vars,
+                deployment_output,
+                chain.network_params,
+                chain.challenger_params,
+                interop_params,
+                observability_helper,
+            )
 
     if observability_helper.enabled and len(observability_helper.metrics_jobs) > 0:
         plan.print("Launching prometheus...")
