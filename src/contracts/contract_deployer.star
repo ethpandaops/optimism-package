@@ -133,9 +133,9 @@ def deploy_contracts(
             {
                 "deployOverrides": {
                     "l2BlockTime": chain.network_params.seconds_per_slot,
-                    "fundDevAccounts": True
-                    if chain.network_params.fund_dev_accounts
-                    else False,
+                    "fundDevAccounts": (
+                        True if chain.network_params.fund_dev_accounts else False
+                    ),
                 },
                 "baseFeeVaultRecipient": read_chain_cmd(
                     "baseFeeVaultRecipient", chain_id
@@ -236,7 +236,11 @@ def deploy_contracts(
         name="op-deployer-apply",
         description="Apply L2 contract deployments",
         image=optimism_args.op_contract_deployer_params.image,
-        env_vars={"PRIVATE_KEY": str(priv_key)} | l1_config_env_vars,
+        env_vars={
+            "PRIVATE_KEY": str(priv_key),
+            "DEPLOYER_CACHE_DIR": "/var/cache/op-deployer",
+        }
+        | l1_config_env_vars,
         store=[
             StoreSpec(
                 src="/network-data",
