@@ -10,13 +10,13 @@ MAX_MEMORY = 300
 
 def launch_transaction_spammer(
     plan,
-    prefunded_addresses,
+    prefunded_address,
     el_uri,
     tx_spammer_params,
     global_node_selectors,
 ):
     config = get_config(
-        prefunded_addresses,
+        prefunded_address,
         el_uri,
         tx_spammer_params,
         global_node_selectors,
@@ -25,7 +25,7 @@ def launch_transaction_spammer(
 
 
 def get_config(
-    prefunded_addresses,
+    prefunded_address,
     el_uri,
     tx_spammer_params,
     node_selectors,
@@ -33,7 +33,7 @@ def get_config(
     cmd = [
         "spam",
         "--rpc={}".format(el_uri),
-        "--sk={0}".format(prefunded_addresses[3].private_key),
+        "--sk={0}".format(prefunded_address.private_key),
     ]
 
     if len(tx_spammer_params.tx_spammer_extra_args) > 0:

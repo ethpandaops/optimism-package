@@ -246,6 +246,10 @@ def input_parser(plan, input_args):
                     cmd=result["da_server_params"]["cmd"],
                 ),
                 additional_services=result["additional_services"],
+                tx_spammer_params=struct(
+                    image=result["tx_spammer_params"]["image"],
+                    tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
+                ),
             )
             for result in results["chains"]
         ],
@@ -403,6 +407,9 @@ def parse_network_params(plan, input_args):
                 )
                 participants.append(participant_copy)
 
+        tx_spammer_params = default_tx_spammer_params()
+        tx_spammer_params.update(chain.get("tx_spammer_params", {}))
+
         result = {
             "participants": participants,
             "network_params": network_params,
@@ -414,6 +421,7 @@ def parse_network_params(plan, input_args):
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
+            "tx_spammer_params": tx_spammer_params,
         }
         chains.append(result)
 
@@ -537,6 +545,7 @@ def default_chains():
             "mev_params": default_mev_params(),
             "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
+            "tx_spammer_params": default_tx_spammer_params(),
         }
     ]
 
@@ -679,4 +688,10 @@ def default_da_server_params():
         "enabled": False,
         "image": DEFAULT_DA_SERVER_PARAMS["image"],
         "cmd": DEFAULT_DA_SERVER_PARAMS["cmd"],
+    }
+
+def default_tx_spammer_params():
+    return {
+        "image": "ethpandaops/tx-fuzz:master",
+        "tx_spammer_extra_args": [],
     }
