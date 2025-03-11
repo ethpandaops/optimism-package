@@ -638,7 +638,7 @@ def default_ethereum_package_network_params():
                     }
                 }
             ),
-        }
+        },
     }
 
 
