@@ -2,6 +2,7 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
 
 DEFAULT_EL_IMAGES = {
@@ -72,14 +73,10 @@ def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     results = parse_network_params(plan, input_args)
 
-    results["global_log_level"] = "info"
-    results["global_node_selectors"] = {}
-    results["global_tolerations"] = []
-    results["persistent"] = False
-
     return struct(
         observability=struct(
             enabled=results["observability"]["enabled"],
+            enable_k8s_features=results["observability"]["enable_k8s_features"],
             prometheus_params=struct(
                 image=results["observability"]["prometheus_params"]["image"],
                 storage_tsdb_retention_time=results["observability"][
@@ -92,6 +89,20 @@ def input_parser(plan, input_args):
                 max_cpu=results["observability"]["prometheus_params"]["max_cpu"],
                 min_mem=results["observability"]["prometheus_params"]["min_mem"],
                 max_mem=results["observability"]["prometheus_params"]["max_mem"],
+            ),
+            loki_params=struct(
+                image=results["observability"]["loki_params"]["image"],
+                min_cpu=results["observability"]["loki_params"]["min_cpu"],
+                max_cpu=results["observability"]["loki_params"]["max_cpu"],
+                min_mem=results["observability"]["loki_params"]["min_mem"],
+                max_mem=results["observability"]["loki_params"]["max_mem"],
+            ),
+            promtail_params=struct(
+                image=results["observability"]["promtail_params"]["image"],
+                min_cpu=results["observability"]["promtail_params"]["min_cpu"],
+                max_cpu=results["observability"]["promtail_params"]["max_cpu"],
+                min_mem=results["observability"]["promtail_params"]["min_mem"],
+                max_mem=results["observability"]["promtail_params"]["max_mem"],
             ),
             grafana_params=struct(
                 image=results["observability"]["grafana_params"]["image"],
@@ -270,6 +281,16 @@ def parse_network_params(plan, input_args):
         input_args.get("observability", {}).get("prometheus_params", {})
     )
 
+    results["observability"]["loki_params"] = default_loki_params()
+    results["observability"]["loki_params"].update(
+        input_args.get("observability", {}).get("loki_params", {})
+    )
+
+    results["observability"]["promtail_params"] = default_promtail_params()
+    results["observability"]["promtail_params"].update(
+        input_args.get("observability", {}).get("promtail_params", {})
+    )
+
     results["observability"]["grafana_params"] = default_grafana_params()
     results["observability"]["grafana_params"].update(
         input_args.get("observability", {}).get("grafana_params", {})
@@ -405,34 +426,31 @@ def parse_network_params(plan, input_args):
         input_args.get("op_contract_deployer_params", {})
     )
 
+    # configure global args
+
+    results["global_log_level"] = "info"
+    results["global_node_selectors"] = {}
+    results["global_tolerations"] = []
+    results["persistent"] = False
+
     results["global_log_level"] = input_args.get("global_log_level", "info")
+    results["global_node_selectors"].update(input_args.get("global_node_selectors", {}))
+    results["global_tolerations"] = input_args.get("global_tolerations", [])
+    results["persistent"] = input_args.get("persistent", False)
 
     return results
-
-
-def default_optimism_params():
-    return {
-        "observability": default_observability_params(),
-        "interop": default_interop_params(),
-        "altda_deploy_config": default_altda_deploy_config(),
-        "chains": default_chains(),
-        "op_contract_deployer_params": default_op_contract_deployer_params(),
-        "global_log_level": "info",
-        "global_node_selectors": {},
-        "global_tolerations": [],
-        "persistent": False,
-    }
 
 
 def default_observability_params():
     return {
         "enabled": True,
+        "enable_k8s_features": False,
     }
 
 
 def default_prometheus_params():
     return {
-        "image": "prom/prometheus:latest",
+        "image": "prom/prometheus:v3.1.0",
         "storage_tsdb_retention_time": "1d",
         "storage_tsdb_retention_size": "512MB",
         "min_cpu": 10,
@@ -444,10 +462,30 @@ def default_prometheus_params():
 
 def default_grafana_params():
     return {
-        "image": "grafana/grafana:latest",
+        "image": "grafana/grafana:11.5.0",
         "dashboard_sources": [
-            "github.com/ethereum-optimism/grafana-dashboards-public/resources@ee47a8ec0545a06ef487ed5ec03ca692e258e5ec"
+            "github.com/ethereum-optimism/grafana-dashboards-public/resources"
         ],
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
+    }
+
+
+def default_loki_params():
+    return {
+        "image": "grafana/loki:3.3.2",
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
+    }
+
+
+def default_promtail_params():
+    return {
+        "image": "grafana/promtail:3.3.2",
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,
@@ -505,7 +543,7 @@ def default_chains():
 
 def default_network_params():
     return {
-        "network": "kurtosis",
+        "network": constants.NETWORK_NAME,
         "network_id": "2151908",
         "name": "op-kurtosis",
         "seconds_per_slot": 2,

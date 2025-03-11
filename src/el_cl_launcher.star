@@ -155,6 +155,7 @@ def launch(
     all_el_contexts = []
     sequencer_enabled = True
     rollup_boost_enabled = "rollup-boost" in additional_services
+    external_builder = mev_params.builder_host != "" and mev_params.builder_port != ""
 
     for index, participant in enumerate(participants):
         cl_type = participant.cl_type
@@ -265,15 +266,36 @@ def launch(
             interop_params,
         )
 
+        # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
+        # and all_cl_contexts[0] are used
+        all_el_contexts.insert(0, el_context)
+
         for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
             observability.register_node_metrics_job(
-                observability_helper, el_context.client_name, "execution", metrics_info
+                observability_helper,
+                el_context.client_name,
+                "execution",
+                network_params.network,
+                metrics_info,
             )
 
         if rollup_boost_enabled and sequencer_enabled:
             plan.print("Starting rollup boost")
 
-            if mev_params.builder_host == "" or mev_params.builder_port == "":
+            if external_builder:
+                el_builder_context = struct(
+                    ip_addr=mev_params.builder_host,
+                    engine_rpc_port_num=mev_params.builder_port,
+                    rpc_port_num=mev_params.builder_port,
+                    rpc_http_url="http://{0}:{1}".format(
+                        mev_params.builder_host, mev_params.builder_port
+                    ),
+                    client_name="external-builder",
+                )
+            else:
+                sequencer_context = (
+                    all_el_contexts[0] if len(all_el_contexts) > 0 else None
+                )
                 el_builder_context = el_builder_launch_method(
                     plan,
                     el_builder_launcher,
@@ -284,22 +306,21 @@ def launch(
                     el_tolerations,
                     node_selectors,
                     all_el_contexts,
-                    sequencer_enabled,
+                    False,  # sequencer_enabled
                     sequencer_context,
                     observability_helper,
                     interop_params,
                 )
-            else:
-                el_builder_context = struct(
-                    ip_addr=mev_params.builder_host,
-                    engine_rpc_port_num=mev_params.builder_port,
-                    rpc_port_num=mev_params.builder_port,
-                    rpc_http_url="http://{0}:{1}".format(
-                        mev_params.builder_host, mev_params.builder_port
-                    ),
-                    client_name="external-builder",
-                )
-
+                for metrics_info in [
+                    x for x in el_builder_context.el_metrics_info if x != None
+                ]:
+                    observability.register_node_metrics_job(
+                        observability_helper,
+                        el_builder_context.client_name,
+                        "execution-builder",
+                        network_params.network,
+                        metrics_info,
+                    )
             rollup_boost_image = (
                 mev_params.rollup_boost_image
                 if mev_params.rollup_boost_image != ""
@@ -340,23 +361,24 @@ def launch(
             da_server_context,
         )
 
+        # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
+        # and all_cl_contexts[0] are used
+        all_cl_contexts.insert(0, cl_context)
+
         for metrics_info in [x for x in cl_context.cl_nodes_metrics_info if x != None]:
             observability.register_node_metrics_job(
                 observability_helper,
                 cl_context.client_name,
                 "beacon",
+                network_params.network,
                 metrics_info,
                 {
                     "supernode": str(cl_context.supernode),
                 },
             )
 
-        sequencer_enabled = False
-
-        all_el_contexts.append(el_context)
-        all_cl_contexts.append(cl_context)
-
-        if rollup_boost_enabled and sequencer_enabled:
+        # We don't deploy CL for external builder
+        if rollup_boost_enabled and sequencer_enabled and not external_builder:
             cl_builder_context = cl_builder_launch_method(
                 plan,
                 cl_builder_launcher,
@@ -372,7 +394,21 @@ def launch(
                 False,
                 observability_helper,
                 interop_params,
+                da_server_context,
             )
+            for metrics_info in [
+                x for x in cl_builder_context.cl_nodes_metrics_info if x != None
+            ]:
+                observability.register_node_metrics_job(
+                    observability_helper,
+                    cl_builder_context.client_name,
+                    "beacon-builder",
+                    network_params.network,
+                    metrics_info,
+                    {
+                        "supernode": str(cl_builder_context.supernode),
+                    },
+                )
             all_cl_contexts.append(cl_builder_context)
 
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))

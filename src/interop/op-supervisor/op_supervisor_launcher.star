@@ -8,6 +8,7 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+constants = import_module("../../package_io/constants.star")
 observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
@@ -16,7 +17,7 @@ interop_constants = import_module("../constants.star")
 
 def get_used_ports():
     used_ports = {
-        interop_constants.SUPERVISOR_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        constants.RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             interop_constants.SUPERVISOR_RPC_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -71,12 +72,11 @@ def launch(
         observability_helper,
     )
 
-    supervisor_service = plan.add_service(
-        interop_constants.SUPERVISOR_SERVICE_NAME, config
-    )
+    service = plan.add_service(interop_constants.SUPERVISOR_SERVICE_NAME, config)
 
     observability.register_op_service_metrics_job(
-        observability_helper, supervisor_service
+        observability_helper,
+        service,
     )
 
     return "op_supervisor"
