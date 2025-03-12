@@ -82,6 +82,7 @@ def create_config_artifact(
     config_data = {
         "Ports": {
             "rpc": HTTP_PORT_NUM,
+            "ws": WS_PORT_NUM,
         },
         "Metrics": {
             "enabled": observability_helper.enabled,

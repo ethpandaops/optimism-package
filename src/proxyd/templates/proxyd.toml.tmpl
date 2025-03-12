@@ -1,6 +1,15 @@
+ws_method_whitelist = [
+  "eth_subscribe",
+  "eth_call",
+  "eth_chainId"
+]
+ws_backend_group = "replica"
+
 [server]
 rpc_host = "0.0.0.0"
 rpc_port = {{ .Ports.rpc }}
+ws_host = "0.0.0.0"
+ws_port = {{ .Ports.ws }}
 
 {{- if .Metrics.enabled }}
 [metrics]
