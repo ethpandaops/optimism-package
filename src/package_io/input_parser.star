@@ -572,6 +572,7 @@ def default_batcher_params():
         "extra_params": [],
     }
 
+
 def default_proxyd_params():
     return {
         "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd",

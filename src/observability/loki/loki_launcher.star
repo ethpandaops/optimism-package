@@ -90,9 +90,7 @@ def get_service_config(
         image=loki_params.image,
         ports=USED_PORTS,
         cmd=[
-            "-config.file={0}/{1}".format(
-                CONFIG_DIRPATH_ON_SERVICE, CONFIG_FILE_NAME
-            ),
+            "-config.file={0}/{1}".format(CONFIG_DIRPATH_ON_SERVICE, CONFIG_FILE_NAME),
         ],
         files={
             CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
