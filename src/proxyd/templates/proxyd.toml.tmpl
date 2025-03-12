@@ -2,24 +2,24 @@
 rpc_host = "0.0.0.0"
 rpc_port = {{ .Ports.rpc }}
 
+{{- if .Metrics.enabled }}
 [metrics]
-enabled = {{ .Metrics.enabled }}
-{{ if .Metrics.enabled }}
+enabled = true
 host = "0.0.0.0"
 port = {{ .Metrics.port }}
-{{ end }}
+{{- end }}
 
 [backends]
-{{ range .Replicas }}
-[backends.{{ .Key }}]
-rpc_url = {{ .Value }}
+{{- range $key, $value := .Replicas }}
+[backends.{{ $key }}]
+rpc_url = "{{ $value }}"
 ws_url = "ws://dummy"
-{{ end }}
+{{- end }}
 
 [backend_groups]
 [backend_groups.replica]
-backends = [
-    {{ range .Replicas }}
-    "{{ .Key }}",
-    {{ end }}
-]
+backends = [{{ range $key, $value := .Replicas }}"{{ $key }}",{{ end }}]
+
+[rpc_method_mappings]
+eth_getProof = "replica"
+eth_gasPrice = "replica"
