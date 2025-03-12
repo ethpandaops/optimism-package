@@ -37,18 +37,15 @@ def run(plan, args={}):
         if "network_params" not in ethereum_args:
             ethereum_args.update(input_parser.default_ethereum_package_network_params())
 
-    # need to do a raw get here in case only optimism_package is provided.
-    # .get will return None if the key is in the config with a None value.
-    optimism_args = args.get("optimism_package") or {}
-    optimism_args_with_right_defaults = input_parser.input_parser(plan, optimism_args)
-    global_tolerations = optimism_args_with_right_defaults.global_tolerations
-    global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
-    global_log_level = optimism_args_with_right_defaults.global_log_level
-    persistent = optimism_args_with_right_defaults.persistent
-    altda_deploy_config = optimism_args_with_right_defaults.altda_deploy_config
+    optimism_args = input_parser.input_parser(plan, args.get("optimism_package", {}))
+    global_tolerations = optimism_args.global_tolerations
+    global_node_selectors = optimism_args.global_node_selectors
+    global_log_level = optimism_args.global_log_level
+    persistent = optimism_args.persistent
+    altda_deploy_config = optimism_args.altda_deploy_config
 
-    observability_params = optimism_args_with_right_defaults.observability
-    interop_params = optimism_args_with_right_defaults.interop
+    observability_params = optimism_args.observability
+    interop_params = optimism_args.interop
 
     observability_helper = observability.make_helper(observability_params)
 
@@ -94,7 +91,7 @@ def run(plan, args={}):
         plan,
         l1_priv_key,
         l1_config_env_vars,
-        optimism_args_with_right_defaults,
+        optimism_args,
         l1_network,
         altda_deploy_config,
     )
@@ -105,7 +102,7 @@ def run(plan, args={}):
     )
 
     l2s = []
-    for l2_num, chain in enumerate(optimism_args_with_right_defaults.chains):
+    for l2_num, chain in enumerate(optimism_args.chains):
         l2s.append(
             l2_launcher.launch_l2(
                 plan,
@@ -130,7 +127,7 @@ def run(plan, args={}):
         op_supervisor_launcher.launch(
             plan,
             l1_config_env_vars,
-            optimism_args_with_right_defaults.chains,
+            optimism_args.chains,
             l2s,
             jwt_file,
             interop_params.supervisor_params,
@@ -139,7 +136,7 @@ def run(plan, args={}):
 
     # challenger must launch after supervisor because it depends on it for interop
     for l2_num, l2 in enumerate(l2s):
-        chain = optimism_args_with_right_defaults.chains[l2_num]
+        chain = optimism_args.chains[l2_num]
         op_challenger_image = (
             chain.challenger_params.image
             if chain.challenger_params.image != ""
