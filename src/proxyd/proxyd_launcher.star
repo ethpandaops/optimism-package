@@ -99,7 +99,7 @@ def create_config_artifact(
 
     config_artifact_name = plan.render_templates(
         {
-            "/{0}".format(CONFIG_FILE_NAME): config_template_and_data,
+            CONFIG_FILE_NAME: config_template_and_data,
         },
         name="proxyd-config",
     )
@@ -116,7 +116,7 @@ def get_proxyd_config(
 
     cmd = [
         "proxyd",
-        "{1}/{0}".format(CONFIG_DIRPATH_ON_SERVICE, CONFIG_FILE_NAME),
+        "{0}/{1}".format(CONFIG_DIRPATH_ON_SERVICE, CONFIG_FILE_NAME),
     ]
 
     # apply customizations
