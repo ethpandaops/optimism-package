@@ -73,6 +73,7 @@ def launch(
 
     return service_url
 
+
 def create_config_artifact(
     plan,
     config_template,
@@ -106,6 +107,7 @@ def create_config_artifact(
     )
 
     return config_artifact_name
+
 
 def get_proxyd_config(
     plan,
