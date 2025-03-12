@@ -39,9 +39,7 @@ def run(plan, args={}):
 
     # need to do a raw get here in case only optimism_package is provided.
     # .get will return None if the key is in the config with a None value.
-    optimism_args = (
-        args.get("optimism_package") or {}
-    )
+    optimism_args = args.get("optimism_package") or {}
     optimism_args_with_right_defaults = input_parser.input_parser(plan, optimism_args)
     global_tolerations = optimism_args_with_right_defaults.global_tolerations
     global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
