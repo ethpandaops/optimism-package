@@ -107,7 +107,6 @@ def launch_l2(
             )
             tx_spammer.launch_transaction_spammer(
                 plan,
-                l1_bridge_address,
                 fuzz_target,
                 tx_spammer_params,
                 global_node_selectors,

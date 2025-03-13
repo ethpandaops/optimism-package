@@ -248,7 +248,9 @@ def input_parser(plan, input_args):
                 additional_services=result["additional_services"],
                 tx_spammer_params=struct(
                     image=result["tx_spammer_params"]["image"],
-                    tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
+                    tx_spammer_extra_args=result["tx_spammer_params"][
+                        "tx_spammer_extra_args"
+                    ],
                 ),
             )
             for result in results["chains"]
@@ -695,6 +697,7 @@ def default_da_server_params():
         "image": DEFAULT_DA_SERVER_PARAMS["image"],
         "cmd": DEFAULT_DA_SERVER_PARAMS["cmd"],
     }
+
 
 def default_tx_spammer_params():
     return {
