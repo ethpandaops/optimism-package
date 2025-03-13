@@ -2,7 +2,3 @@ optimism_package:
   chains:
     - participants:
         - count: 2
-ethereum_package:
-  participants:
-  - el_type: geth
-    cl_type: teku

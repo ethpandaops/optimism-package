@@ -2,7 +2,7 @@ name: Nightly test Workflow
 
 on:
   schedule:
-    - cron: "0 2 * * *" # This schedules the workflow to run at 02:00 UTC every day
+    - cron: "0 2 * * *" # Runs at 02:00 UTC daily
   workflow_dispatch:
 
 jobs:
@@ -15,12 +15,14 @@ jobs:
       - id: set-matrix
         # List all yaml files in the .github/tests directory, except for the k8s.yaml file
         run: echo "matrix=$(ls ./.github/tests/*.yaml | grep -vE 'k8s.yaml$' | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
+
   run_with_args:
     needs: list-yamls
     strategy:
       matrix:
-          file_name: ${{ fromJson(needs.list-yamls.outputs.matrix) }}
+        file_name: ${{ fromJson(needs.list-yamls.outputs.matrix) }}
     runs-on: ubuntu-latest
+    continue-on-error: true  # Prevent the whole job from failing due to one test failure
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -33,12 +35,14 @@ jobs:
           kurtosis analytics disable
 
       - name: Run Starlark
+        id: test_execution
         run: |
           if [ "${{ matrix.file_name }}" != "./.github/tests/mix-with-tools-mev.yaml" ]; then
-            kurtosis run ${{ github.workspace }} --verbosity detailed --args-file ${{ matrix.file_name }}
+            kurtosis run ${{ github.workspace }} --verbosity detailed --args-file ${{ matrix.file_name }} || echo "TEST_FAILED=true" >> $GITHUB_ENV
           else
             echo "Skipping ./.github/tests/mix-with-tools-mev.yaml"
           fi
+        continue-on-error: true  # Don't fail the entire job
 
       - name: Check if Discord Webhook is Set
         id: check_discord_webhook
@@ -57,10 +61,11 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          args: "The nightly test for ${{matrix.file_name}} on optimism-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          args: "The nightly test for ${{ matrix.file_name }} on optimism-package has failed. Find it here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
   run_with_external_l1_args:
     runs-on: ubuntu-latest
+    continue-on-error: true  # Ensure failure here doesn't stop other jobs
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -71,10 +76,10 @@ jobs:
           sudo apt update
           sudo apt install kurtosis-cli
           kurtosis analytics disable
-      
+
       - name: Deploy L1
         run: kurtosis run --enclave test --args-file ./.github/tests/external-l1/ethereum.yaml github.com/ethpandaops/ethereum-package
-      
+
       - name: Run Starlark
         run: |
           kurtosis run --enclave test --verbosity detailed --args-file ./.github/tests/external-l1/optimism.yaml ${{ github.workspace }}

@@ -665,6 +665,12 @@ def default_op_contract_deployer_params():
 
 def default_ethereum_package_network_params():
     return {
+        "participants": [
+            {
+                "el_type": "geth",
+                "cl_type": "teku",
+            }
+        ],
         "network_params": {
             "preset": "minimal",
             "genesis_delay": 5,
@@ -679,7 +685,7 @@ def default_ethereum_package_network_params():
                     }
                 }
             ),
-        }
+        },
     }
 
 
