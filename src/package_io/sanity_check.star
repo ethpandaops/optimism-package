@@ -159,6 +159,10 @@ SUBCATEGORY_PARAMS = {
         "image",
         "cmd",
     ],
+    "tx_spammer_params": [
+        "image",
+        "tx_spammer_extra_args",
+    ],
 }
 
 OP_CONTRACT_DEPLOYER_PARAMS = [
@@ -170,11 +174,7 @@ OP_CONTRACT_DEPLOYER_PARAMS = [
 
 OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES = ["faultGameAbsolutePrestate"]
 
-ADDITIONAL_SERVICES_PARAMS = [
-    "blockscout",
-    "rollup-boost",
-    "da_server",
-]
+ADDITIONAL_SERVICES_PARAMS = ["blockscout", "rollup-boost", "da_server", "tx_spammer"]
 
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",
