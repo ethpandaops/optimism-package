@@ -20,3 +20,6 @@ lint:
         --checked-calls \
         --local-imports \
         main.star src/
+
+test:
+    kurtosis-test .
