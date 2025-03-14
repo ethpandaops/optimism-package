@@ -53,7 +53,7 @@ jobs:
         uses: jdx/mise-action@v2
 
       - name: Kurtosis Lint
-        run: kurtosis lint ${{ github.workspace }}
+        run: just lint
 
   test:
     runs-on: ubuntu-latest
