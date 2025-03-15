@@ -211,6 +211,11 @@ def input_parser(plan, input_args):
                     interop_time_offset=result["network_params"]["interop_time_offset"],
                     fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
                 ),
+                proxyd_params=struct(
+                    image=result["proxyd_params"]["image"],
+                    tag=result["proxyd_params"]["tag"],
+                    extra_params=result["proxyd_params"]["extra_params"],
+                ),
                 batcher_params=struct(
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
@@ -321,6 +326,9 @@ def parse_network_params(plan, input_args):
         network_params = default_network_params()
         network_params.update(chain.get("network_params", {}))
 
+        proxyd_params = default_proxyd_params()
+        proxyd_params.update(chain.get("proxyd_params", {}))
+
         batcher_params = default_batcher_params()
         batcher_params.update(chain.get("batcher_params", {}))
 
@@ -406,6 +414,7 @@ def parse_network_params(plan, input_args):
         result = {
             "participants": participants,
             "network_params": network_params,
+            "proxyd_params": proxyd_params,
             "batcher_params": batcher_params,
             "challenger_params": challenger_params,
             "proposer_params": proposer_params,
@@ -531,6 +540,7 @@ def default_chains():
         {
             "participants": [default_participant()],
             "network_params": default_network_params(),
+            "proxyd_params": default_proxyd_params(),
             "batcher_params": default_batcher_params(),
             "proposer_params": default_proposer_params(),
             "challenger_params": default_challenger_params(),
@@ -559,6 +569,14 @@ def default_network_params():
 def default_batcher_params():
     return {
         "image": DEFAULT_BATCHER_IMAGES["op-batcher"],
+        "extra_params": [],
+    }
+
+
+def default_proxyd_params():
+    return {
+        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd",
+        "tag": "v4.14.2",
         "extra_params": [],
     }
 
