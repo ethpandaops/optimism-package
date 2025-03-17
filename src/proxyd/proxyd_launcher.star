@@ -14,7 +14,6 @@ prometheus = import_module("../observability/prometheus/prometheus_launcher.star
 
 # Port nums
 HTTP_PORT_NUM = 8080
-WS_PORT_NUM = 8081
 METRICS_PORT_NUM = 7300
 
 TEMPLATES_FILEPATH = "./templates"
@@ -29,11 +28,6 @@ def get_used_ports():
     used_ports = {
         constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             HTTP_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
-        ),
-        constants.WS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            WS_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
@@ -83,7 +77,6 @@ def create_config_artifact(
     config_data = {
         "Ports": {
             "rpc": HTTP_PORT_NUM,
-            "ws": WS_PORT_NUM,
         },
         "Metrics": {
             "enabled": observability_helper.enabled,
