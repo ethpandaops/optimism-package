@@ -4,7 +4,7 @@ da_server_launcher = import_module("./alt-da/da-server/da_server_launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
 input_parser = import_module("./package_io/input_parser.star")
 util = import_module("./util.star")
-tx_spammer = import_module("./transaction_spammer/transaction_spammer.star")
+tx_fuzzer = import_module("./transaction_spammer/transaction_spammer.star")
 
 
 def launch_l2(
@@ -29,7 +29,7 @@ def launch_l2(
     challenger_params = l2_args.challenger_params
     proposer_params = l2_args.proposer_params
     mev_params = l2_args.mev_params
-    tx_spammer_params = l2_args.tx_spammer_params
+    tx_fuzzer_params = l2_args.tx_fuzzer_params
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))
 
@@ -99,16 +99,16 @@ def launch_l2(
                 network_params.network_id,
             )
             plan.print("Successfully launched op-blockscout")
-        elif additional_service == "tx_spammer":
+        elif additional_service == "tx_fuzzer":
             plan.print("Launching transaction spammer")
             fuzz_target = "http://{0}:{1}".format(
                 all_el_contexts[0].ip_addr,
                 all_el_contexts[0].rpc_port_num,
             )
-            tx_spammer.launch_transaction_spammer(
+            tx_fuzzer.launch_transaction_spammer(
                 plan,
                 fuzz_target,
-                tx_spammer_params,
+                tx_fuzzer_params,
                 global_node_selectors,
             )
             plan.print("Successfully launched transaction spammer")

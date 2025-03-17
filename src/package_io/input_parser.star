@@ -246,10 +246,10 @@ def input_parser(plan, input_args):
                     cmd=result["da_server_params"]["cmd"],
                 ),
                 additional_services=result["additional_services"],
-                tx_spammer_params=struct(
-                    image=result["tx_spammer_params"]["image"],
-                    tx_spammer_extra_args=result["tx_spammer_params"][
-                        "tx_spammer_extra_args"
+                tx_fuzzer_params=struct(
+                    image=result["tx_fuzzer_params"]["image"],
+                    tx_fuzzer_extra_args=result["tx_fuzzer_params"][
+                        "tx_fuzzer_extra_args"
                     ],
                 ),
             )
@@ -409,8 +409,8 @@ def parse_network_params(plan, input_args):
                 )
                 participants.append(participant_copy)
 
-        tx_spammer_params = default_tx_spammer_params()
-        tx_spammer_params.update(chain.get("tx_spammer_params", {}))
+        tx_fuzzer_params = default_tx_fuzzer_params()
+        tx_fuzzer_params.update(chain.get("tx_fuzzer_params", {}))
 
         result = {
             "participants": participants,
@@ -423,7 +423,7 @@ def parse_network_params(plan, input_args):
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
-            "tx_spammer_params": tx_spammer_params,
+            "tx_fuzzer_params": tx_fuzzer_params,
         }
         chains.append(result)
 
@@ -547,7 +547,7 @@ def default_chains():
             "mev_params": default_mev_params(),
             "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
-            "tx_spammer_params": default_tx_spammer_params(),
+            "tx_fuzzer_params": default_tx_fuzzer_params(),
         }
     ]
 
@@ -699,8 +699,8 @@ def default_da_server_params():
     }
 
 
-def default_tx_spammer_params():
+def default_tx_fuzzer_params():
     return {
         "image": "ethpandaops/tx-fuzz:master",
-        "tx_spammer_extra_args": [],
+        "tx_fuzzer_extra_args": [],
     }
