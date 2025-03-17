@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@5083fe46898c414b2475087cc79da59e7da859e8 # v2
 
       - name: Run Starlark
         run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }} --verbosity detailed
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Setup Kurtosis
         run: |
@@ -47,10 +47,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@5083fe46898c414b2475087cc79da59e7da859e8 # v2
 
       - name: Kurtosis Lint
         run: kurtosis lint ${{ github.workspace }}
@@ -59,10 +59,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Install mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@5083fe46898c414b2475087cc79da59e7da859e8 # v2
 
       - name: Run kurtosis-test tests
         run: kurtosis-test .
