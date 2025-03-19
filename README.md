@@ -441,6 +441,17 @@ optimism_package:
         # Interval between submitting L2 output proposals
         proposal_internal: 10m
 
+      # Default signer configuration
+      signer_params:
+        # The Docker image that should be used for the signer; leave blank to use the default image
+        image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-signer
+
+        # The Docker tag that should be used for the signer; leave blank to use the default tag
+        tag: ""
+
+        # A list of optional extra params that will be passed to the signer container for modifying its behaviour
+        extra_params: []
+
       # Default MEV configuration
       mev_params:
         # The Docker image that should be used for rollup boost; leave blank to use the default rollup-boost image
