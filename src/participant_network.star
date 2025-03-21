@@ -91,7 +91,7 @@ def launch_participant_network(
         if batcher_params.image != ""
         else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
     )
-    op_batcher_launcher.launch(
+    batcher_service = op_batcher_launcher.launch(
         plan,
         "op-batcher-{0}".format(l2_services_suffix),
         op_batcher_image,
@@ -122,7 +122,7 @@ def launch_participant_network(
         if proposer_params.image != ""
         else input_parser.DEFAULT_PROPOSER_IMAGES["op-proposer"]
     )
-    op_proposer_launcher.launch(
+    proposer_service = op_proposer_launcher.launch(
         plan,
         "op-proposer-{0}".format(l2_services_suffix),
         op_proposer_image,
