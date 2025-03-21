@@ -12,14 +12,8 @@ util = import_module("./util.star")
 
 def launch_participant_network(
     plan,
-    participants,
+    chain_args,
     jwt_file,
-    network_params,
-    proxyd_params,
-    batcher_params,
-    challenger_params,
-    proposer_params,
-    mev_params,
     deployment_output,
     l1_config_env_vars,
     l2_num,
@@ -33,26 +27,34 @@ def launch_participant_network(
     interop_params,
     da_server_context,
 ):
+    participants = chain_args.participants
+    network_params = chain_args.network_params
+    proxyd_params = chain_args.proxyd_params
+    batcher_params = chain_args.batcher_params
+    challenger_params = chain_args.challenger_params
+    proposer_params = chain_args.proposer_params
+    signer_params = chain_args.signer_params
+    mev_params = chain_args.mev_params
+
     num_participants = len(participants)
     # First EL and sequencer CL
     all_el_contexts, all_cl_contexts = el_cl_client_launcher.launch(
         plan,
-        jwt_file,
         network_params,
         mev_params,
+        interop_params,
+        jwt_file,
         deployment_output,
         participants,
-        num_participants,
         l1_config_env_vars,
         l2_services_suffix,
+        da_server_context,
+        additional_services,
         global_log_level,
         global_node_selectors,
         global_tolerations,
         persistent,
-        additional_services,
         observability_helper,
-        interop_params,
-        da_server_context,
     )
 
     all_participants = []
@@ -132,6 +134,17 @@ def launch_participant_network(
         game_factory_address,
         proposer_params,
         network_params,
+        observability_helper,
+    )
+
+    op_signer_launcher.launch(
+        plan,
+        signer_params,
+        network_params,
+        {
+            batcher_service.hostname: batcher_key,
+            proposer_service.hostname: proposer_key,
+        },
         observability_helper,
     )
 
