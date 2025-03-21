@@ -40,7 +40,9 @@ def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
 
 def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NUM):
     ports[port_id] = ethereum_package_shared_utils.new_port_spec(
-        port_num, ethereum_package_shared_utils.TCP_PROTOCOL
+        port_num,
+        ethereum_package_shared_utils.TCP_PROTOCOL,
+        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
 
 

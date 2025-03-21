@@ -6,6 +6,7 @@ op_challenger_launcher = import_module(
     "./challenger/op-challenger/op_challenger_launcher.star"
 )
 op_proposer_launcher = import_module("./proposer/op-proposer/op_proposer_launcher.star")
+proxyd_launcher = import_module("./proxyd/proxyd_launcher.star")
 util = import_module("./util.star")
 
 
@@ -14,6 +15,7 @@ def launch_participant_network(
     participants,
     jwt_file,
     network_params,
+    proxyd_params,
     batcher_params,
     challenger_params,
     proposer_params,
@@ -69,6 +71,14 @@ def launch_participant_network(
         )
 
         all_participants.append(participant_entry)
+
+    proxyd_launcher.launch(
+        plan,
+        proxyd_params,
+        network_params,
+        all_el_contexts,
+        observability_helper,
+    )
 
     batcher_key = util.read_network_config_value(
         plan,
