@@ -359,6 +359,7 @@ def parse_network_params(plan, input_args):
 
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
+
         da_server_params = default_da_server_params()
         da_server_params.update(chain.get("da_server_params", {}))
 
@@ -630,7 +631,7 @@ def default_proposer_params():
 def default_signer_params():
     return {
         "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-signer",
-        "tag": "v1.3.1"
+        "tag": "v1.4.0"
         "extra_params": [],
     }
 
