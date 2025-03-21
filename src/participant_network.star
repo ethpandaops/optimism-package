@@ -6,6 +6,7 @@ op_challenger_launcher = import_module(
     "./challenger/op-challenger/op_challenger_launcher.star"
 )
 op_proposer_launcher = import_module("./proposer/op-proposer/op_proposer_launcher.star")
+op_signer_launcher = import_module("./signer/op_signer_launcher.star")
 proxyd_launcher = import_module("./proxyd/proxyd_launcher.star")
 util = import_module("./util.star")
 
@@ -22,26 +23,20 @@ def launch_participant_network(
     global_node_selectors,
     global_tolerations,
     persistent,
-    additional_services,
     observability_helper,
     interop_params,
     da_server_context,
 ):
     participants = chain_args.participants
     network_params = chain_args.network_params
-    proxyd_params = chain_args.proxyd_params
     batcher_params = chain_args.batcher_params
-    challenger_params = chain_args.challenger_params
     proposer_params = chain_args.proposer_params
-    signer_params = chain_args.signer_params
-    mev_params = chain_args.mev_params
 
-    num_participants = len(participants)
     # First EL and sequencer CL
     all_el_contexts, all_cl_contexts = el_cl_client_launcher.launch(
         plan,
         network_params,
-        mev_params,
+        chain_args.mev_params,
         interop_params,
         jwt_file,
         deployment_output,
@@ -49,7 +44,7 @@ def launch_participant_network(
         l1_config_env_vars,
         l2_services_suffix,
         da_server_context,
-        additional_services,
+        chain_args.additional_services,
         global_log_level,
         global_node_selectors,
         global_tolerations,
@@ -76,7 +71,7 @@ def launch_participant_network(
 
     proxyd_launcher.launch(
         plan,
-        proxyd_params,
+        chain_args.proxyd_params,
         network_params,
         all_el_contexts,
         observability_helper,
@@ -139,7 +134,7 @@ def launch_participant_network(
 
     op_signer_launcher.launch(
         plan,
-        signer_params,
+        chain_args.signer_params,
         network_params,
         {
             batcher_service.hostname: batcher_key,
