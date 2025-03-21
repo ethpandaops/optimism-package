@@ -136,10 +136,18 @@ def launch_participant_network(
         plan,
         chain_args.signer_params,
         network_params,
-        {
-            batcher_service.hostname: batcher_key,
-            proposer_service.hostname: proposer_key,
-        },
+        [
+            op_signer_launcher.make_client(
+                "batcher",
+                batcher_service.hostname,
+                batcher_key
+            ),
+            op_signer_launcher.make_client(
+                "proposer",
+                proposer_service.hostname,
+                proposer_key
+            ),
+        ],
         observability_helper,
     )
 
