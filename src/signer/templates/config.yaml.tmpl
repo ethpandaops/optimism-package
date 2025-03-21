@@ -1,3 +1,5 @@
 auth:
-  - name: localhost
-    key:
+  {{ range $client_name, $client_key_artifact := .Clients }}
+  - name: {{ $client_name }}
+    key: {{ $client_key_artifact }}
+  {{ end }}
