@@ -22,7 +22,7 @@ CONFIG_FILE_NAME = "config.yaml"
 CONFIG_TEMPLATE_FILEPATH = "{0}/{1}.tmpl".format(TEMPLATES_FILEPATH, CONFIG_FILE_NAME)
 
 CONFIG_DIRPATH_ON_SERVICE = "/app"
-
+# KEY_DIRPATH_ON_SERVICE = "/{0}/tls".format(CONFIG_DIRPATH_ON_SERVICE)
 
 def get_used_ports():
     used_ports = {
@@ -129,28 +129,30 @@ def get_signer_config(
 ):
     ports = dict(get_used_ports())
 
+    cmd = []
+
     # apply customizations
 
     if observability_helper.enabled:
         observability.expose_metrics_port(ports, port_num=METRICS_PORT_NUM)
-
+    
     cmd += signer_params.extra_params
 
     return ServiceConfig(
         image="{0}:{1}".format(signer_params.image, signer_params.tag),
         ports=ports,
-        env_vars={
-            "OP_SIGNER_SERVER_CA": "{0}/ca.crt".format(KEY_DIRPATH_ON_SERVICE),
-            "OP_SIGNER_SERVER_CERT": "{0}/tls.crt".format(KEY_DIRPATH_ON_SERVICE),
-            "OP_SIGNER_SERVER_KEY": "{0}/tls.key".format(KEY_DIRPATH_ON_SERVICE),
-        },
+        # env_vars={
+        #     "OP_SIGNER_SERVER_CA": "{0}/ca.crt".format(KEY_DIRPATH_ON_SERVICE),
+        #     "OP_SIGNER_SERVER_CERT": "{0}/tls.crt".format(KEY_DIRPATH_ON_SERVICE),
+        #     "OP_SIGNER_SERVER_KEY": "{0}/tls.key".format(KEY_DIRPATH_ON_SERVICE),
+        # },
         files={
             CONFIG_DIRPATH_ON_SERVICE: Directory(
-                artifact_names=[
-                    config_artifact_name,
-                    client_key_artifact
-                    for client_hostname, client_key_artifact in client_key_artifacts.items()
-                ]
+                artifact_names=[config_artifact_name] +
+                    [
+                        client_key_artifacts[client_hostname]
+                        for client_hostname in client_key_artifacts
+                    ]
             )
         },
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
