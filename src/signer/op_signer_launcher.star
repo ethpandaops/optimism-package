@@ -21,8 +21,9 @@ TEMPLATES_FILEPATH = "./templates"
 CONFIG_FILE_NAME = "config.yaml"
 CONFIG_TEMPLATE_FILEPATH = "{0}/{1}.tmpl".format(TEMPLATES_FILEPATH, CONFIG_FILE_NAME)
 
-CONFIG_DIRPATH_ON_SERVICE = "/app"
-# KEY_DIRPATH_ON_SERVICE = "/{0}/tls".format(CONFIG_DIRPATH_ON_SERVICE)
+CONFIG_DIRPATH_ON_SERVICE = "/config"
+CLIENT_KEY_DIRPATH_ON_SERVICE = "/keys"
+# KEY_DIRPATH_ON_SERVICE = "/tls"
 
 def get_used_ports():
     used_ports = {
@@ -34,6 +35,12 @@ def get_used_ports():
     }
     return used_ports
 
+def make_client(client_name,client_hostname, client_key):
+    return struct(
+        name = client_name,
+        hostname = client_hostname,
+        key = client_key,
+    )
 
 def launch(
     plan,
@@ -80,18 +87,16 @@ def create_key_artifact(
     plan,
     clients,
 ):
-    keyDir = "/keys"
-
     client_key_artifacts = {}
 
-    for client_hostname, client_key in clients.items():
+    for client in clients:
         client_key_file = util.write_to_file(
             plan,
-            client_key,
-            keyDir,
-            "{0}_key.pem".format(client_hostname),
+            client.key,
+            CLIENT_KEY_DIRPATH_ON_SERVICE,
+            "{0}_key.pem".format(client.name),
         )
-        client_key_artifacts[client_hostname] = client_key_file
+        client_key_artifacts[client.hostname] = client_key_file
 
     return client_key_artifacts
 
@@ -104,6 +109,7 @@ def create_config_artifact(
 ):
     config_data = {
         "Clients": client_key_artifacts,
+        "KeyDir": CLIENT_KEY_DIRPATH_ON_SERVICE,
     }
 
     config_template_and_data = ethereum_package_shared_utils.new_template_and_data(
@@ -147,13 +153,13 @@ def get_signer_config(
         #     "OP_SIGNER_SERVER_KEY": "{0}/tls.key".format(KEY_DIRPATH_ON_SERVICE),
         # },
         files={
-            CONFIG_DIRPATH_ON_SERVICE: Directory(
-                artifact_names=[config_artifact_name] +
-                    [
-                        client_key_artifacts[client_hostname]
-                        for client_hostname in client_key_artifacts
-                    ]
-            )
+            CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
+            CLIENT_KEY_DIRPATH_ON_SERVICE: Directory(
+                artifact_names=[
+                    client_key_artifacts[client_hostname]
+                    for client_hostname in client_key_artifacts
+                ]
+            ),
         },
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
