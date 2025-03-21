@@ -50,14 +50,8 @@ def launch_l2(
 
     l2 = participant_network.launch_participant_network(
         plan,
-        l2_args.participants,
+        l2_args,
         jwt_file,
-        network_params,
-        proxyd_params,
-        batcher_params,
-        challenger_params,
-        proposer_params,
-        mev_params,
         deployment_output,
         l1_config,
         l2_num,
@@ -66,7 +60,6 @@ def launch_l2(
         global_node_selectors,
         global_tolerations,
         persistent,
-        l2_args.additional_services,
         observability_helper,
         interop_params,
         da_server_context,
