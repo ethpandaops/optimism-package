@@ -68,7 +68,7 @@ def launch(
         observability_helper, service, network_params.network
     )
 
-    return http_url
+    return service
 
 
 def get_proposer_config(
