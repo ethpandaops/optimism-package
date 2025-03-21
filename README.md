@@ -293,14 +293,20 @@ optimism_package:
         # Valid values are:
         # op-geth
         # op-reth
+        # op-rbuilder
         el_builder_type: ""
 
         # The Docker image that should be used for the builder EL client; leave blank to use the default for the client type
         # Defaults by client:
         # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
         # - op-reth: parithoshj/op-reth:latest
+        # - op-rbuilder: ghcr.io/flashbots/op-rbuilder:latest
         el_builder_image: ""
 
+        # Builder secret key used by op-rbuilder to sign transactions
+        # Defaults to None - not used
+        el_builder_key: ""
+        
         # The type of builder CL client that should be started
         # Valid values are:
         # op-node
@@ -642,7 +648,7 @@ To use rollup boost, you can add `rollup-boost` as an additional service and con
 optimism_package:
   chains:
     - participants:
-        - el_builder_type: op-geth
+        - el_builder_type: op-rbuilder
           cl_builder_type: op-node
       mev_params:
         rollup_boost_image: "flashbots/rollup-boost:latest"
