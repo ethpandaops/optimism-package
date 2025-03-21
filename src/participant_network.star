@@ -6,20 +6,15 @@ op_challenger_launcher = import_module(
     "./challenger/op-challenger/op_challenger_launcher.star"
 )
 op_proposer_launcher = import_module("./proposer/op-proposer/op_proposer_launcher.star")
+op_signer_launcher = import_module("./signer/op_signer_launcher.star")
 proxyd_launcher = import_module("./proxyd/proxyd_launcher.star")
 util = import_module("./util.star")
 
 
 def launch_participant_network(
     plan,
-    participants,
+    chain_args,
     jwt_file,
-    network_params,
-    proxyd_params,
-    batcher_params,
-    challenger_params,
-    proposer_params,
-    mev_params,
     deployment_output,
     l1_config_env_vars,
     l2_num,
@@ -28,31 +23,33 @@ def launch_participant_network(
     global_node_selectors,
     global_tolerations,
     persistent,
-    additional_services,
     observability_helper,
     interop_params,
     da_server_context,
 ):
-    num_participants = len(participants)
+    participants = chain_args.participants
+    network_params = chain_args.network_params
+    batcher_params = chain_args.batcher_params
+    proposer_params = chain_args.proposer_params
+
     # First EL and sequencer CL
     all_el_contexts, all_cl_contexts = el_cl_client_launcher.launch(
         plan,
-        jwt_file,
         network_params,
-        mev_params,
+        chain_args.mev_params,
+        interop_params,
+        jwt_file,
         deployment_output,
         participants,
-        num_participants,
         l1_config_env_vars,
         l2_services_suffix,
+        da_server_context,
+        chain_args.additional_services,
         global_log_level,
         global_node_selectors,
         global_tolerations,
         persistent,
-        additional_services,
         observability_helper,
-        interop_params,
-        da_server_context,
     )
 
     all_participants = []
@@ -74,7 +71,7 @@ def launch_participant_network(
 
     proxyd_launcher.launch(
         plan,
-        proxyd_params,
+        chain_args.proxyd_params,
         network_params,
         all_el_contexts,
         observability_helper,
@@ -91,7 +88,7 @@ def launch_participant_network(
         if batcher_params.image != ""
         else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
     )
-    op_batcher_launcher.launch(
+    batcher_service = op_batcher_launcher.launch(
         plan,
         "op-batcher-{0}".format(l2_services_suffix),
         op_batcher_image,
@@ -122,7 +119,7 @@ def launch_participant_network(
         if proposer_params.image != ""
         else input_parser.DEFAULT_PROPOSER_IMAGES["op-proposer"]
     )
-    op_proposer_launcher.launch(
+    proposer_service = op_proposer_launcher.launch(
         plan,
         "op-proposer-{0}".format(l2_services_suffix),
         op_proposer_image,
@@ -132,6 +129,25 @@ def launch_participant_network(
         game_factory_address,
         proposer_params,
         network_params,
+        observability_helper,
+    )
+
+    op_signer_launcher.launch(
+        plan,
+        chain_args.signer_params,
+        network_params,
+        [
+            op_signer_launcher.make_client(
+                "batcher",
+                batcher_service.hostname,
+                batcher_key
+            ),
+            op_signer_launcher.make_client(
+                "proposer",
+                proposer_service.hostname,
+                proposer_key
+            ),
+        ],
         observability_helper,
     )
 
