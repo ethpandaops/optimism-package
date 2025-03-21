@@ -22,7 +22,6 @@ CONFIG_FILE_NAME = "config.yaml"
 CONFIG_TEMPLATE_FILEPATH = "{0}/{1}.tmpl".format(TEMPLATES_FILEPATH, CONFIG_FILE_NAME)
 
 CONFIG_DIRPATH_ON_SERVICE = "/app"
-KEY_DIRPATH_ON_SERVICE = "/{0}/tls".format(CONFIG_DIRPATH_ON_SERVICE)
 
 
 def get_used_ports():
@@ -40,29 +39,35 @@ def launch(
     plan,
     signer_params,
     network_params,
+    clients,
     observability_helper,
 ):
+    service_name = "op-signer-{0}".format(network_params.network)
+
+    client_key_artifacts = create_key_artifact(
+        plan,
+        clients,
+    )
+
     config_template = read_file(CONFIG_TEMPLATE_FILEPATH)
 
     config_artifact_name = create_config_artifact(
         plan,
+        service_name,
         config_template,
+        client_key_artifacts,
         observability_helper,
-    )
-
-    key_artifact_name = create_key_artifact(
-        plan,
     )
 
     config = get_signer_config(
         plan,
         signer_params,
         config_artifact_name,
-        key_artifact_name,
+        client_key_artifacts,
         observability_helper,
     )
 
-    service = plan.add_service("op-signer-{0}".format(network_params.network), config)
+    service = plan.add_service(service_name, config)
     service_url = util.make_service_http_url(service)
 
     observability.register_op_service_metrics_job(
@@ -73,33 +78,32 @@ def launch(
 
 def create_key_artifact(
     plan,
+    clients,
 ):
-    key_data = {
-    }
+    keyDir = "/keys"
 
-    key_artifact_name = plan.render_templates(
-        {
+    client_key_artifacts = {}
 
-        },
-        name="signer-keys",
-    )
+    for client_hostname, client_key in clients.items():
+        client_key_file = util.write_to_file(
+            plan,
+            client_key,
+            keyDir,
+            "{0}_key.pem".format(client_hostname),
+        )
+        client_key_artifacts[client_hostname] = client_key_file
 
-    return key_artifact_name
-
+    return client_key_artifacts
 
 def create_config_artifact(
     plan,
+    service_name,
     config_template,
+    client_key_artifacts,
     observability_helper,
 ):
     config_data = {
-        "Ports": {
-            "http": HTTP_PORT_NUM,
-        },
-        "Metrics": {
-            "enabled": observability_helper.enabled,
-            "port": METRICS_PORT_NUM,
-        },
+        "Clients": client_key_artifacts,
     }
 
     config_template_and_data = ethereum_package_shared_utils.new_template_and_data(
@@ -110,7 +114,7 @@ def create_config_artifact(
         {
             CONFIG_FILE_NAME: config_template_and_data,
         },
-        name="signer-config",
+        name="{0}-config".format(service_name),
     )
 
     return config_artifact_name
@@ -120,7 +124,7 @@ def get_signer_config(
     plan,
     signer_params,
     config_artifact_name,
-    key_artifact_name,
+    client_key_artifacts,
     observability_helper,
 ):
     ports = dict(get_used_ports())
@@ -141,8 +145,13 @@ def get_signer_config(
             "OP_SIGNER_SERVER_KEY": "{0}/tls.key".format(KEY_DIRPATH_ON_SERVICE),
         },
         files={
-            CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
-            KEY_DIRPATH_ON_SERVICE: key_artifact_name,
+            CONFIG_DIRPATH_ON_SERVICE: Directory(
+                artifact_names=[
+                    config_artifact_name,
+                    client_key_artifact
+                    for client_hostname, client_key_artifact in client_key_artifacts.items()
+                ]
+            )
         },
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
