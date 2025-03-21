@@ -818,3 +818,21 @@ kurtosis-test .
 ```
 
 The tests can be found in `*_test.star` scripts located in the `test` directory.
+
+### Dev accounts being used
+
+Index| Address | Private Key | In use | Tool
+---|---|---|---|---
+0| `0xf39F...2266` | `0xac09...f80` | ✅ | [op-transaction-spammer](src/transaction_spammer/transaction_spammer.star#L33)
+1| `0x7099...79C8` | `0x59c6...690d` | ❌ | ""
+2| `0x3C49...3359` | `0x5de4...365a` | ❌ | ""
+3| `0x90F7...9b906` | `0x7c85...a07a6` | ❌ | ""
+4| `0x15d3...9f1b9` | `0x47e1...9c6` | ❌ | ""
+5| `0x9965...0A4dc` | `0x8b3a...ba` | ❌ | ""
+6| `0x976E...9b906` | `0x92db...64e` | ❌ | ""
+7| `0x14dC...3356` | `0x4bbbf...356` | ❌ | ""
+8| `0x2361...226a` | `0xdbda...b97` | ❌ | ""
+9| `0xa0Ee...720` | `0xa0Ee...c6` | ❌ | ""
+
+mnemonic: `test test test test test test test test test test test junk`
+
