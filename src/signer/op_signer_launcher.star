@@ -66,15 +66,13 @@ def launch(
         observability_helper,
     )
 
-    config = get_signer_config(
+    service = plan.add_service(service_name, get_signer_config(
         plan,
         signer_params,
         config_artifact_name,
         client_key_artifacts,
         observability_helper,
-    )
-
-    service = plan.add_service(service_name, config)
+    ))
     service_url = util.make_service_http_url(service)
 
     observability.register_op_service_metrics_job(

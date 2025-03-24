@@ -26,17 +26,20 @@ def get_used_ports():
 def launch(
     plan,
     l2_num,
-    service_name,
     image,
     el_context,
     cl_context,
     l1_config_env_vars,
+    challenger_key,
+    game_factory_address,
     deployment_output,
     network_params,
     challenger_params,
     interop_params,
     observability_helper,
 ):
+    service_name = "op-challenger-{0}".format(network_params.network)
+
     config = get_challenger_config(
         plan,
         l2_num,
@@ -45,6 +48,8 @@ def launch(
         el_context,
         cl_context,
         l1_config_env_vars,
+        challenger_key,
+        game_factory_address,
         deployment_output,
         network_params,
         challenger_params,
@@ -58,7 +63,7 @@ def launch(
         observability_helper, service, network_params.network
     )
 
-    return "op_challenger"
+    return service
 
 
 def get_challenger_config(
@@ -69,6 +74,8 @@ def get_challenger_config(
     el_context,
     cl_context,
     l1_config_env_vars,
+    challenger_key,
+    game_factory_address,
     deployment_output,
     network_params,
     challenger_params,
@@ -76,19 +83,6 @@ def get_challenger_config(
     observability_helper,
 ):
     ports = dict(get_used_ports())
-
-    game_factory_address = util.read_network_config_value(
-        plan,
-        deployment_output,
-        "state",
-        ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
-    )
-    challenger_key = util.read_network_config_value(
-        plan,
-        deployment_output,
-        "challenger-{0}".format(network_params.network_id),
-        ".privateKey",
-    )
 
     cmd = [
         "op-challenger",

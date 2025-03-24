@@ -9,7 +9,6 @@ util = import_module("./util.star")
 def launch_l2(
     plan,
     l2_num,
-    l2_services_suffix,
     l2_args,
     jwt_file,
     deployment_output,
@@ -40,9 +39,9 @@ def launch_l2(
         plan.print("Launching da-server")
         da_server_context = da_server_launcher.launch_da_server(
             plan,
-            "da-server-{0}".format(l2_services_suffix),
             da_server_image,
             l2_args.da_server_params.cmd,
+            network_params,
         )
         plan.print("Successfully launched da-server")
 
@@ -53,7 +52,6 @@ def launch_l2(
         deployment_output,
         l1_config,
         l2_num,
-        l2_services_suffix,
         global_log_level,
         global_node_selectors,
         global_tolerations,
@@ -79,19 +77,18 @@ def launch_l2(
         ),
     )
 
-    for additional_service in l2_args.additional_services:
-        if additional_service == "blockscout":
-            plan.print("Launching op-blockscout")
-            blockscout.launch_blockscout(
-                plan,
-                l2_services_suffix,
-                l1_rpc_url,
-                all_el_contexts[0],  # first l2 EL url
-                network_params.name,
-                deployment_output,
-                network_params.network_id,
-            )
-            plan.print("Successfully launched op-blockscout")
+    if "blockscout" in l2_args.additional_services:
+        plan.print("Launching op-blockscout")
+        blockscout.launch_blockscout(
+            plan,
+            network_params.name,
+            l1_rpc_url,
+            all_el_contexts[0],  # first l2 EL url
+            network_params.name,
+            deployment_output,
+            network_params.network_id,
+        )
+        plan.print("Successfully launched op-blockscout")
 
     plan.print(l2.participants)
     plan.print(

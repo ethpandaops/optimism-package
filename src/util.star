@@ -10,6 +10,10 @@ def read_network_config_value(plan, network_config_file, json_file, json_path):
     )
 
 
+def read_service_network_config_value(plan, network_config_file, service_type, network_id, json_path):
+    return read_network_config_value(plan, network_config_file, "{0}-{1}".format(service_type, network_id), json_path)
+
+
 def read_json_value(plan, json_file, json_path, mounts=None):
     run = plan.run_sh(
         description="Read JSON value",

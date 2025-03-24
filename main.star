@@ -107,7 +107,6 @@ def run(plan, args={}):
             l2_launcher.launch_l2(
                 plan,
                 l2_num,
-                chain.network_params.name,
                 chain,
                 jwt_file,
                 deployment_output,
@@ -133,30 +132,6 @@ def run(plan, args={}):
             interop_params.supervisor_params,
             observability_helper,
         )
-
-    # challenger must launch after supervisor because it depends on it for interop
-    for l2_num, l2 in enumerate(l2s):
-        chain = optimism_args.chains[l2_num]
-        op_challenger_image = (
-            chain.challenger_params.image
-            if chain.challenger_params.image != ""
-            else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
-        )
-        if chain.challenger_params.enabled:
-            op_challenger_launcher.launch(
-                plan,
-                l2_num,
-                "op-challenger-{0}".format(chain.network_params.name),
-                chain.challenger_params.image,
-                l2.participants[0].el_context,
-                l2.participants[0].cl_context,
-                l1_config_env_vars,
-                deployment_output,
-                chain.network_params,
-                chain.challenger_params,
-                interop_params,
-                observability_helper,
-            )
 
     observability.launch(
         plan, observability_helper, global_node_selectors, observability_params

@@ -18,7 +18,6 @@ def launch_participant_network(
     deployment_output,
     l1_config_env_vars,
     l2_num,
-    l2_services_suffix,
     global_log_level,
     global_node_selectors,
     global_tolerations,
@@ -31,6 +30,7 @@ def launch_participant_network(
     network_params = chain_args.network_params
     batcher_params = chain_args.batcher_params
     proposer_params = chain_args.proposer_params
+    challenger_params = chain_args.challenger_params
 
     # First EL and sequencer CL
     all_el_contexts, all_cl_contexts = el_cl_client_launcher.launch(
@@ -42,7 +42,7 @@ def launch_participant_network(
         deployment_output,
         participants,
         l1_config_env_vars,
-        l2_services_suffix,
+        network_params.name,
         da_server_context,
         chain_args.additional_services,
         global_log_level,
@@ -77,10 +77,11 @@ def launch_participant_network(
         observability_helper,
     )
 
-    batcher_key = util.read_network_config_value(
+    batcher_key = util.read_service_network_config_value(
         plan,
         deployment_output,
-        "batcher-{0}".format(network_params.network_id),
+        "batcher",
+        network_params.network_id,
         ".privateKey",
     )
     op_batcher_image = (
@@ -90,7 +91,6 @@ def launch_participant_network(
     )
     batcher_service = op_batcher_launcher.launch(
         plan,
-        "op-batcher-{0}".format(l2_services_suffix),
         op_batcher_image,
         all_el_contexts[0],
         all_cl_contexts[0],
@@ -108,10 +108,11 @@ def launch_participant_network(
         "state",
         ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
     )
-    proposer_key = util.read_network_config_value(
+    proposer_key = util.read_service_network_config_value(
         plan,
         deployment_output,
-        "proposer-{0}".format(network_params.network_id),
+        "proposer",
+        network_params.network_id,
         ".privateKey",
     )
     op_proposer_image = (
@@ -121,7 +122,6 @@ def launch_participant_network(
     )
     proposer_service = op_proposer_launcher.launch(
         plan,
-        "op-proposer-{0}".format(l2_services_suffix),
         op_proposer_image,
         all_cl_contexts[0],
         l1_config_env_vars,
@@ -131,6 +131,36 @@ def launch_participant_network(
         network_params,
         observability_helper,
     )
+
+    challenger_service = None
+    if challenger_params.enabled:
+        challenger_key = util.read_service_network_config_value(
+            plan,
+            deployment_output,
+            "challenger",
+            network_params.network_id,
+            ".privateKey",
+        )
+        op_challenger_image = (
+            challenger_params.image
+            if challenger_params.image != ""
+            else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
+        )
+        challenger_service = op_challenger_launcher.launch(
+            plan,
+            l2_num,
+            op_challenger_image,
+            all_el_contexts[0],
+            all_cl_contexts[0],
+            l1_config_env_vars,
+            challenger_key,
+            game_factory_address,
+            deployment_output,
+            network_params,
+            challenger_params,
+            interop_params,
+            observability_helper,
+        )
 
     op_signer_launcher.launch(
         plan,
@@ -147,6 +177,11 @@ def launch_participant_network(
                 proposer_service.hostname,
                 proposer_key
             ),
+            op_signer_launcher.make_client(
+                "challenger",
+                challenger_service.hostname,
+                challenger_key
+            ) if challenger_service != None else None,
         ],
         observability_helper,
     )
