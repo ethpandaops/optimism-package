@@ -1,5 +1,5 @@
 constants = import_module("../package_io/constants.star")
-SERVICE_NAME = "op-transaction-spammer"
+SERVICE_NAME = "op-transaction-fuzzer"
 
 # The min/max CPU/memory that tx-fuzzer can use
 MIN_CPU = 100
@@ -8,7 +8,7 @@ MIN_MEMORY = 20
 MAX_MEMORY = 300
 
 
-def launch_transaction_spammer(
+def launch_transaction_fuzzer(
     plan,
     el_uri,
     tx_fuzzer_params,

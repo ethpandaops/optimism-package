@@ -810,7 +810,7 @@ The tests can be found in `*_test.star` scripts located in the `test` directory.
 
 Index| Address | Private Key | In use | Tool
 ---|---|---|---|---
-0| `0xf39F...2266` | `0xac09...f80` | ✅ | [op-transaction-spammer](src/transaction_spammer/transaction_spammer.star#L33)
+0| `0xf39F...2266` | `0xac09...f80` | ✅ | [op-transaction-fuzzer](src/transaction_fuzzer/transaction_fuzzer.star#L33)
 1| `0x7099...79C8` | `0x59c6...690d` | ❌ | ""
 2| `0x3C49...3359` | `0x5de4...365a` | ❌ | ""
 3| `0x90F7...9b906` | `0x7c85...a07a6` | ❌ | ""

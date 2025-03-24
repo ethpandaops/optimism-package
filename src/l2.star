@@ -4,7 +4,7 @@ da_server_launcher = import_module("./alt-da/da-server/da_server_launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
 input_parser = import_module("./package_io/input_parser.star")
 util = import_module("./util.star")
-tx_fuzzer = import_module("./transaction_spammer/transaction_spammer.star")
+tx_fuzzer = import_module("./transaction_fuzzer/transaction_fuzzer.star")
 
 
 def launch_l2(
@@ -105,7 +105,7 @@ def launch_l2(
                 all_el_contexts[0].ip_addr,
                 all_el_contexts[0].rpc_port_num,
             )
-            tx_fuzzer.launch_transaction_spammer(
+            tx_fuzzer.launch_transaction_fuzzer(
                 plan,
                 fuzz_target,
                 tx_fuzzer_params,
