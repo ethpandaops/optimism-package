@@ -1,3 +1,4 @@
+provider: LOCAL
 auth:
   {{ range $client_name, $client_key_artifact := .Clients }}
   - name: {{ $client_name }}
