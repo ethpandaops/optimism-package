@@ -23,7 +23,6 @@ CONFIG_TEMPLATE_FILEPATH = "{0}/{1}.tmpl".format(TEMPLATES_FILEPATH, CONFIG_FILE
 
 CONFIG_DIRPATH_ON_SERVICE = "/config"
 CLIENT_KEY_DIRPATH_ON_SERVICE = "/keys"
-# KEY_DIRPATH_ON_SERVICE = "/tls"
 
 def get_used_ports():
     used_ports = {
@@ -90,13 +89,28 @@ def create_key_artifact(
     client_key_artifacts = {}
 
     for client in clients:
-        client_key_file = util.write_to_file(
-            plan,
-            client.key,
-            CLIENT_KEY_DIRPATH_ON_SERVICE,
-            "{0}_key.pem".format(client.name),
+        file_name = "{0}_key.pem".format(client.name)
+
+        cmds = [
+            "echo '{0}' | xxd -r -p > privkey.bin".format(client.key),
+            "{ \
+                printf '\\x30\\x2e\\x02\\x01\\x01\\x04\\x20' \
+                cat privkey.bin \
+                printf '\\xa0\\x07\\x06\\x05\\x2b\\x81\\x04\\x00\\x0a' \
+            } > ec_key.der",
+            "openssl ec -inform DER -in ec_key.der -out {0}".format(file_name),
+        ]
+
+        run = plan.run_sh(
+            description="Convert ethereum private key to PEM",
+            image=util.DEPLOYMENT_UTILS_IMAGE,
+            store=[
+                StoreSpec(src="/", name=file_name),
+            ],
+            run=util.join_cmds(cmds),
         )
-        client_key_artifacts[client.hostname] = client_key_file
+
+        client_key_artifacts[client.hostname] = run.files_artifacts[0]
 
     return client_key_artifacts
 
@@ -135,7 +149,7 @@ def get_signer_config(
 ):
     ports = dict(get_used_ports())
 
-    cmd = []
+    cmd = [""]
 
     # apply customizations
 
@@ -147,11 +161,10 @@ def get_signer_config(
     return ServiceConfig(
         image="{0}:{1}".format(signer_params.image, signer_params.tag),
         ports=ports,
-        # env_vars={
-        #     "OP_SIGNER_SERVER_CA": "{0}/ca.crt".format(KEY_DIRPATH_ON_SERVICE),
-        #     "OP_SIGNER_SERVER_CERT": "{0}/tls.crt".format(KEY_DIRPATH_ON_SERVICE),
-        #     "OP_SIGNER_SERVER_KEY": "{0}/tls.key".format(KEY_DIRPATH_ON_SERVICE),
-        # },
+        env_vars={
+            "OP_SIGNER_TLS_ENABLED": "false",
+            "OP_SIGNER_SERVICE_CONFIG": "{0}/{1}".format(CONFIG_DIRPATH_ON_SERVICE, CONFIG_FILE_NAME)
+        },
         files={
             CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
             CLIENT_KEY_DIRPATH_ON_SERVICE: Directory(
