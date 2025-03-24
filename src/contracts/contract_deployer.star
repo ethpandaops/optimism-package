@@ -89,7 +89,7 @@ def deploy_contracts(
                 name="op-deployer-configs",
             )
         ],
-        run=" && ".join(
+        run=utils.join_cmds(
             [
                 "mkdir -p /network-data",
                 "op-deployer init --intent-config-type custom --l1-chain-id $L1_CHAIN_ID --l2-chain-ids {0} --workdir /network-data".format(
@@ -261,11 +261,11 @@ def deploy_contracts(
             "/network-data": op_deployer_init.files_artifacts[0],
             "/tmp": intent_json_artifact,
         },
-        run=" && ".join(
+        run=utils.join_cmds(
             [
                 # zhwrd: this mess is temporary until we implement json reading for op-deployer intent file
                 # convert intent_json to yaml. this is necessary because its unreliable to evaluate command substitutions in json.
-                """cat /tmp/intent.json | dasel -r json -w yaml > /network-data/intent.yaml""",
+                "cat /tmp/intent.json | dasel -r json -w yaml > /network-data/intent.yaml",
                 # evaluate the command substitutions
                 "eval \"echo '$(cat /network-data/intent.yaml)'\" | dasel -r yaml -w json > /network-data/intent-b.json",
                 # convert op-deployer generated intent.toml to json
@@ -313,7 +313,7 @@ def deploy_contracts(
             "/network-data": op_deployer_configure.files_artifacts[0],
         }
         | contracts_extra_files,
-        run=" && ".join(apply_cmds),
+        run=utils.join_cmds(apply_cmds),
     )
 
     for chain in optimism_args.chains:

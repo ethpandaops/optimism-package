@@ -52,6 +52,7 @@ def launch(
 
     client_key_artifacts = create_key_artifact(
         plan,
+        network_params.network,
         clients,
     )
 
@@ -84,33 +85,43 @@ def launch(
 
 def create_key_artifact(
     plan,
+    network,
     clients,
 ):
     client_key_artifacts = {}
 
     for client in clients:
         file_name = "{0}_key.pem".format(client.name)
-
+        der_file = "ec_key.der"
+        
         cmds = [
+            "mkdir {0}".format(CLIENT_KEY_DIRPATH_ON_SERVICE),
+            "cd {0}".format(CLIENT_KEY_DIRPATH_ON_SERVICE),
+            # convert raw hex private key to binary
             "echo '{0}' | xxd -r -p > privkey.bin".format(client.key),
-            "{ \
-                printf '\\x30\\x2e\\x02\\x01\\x01\\x04\\x20' \
-                cat privkey.bin \
-                printf '\\xa0\\x07\\x06\\x05\\x2b\\x81\\x04\\x00\\x0a' \
-            } > ec_key.der",
-            "openssl ec -inform DER -in ec_key.der -out {0}".format(file_name),
+            # add wrapper
+            "printf '\\x30\\x2e\\x02\\x01\\x01\\x04\\x20' > {0}".format(der_file),
+            "cat privkey.bin >> {0}".format(der_file),
+            "printf '\\xa0\\x07\\x06\\x05\\x2b\\x81\\x04\\x00\\x0a' >> {0}".format(der_file),
+            # convert binary key to PEM
+            "openssl ec -inform DER -in {0} -out {1}".format(der_file, file_name),
         ]
 
         run = plan.run_sh(
             description="Convert ethereum private key to PEM",
-            image=util.DEPLOYMENT_UTILS_IMAGE,
+            image="alpine/openssl:latest",
             store=[
-                StoreSpec(src="/", name=file_name),
+                StoreSpec(
+                    src="{0}/{1}".format(CLIENT_KEY_DIRPATH_ON_SERVICE, file_name),
+                    name="{0}-{1}".format(network, file_name)),
             ],
             run=util.join_cmds(cmds),
         )
 
-        client_key_artifacts[client.hostname] = run.files_artifacts[0]
+        client_key_artifacts[client.hostname] = struct(
+            filename=file_name,
+            artifact=run.files_artifacts[0],
+        )
 
     return client_key_artifacts
 
@@ -149,7 +160,7 @@ def get_signer_config(
 ):
     ports = dict(get_used_ports())
 
-    cmd = [""]
+    cmd = []
 
     # apply customizations
 
@@ -169,7 +180,7 @@ def get_signer_config(
             CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
             CLIENT_KEY_DIRPATH_ON_SERVICE: Directory(
                 artifact_names=[
-                    client_key_artifacts[client_hostname]
+                    client_key_artifacts[client_hostname].artifact
                     for client_hostname in client_key_artifacts
                 ]
             ),
