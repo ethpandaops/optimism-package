@@ -37,7 +37,6 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 
 def launch(
     plan,
-    service_name,
     image,
     cl_context,
     l1_config_env_vars,
@@ -47,12 +46,11 @@ def launch(
     network_params,
     observability_helper,
 ):
-    proposer_service_name = "{0}".format(service_name)
+    service_name = "op-proposer-{0}".format(network_params.name)
 
     config = get_proposer_config(
         plan,
         image,
-        service_name,
         cl_context,
         l1_config_env_vars,
         gs_proposer_private_key,
@@ -62,7 +60,6 @@ def launch(
     )
 
     service = plan.add_service(service_name, config)
-    http_url = util.make_service_http_url(service)
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
@@ -74,7 +71,6 @@ def launch(
 def get_proposer_config(
     plan,
     image,
-    service_name,
     cl_context,
     l1_config_env_vars,
     gs_proposer_private_key,

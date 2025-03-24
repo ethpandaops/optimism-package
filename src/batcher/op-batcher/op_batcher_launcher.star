@@ -37,7 +37,6 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 
 def launch(
     plan,
-    service_name,
     image,
     el_context,
     cl_context,
@@ -48,10 +47,11 @@ def launch(
     observability_helper,
     da_server_context,
 ):
+    service_name = "op-batcher-{0}".format(network_params.name)
+
     config = get_batcher_config(
         plan,
         image,
-        service_name,
         el_context,
         cl_context,
         l1_config_env_vars,
@@ -73,7 +73,6 @@ def launch(
 def get_batcher_config(
     plan,
     image,
-    service_name,
     el_context,
     cl_context,
     l1_config_env_vars,
