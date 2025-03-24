@@ -143,6 +143,7 @@ SUBCATEGORY_PARAMS = {
         "interop_time_offset",
         "fund_dev_accounts",
     ],
+    "proxyd_params": ["image", "tag", "extra_params"],
     "batcher_params": ["image", "extra_params"],
     "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
     "challenger_params": [

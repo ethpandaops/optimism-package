@@ -385,6 +385,17 @@ optimism_package:
         # Defaults to True
         fund_dev_accounts: true
 
+      # Default proxyd configuration
+      proxyd_params:
+        # The Docker image that should be used for proxyd; leave blank to use the default image
+        image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd"
+
+        # The Docker tag that should be used for proxyd; leave blank to use the default tag
+        tag: ""
+
+        # A list of optional extra params that will be passed to the proxyd container
+        extra_params: []
+
       # Default batcher configuration
       batcher_params:
         # The Docker image that should be used for the batcher; leave blank to use the default op-batcher image
@@ -460,8 +471,10 @@ optimism_package:
           - "--port=3100"
           - "--log.level=debug"
 
-  # L2 contract deployer configuration - used for all L2 networks
-  # The docker image that should be used for the L2 contract deployer
+  # L2 contract deployer configuration - used for all L2 networks.
+  # The docker image that should be used for the L2 contract deployer.
+  # Locators can be http(s) URLs, or point to an enclave artifact with
+  # a pseudo URL artifact://NAME
   op_contract_deployer_params:
     image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.11
     l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz

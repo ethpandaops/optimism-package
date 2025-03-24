@@ -14,3 +14,9 @@ open-service enclaveName serviceName:
 open-grafana enclaveName:
     just open-service {{enclaveName}} grafana
     
+# TODO(enable more checks)
+lint:
+    kurtosis-lint \
+        --checked-calls \
+        --local-imports \
+        main.star src/
