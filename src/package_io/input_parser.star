@@ -631,7 +631,7 @@ def default_proposer_params():
 def default_signer_params():
     return {
         "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-signer",
-        "tag": "v1.4.0",
+        "tag": "v1.4.1",
         "extra_params": [],
     }
 
