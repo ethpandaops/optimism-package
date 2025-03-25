@@ -62,7 +62,7 @@ def launch(
         ".address",
     )
 
-    config = get_batcher_config(
+    service = plan.add_service(service_instance_name, make_service_config(
         plan,
         el_context,
         cl_context,
@@ -72,9 +72,7 @@ def launch(
         batcher_params,
         observability_helper,
         da_server_context,
-    )
-
-    service = plan.add_service(service_instance_name, config)
+    ))
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
@@ -83,7 +81,7 @@ def launch(
     return service
 
 
-def get_batcher_config(
+def make_service_config(
     plan,
     el_context,
     cl_context,

@@ -51,7 +51,7 @@ def launch(
         ".address",
     )
 
-    config = get_challenger_config(
+    service = plan.add_service(service_instance_name, make_service_config(
         plan,
         l2_num,
         service_instance_name,
@@ -66,9 +66,7 @@ def launch(
         challenger_params,
         interop_params,
         observability_helper,
-    )
-
-    service = plan.add_service(service_instance_name, config)
+    ))
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
@@ -77,7 +75,7 @@ def launch(
     return service
 
 
-def get_challenger_config(
+def make_service_config(
     plan,
     l2_num,
     service_instance_name,
