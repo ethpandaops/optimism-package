@@ -53,6 +53,9 @@ DEFAULT_DA_SERVER_PARAMS = {
     ],
 }
 
+DEFAULT_TX_FUZZER_IMAGES = {
+    "tx-fuzzer": "ethpandaops/tx-fuzz:master",
+}
 
 DEFAULT_ADDITIONAL_SERVICES = []
 
