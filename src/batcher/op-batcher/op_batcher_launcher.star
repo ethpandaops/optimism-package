@@ -15,7 +15,8 @@ op_signer_launcher = import_module("../../signer/op_signer_launcher.star")
 #
 #  ---------------------------------- Batcher client -------------------------------------
 
-SERVICE_NAME = "op-batcher"
+SERVICE_TYPE = "batcher"
+SERVICE_NAME = util.make_op_service_name(SERVICE_TYPE)
 
 # The Docker container runs as the "op-batcher" user so we can't write to root
 BATCHER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/{0}/{0}-data".format(SERVICE_NAME)
@@ -51,9 +52,15 @@ def launch(
     observability_helper,
     da_server_context,
 ):
-    service_name = util.make_service_name(SERVICE_NAME, network_params)
+    service_instance_name = util.make_service_instance_name(SERVICE_NAME, network_params)
 
-    batcher_address = util.read_service_network_config_value(plan, deployment_output, "batcher", network_params, ".address")
+    batcher_address = util.read_service_network_config_value(
+        plan,
+        deployment_output,
+        SERVICE_TYPE,
+        network_params,
+        ".address",
+    )
 
     config = get_batcher_config(
         plan,
@@ -68,7 +75,7 @@ def launch(
         da_server_context,
     )
 
-    service = plan.add_service(service_name, config)
+    service = plan.add_service(service_instance_name, config)
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network

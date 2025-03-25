@@ -95,7 +95,11 @@ def join_cmds(commands):
     return " && ".join(commands)
 
 
-def make_service_name(service_name, network_params):
+def make_op_service_name(service_type):
+    return "op-{0}".format(service_type)
+
+
+def make_service_instance_name(service_name, network_params):
     return "{0}-{1}".format(service_name, network_params.network)
 
 
