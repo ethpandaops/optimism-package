@@ -2,11 +2,12 @@ constants = import_module("./package_io/constants.star")
 
 DEPLOYMENT_UTILS_IMAGE = "mslipper/deployment-utils:latest"
 
+NETWORK_DATA_DIR = "/network-data"
 
 def read_network_config_value(plan, network_config_file, json_file, json_path):
-    mounts = {"/network-data": network_config_file}
+    mounts = {NETWORK_DATA_DIR: network_config_file}
     return read_json_value(
-        plan, "/network-data/{0}.json".format(json_file), json_path, mounts
+        plan, "{0}/{1}.json".format(NETWORK_DATA_DIR, json_file), json_path, mounts
     )
 
 
