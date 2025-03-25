@@ -6,6 +6,7 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+input_parser = import_module("../../input_parser.star")
 observability = import_module("../../observability/observability.star")
 op_signer_launcher = import_module("../../signer/op_signer_launcher.star")
 
@@ -29,7 +30,6 @@ def get_used_ports():
 def launch(
     plan,
     l2_num,
-    image,
     el_context,
     cl_context,
     l1_config_env_vars,
@@ -55,7 +55,6 @@ def launch(
         plan,
         l2_num,
         service_instance_name,
-        image,
         el_context,
         cl_context,
         l1_config_env_vars,
@@ -82,7 +81,6 @@ def get_challenger_config(
     plan,
     l2_num,
     service_instance_name,
-    image,
     el_context,
     cl_context,
     l1_config_env_vars,
@@ -160,6 +158,13 @@ def get_challenger_config(
     cmd += challenger_params.extra_params
     cmd = "mkdir -p {0} && {1}".format(
         CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
+    )
+
+    # legacy default image logic
+    image = (
+        challenger_params.image
+        if challenger_params.image != ""
+        else input_parser.DEFAULT_CHALLENGER_IMAGES[SERVICE_NAME]
     )
 
     return ServiceConfig(

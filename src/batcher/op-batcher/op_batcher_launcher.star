@@ -6,6 +6,7 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+input_parser = import_module("../../input_parser.star")
 constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 
@@ -41,7 +42,6 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 
 def launch(
     plan,
-    image,
     el_context,
     cl_context,
     l1_config_env_vars,
@@ -64,7 +64,6 @@ def launch(
 
     config = get_batcher_config(
         plan,
-        image,
         el_context,
         cl_context,
         l1_config_env_vars,
@@ -86,7 +85,6 @@ def launch(
 
 def get_batcher_config(
     plan,
-    image,
     el_context,
     cl_context,
     l1_config_env_vars,
@@ -129,6 +127,13 @@ def get_batcher_config(
         observability.configure_op_service_metrics(cmd, ports)
 
     cmd += batcher_params.extra_params
+
+    # legacy default image logic
+    image = (
+        batcher_params.image
+        if batcher_params.image != ""
+        else input_parser.DEFAULT_BATCHER_IMAGES[SERVICE_NAME]
+    )
 
     return ServiceConfig(
         image=image,
