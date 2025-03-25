@@ -197,5 +197,6 @@ def get_signer_config(
     )
 
 def configure_op_signer(cmd, client_address):
+    cmd.append("--signer.tls.enabled=false")
     cmd.append("--signer.endpoint=" + ENDPOINT)
     cmd.append("--signer.address=" + client_address)

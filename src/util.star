@@ -158,9 +158,6 @@ def make_execution_rpc_url(el_context):
         el_context.rpc_port_num,
     )
 
-def disable_op_service_tls(cmd):
-    cmd.append("--tls.enabled=false")
-
 def configure_op_service_rpc(cmd, port_num):
     cmd.append("--rpc.addr=0.0.0.0")
     cmd.append("--rpc.port={0}".format(port_num))
