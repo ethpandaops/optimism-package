@@ -106,8 +106,6 @@ def get_batcher_config(
         "--max-channel-duration=1",
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--private-key=" + batcher_key,
-        "--signer.endpoint=" + op_signer_launcher.ENDPOINT,
-        "--signer.address=" + batcher_address,
         # da commitments currently have to be sent as calldata to the batcher inbox
         "--data-availability-type="
         + ("calldata" if da_server_context.enabled else "blobs"),
@@ -119,6 +117,9 @@ def get_batcher_config(
     ]
 
     # apply customizations
+
+    util.disable_op_service_tls(cmd)
+    op_signer_launcher.configure_op_signer(cmd, batcher_address)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)

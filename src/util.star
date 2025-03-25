@@ -157,3 +157,6 @@ def make_execution_rpc_url(el_context):
         el_context.ip_addr,
         el_context.rpc_port_num,
     )
+
+def disable_op_service_tls(cmd):
+    cmd.append("--tls.enabled=false")

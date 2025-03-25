@@ -94,8 +94,6 @@ def get_proposer_config(
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--game-factory-address=" + str(game_factory_address),
         "--private-key=" + proposer_key,
-        "--signer.endpoint=" + op_signer_launcher.ENDPOINT,
-        "--signer.address=" + proposer_address,
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--allow-non-finalized=true",
         "--game-type={0}".format(proposer_params.game_type),
@@ -104,6 +102,9 @@ def get_proposer_config(
     ]
 
     # apply customizations
+
+    util.disable_op_service_tls(cmd)
+    op_signer_launcher.configure_op_signer(cmd, proposer_address)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)

@@ -168,6 +168,8 @@ def get_signer_config(
 
     # apply customizations
 
+    util.disable_op_service_tls(cmd)
+
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
     
@@ -193,3 +195,7 @@ def get_signer_config(
         },
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
+
+def configure_op_signer(cmd, client_address):
+    cmd.append("--signer.endpoint=" + ENDPOINT)
+    cmd.append("--signer.address=" + client_address)
