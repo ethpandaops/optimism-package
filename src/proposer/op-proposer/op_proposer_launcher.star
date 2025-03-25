@@ -6,6 +6,7 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+input_parser = import_module("../../input_parser.star")
 constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 
@@ -40,7 +41,6 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 
 def launch(
     plan,
-    image,
     cl_context,
     l1_config_env_vars,
     proposer_key,
@@ -62,7 +62,6 @@ def launch(
 
     config = get_proposer_config(
         plan,
-        image,
         cl_context,
         l1_config_env_vars,
         proposer_key,
@@ -83,7 +82,6 @@ def launch(
 
 def get_proposer_config(
     plan,
-    image,
     cl_context,
     l1_config_env_vars,
     proposer_key,
@@ -116,6 +114,13 @@ def get_proposer_config(
         observability.configure_op_service_metrics(cmd, ports)
 
     cmd += proposer_params.extra_params
+
+    # legacy default image logic
+    image = (
+        proposer_params.image
+        if proposer_params.image != ""
+        else input_parser.DEFAULT_PROPOSER_IMAGES[SERVICE_NAME]
+    )
 
     return ServiceConfig(
         image=image,

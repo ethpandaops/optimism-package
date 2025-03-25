@@ -121,14 +121,8 @@ def launch_participant_network(
         observability_helper,
     )
 
-    op_batcher_image = (
-        batcher_params.image
-        if batcher_params.image != ""
-        else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
-    )
     batcher_service = op_batcher_launcher.launch(
         plan,
-        op_batcher_image,
         all_el_contexts[0],
         all_cl_contexts[0],
         l1_config_env_vars,
@@ -146,14 +140,8 @@ def launch_participant_network(
         "state",
         ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
     )
-    op_proposer_image = (
-        proposer_params.image
-        if proposer_params.image != ""
-        else input_parser.DEFAULT_PROPOSER_IMAGES["op-proposer"]
-    )
     proposer_service = op_proposer_launcher.launch(
         plan,
-        op_proposer_image,
         all_cl_contexts[0],
         l1_config_env_vars,
         proposer_key,
@@ -165,15 +153,9 @@ def launch_participant_network(
     )
 
     if challenger_params.enabled:
-        op_challenger_image = (
-            challenger_params.image
-            if challenger_params.image != ""
-            else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
-        )
         op_challenger_launcher.launch(
             plan,
             l2_num,
-            op_challenger_image,
             all_el_contexts[0],
             all_cl_contexts[0],
             l1_config_env_vars,
