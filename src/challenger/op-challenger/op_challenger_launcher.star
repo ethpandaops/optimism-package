@@ -108,8 +108,6 @@ def get_challenger_config(
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--l2-eth-rpc=" + el_context.rpc_http_url,
         "--private-key=" + challenger_key,
-        "--signer.endpoint=" + op_signer_launcher.ENDPOINT,
-        "--signer.address=" + challenger_address,
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--trace-type=" + ",".join(challenger_params.cannon_trace_types),
     ]
@@ -121,6 +119,9 @@ def get_challenger_config(
     }
 
     # apply customizations
+
+    util.disable_op_service_tls(cmd)
+    op_signer_launcher.configure_op_signer(cmd, challenger_address)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
