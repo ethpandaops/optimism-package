@@ -113,7 +113,7 @@ def create_key_artifact(
 
         run = plan.run_sh(
             description="Convert ethereum private key to PEM",
-            image="alpine/openssl:latest",
+            image="alpine/openssl:3.3.3",
             store=[
                 StoreSpec(
                     src="{0}/{1}".format(CLIENT_KEY_DIRPATH_ON_SERVICE, file_name),
