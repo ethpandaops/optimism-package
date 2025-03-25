@@ -103,6 +103,7 @@ def create_key_artifact(
             "printf '\\xa0\\x07\\x06\\x05\\x2b\\x81\\x04\\x00\\x0a' >> {0}".format(der_file),
             # convert binary key to PEM
             "openssl ec -inform DER -in {0} -out {1}".format(der_file, file_name),
+            "chmod 666 {0}".format(file_name),
         ]
 
         run = plan.run_sh(
