@@ -77,12 +77,11 @@ def launch_participant_network(
         observability_helper,
     )
 
-    batcher_key = util.read_service_network_config_value(
+    batcher_key = util.read_service_private_key(
         plan,
         deployment_output,
         "batcher",
-        network_params.network_id,
-        ".privateKey",
+        network_params,
     )
     op_batcher_image = (
         batcher_params.image
@@ -109,12 +108,11 @@ def launch_participant_network(
         "state",
         ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
     )
-    proposer_key = util.read_service_network_config_value(
+    proposer_key = util.read_service_private_key(
         plan,
         deployment_output,
         "proposer",
-        network_params.network_id,
-        ".privateKey",
+        network_params,
     )
     op_proposer_image = (
         proposer_params.image
@@ -136,12 +134,11 @@ def launch_participant_network(
 
     challenger_service = None
     if challenger_params.enabled:
-        challenger_key = util.read_service_network_config_value(
+        challenger_key = util.read_service_private_key(
             plan,
             deployment_output,
             "challenger",
-            network_params.network_id,
-            ".privateKey",
+            network_params,
         )
         op_challenger_image = (
             challenger_params.image
