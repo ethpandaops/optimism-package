@@ -100,9 +100,6 @@ def get_batcher_config(
         "--num-confirmations=1",
         "--safe-abort-nonce-too-low-count=3",
         "--resubmission-timeout=30s",
-        "--rpc.addr=0.0.0.0",
-        "--rpc.port=" + str(BATCHER_HTTP_PORT_NUM),
-        "--rpc.enable-admin",
         "--max-channel-duration=1",
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--private-key=" + batcher_key,
@@ -119,6 +116,7 @@ def get_batcher_config(
     # apply customizations
 
     util.disable_op_service_tls(cmd)
+    util.configure_op_service_rpc(cmd, BATCHER_HTTP_PORT_NUM)
     op_signer_launcher.configure_op_signer(cmd, batcher_address)
 
     if observability_helper.enabled:

@@ -168,9 +168,6 @@ def get_beacon_config(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
             launcher.network_params.network_id,
         ),
-        "--rpc.addr=0.0.0.0",
-        "--rpc.port={0}".format(BEACON_HTTP_PORT_NUM),
-        "--rpc.enable-admin",
         "--l1={0}".format(l1_config_env_vars["L1_RPC_URL"]),
         "--l1.rpckind={0}".format(l1_config_env_vars["L1_RPC_KIND"]),
         "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
@@ -209,14 +206,10 @@ def get_beacon_config(
 
     # apply customizations
 
-    if observability_helper.enabled:
-        cmd += [
-            "--metrics.enabled=true",
-            "--metrics.addr=0.0.0.0",
-            "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
-        ]
+    util.configure_op_service_rpc(cmd, BEACON_HTTP_PORT_NUM)
 
-        observability.expose_metrics_port(ports)
+    if observability_helper.enabled:
+        observability.configure_op_service_metrics(cmd, ports)
 
     if interop_params.enabled:
         ports[
