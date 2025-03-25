@@ -77,6 +77,7 @@ def launch_participant_network(
         observability_helper,
     )
 
+    # get signer client keys
     batcher_key = util.read_service_private_key(
         plan,
         deployment_output,
@@ -97,7 +98,7 @@ def launch_participant_network(
     )
 
     # signer needs to start before its clients
-    op_signer_launcher.launch(
+    signer_service = op_signer_launcher.launch(
         plan,
         chain_args.signer_params,
         network_params,
@@ -126,6 +127,7 @@ def launch_participant_network(
         all_el_contexts[0],
         all_cl_contexts[0],
         l1_config_env_vars,
+        signer_service,
         batcher_key,
         deployment_output,
         batcher_params,
@@ -144,6 +146,7 @@ def launch_participant_network(
         plan,
         all_cl_contexts[0],
         l1_config_env_vars,
+        signer_service,
         proposer_key,
         game_factory_address,
         deployment_output,
@@ -158,6 +161,7 @@ def launch_participant_network(
             all_el_contexts[0],
             all_cl_contexts[0],
             l1_config_env_vars,
+            signer_service,
             challenger_key,
             game_factory_address,
             deployment_output,

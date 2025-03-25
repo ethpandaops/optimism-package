@@ -42,6 +42,7 @@ def launch(
     el_context,
     cl_context,
     l1_config_env_vars,
+    signer_service,
     batcher_key,
     deployment_output,
     batcher_params,
@@ -64,6 +65,7 @@ def launch(
         el_context,
         cl_context,
         l1_config_env_vars,
+        signer_service,
         batcher_key,
         batcher_address,
         batcher_params,
@@ -83,6 +85,7 @@ def make_service_config(
     el_context,
     cl_context,
     l1_config_env_vars,
+    signer_service,
     batcher_key,
     batcher_address,
     batcher_params,
@@ -116,7 +119,7 @@ def make_service_config(
     # apply customizations
 
     util.configure_op_service_rpc(cmd, HTTP_PORT_NUM)
-    op_signer_launcher.configure_op_signer(cmd, batcher_address)
+    op_signer_launcher.configure_op_signer(cmd, signer_service, batcher_address)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)

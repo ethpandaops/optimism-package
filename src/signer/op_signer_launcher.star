@@ -17,10 +17,6 @@ SERVICE_NAME = util.make_op_service_name(SERVICE_TYPE)
 # Port nums
 HTTP_PORT_NUM = 8545
 
-ENDPOINT = util.make_http_url(
-    SERVICE_NAME, HTTP_PORT_NUM
-)
-
 TEMPLATES_FILEPATH = "./templates"
 
 CONFIG_FILE_NAME = "config.yaml"
@@ -75,13 +71,12 @@ def launch(
         client_key_artifacts,
         observability_helper,
     ))
-    service_url = util.make_service_http_url(service)
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
     )
 
-    return service_url
+    return service
 
 def create_key_artifacts(
     plan,
@@ -190,7 +185,7 @@ def make_service_config(
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
 
-def configure_op_signer(cmd, client_address):
+def configure_op_signer(cmd, signer_service, client_address):
     cmd.append("--signer.tls.enabled=false")
-    cmd.append("--signer.endpoint=" + ENDPOINT)
+    cmd.append("--signer.endpoint=" + util.make_service_http_url(signer_service))
     cmd.append("--signer.address=" + client_address)
