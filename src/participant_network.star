@@ -80,9 +80,47 @@ def launch_participant_network(
     batcher_key = util.read_service_private_key(
         plan,
         deployment_output,
-        "batcher",
+        op_batcher_launcher.SERVICE_TYPE,
         network_params,
     )
+    proposer_key = util.read_service_private_key(
+        plan,
+        deployment_output,
+        op_proposer_launcher.SERVICE_TYPE,
+        network_params,
+    )
+    challenger_key = util.read_service_private_key(
+        plan,
+        deployment_output,
+        op_challenger_launcher.SERVICE_TYPE,
+        network_params,
+    )
+
+    # signer needs to start before its clients
+    op_signer_launcher.launch(
+        plan,
+        chain_args.signer_params,
+        network_params,
+        [
+            op_signer_launcher.make_client(
+                op_batcher_launcher.SERVICE_TYPE,
+                op_batcher_launcher.SERVICE_NAME,
+                batcher_key,
+            ),
+            op_signer_launcher.make_client(
+                op_proposer_launcher.SERVICE_TYPE,
+                op_proposer_launcher.SERVICE_NAME,
+                proposer_key,
+            ),
+            op_signer_launcher.make_client(
+                op_challenger_launcher.SERVICE_TYPE,
+                op_challenger_launcher.SERVICE_NAME,
+                challenger_key,
+            ) if challenger_params.enabled else None,
+        ],
+        observability_helper,
+    )
+
     op_batcher_image = (
         batcher_params.image
         if batcher_params.image != ""
@@ -108,12 +146,6 @@ def launch_participant_network(
         "state",
         ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
     )
-    proposer_key = util.read_service_private_key(
-        plan,
-        deployment_output,
-        "proposer",
-        network_params,
-    )
     op_proposer_image = (
         proposer_params.image
         if proposer_params.image != ""
@@ -132,20 +164,13 @@ def launch_participant_network(
         observability_helper,
     )
 
-    challenger_service = None
     if challenger_params.enabled:
-        challenger_key = util.read_service_private_key(
-            plan,
-            deployment_output,
-            "challenger",
-            network_params,
-        )
         op_challenger_image = (
             challenger_params.image
             if challenger_params.image != ""
             else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
         )
-        challenger_service = op_challenger_launcher.launch(
+        op_challenger_launcher.launch(
             plan,
             l2_num,
             op_challenger_image,
@@ -160,30 +185,6 @@ def launch_participant_network(
             interop_params,
             observability_helper,
         )
-
-    op_signer_launcher.launch(
-        plan,
-        chain_args.signer_params,
-        network_params,
-        [
-            op_signer_launcher.make_client(
-                "batcher",
-                batcher_service.hostname,
-                batcher_key
-            ),
-            op_signer_launcher.make_client(
-                "proposer",
-                proposer_service.hostname,
-                proposer_key
-            ),
-            op_signer_launcher.make_client(
-                "challenger",
-                challenger_service.hostname,
-                challenger_key
-            ) if challenger_params.enabled else None,
-        ],
-        observability_helper,
-    )
 
     return struct(
         participants=all_participants,

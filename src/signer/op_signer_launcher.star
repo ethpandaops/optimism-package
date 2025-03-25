@@ -39,10 +39,10 @@ def get_used_ports():
     }
     return used_ports
 
-def make_client(client_name,client_hostname, client_key):
+def make_client(client_type, client_name, client_key):
     return struct(
-        name = client_name,
-        hostname = client_hostname,
+        name = client_type,
+        hostname = client_name,
         key = client_key,
     )
 
@@ -167,8 +167,6 @@ def get_signer_config(
     cmd = []
 
     # apply customizations
-
-    util.disable_op_service_tls(cmd)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
