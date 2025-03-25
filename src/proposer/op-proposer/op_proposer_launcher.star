@@ -6,7 +6,7 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-input_parser = import_module("../../input_parser.star")
+input_parser = import_module("../../package_io/input_parser.star")
 constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 

@@ -6,7 +6,7 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-input_parser = import_module("../../input_parser.star")
+input_parser = import_module("../../package_io/input_parser.star")
 constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 
@@ -19,17 +19,14 @@ op_signer_launcher = import_module("../../signer/op_signer_launcher.star")
 SERVICE_TYPE = "batcher"
 SERVICE_NAME = util.make_op_service_name(SERVICE_TYPE)
 
-# The Docker container runs as the "op-batcher" user so we can't write to root
-BATCHER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/{0}/{0}-data".format(SERVICE_NAME)
-
 # Port nums
-BATCHER_HTTP_PORT_NUM = 8548
+HTTP_PORT_NUM = 8548
 
 
 def get_used_ports():
     used_ports = {
         constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            BATCHER_HTTP_PORT_NUM,
+            HTTP_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
@@ -118,7 +115,7 @@ def make_service_config(
 
     # apply customizations
 
-    util.configure_op_service_rpc(cmd, BATCHER_HTTP_PORT_NUM)
+    util.configure_op_service_rpc(cmd, HTTP_PORT_NUM)
     op_signer_launcher.configure_op_signer(cmd, batcher_address)
 
     if observability_helper.enabled:

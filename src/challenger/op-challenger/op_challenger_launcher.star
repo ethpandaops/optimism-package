@@ -6,7 +6,7 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-input_parser = import_module("../../input_parser.star")
+input_parser = import_module("../../package_io/input_parser.star")
 observability = import_module("../../observability/observability.star")
 op_signer_launcher = import_module("../../signer/op_signer_launcher.star")
 
@@ -18,7 +18,7 @@ util = import_module("../../util.star")
 SERVICE_TYPE = "challenger"
 SERVICE_NAME = util.make_op_service_name(SERVICE_TYPE)
 
-CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/{0}/{0}-data".format(SERVICE_NAME)
+DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/{0}/{0}-data".format(SERVICE_NAME)
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 
@@ -29,7 +29,6 @@ def get_used_ports():
 
 def launch(
     plan,
-    l2_num,
     el_context,
     cl_context,
     l1_config_env_vars,
@@ -51,10 +50,16 @@ def launch(
         ".address",
     )
 
+    cannon_prestate_artifact = None
+    if challenger_params.cannon_prestate_path:
+        cannon_prestate_artifact = plan.upload_files(
+            src=challenger_params.cannon_prestate_path,
+            name="{}-prestates".format(service_instance_name),
+        )
+
     service = plan.add_service(service_instance_name, make_service_config(
         plan,
-        l2_num,
-        service_instance_name,
+        cannon_prestate_artifact,
         el_context,
         cl_context,
         l1_config_env_vars,
@@ -77,8 +82,7 @@ def launch(
 
 def make_service_config(
     plan,
-    l2_num,
-    service_instance_name,
+    cannon_prestate_artifact,
     el_context,
     cl_context,
     l1_config_env_vars,
@@ -106,7 +110,7 @@ def make_service_config(
             network_params.network_id,
         ),
         "--game-factory-address=" + game_factory_address,
-        "--datadir=" + CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "--datadir=" + DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--l1-beacon=" + l1_config_env_vars["CL_RPC_URL"],
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--l2-eth-rpc=" + el_context.rpc_http_url,
@@ -141,11 +145,7 @@ def make_service_config(
         and challenger_params.cannon_prestates_url
     ):
         fail("Only one of cannon_prestate_path and cannon_prestates_url can be set")
-    elif challenger_params.cannon_prestate_path:
-        cannon_prestate_artifact = plan.upload_files(
-            src=challenger_params.cannon_prestate_path,
-            name="{}-prestates".format(service_instance_name),
-        )
+    elif cannon_prestate_artifact != None:
         files["/prestates"] = cannon_prestate_artifact
         cmd.append("--cannon-prestate=/prestates/prestate-proof.json")
     elif challenger_params.cannon_prestates_url:
@@ -155,7 +155,7 @@ def make_service_config(
 
     cmd += challenger_params.extra_params
     cmd = "mkdir -p {0} && {1}".format(
-        CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
+        DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
     )
 
     # legacy default image logic

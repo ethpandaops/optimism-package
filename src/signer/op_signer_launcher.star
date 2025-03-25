@@ -53,25 +53,22 @@ def launch(
     clients,
     observability_helper,
 ):
-    service_name = util.make_service_instance_name(SERVICE_NAME, network_params)
+    service_instance_name = util.make_service_instance_name(SERVICE_NAME, network_params)
 
-    client_key_artifacts = create_key_artifact(
+    client_key_artifacts = create_key_artifacts(
         plan,
-        network_params.network,
+        service_instance_name,
         clients,
     )
 
-    config_template = read_file(CONFIG_TEMPLATE_FILEPATH)
-
     config_artifact_name = create_config_artifact(
         plan,
-        service_name,
-        config_template,
+        service_instance_name,
         client_key_artifacts,
         observability_helper,
     )
 
-    service = plan.add_service(service_name, get_signer_config(
+    service = plan.add_service(service_instance_name, make_service_config(
         plan,
         signer_params,
         config_artifact_name,
@@ -86,9 +83,9 @@ def launch(
 
     return service_url
 
-def create_key_artifact(
+def create_key_artifacts(
     plan,
-    network,
+    service_instance_name,
     clients,
 ):
     client_key_artifacts = {}
@@ -117,7 +114,7 @@ def create_key_artifact(
             store=[
                 StoreSpec(
                     src="{0}/{1}".format(CLIENT_KEY_DIRPATH_ON_SERVICE, file_name),
-                    name="{0}-{1}".format(network, file_name)),
+                    name="{0}-{1}-key".format(service_instance_name, client.name)),
             ],
             run=util.join_cmds(cmds),
         )
@@ -131,8 +128,7 @@ def create_key_artifact(
 
 def create_config_artifact(
     plan,
-    service_name,
-    config_template,
+    service_instance_name,
     client_key_artifacts,
     observability_helper,
 ):
@@ -142,20 +138,20 @@ def create_config_artifact(
     }
 
     config_template_and_data = ethereum_package_shared_utils.new_template_and_data(
-        config_template, config_data
+        read_file(CONFIG_TEMPLATE_FILEPATH), config_data
     )
 
     config_artifact_name = plan.render_templates(
         {
             CONFIG_FILE_NAME: config_template_and_data,
         },
-        name="{0}-config".format(service_name),
+        name="{0}-config".format(service_instance_name),
     )
 
     return config_artifact_name
 
 
-def get_signer_config(
+def make_service_config(
     plan,
     signer_params,
     config_artifact_name,
