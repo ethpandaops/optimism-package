@@ -51,7 +51,7 @@ def launch(
 ):
     service_name = util.make_service_name(SERVICE_NAME, network_params)
 
-    proposer_address = util.read_service_network_config_value(plan, deployment_output, "proposer", network_params.network_id, ".address")
+    proposer_address = util.read_service_network_config_value(plan, deployment_output, "proposer", network_params, ".address")
 
     config = get_proposer_config(
         plan,

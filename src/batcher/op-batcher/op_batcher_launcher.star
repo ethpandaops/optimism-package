@@ -53,7 +53,7 @@ def launch(
 ):
     service_name = util.make_service_name(SERVICE_NAME, network_params)
 
-    batcher_address = util.read_service_network_config_value(plan, deployment_output, "batcher", network_params.network_id, ".address")
+    batcher_address = util.read_service_network_config_value(plan, deployment_output, "batcher", network_params, ".address")
 
     config = get_batcher_config(
         plan,

@@ -42,7 +42,7 @@ def launch(
 ):
     service_name = util.make_service_name(SERVICE_NAME, network_params)
 
-    challenger_address = util.read_service_network_config_value(plan, deployment_output, "challenger", network_params.network_id, ".address")
+    challenger_address = util.read_service_network_config_value(plan, deployment_output, "challenger", network_params, ".address")
 
     config = get_challenger_config(
         plan,

@@ -247,11 +247,11 @@ def get_beacon_config(
         )
 
     if sequencer_enabled:
-        sequencer_private_key = util.read_network_config_value(
+        sequencer_private_key = util.read_service_private_key(
             plan,
             launcher.deployment_output,
-            "sequencer-{0}".format(launcher.network_params.network_id),
-            ".privateKey",
+            "sequencer",
+            launcher.network_params,
         )
 
         cmd += [
