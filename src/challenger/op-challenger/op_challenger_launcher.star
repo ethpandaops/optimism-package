@@ -32,6 +32,7 @@ def launch(
     el_context,
     cl_context,
     l1_config_env_vars,
+    signer_service,
     challenger_key,
     game_factory_address,
     deployment_output,
@@ -63,6 +64,7 @@ def launch(
         el_context,
         cl_context,
         l1_config_env_vars,
+        signer_service,
         challenger_key,
         challenger_address,
         game_factory_address,
@@ -86,6 +88,7 @@ def make_service_config(
     el_context,
     cl_context,
     l1_config_env_vars,
+    signer_service,
     challenger_key,
     challenger_address,
     game_factory_address,
@@ -127,7 +130,7 @@ def make_service_config(
 
     # apply customizations
 
-    op_signer_launcher.configure_op_signer(cmd, challenger_address)
+    op_signer_launcher.configure_op_signer(cmd, signer_service, challenger_address)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
