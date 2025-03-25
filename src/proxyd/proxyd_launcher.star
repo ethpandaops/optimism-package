@@ -47,6 +47,7 @@ def launch(
     config_artifact_name = create_config_artifact(
         plan,
         config_template,
+        network_params,
         el_contexts,
         observability_helper,
     )
@@ -58,7 +59,7 @@ def launch(
         observability_helper,
     )
 
-    service = plan.add_service("proxyd-{0}".format(network_params.network), config)
+    service = plan.add_service("proxyd-{0}".format(network_params.network_id), config)
     service_url = util.make_service_http_url(service)
 
     observability.register_op_service_metrics_job(
@@ -71,6 +72,7 @@ def launch(
 def create_config_artifact(
     plan,
     config_template,
+    network_params,
     el_contexts,
     observability_helper,
 ):
@@ -96,7 +98,7 @@ def create_config_artifact(
         {
             CONFIG_FILE_NAME: config_template_and_data,
         },
-        name="proxyd-config",
+        name="proxyd-config-{0}".format(network_params.network_id),
     )
 
     return config_artifact_name
