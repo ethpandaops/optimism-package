@@ -155,7 +155,6 @@ def launch_participant_network(
     if challenger_params.enabled:
         op_challenger_launcher.launch(
             plan,
-            l2_num,
             all_el_contexts[0],
             all_cl_contexts[0],
             l1_config_env_vars,
