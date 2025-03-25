@@ -271,7 +271,7 @@ def deploy_contracts(
                 # convert op-deployer generated intent.toml to json
                 "dasel -r toml -w json -f {0}/intent.toml > {0}/intent-a.json".format(util.NETWORK_DATA_DIR),
                 # merge the two intent.json files, ensuring that the chains array is merged correctly
-                "jq -s 'add + {chains: map(.chains) | transpose | map(add)}' {0}/intent-a.json {0}/intent-b.json > {0}/intent-merged.json",
+                "jq -s 'add + {{chains: map(.chains) | transpose | map(add)}}' {0}/intent-a.json {0}/intent-b.json > {0}/intent-merged.json".format(util.NETWORK_DATA_DIR),
                 # convert the merged intent.json back to toml
                 "cat {0}/intent-merged.json | dasel -r json -w toml > {0}/intent.toml".format(util.NETWORK_DATA_DIR),
             ]
