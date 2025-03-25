@@ -169,14 +169,16 @@ def get_signer_config(
     # apply customizations
 
     if observability_helper.enabled:
-        observability.expose_metrics_port(ports, port_num=METRICS_PORT_NUM)
+        observability.configure_op_service_metrics(cmd, ports)
     
     cmd += signer_params.extra_params
 
     return ServiceConfig(
         image="{0}:{1}".format(signer_params.image, signer_params.tag),
         ports=ports,
+        cmd=cmd,
         env_vars={
+            "OP_SIGNER_RPC_PORT": str(HTTP_PORT_NUM),
             "OP_SIGNER_TLS_ENABLED": "false",
             "OP_SIGNER_SERVICE_CONFIG": "{0}/{1}".format(CONFIG_DIRPATH_ON_SERVICE, CONFIG_FILE_NAME)
         },
