@@ -10,12 +10,15 @@ constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 
 observability = import_module("../../observability/observability.star")
-prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+op_signer_launcher = import_module("../../signer/op_signer_launcher.star")
 
 #
 #  ---------------------------------- Batcher client -------------------------------------
+
+SERVICE_NAME = "op-batcher"
+
 # The Docker container runs as the "op-batcher" user so we can't write to root
-BATCHER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-batcher/op-batcher-data"
+BATCHER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/{0}/{0}-data".format(SERVICE_NAME)
 
 # Port nums
 BATCHER_HTTP_PORT_NUM = 8548
@@ -41,13 +44,16 @@ def launch(
     el_context,
     cl_context,
     l1_config_env_vars,
-    gs_batcher_private_key,
+    batcher_key,
+    deployment_output,
     batcher_params,
     network_params,
     observability_helper,
     da_server_context,
 ):
-    service_name = "op-batcher-{0}".format(network_params.name)
+    service_name = util.make_service_name(SERVICE_NAME, network_params)
+
+    batcher_address = util.read_service_network_config_value(plan, deployment_output, "batcher", network_params.network_id, ".address")
 
     config = get_batcher_config(
         plan,
@@ -55,7 +61,8 @@ def launch(
         el_context,
         cl_context,
         l1_config_env_vars,
-        gs_batcher_private_key,
+        batcher_key,
+        batcher_address,
         batcher_params,
         observability_helper,
         da_server_context,
@@ -76,7 +83,8 @@ def get_batcher_config(
     el_context,
     cl_context,
     l1_config_env_vars,
-    gs_batcher_private_key,
+    batcher_key,
+    batcher_address,
     batcher_params,
     observability_helper,
     da_server_context,
@@ -84,7 +92,7 @@ def get_batcher_config(
     ports = dict(get_used_ports())
 
     cmd = [
-        "op-batcher",
+        SERVICE_NAME,
         "--l2-eth-rpc=" + el_context.rpc_http_url,
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--poll-interval=1s",
@@ -97,7 +105,9 @@ def get_batcher_config(
         "--rpc.enable-admin",
         "--max-channel-duration=1",
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
-        "--private-key=" + gs_batcher_private_key,
+        "--private-key=" + batcher_key,
+        "--signer.endpoint=" + op_signer_launcher.ENDPOINT,
+        "--signer.address=" + batcher_address,
         # da commitments currently have to be sent as calldata to the batcher inbox
         "--data-availability-type="
         + ("calldata" if da_server_context.enabled else "blobs"),

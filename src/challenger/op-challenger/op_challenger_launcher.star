@@ -7,14 +7,16 @@ ethereum_package_constants = import_module(
 )
 
 observability = import_module("../../observability/observability.star")
-prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+op_signer_launcher = import_module("../../signer/op_signer_launcher.star")
 
 interop_constants = import_module("../../interop/constants.star")
 util = import_module("../../util.star")
 
 #
 #  ---------------------------------- Challenger client -------------------------------------
-CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-challenger/op-challenger-data"
+SERVICE_NAME = "op-challenger"
+
+CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/{0}/{0}-data".format(SERVICE_NAME)
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 
@@ -38,7 +40,9 @@ def launch(
     interop_params,
     observability_helper,
 ):
-    service_name = "op-challenger-{0}".format(network_params.network)
+    service_name = util.make_service_name(SERVICE_NAME, network_params)
+
+    challenger_address = util.read_service_network_config_value(plan, deployment_output, "challenger", network_params.network_id, ".address")
 
     config = get_challenger_config(
         plan,
@@ -49,6 +53,7 @@ def launch(
         cl_context,
         l1_config_env_vars,
         challenger_key,
+        challenger_address,
         game_factory_address,
         deployment_output,
         network_params,
@@ -75,6 +80,7 @@ def get_challenger_config(
     cl_context,
     l1_config_env_vars,
     challenger_key,
+    challenger_address,
     game_factory_address,
     deployment_output,
     network_params,
@@ -85,7 +91,7 @@ def get_challenger_config(
     ports = dict(get_used_ports())
 
     cmd = [
-        "op-challenger",
+        SERVICE_NAME,
         "--cannon-l2-genesis="
         + "{0}/genesis-{1}.json".format(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
@@ -102,6 +108,8 @@ def get_challenger_config(
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--l2-eth-rpc=" + el_context.rpc_http_url,
         "--private-key=" + challenger_key,
+        "--signer.endpoint=" + op_signer_launcher.ENDPOINT,
+        "--signer.address=" + challenger_address,
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--trace-type=" + ",".join(challenger_params.cannon_trace_types),
     ]

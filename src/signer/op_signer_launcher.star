@@ -12,9 +12,14 @@ util = import_module("../util.star")
 observability = import_module("../observability/observability.star")
 prometheus = import_module("../observability/prometheus/prometheus_launcher.star")
 
+SERVICE_NAME = "op-signer"
+
 # Port nums
-HTTP_PORT_NUM = 8080
-METRICS_PORT_NUM = 7300
+HTTP_PORT_NUM = 8545
+
+ENDPOINT = util.make_http_url(
+    SERVICE_NAME, HTTP_PORT_NUM
+)
 
 TEMPLATES_FILEPATH = "./templates"
 
@@ -48,7 +53,7 @@ def launch(
     clients,
     observability_helper,
 ):
-    service_name = "op-signer-{0}".format(network_params.network)
+    service_name = util.make_service_name(SERVICE_NAME, network_params)
 
     client_key_artifacts = create_key_artifact(
         plan,
