@@ -10,12 +10,14 @@ constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 
 observability = import_module("../../observability/observability.star")
-prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+op_signer_launcher = import_module("../../signer/op_signer_launcher.star")
 
 #
 #  ---------------------------------- Batcher client -------------------------------------
+SERVICE_NAME = "op-proposer"
+
 # The Docker container runs as the "op-proposer" user so we can't write to root
-DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-proposer/op-proposer-data"
+DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/{0}/{0}-data".format(SERVICE_NAME)
 
 # Port nums
 HTTP_PORT_NUM = 8560
@@ -40,20 +42,24 @@ def launch(
     image,
     cl_context,
     l1_config_env_vars,
-    gs_proposer_private_key,
+    proposer_key,
     game_factory_address,
+    deployment_output,
     proposer_params,
     network_params,
     observability_helper,
 ):
-    service_name = "op-proposer-{0}".format(network_params.name)
+    service_name = util.make_service_name(SERVICE_NAME, network_params)
+
+    proposer_address = util.read_service_network_config_value(plan, deployment_output, "proposer", network_params.network_id, ".address")
 
     config = get_proposer_config(
         plan,
         image,
         cl_context,
         l1_config_env_vars,
-        gs_proposer_private_key,
+        proposer_key,
+        proposer_address,
         game_factory_address,
         proposer_params,
         observability_helper,
@@ -73,7 +79,8 @@ def get_proposer_config(
     image,
     cl_context,
     l1_config_env_vars,
-    gs_proposer_private_key,
+    proposer_key,
+    proposer_address,
     game_factory_address,
     proposer_params,
     observability_helper,
@@ -81,12 +88,14 @@ def get_proposer_config(
     ports = dict(get_used_ports())
 
     cmd = [
-        "op-proposer",
+        SERVICE_NAME,
         "--poll-interval=12s",
         "--rpc.port=" + str(HTTP_PORT_NUM),
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--game-factory-address=" + str(game_factory_address),
-        "--private-key=" + gs_proposer_private_key,
+        "--private-key=" + proposer_key,
+        "--signer.endpoint=" + op_signer_launcher.ENDPOINT,
+        "--signer.address=" + proposer_address,
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--allow-non-finalized=true",
         "--game-type={0}".format(proposer_params.game_type),

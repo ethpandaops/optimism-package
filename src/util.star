@@ -90,6 +90,10 @@ def join_cmds(commands):
     return " && ".join(commands)
 
 
+def make_service_name(service_name, network_params):
+    return "{0}-{1}".format(service_name, network_params.network)
+
+
 def get_service_port_num(service, port_id):
     return service.ports[port_id].number
 

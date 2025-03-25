@@ -96,6 +96,7 @@ def launch_participant_network(
         all_cl_contexts[0],
         l1_config_env_vars,
         batcher_key,
+        deployment_output,
         batcher_params,
         network_params,
         observability_helper,
@@ -127,6 +128,7 @@ def launch_participant_network(
         l1_config_env_vars,
         proposer_key,
         game_factory_address,
+        deployment_output,
         proposer_params,
         network_params,
         observability_helper,
@@ -181,7 +183,7 @@ def launch_participant_network(
                 "challenger",
                 challenger_service.hostname,
                 challenger_key
-            ) if challenger_service != None else None,
+            ) if challenger_params.enabled else None,
         ],
         observability_helper,
     )
