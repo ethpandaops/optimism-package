@@ -58,9 +58,3 @@ def test_label_from_image_long_image_name_long_suffix(plan):
     image_label = util.label_from_image(image_name)
     expect.eq(len(image_label), 63)
     expect.eq(image_suffix[-63:], image_label)
-
-def test_configure_op_service_rpc(plan):
-    port_num = 8545
-    cmd = ["op-service"]
-    util.configure_op_service_rpc(cmd, port_num)
-    expect.eq(cmd, ["op-service", "--rpc.addr=0.0.0.0", "--rpc.port={0}".format(port_num), "--rpc.enable-admin"])

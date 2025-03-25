@@ -115,7 +115,6 @@ def get_batcher_config(
 
     # apply customizations
 
-    util.disable_op_service_tls(cmd)
     util.configure_op_service_rpc(cmd, BATCHER_HTTP_PORT_NUM)
     op_signer_launcher.configure_op_signer(cmd, batcher_address)
 

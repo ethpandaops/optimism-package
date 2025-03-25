@@ -120,7 +120,6 @@ def get_challenger_config(
 
     # apply customizations
 
-    util.disable_op_service_tls(cmd)
     op_signer_launcher.configure_op_signer(cmd, challenger_address)
 
     if observability_helper.enabled:
