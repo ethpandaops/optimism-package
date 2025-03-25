@@ -14,7 +14,8 @@ util = import_module("../../util.star")
 
 #
 #  ---------------------------------- Challenger client -------------------------------------
-SERVICE_NAME = "op-challenger"
+SERVICE_TYPE = "challenger"
+SERVICE_NAME = util.make_op_service_name(SERVICE_TYPE)
 
 CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/{0}/{0}-data".format(SERVICE_NAME)
 ENTRYPOINT_ARGS = ["sh", "-c"]
@@ -40,14 +41,20 @@ def launch(
     interop_params,
     observability_helper,
 ):
-    service_name = util.make_service_name(SERVICE_NAME, network_params)
+    service_instance_name = util.make_service_instance_name(SERVICE_NAME, network_params)
 
-    challenger_address = util.read_service_network_config_value(plan, deployment_output, "challenger", network_params, ".address")
+    challenger_address = util.read_service_network_config_value(
+        plan,
+        deployment_output,
+        SERVICE_TYPE,
+        network_params,
+        ".address",
+    )
 
     config = get_challenger_config(
         plan,
         l2_num,
-        service_name,
+        service_instance_name,
         image,
         el_context,
         cl_context,
@@ -62,7 +69,7 @@ def launch(
         observability_helper,
     )
 
-    service = plan.add_service(service_name, config)
+    service = plan.add_service(service_instance_name, config)
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
@@ -74,7 +81,7 @@ def launch(
 def get_challenger_config(
     plan,
     l2_num,
-    service_name,
+    service_instance_name,
     image,
     el_context,
     cl_context,
@@ -141,7 +148,7 @@ def get_challenger_config(
     elif challenger_params.cannon_prestate_path:
         cannon_prestate_artifact = plan.upload_files(
             src=challenger_params.cannon_prestate_path,
-            name="{}-prestates".format(service_name),
+            name="{}-prestates".format(service_instance_name),
         )
         files["/prestates"] = cannon_prestate_artifact
         cmd.append("--cannon-prestate=/prestates/prestate-proof.json")

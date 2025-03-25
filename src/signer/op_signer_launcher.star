@@ -10,9 +10,9 @@ constants = import_module("../package_io/constants.star")
 util = import_module("../util.star")
 
 observability = import_module("../observability/observability.star")
-prometheus = import_module("../observability/prometheus/prometheus_launcher.star")
 
-SERVICE_NAME = "op-signer"
+SERVICE_TYPE = "signer"
+SERVICE_NAME = util.make_op_service_name(SERVICE_TYPE)
 
 # Port nums
 HTTP_PORT_NUM = 8545
@@ -53,7 +53,7 @@ def launch(
     clients,
     observability_helper,
 ):
-    service_name = util.make_service_name(SERVICE_NAME, network_params)
+    service_name = util.make_service_instance_name(SERVICE_NAME, network_params)
 
     client_key_artifacts = create_key_artifact(
         plan,
