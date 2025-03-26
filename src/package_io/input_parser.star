@@ -11,6 +11,7 @@ DEFAULT_EL_IMAGES = {
     "op-erigon": "testinprod/op-erigon:latest",
     "op-nethermind": "nethermind/nethermind:latest",
     "op-besu": "ghcr.io/optimism-java/op-besu:latest",
+    "op-rbuilder": "ghcr.io/flashbots/op-rbuilder:latest",
 }
 
 DEFAULT_CL_IMAGES = {
@@ -165,6 +166,7 @@ def input_parser(plan, input_args):
                         cl_max_mem=participant["cl_max_mem"],
                         el_builder_type=participant["el_builder_type"],
                         el_builder_image=participant["el_builder_image"],
+                        el_builder_key=participant["el_builder_key"],
                         el_builder_log_level=participant["el_builder_log_level"],
                         el_builder_extra_env_vars=participant[
                             "el_builder_extra_env_vars"
@@ -629,6 +631,7 @@ def default_participant():
         "cl_max_mem": 0,
         "el_builder_type": "op-geth",
         "el_builder_image": "",
+        "el_builder_key": "",
         "el_builder_log_level": "",
         "el_builder_extra_env_vars": {},
         "el_builder_extra_labels": {},
