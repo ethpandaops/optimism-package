@@ -43,8 +43,7 @@ def launch(
     cl_context,
     l1_config_env_vars,
     signer_service,
-    batcher_key,
-    deployment_output,
+    signer_client,
     batcher_params,
     network_params,
     observability_helper,
@@ -52,22 +51,13 @@ def launch(
 ):
     service_instance_name = util.make_service_instance_name(SERVICE_NAME, network_params)
 
-    batcher_address = util.read_service_network_config_value(
-        plan,
-        deployment_output,
-        SERVICE_TYPE,
-        network_params,
-        ".address",
-    )
-
     service = plan.add_service(service_instance_name, make_service_config(
         plan,
         el_context,
         cl_context,
         l1_config_env_vars,
         signer_service,
-        batcher_key,
-        batcher_address,
+        signer_client,
         batcher_params,
         observability_helper,
         da_server_context,
@@ -86,8 +76,7 @@ def make_service_config(
     cl_context,
     l1_config_env_vars,
     signer_service,
-    batcher_key,
-    batcher_address,
+    signer_client,
     batcher_params,
     observability_helper,
     da_server_context,
@@ -105,7 +94,7 @@ def make_service_config(
         "--resubmission-timeout=30s",
         "--max-channel-duration=1",
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
-        "--private-key=" + batcher_key,
+        "--private-key=" + signer_client.key,
         # da commitments currently have to be sent as calldata to the batcher inbox
         "--data-availability-type="
         + ("calldata" if da_server_context.enabled else "blobs"),
@@ -116,10 +105,12 @@ def make_service_config(
         "--altda.da-service",
     ]
 
+    files = {}
+
     # apply customizations
 
     util.configure_op_service_rpc(cmd, HTTP_PORT_NUM)
-    op_signer_launcher.configure_op_signer(cmd, signer_service, batcher_address)
+    op_signer_launcher.configure_op_signer(cmd, files, signer_service, signer_client)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
@@ -137,5 +128,6 @@ def make_service_config(
         image=image,
         ports=ports,
         cmd=cmd,
+        files=files,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
