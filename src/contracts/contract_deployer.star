@@ -265,21 +265,33 @@ def deploy_contracts(
             [
                 # zhwrd: this mess is temporary until we implement json reading for op-deployer intent file
                 # convert intent_json to yaml. this is necessary because its unreliable to evaluate command substitutions in json.
-                "cat /tmp/intent.json | dasel -r json -w yaml > {0}/intent.yaml".format(util.NETWORK_DATA_DIR),
+                "cat /tmp/intent.json | dasel -r json -w yaml > {0}/intent.yaml".format(
+                    util.NETWORK_DATA_DIR
+                ),
                 # evaluate the command substitutions
-                "eval \"echo '$(cat {0}/intent.yaml)'\" | dasel -r yaml -w json > {0}/intent-b.json".format(util.NETWORK_DATA_DIR),
+                "eval \"echo '$(cat {0}/intent.yaml)'\" | dasel -r yaml -w json > {0}/intent-b.json".format(
+                    util.NETWORK_DATA_DIR
+                ),
                 # convert op-deployer generated intent.toml to json
-                "dasel -r toml -w json -f {0}/intent.toml > {0}/intent-a.json".format(util.NETWORK_DATA_DIR),
+                "dasel -r toml -w json -f {0}/intent.toml > {0}/intent-a.json".format(
+                    util.NETWORK_DATA_DIR
+                ),
                 # merge the two intent.json files, ensuring that the chains array is merged correctly
-                "jq -s 'add + {{chains: map(.chains) | transpose | map(add)}}' {0}/intent-a.json {0}/intent-b.json > {0}/intent-merged.json".format(util.NETWORK_DATA_DIR),
+                "jq -s 'add + {{chains: map(.chains) | transpose | map(add)}}' {0}/intent-a.json {0}/intent-b.json > {0}/intent-merged.json".format(
+                    util.NETWORK_DATA_DIR
+                ),
                 # convert the merged intent.json back to toml
-                "cat {0}/intent-merged.json | dasel -r json -w toml > {0}/intent.toml".format(util.NETWORK_DATA_DIR),
+                "cat {0}/intent-merged.json | dasel -r json -w toml > {0}/intent.toml".format(
+                    util.NETWORK_DATA_DIR
+                ),
             ]
         ),
     )
 
     apply_cmds = [
-        "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir {0}".format(util.NETWORK_DATA_DIR),
+        "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir {0}".format(
+            util.NETWORK_DATA_DIR
+        ),
     ]
     for chain in optimism_args.chains:
         network_id = chain.network_params.network_id
@@ -332,7 +344,9 @@ def deploy_contracts(
                 util.NETWORK_DATA_DIR: op_deployer_output.files_artifacts[0],
                 "/fund-script": fund_script_artifact,
             },
-            run='jq --from-file /fund-script/gen2spec.jq < "{0}/genesis-{1}.json" > "{0}/chainspec-{1}.json"'.format(util.NETWORK_DATA_DIR, chain.network_params.network_id),
+            run='jq --from-file /fund-script/gen2spec.jq < "{0}/genesis-{1}.json" > "{0}/chainspec-{1}.json"'.format(
+                util.NETWORK_DATA_DIR, chain.network_params.network_id
+            ),
         )
 
     return op_deployer_output.files_artifacts[0]
@@ -343,4 +357,6 @@ def chain_key(index, key):
 
 
 def read_chain_cmd(filename, l2_chain_id):
-    return "`jq -r .address {0}/{1}-{2}.json`".format(util.NETWORK_DATA_DIR, filename, l2_chain_id)
+    return "`jq -r .address {0}/{1}-{2}.json`".format(
+        util.NETWORK_DATA_DIR, filename, l2_chain_id
+    )

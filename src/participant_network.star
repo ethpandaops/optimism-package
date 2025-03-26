@@ -93,7 +93,9 @@ def launch_participant_network(
             op_signer_launcher.make_client(
                 op_challenger_launcher.SERVICE_TYPE,
                 op_challenger_launcher.SERVICE_NAME,
-            ) if challenger_params.enabled else None,
+            )
+            if challenger_params.enabled
+            else None,
         ],
     )
 

@@ -50,18 +50,23 @@ def launch(
     network_params,
     observability_helper,
 ):
-    service_instance_name = util.make_service_instance_name(SERVICE_NAME, network_params)
+    service_instance_name = util.make_service_instance_name(
+        SERVICE_NAME, network_params
+    )
 
-    service = plan.add_service(service_instance_name, make_service_config(
-        plan,
-        cl_context,
-        l1_config_env_vars,
-        signer_service,
-        signer_client,
-        game_factory_address,
-        proposer_params,
-        observability_helper,
-    ))
+    service = plan.add_service(
+        service_instance_name,
+        make_service_config(
+            plan,
+            cl_context,
+            l1_config_env_vars,
+            signer_service,
+            signer_client,
+            game_factory_address,
+            proposer_params,
+            observability_helper,
+        ),
+    )
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
