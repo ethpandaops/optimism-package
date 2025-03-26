@@ -49,19 +49,24 @@ def launch(
     observability_helper,
     da_server_context,
 ):
-    service_instance_name = util.make_service_instance_name(SERVICE_NAME, network_params)
+    service_instance_name = util.make_service_instance_name(
+        SERVICE_NAME, network_params
+    )
 
-    service = plan.add_service(service_instance_name, make_service_config(
-        plan,
-        el_context,
-        cl_context,
-        l1_config_env_vars,
-        signer_service,
-        signer_client,
-        batcher_params,
-        observability_helper,
-        da_server_context,
-    ))
+    service = plan.add_service(
+        service_instance_name,
+        make_service_config(
+            plan,
+            el_context,
+            cl_context,
+            l1_config_env_vars,
+            signer_service,
+            signer_client,
+            batcher_params,
+            observability_helper,
+            da_server_context,
+        ),
+    )
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network

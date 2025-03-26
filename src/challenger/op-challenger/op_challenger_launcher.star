@@ -41,7 +41,9 @@ def launch(
     interop_params,
     observability_helper,
 ):
-    service_instance_name = util.make_service_instance_name(SERVICE_NAME, network_params)
+    service_instance_name = util.make_service_instance_name(
+        SERVICE_NAME, network_params
+    )
 
     cannon_prestate_artifact = None
     if challenger_params.cannon_prestate_path:
@@ -50,21 +52,24 @@ def launch(
             name="{}-prestates".format(service_instance_name),
         )
 
-    service = plan.add_service(service_instance_name, make_service_config(
-        plan,
-        cannon_prestate_artifact,
-        el_context,
-        cl_context,
-        l1_config_env_vars,
-        signer_service,
-        signer_client,
-        game_factory_address,
-        deployment_output,
-        network_params,
-        challenger_params,
-        interop_params,
-        observability_helper,
-    ))
+    service = plan.add_service(
+        service_instance_name,
+        make_service_config(
+            plan,
+            cannon_prestate_artifact,
+            el_context,
+            cl_context,
+            l1_config_env_vars,
+            signer_service,
+            signer_client,
+            game_factory_address,
+            deployment_output,
+            network_params,
+            challenger_params,
+            interop_params,
+            observability_helper,
+        ),
+    )
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
@@ -147,9 +152,7 @@ def make_service_config(
         fail("One of cannon_prestate_path or cannon_prestates_url must be set")
 
     cmd += challenger_params.extra_params
-    cmd = "mkdir -p {0} && {1}".format(
-        DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
-    )
+    cmd = "mkdir -p {0} && {1}".format(DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd))
 
     # legacy default image logic
     image = (

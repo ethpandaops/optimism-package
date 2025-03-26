@@ -4,6 +4,7 @@ DEPLOYMENT_UTILS_IMAGE = "mslipper/deployment-utils:latest"
 
 NETWORK_DATA_DIR = "/network-data"
 
+
 def read_network_config_value(plan, network_config_file, json_file, json_path):
     mounts = {NETWORK_DATA_DIR: network_config_file}
     return read_json_value(
@@ -11,12 +12,21 @@ def read_network_config_value(plan, network_config_file, json_file, json_path):
     )
 
 
-def read_service_network_config_value(plan, network_config_file, service_type, network_params, json_path):
-    return read_network_config_value(plan, network_config_file, "{0}-{1}".format(service_type, network_params.network_id), json_path)
+def read_service_network_config_value(
+    plan, network_config_file, service_type, network_params, json_path
+):
+    return read_network_config_value(
+        plan,
+        network_config_file,
+        "{0}-{1}".format(service_type, network_params.network_id),
+        json_path,
+    )
 
 
 def read_service_private_key(plan, network_config_file, service_type, network_params):
-    return read_service_network_config_value(plan, network_config_file, service_type, network_params, ".privateKey")
+    return read_service_network_config_value(
+        plan, network_config_file, service_type, network_params, ".privateKey"
+    )
 
 
 def read_json_value(plan, json_file, json_path, mounts=None):
@@ -161,6 +171,7 @@ def make_execution_rpc_url(el_context):
         el_context.ip_addr,
         el_context.rpc_port_num,
     )
+
 
 def configure_op_service_rpc(cmd, port_num):
     cmd.append("--rpc.addr=0.0.0.0")
