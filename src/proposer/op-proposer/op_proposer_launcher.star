@@ -44,30 +44,20 @@ def launch(
     cl_context,
     l1_config_env_vars,
     signer_service,
-    proposer_key,
+    signer_client,
     game_factory_address,
-    deployment_output,
     proposer_params,
     network_params,
     observability_helper,
 ):
     service_instance_name = util.make_service_instance_name(SERVICE_NAME, network_params)
 
-    proposer_address = util.read_service_network_config_value(
-        plan,
-        deployment_output,
-        SERVICE_TYPE,
-        network_params,
-        ".address",
-    )
-
     service = plan.add_service(service_instance_name, make_service_config(
         plan,
         cl_context,
         l1_config_env_vars,
         signer_service,
-        proposer_key,
-        proposer_address,
+        signer_client,
         game_factory_address,
         proposer_params,
         observability_helper,
@@ -85,8 +75,7 @@ def make_service_config(
     cl_context,
     l1_config_env_vars,
     signer_service,
-    proposer_key,
-    proposer_address,
+    signer_client,
     game_factory_address,
     proposer_params,
     observability_helper,
@@ -99,7 +88,7 @@ def make_service_config(
         "--rpc.port=" + str(HTTP_PORT_NUM),
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--game-factory-address=" + str(game_factory_address),
-        "--private-key=" + proposer_key,
+        "--private-key=" + signer_client.key,
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--allow-non-finalized=true",
         "--game-type={0}".format(proposer_params.game_type),
@@ -107,9 +96,11 @@ def make_service_config(
         "--wait-node-sync=true",
     ]
 
+    files = {}
+
     # apply customizations
 
-    op_signer_launcher.configure_op_signer(cmd, signer_service, proposer_address)
+    op_signer_launcher.configure_op_signer(cmd, files, signer_service, signer_client)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
@@ -127,5 +118,6 @@ def make_service_config(
         image=image,
         ports=ports,
         cmd=cmd,
+        files=files,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

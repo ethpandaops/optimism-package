@@ -77,24 +77,24 @@ def launch_participant_network(
         observability_helper,
     )
 
-    # get signer client keys
-    batcher_key = util.read_service_private_key(
+    signer_clients = op_signer_launcher.generate_client_creds(
         plan,
-        deployment_output,
-        op_batcher_launcher.SERVICE_TYPE,
         network_params,
-    )
-    proposer_key = util.read_service_private_key(
-        plan,
         deployment_output,
-        op_proposer_launcher.SERVICE_TYPE,
-        network_params,
-    )
-    challenger_key = util.read_service_private_key(
-        plan,
-        deployment_output,
-        op_challenger_launcher.SERVICE_TYPE,
-        network_params,
+        [
+            op_signer_launcher.make_client(
+                op_batcher_launcher.SERVICE_TYPE,
+                op_batcher_launcher.SERVICE_NAME,
+            ),
+            op_signer_launcher.make_client(
+                op_proposer_launcher.SERVICE_TYPE,
+                op_proposer_launcher.SERVICE_NAME,
+            ),
+            op_signer_launcher.make_client(
+                op_challenger_launcher.SERVICE_TYPE,
+                op_challenger_launcher.SERVICE_NAME,
+            ) if challenger_params.enabled else None,
+        ],
     )
 
     # signer needs to start before its clients
@@ -102,23 +102,7 @@ def launch_participant_network(
         plan,
         chain_args.signer_params,
         network_params,
-        [
-            op_signer_launcher.make_client(
-                op_batcher_launcher.SERVICE_TYPE,
-                op_batcher_launcher.SERVICE_NAME,
-                batcher_key,
-            ),
-            op_signer_launcher.make_client(
-                op_proposer_launcher.SERVICE_TYPE,
-                op_proposer_launcher.SERVICE_NAME,
-                proposer_key,
-            ),
-            op_signer_launcher.make_client(
-                op_challenger_launcher.SERVICE_TYPE,
-                op_challenger_launcher.SERVICE_NAME,
-                challenger_key,
-            ) if challenger_params.enabled else None,
-        ],
+        signer_clients,
         observability_helper,
     )
 
@@ -128,8 +112,7 @@ def launch_participant_network(
         all_cl_contexts[0],
         l1_config_env_vars,
         signer_service,
-        batcher_key,
-        deployment_output,
+        signer_clients[op_batcher_launcher.SERVICE_TYPE],
         batcher_params,
         network_params,
         observability_helper,
@@ -147,9 +130,8 @@ def launch_participant_network(
         all_cl_contexts[0],
         l1_config_env_vars,
         signer_service,
-        proposer_key,
+        signer_clients[op_proposer_launcher.SERVICE_TYPE],
         game_factory_address,
-        deployment_output,
         proposer_params,
         network_params,
         observability_helper,
@@ -162,7 +144,7 @@ def launch_participant_network(
             all_cl_contexts[0],
             l1_config_env_vars,
             signer_service,
-            challenger_key,
+            signer_clients[op_challenger_launcher.SERVICE_TYPE],
             game_factory_address,
             deployment_output,
             network_params,

@@ -33,7 +33,7 @@ def launch(
     cl_context,
     l1_config_env_vars,
     signer_service,
-    challenger_key,
+    signer_client,
     game_factory_address,
     deployment_output,
     network_params,
@@ -42,14 +42,6 @@ def launch(
     observability_helper,
 ):
     service_instance_name = util.make_service_instance_name(SERVICE_NAME, network_params)
-
-    challenger_address = util.read_service_network_config_value(
-        plan,
-        deployment_output,
-        SERVICE_TYPE,
-        network_params,
-        ".address",
-    )
 
     cannon_prestate_artifact = None
     if challenger_params.cannon_prestate_path:
@@ -65,8 +57,7 @@ def launch(
         cl_context,
         l1_config_env_vars,
         signer_service,
-        challenger_key,
-        challenger_address,
+        signer_client,
         game_factory_address,
         deployment_output,
         network_params,
@@ -89,8 +80,7 @@ def make_service_config(
     cl_context,
     l1_config_env_vars,
     signer_service,
-    challenger_key,
-    challenger_address,
+    signer_client,
     game_factory_address,
     deployment_output,
     network_params,
@@ -117,7 +107,7 @@ def make_service_config(
         "--l1-beacon=" + l1_config_env_vars["CL_RPC_URL"],
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--l2-eth-rpc=" + el_context.rpc_http_url,
-        "--private-key=" + challenger_key,
+        "--private-key=" + signer_client.key,
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--trace-type=" + ",".join(challenger_params.cannon_trace_types),
     ]
@@ -130,7 +120,7 @@ def make_service_config(
 
     # apply customizations
 
-    op_signer_launcher.configure_op_signer(cmd, signer_service, challenger_address)
+    op_signer_launcher.configure_op_signer(cmd, files, signer_service, signer_client)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)

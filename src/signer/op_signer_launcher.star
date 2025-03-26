@@ -22,6 +22,8 @@ TEMPLATES_FILEPATH = "./templates"
 CONFIG_FILE_NAME = "config.yaml"
 CONFIG_TEMPLATE_FILEPATH = "{0}/{1}.tmpl".format(TEMPLATES_FILEPATH, CONFIG_FILE_NAME)
 
+GENERATE_CREDS_DIR = "/creds"
+TLS_DIR = "/tls"
 CONFIG_DIRPATH_ON_SERVICE = "/config"
 CLIENT_KEY_DIRPATH_ON_SERVICE = "/keys"
 
@@ -35,12 +37,6 @@ def get_used_ports():
     }
     return used_ports
 
-def make_client(client_type, client_name, client_key):
-    return struct(
-        name = client_type,
-        hostname = client_name,
-        key = client_key,
-    )
 
 def launch(
     plan,
@@ -50,6 +46,11 @@ def launch(
     observability_helper,
 ):
     service_instance_name = util.make_service_instance_name(SERVICE_NAME, network_params)
+
+    tls_artifact = create_tls_artifact(
+        plan,
+        service_instance_name,
+    )
 
     client_key_artifacts = create_key_artifacts(
         plan,
@@ -67,6 +68,7 @@ def launch(
     service = plan.add_service(service_instance_name, make_service_config(
         plan,
         signer_params,
+        tls_artifact,
         config_artifact_name,
         client_key_artifacts,
         observability_helper,
@@ -78,6 +80,19 @@ def launch(
 
     return service
 
+def create_tls_artifact(
+    plan,
+    service_instance_name,
+):
+    return generate_credentials(
+        plan,
+        ["ca"],
+        [StoreSpec(
+            src=GENERATE_CREDS_DIR,
+            name="{0}-tls".format(service_instance_name)
+        )],
+    )[0]
+
 def create_key_artifacts(
     plan,
     service_instance_name,
@@ -85,8 +100,8 @@ def create_key_artifacts(
 ):
     client_key_artifacts = {}
 
-    for client in clients:
-        file_name = "{0}_key.pem".format(client.name)
+    for client_name, client in clients.items():
+        file_name = "{0}_key.pem".format(client_name)
         der_file = "ec_key.der"
         
         cmds = [
@@ -149,6 +164,7 @@ def create_config_artifact(
 def make_service_config(
     plan,
     signer_params,
+    tls_artifact,
     config_artifact_name,
     client_key_artifacts,
     observability_helper,
@@ -170,10 +186,10 @@ def make_service_config(
         cmd=cmd,
         env_vars={
             "OP_SIGNER_RPC_PORT": str(HTTP_PORT_NUM),
-            "OP_SIGNER_TLS_ENABLED": "false",
             "OP_SIGNER_SERVICE_CONFIG": "{0}/{1}".format(CONFIG_DIRPATH_ON_SERVICE, CONFIG_FILE_NAME)
         },
         files={
+            TLS_DIR: tls_artifact,
             CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
             CLIENT_KEY_DIRPATH_ON_SERVICE: Directory(
                 artifact_names=[
@@ -185,7 +201,98 @@ def make_service_config(
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
 
-def configure_op_signer(cmd, signer_service, client_address):
-    cmd.append("--signer.tls.enabled=false")
+def configure_op_signer(cmd, files, signer_service, client):
     cmd.append("--signer.endpoint=" + util.make_service_http_url(signer_service))
-    cmd.append("--signer.address=" + client_address)
+    cmd.append("--signer.address=" + client.address)
+
+    files[TLS_DIR] = client.tls_artifact
+
+def make_client(client_type, client_name):
+    return struct(
+        name = client_type,
+        hostname = client_name,
+    )
+
+
+def make_populated_client(client, key, address, tls_artifact):
+    return struct(
+        name = client.name,
+        hostname = client.hostname,
+        key = key,
+        address = address,
+        tls_artifact = tls_artifact
+    )
+
+
+def generate_credentials(plan, args, store):
+    gen_script = "gen-local-creds.sh"
+    script_path = "/{0}".format(gen_script)
+
+    # no way to avoid having to upload the script every time currently
+
+    # script_artifact_name = "{0}-gen-creds".format(SERVICE_NAME)
+
+    # script_artifact = plan.get_files_artifact(name=script_artifact_name)
+    # if script_artifact == None:
+    script_artifact = plan.upload_files(
+        src="github.com/ethereum-optimism/infra/op-signer/{0}@edobry/op-signer-gen-creds".format(gen_script),
+        # name=script_artifact_name,
+    )
+
+    cmds = [
+        "chmod +x {0}".format(script_path),
+        "{0} {1}".format(script_path, " ".join(args)),
+    ]
+    
+    return plan.run_sh(
+        description="Generate signer credentials",
+        image="alpine/openssl:3.3.3",
+        files={
+            script_path: script_artifact,
+        },
+        env_vars={
+            "OP_SIGNER_GEN_TLS_DOCKER": "false",
+        },
+        run=util.join_cmds(cmds),
+        store=store
+    ).files_artifacts
+
+
+def generate_client_creds(plan, network_params, deployment_output, clients):
+    client_tls_artifacts = generate_credentials(
+        plan,
+        ["client_tls"] + [client.hostname for client in clients],
+        [
+            StoreSpec(
+                src="{0}/{1}".format(GENERATE_CREDS_DIR, client.hostname),
+                name="{0}-creds".format(client.hostname),
+            ) for client in clients
+        ]
+    )
+    
+    client_map = {}
+
+    for client_num, client in enumerate(clients):
+        private_key = util.read_service_private_key(
+            plan,
+            deployment_output,
+            client.name,
+            network_params,
+        )
+
+        address = util.read_service_network_config_value(
+            plan,
+            deployment_output,
+            client.name,
+            network_params,
+            ".address",
+        )
+
+        client_map[client.name] = make_populated_client(
+            client,
+            private_key,
+            address,
+            client_tls_artifacts[client_num]
+        )
+
+    return client_map
