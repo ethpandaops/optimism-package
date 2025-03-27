@@ -36,20 +36,21 @@ def launch(
     challenger_params,
     interop_params,
     observability_helper,
+    prestates_url=None,
 ):
     config = get_challenger_config(
-        plan,
-        l2_num,
-        service_name,
-        image,
-        el_context,
-        cl_context,
-        l1_config_env_vars,
-        deployment_output,
-        network_params,
-        challenger_params,
-        interop_params,
-        observability_helper,
+        plan=plan,
+        l2_num=l2_num,
+        image=image,
+        el_context=el_context,
+        cl_context=cl_context,
+        l1_config_env_vars=l1_config_env_vars,
+        deployment_output=deployment_output,
+        network_params=network_params,
+        challenger_params=challenger_params,
+        interop_params=interop_params,
+        observability_helper=observability_helper,
+        prestates_url=prestates_url,
     )
 
     service = plan.add_service(service_name, config)
@@ -58,13 +59,12 @@ def launch(
         observability_helper, service, network_params.network
     )
 
-    return "op_challenger"
+    return "op-challenger"
 
 
 def get_challenger_config(
     plan,
     l2_num,
-    service_name,
     image,
     el_context,
     cl_context,
@@ -74,6 +74,7 @@ def get_challenger_config(
     challenger_params,
     interop_params,
     observability_helper,
+    prestates_url,
 ):
     ports = dict(get_used_ports())
 
@@ -131,22 +132,12 @@ def get_challenger_config(
         # Tracked at issue https://github.com/ethpandaops/optimism-package/issues/189
         cmd.append("--cannon-depset-config=dummy-file.json")
 
-    if (
-        challenger_params.cannon_prestate_path
-        and challenger_params.cannon_prestates_url
-    ):
-        fail("Only one of cannon_prestate_path and cannon_prestates_url can be set")
-    elif challenger_params.cannon_prestate_path:
-        cannon_prestate_artifact = plan.upload_files(
-            src=challenger_params.cannon_prestate_path,
-            name="{}-prestates".format(service_name),
+    cmd.append(
+        get_prestates_flag(
+            prestates_url,
+            challenger_params,
         )
-        files["/prestates"] = cannon_prestate_artifact
-        cmd.append("--cannon-prestate=/prestates/prestate-proof.json")
-    elif challenger_params.cannon_prestates_url:
-        cmd.append("--cannon-prestates-url=" + challenger_params.cannon_prestates_url)
-    else:
-        fail("One of cannon_prestate_path or cannon_prestates_url must be set")
+    )
 
     cmd += challenger_params.extra_params
     cmd = "mkdir -p {0} && {1}".format(
@@ -161,3 +152,21 @@ def get_challenger_config(
         files=files,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
+
+
+def get_prestates_flag(prestates_url, challenger_params):
+    if (
+        challenger_params.cannon_prestate_path
+        and challenger_params.cannon_prestates_url
+    ):
+        fail("Only one of cannon_prestate_path and cannon_prestates_url can be set")
+
+    if prestates_url:
+        # this takes precedence over cannon_prestate_path and cannon_prestates_url
+        return "--cannon-prestates-url=" + prestates_url
+
+    if challenger_params.cannon_prestate_path:
+        return "--cannon-prestate=/prestates/prestate-proof.json"
+
+    # we have default for cannon_prestates_url, so it's a safe fallback
+    return "--cannon-prestates-url=" + challenger_params.cannon_prestates_url
