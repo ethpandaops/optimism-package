@@ -32,8 +32,7 @@ def launch(
     el_context,
     cl_context,
     l1_config_env_vars,
-    signer_service,
-    signer_client,
+    signer_context,
     game_factory_address,
     deployment_output,
     network_params,
@@ -60,8 +59,7 @@ def launch(
             el_context,
             cl_context,
             l1_config_env_vars,
-            signer_service,
-            signer_client,
+            signer_context,
             game_factory_address,
             deployment_output,
             network_params,
@@ -84,8 +82,7 @@ def make_service_config(
     el_context,
     cl_context,
     l1_config_env_vars,
-    signer_service,
-    signer_client,
+    signer_context,
     game_factory_address,
     deployment_output,
     network_params,
@@ -112,7 +109,7 @@ def make_service_config(
         "--l1-beacon=" + l1_config_env_vars["CL_RPC_URL"],
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--l2-eth-rpc=" + el_context.rpc_http_url,
-        "--private-key=" + signer_client.key,
+        "--private-key=" + signer_context.clients[SERVICE_TYPE].key,
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--trace-type=" + ",".join(challenger_params.cannon_trace_types),
     ]
@@ -125,7 +122,7 @@ def make_service_config(
 
     # apply customizations
 
-    op_signer_launcher.configure_op_signer(cmd, files, signer_service, signer_client)
+    op_signer_launcher.configure_op_signer(cmd, files, signer_context, SERVICE_TYPE)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
