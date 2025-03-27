@@ -1,5 +1,4 @@
 constants = import_module("../package_io/constants.star")
-SERVICE_NAME = "op-transaction-fuzzer"
 
 # The min/max CPU/memory that tx-fuzzer can use
 MIN_CPU = 100
@@ -8,8 +7,9 @@ MIN_MEMORY = 20
 MAX_MEMORY = 300
 
 
-def launch_transaction_fuzzer(
+def launch(
     plan,
+    service_name,
     el_uri,
     tx_fuzzer_params,
     global_node_selectors,
@@ -19,7 +19,7 @@ def launch_transaction_fuzzer(
         tx_fuzzer_params,
         global_node_selectors,
     )
-    plan.add_service(SERVICE_NAME, config)
+    plan.add_service(service_name, config)
 
 
 def get_config(

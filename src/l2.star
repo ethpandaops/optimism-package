@@ -107,8 +107,9 @@ def launch_l2(
                 all_el_contexts[0].ip_addr,
                 all_el_contexts[0].rpc_port_num,
             )
-            tx_fuzzer.launch_transaction_fuzzer(
+            tx_fuzzer.launch(
                 plan,
+                "op-transaction-fuzzer-{0}".format(chain.network_params.name),
                 fuzz_target,
                 tx_fuzzer_params,
                 global_node_selectors,
