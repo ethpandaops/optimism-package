@@ -87,3 +87,6 @@ yarn-error.log
 
 # enclave dumps
 dump/
+
+# kurtosis-test temporary files
+.kurtosis-test
