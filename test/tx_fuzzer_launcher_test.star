@@ -64,6 +64,6 @@ def test_launch_with_defaults(plan):
         [
             "/tx-fuzz.bin spam --rpc=EL_RPC_URL --sk={}".format(
                 constants.dev_accounts[0]["private_key"]
-            )"
+            )
         ],
     )
