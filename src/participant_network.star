@@ -77,8 +77,10 @@ def launch_participant_network(
         observability_helper,
     )
 
-    signer_clients = op_signer_launcher.generate_client_creds(
+    # signer needs to start before its clients
+    signer_context = op_signer_launcher.launch(
         plan,
+        chain_args.signer_params,
         network_params,
         deployment_output,
         [
@@ -93,18 +95,8 @@ def launch_participant_network(
             op_signer_launcher.make_client(
                 op_challenger_launcher.SERVICE_TYPE,
                 op_challenger_launcher.SERVICE_NAME,
-            )
-            if challenger_params.enabled
-            else None,
+            ) if challenger_params.enabled else None,
         ],
-    )
-
-    # signer needs to start before its clients
-    signer_service = op_signer_launcher.launch(
-        plan,
-        chain_args.signer_params,
-        network_params,
-        signer_clients,
         observability_helper,
     )
 
@@ -113,8 +105,7 @@ def launch_participant_network(
         all_el_contexts[0],
         all_cl_contexts[0],
         l1_config_env_vars,
-        signer_service,
-        signer_clients[op_batcher_launcher.SERVICE_TYPE],
+        signer_context,
         batcher_params,
         network_params,
         observability_helper,
@@ -131,8 +122,7 @@ def launch_participant_network(
         plan,
         all_cl_contexts[0],
         l1_config_env_vars,
-        signer_service,
-        signer_clients[op_proposer_launcher.SERVICE_TYPE],
+        signer_context,
         game_factory_address,
         proposer_params,
         network_params,
@@ -145,8 +135,7 @@ def launch_participant_network(
             all_el_contexts[0],
             all_cl_contexts[0],
             l1_config_env_vars,
-            signer_service,
-            signer_clients[op_challenger_launcher.SERVICE_TYPE],
+            signer_context,
             game_factory_address,
             deployment_output,
             network_params,

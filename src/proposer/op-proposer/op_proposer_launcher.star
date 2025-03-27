@@ -43,8 +43,7 @@ def launch(
     plan,
     cl_context,
     l1_config_env_vars,
-    signer_service,
-    signer_client,
+    signer_context,
     game_factory_address,
     proposer_params,
     network_params,
@@ -60,8 +59,7 @@ def launch(
             plan,
             cl_context,
             l1_config_env_vars,
-            signer_service,
-            signer_client,
+            signer_context,
             game_factory_address,
             proposer_params,
             observability_helper,
@@ -79,8 +77,7 @@ def make_service_config(
     plan,
     cl_context,
     l1_config_env_vars,
-    signer_service,
-    signer_client,
+    signer_context,
     game_factory_address,
     proposer_params,
     observability_helper,
@@ -105,7 +102,7 @@ def make_service_config(
 
     # apply customizations
 
-    op_signer_launcher.configure_op_signer(cmd, files, signer_service, signer_client)
+    op_signer_launcher.configure_op_signer(cmd, files, signer_context, SERVICE_TYPE)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)

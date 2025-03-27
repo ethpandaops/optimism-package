@@ -42,8 +42,7 @@ def launch(
     el_context,
     cl_context,
     l1_config_env_vars,
-    signer_service,
-    signer_client,
+    signer_context,
     batcher_params,
     network_params,
     observability_helper,
@@ -60,8 +59,7 @@ def launch(
             el_context,
             cl_context,
             l1_config_env_vars,
-            signer_service,
-            signer_client,
+            signer_context,
             batcher_params,
             observability_helper,
             da_server_context,
@@ -80,8 +78,7 @@ def make_service_config(
     el_context,
     cl_context,
     l1_config_env_vars,
-    signer_service,
-    signer_client,
+    signer_context,
     batcher_params,
     observability_helper,
     da_server_context,
@@ -99,7 +96,7 @@ def make_service_config(
         "--resubmission-timeout=30s",
         "--max-channel-duration=1",
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
-        "--private-key=" + signer_client.key,
+        "--private-key=" + signer_context.clients[SERVICE_TYPE].key,
         # da commitments currently have to be sent as calldata to the batcher inbox
         "--data-availability-type="
         + ("calldata" if da_server_context.enabled else "blobs"),
@@ -115,7 +112,7 @@ def make_service_config(
     # apply customizations
 
     util.configure_op_service_rpc(cmd, HTTP_PORT_NUM)
-    op_signer_launcher.configure_op_signer(cmd, files, signer_service, signer_client)
+    op_signer_launcher.configure_op_signer(cmd, files, signer_context, SERVICE_TYPE)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)

@@ -22,7 +22,6 @@ TEMPLATES_FILEPATH = "./templates"
 CONFIG_FILE_NAME = "config.yaml"
 CONFIG_TEMPLATE_FILEPATH = "{0}/{1}.tmpl".format(TEMPLATES_FILEPATH, CONFIG_FILE_NAME)
 
-GENERATE_CREDS_DIR = "/creds"
 TLS_DIR = "/tls"
 CONFIG_DIRPATH_ON_SERVICE = "/config"
 CLIENT_KEY_DIRPATH_ON_SERVICE = "/keys"
@@ -43,6 +42,7 @@ def launch(
     plan,
     signer_params,
     network_params,
+    deployment_output,
     clients,
     observability_helper,
 ):
@@ -50,15 +50,23 @@ def launch(
         SERVICE_NAME, network_params
     )
 
-    tls_artifact = create_tls_artifact(
+    signer_tls_artifact = create_tls_artifact(
         plan,
         service_instance_name,
+    )
+
+    populated_clients = generate_client_creds(
+        plan,
+        network_params,
+        deployment_output,
+        signer_tls_artifact,
+        clients
     )
 
     client_key_artifacts = create_key_artifacts(
         plan,
         service_instance_name,
-        clients,
+        populated_clients,
     )
 
     config_artifact_name = create_config_artifact(
@@ -73,7 +81,7 @@ def launch(
         make_service_config(
             plan,
             signer_params,
-            tls_artifact,
+            signer_tls_artifact,
             config_artifact_name,
             client_key_artifacts,
             observability_helper,
@@ -84,7 +92,10 @@ def launch(
         observability_helper, service, network_params.network
     )
 
-    return service
+    return struct(
+        service=service,
+        clients=populated_clients,
+    )
 
 
 def create_tls_artifact(
@@ -96,7 +107,7 @@ def create_tls_artifact(
         ["ca"],
         [
             StoreSpec(
-                src=GENERATE_CREDS_DIR, name="{0}-tls".format(service_instance_name)
+                src=TLS_DIR, name="{0}-tls".format(service_instance_name)
             )
         ],
     )[0]
@@ -217,9 +228,9 @@ def make_service_config(
     )
 
 
-def configure_op_signer(cmd, files, signer_service, client):
-    cmd.append("--signer.endpoint=" + util.make_service_http_url(signer_service))
-    cmd.append("--signer.address=" + client.address)
+def configure_op_signer(cmd, files, signer_context, client_type):
+    cmd.append("--signer.endpoint=" + util.make_service_http_url(signer_context.service))
+    cmd.append("--signer.address=" + signer_context.clients[client_type].address)
 
     files[TLS_DIR] = client.tls_artifact
 
@@ -241,9 +252,9 @@ def make_populated_client(client, key, address, tls_artifact):
     )
 
 
-def generate_credentials(plan, args, store):
+def generate_credentials(plan, args, store, files={}):
     gen_script = "gen-local-creds.sh"
-    script_path = "/{0}".format(gen_script)
+    script_path = "/script/{0}".format(gen_script)
 
     # no way to avoid having to upload the script every time currently
 
@@ -252,7 +263,7 @@ def generate_credentials(plan, args, store):
     # script_artifact = plan.get_files_artifact(name=script_artifact_name)
     # if script_artifact == None:
     script_artifact = plan.upload_files(
-        src="github.com/ethereum-optimism/infra/op-signer/{0}@edobry/op-signer-gen-creds".format(
+        src="github.com/ethereum-optimism/infra/op-signer/{0}@edobry/op-signer-gen-tls".format(
             gen_script
         ),
         # name=script_artifact_name,
@@ -267,8 +278,8 @@ def generate_credentials(plan, args, store):
         description="Generate signer credentials",
         image="alpine/openssl:3.3.3",
         files={
-            script_path: script_artifact,
-        },
+            "/script": script_artifact,
+        } | files,
         env_vars={
             "OP_SIGNER_GEN_TLS_DOCKER": "false",
         },
@@ -277,17 +288,18 @@ def generate_credentials(plan, args, store):
     ).files_artifacts
 
 
-def generate_client_creds(plan, network_params, deployment_output, clients):
+def generate_client_creds(plan, network_params, deployment_output, signer_tls_artifact, clients):
     client_tls_artifacts = generate_credentials(
         plan,
         ["client_tls"] + [client.hostname for client in clients],
         [
             StoreSpec(
-                src="{0}/{1}".format(GENERATE_CREDS_DIR, client.hostname),
+                src="{0}/{1}".format(TLS_DIR, client.hostname),
                 name="{0}-creds".format(client.hostname),
             )
             for client in clients
         ],
+        files={ TLS_DIR: signer_tls_artifact },
     )
 
     client_map = {}
