@@ -107,25 +107,12 @@ def create_tls_artifacts(
     plan,
     service_instance_name,
 ):
-    signer_ca = generate_credentials(
-        plan,
-        ["ca"],
-        [
-            StoreSpec(
-                src=TLS_DIR, name="{0}-tls-ca".format(service_instance_name)
-            )
-        ],
-    )[0]
+    signer_ca = generate_ca(plan, service_instance_name)
     
-    signer_tls = generate_credentials(
+    signer_tls = generate_client_tls(
         plan,
-        ["client_tls", service_instance_name],
-        [
-            StoreSpec(
-                src="{0}/{1}".format(TLS_DIR, service_instance_name), name="{0}-tls".format(service_instance_name)
-            )
-        ],
-        files={ TLS_DIR: signer_ca },
+        signer_ca,
+        [service_instance_name],
     )[0]
 
     return signer_ca, signer_tls
@@ -325,22 +312,43 @@ def generate_credentials(plan, args, store, files={}):
     ).files_artifacts
 
 
-def generate_client_creds(plan, network_params, deployment_output, signer_tls_artifact, client_map):
+def generate_ca(plan, service_instance_name):
+    return generate_credentials(
+        plan,
+        ["ca"],
+        [
+            StoreSpec(
+                src="{0}/*".format(TLS_DIR),
+                name="{0}-tls-ca".format(service_instance_name)
+            )
+        ],
+    )[0]
+
+
+def generate_client_tls(plan, signer_ca_artifact, client_hostnames):
+    return generate_credentials(
+        plan,
+        ["client_tls"] + client_hostnames,
+        [
+            StoreSpec(
+                src="{0}/{1}/*".format(TLS_DIR, client),
+                name="{0}-tls".format(client),
+            )
+            for client in client_hostnames
+        ],
+        files={ TLS_DIR: signer_ca_artifact },
+    )
+
+
+def generate_client_creds(plan, network_params, deployment_output, signer_ca_artifact, client_map):
     clients = []
     for client_type, client_name in client_map.items():
         clients.append(make_client(client_type, util.make_service_instance_name(client_name, network_params)))
 
-    client_tls_artifacts = generate_credentials(
+    client_tls_artifacts = generate_client_tls(
         plan,
-        ["client_tls"] + [client.hostname for client in clients],
-        [
-            StoreSpec(
-                src="{0}/{1}".format(TLS_DIR, client.hostname),
-                name="{0}-creds".format(client.hostname),
-            )
-            for client in clients
-        ],
-        files={ TLS_DIR: signer_tls_artifact },
+        signer_ca_artifact,
+        [client.hostname for client in clients],
     )
 
     client_map = {}
