@@ -32,6 +32,7 @@ def launch_participant_network(
     observability_helper,
     interop_params,
     da_server_context,
+    custom_launchers,
 ):
     num_participants = len(participants)
     # First EL and sequencer CL
@@ -53,6 +54,7 @@ def launch_participant_network(
         observability_helper,
         interop_params,
         da_server_context,
+        custom_launchers,
     )
 
     all_participants = []
