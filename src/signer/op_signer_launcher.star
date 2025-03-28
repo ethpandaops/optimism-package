@@ -23,6 +23,9 @@ CONFIG_FILE_NAME = "config.yaml"
 CONFIG_TEMPLATE_FILEPATH = "{0}/{1}.tmpl".format(TEMPLATES_FILEPATH, CONFIG_FILE_NAME)
 
 TLS_DIR = "/tls"
+TLS_CA_PATH = "{0}/ca.crt".format(TLS_DIR)
+TLS_CERT_PATH = "{0}/tls.crt".format(TLS_DIR)
+TLS_KEY_PATH = "{0}/tls.key".format(TLS_DIR)
 CONFIG_DIRPATH_ON_SERVICE = "/config"
 CLIENT_KEY_DIRPATH_ON_SERVICE = "/keys"
 
@@ -50,7 +53,7 @@ def launch(
         SERVICE_NAME, network_params
     )
 
-    signer_tls_artifact = create_tls_artifact(
+    signer_ca_artifact, signer_tls_artifact = create_tls_artifacts(
         plan,
         service_instance_name,
     )
@@ -59,7 +62,7 @@ def launch(
         plan,
         network_params,
         deployment_output,
-        signer_tls_artifact,
+        signer_ca_artifact,
         clients
     )
 
@@ -81,6 +84,7 @@ def launch(
         make_service_config(
             plan,
             signer_params,
+            signer_ca_artifact,
             signer_tls_artifact,
             config_artifact_name,
             client_key_artifacts,
@@ -95,22 +99,36 @@ def launch(
     return struct(
         service=service,
         clients=populated_clients,
+        ca_artifact=signer_ca_artifact,
     )
 
 
-def create_tls_artifact(
+def create_tls_artifacts(
     plan,
     service_instance_name,
 ):
-    return generate_credentials(
+    signer_ca = generate_credentials(
         plan,
         ["ca"],
         [
             StoreSpec(
-                src=TLS_DIR, name="{0}-tls".format(service_instance_name)
+                src=TLS_DIR, name="{0}-tls-ca".format(service_instance_name)
             )
         ],
     )[0]
+    
+    signer_tls = generate_credentials(
+        plan,
+        ["client_tls", service_instance_name],
+        [
+            StoreSpec(
+                src="{0}/{1}".format(TLS_DIR, service_instance_name), name="{0}-tls".format(service_instance_name)
+            )
+        ],
+        files={ TLS_DIR: signer_ca },
+    )[0]
+
+    return signer_ca, signer_tls
 
 
 def create_key_artifacts(
@@ -188,6 +206,7 @@ def create_config_artifact(
 def make_service_config(
     plan,
     signer_params,
+    ca_artifact,
     tls_artifact,
     config_artifact_name,
     client_key_artifacts,
@@ -209,13 +228,21 @@ def make_service_config(
         ports=ports,
         cmd=cmd,
         env_vars={
+            "OP_SIGNER_TLS_CA": TLS_CA_PATH,
+            "OP_SIGNER_TLS_CERT": TLS_CERT_PATH,
+            "OP_SIGNER_TLS_KEY": TLS_KEY_PATH,
             "OP_SIGNER_RPC_PORT": str(HTTP_PORT_NUM),
             "OP_SIGNER_SERVICE_CONFIG": "{0}/{1}".format(
                 CONFIG_DIRPATH_ON_SERVICE, CONFIG_FILE_NAME
             ),
         },
         files={
-            TLS_DIR: tls_artifact,
+            TLS_DIR: Directory(
+                artifact_names=[
+                    ca_artifact,
+                    tls_artifact,
+                ]
+            ),
             CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
             CLIENT_KEY_DIRPATH_ON_SERVICE: Directory(
                 artifact_names=[
@@ -229,10 +256,19 @@ def make_service_config(
 
 
 def configure_op_signer(cmd, files, signer_context, client_type):
-    cmd.append("--signer.endpoint=" + util.make_service_http_url(signer_context.service))
-    cmd.append("--signer.address=" + signer_context.clients[client_type].address)
+    client = signer_context.clients[client_type]
 
-    files[TLS_DIR] = client.tls_artifact
+    cmd.append("--signer.tls.cert=" + TLS_CERT_PATH)
+    cmd.append("--signer.tls.key=" + TLS_KEY_PATH)
+    cmd.append("--signer.endpoint=" + util.make_service_https_url(signer_context.service))
+    cmd.append("--signer.address=" + client.address)
+
+    files[TLS_DIR] = Directory(
+        artifact_names=[
+            client.tls_artifact,
+            signer_context.ca_artifact,
+        ]
+    )
 
 
 def make_client(client_type, client_name):
@@ -272,6 +308,7 @@ def generate_credentials(plan, args, store, files={}):
     cmds = [
         "chmod +x {0}".format(script_path),
         "{0} {1}".format(script_path, " ".join(args)),
+        "chmod 666 {0}/*".format(TLS_DIR),
     ]
 
     return plan.run_sh(
@@ -288,7 +325,11 @@ def generate_credentials(plan, args, store, files={}):
     ).files_artifacts
 
 
-def generate_client_creds(plan, network_params, deployment_output, signer_tls_artifact, clients):
+def generate_client_creds(plan, network_params, deployment_output, signer_tls_artifact, client_map):
+    clients = []
+    for client_type, client_name in client_map.items():
+        clients.append(make_client(client_type, util.make_service_instance_name(client_name, network_params)))
+
     client_tls_artifacts = generate_credentials(
         plan,
         ["client_tls"] + [client.hostname for client in clients],
