@@ -90,7 +90,7 @@ def make_service_config(
         "--rpc.port=" + str(HTTP_PORT_NUM),
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--game-factory-address=" + str(game_factory_address),
-        "--private-key=" + signer_client.key,
+        "--private-key=" + signer_context.clients[SERVICE_TYPE].key,
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--allow-non-finalized=true",
         "--game-type={0}".format(proposer_params.game_type),

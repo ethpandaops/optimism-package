@@ -83,20 +83,12 @@ def launch_participant_network(
         chain_args.signer_params,
         network_params,
         deployment_output,
-        [
-            op_signer_launcher.make_client(
-                op_batcher_launcher.SERVICE_TYPE,
-                op_batcher_launcher.SERVICE_NAME,
-            ),
-            op_signer_launcher.make_client(
-                op_proposer_launcher.SERVICE_TYPE,
-                op_proposer_launcher.SERVICE_NAME,
-            ),
-            op_signer_launcher.make_client(
-                op_challenger_launcher.SERVICE_TYPE,
-                op_challenger_launcher.SERVICE_NAME,
-            ) if challenger_params.enabled else None,
-        ],
+        {
+            op_batcher_launcher.SERVICE_TYPE: op_batcher_launcher.SERVICE_NAME,
+            op_proposer_launcher.SERVICE_TYPE: op_proposer_launcher.SERVICE_NAME,
+            op_challenger_launcher.SERVICE_TYPE: op_challenger_launcher.SERVICE_NAME
+            if challenger_params.enabled else None,
+        },
         observability_helper,
     )
 
