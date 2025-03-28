@@ -151,7 +151,7 @@ def make_ws_url(host, port_num):
 
 def make_service_url_authority(service, port_id):
     return make_url_authority(
-        service.ip_address, get_service_port_num(service, port_id)
+        service.hostname, get_service_port_num(service, port_id)
     )
 
 
