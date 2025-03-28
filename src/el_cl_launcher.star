@@ -134,7 +134,15 @@ def launch(
     }
 
     if custom_launchers and "el_builder_launcher" in custom_launchers:
-        el_builder_launchers["custom"] = custom_launchers["el_builder_launcher"]
+        el_builder_launchers["custom"] = {
+            "launcher": custom_launchers["el_builder_launcher"]["launcher"](
+                deployment_output,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": custom_launchers["el_builder_launcher"]["launch_method"]
+        }
 
     cl_launchers = {
         "op-node": {
