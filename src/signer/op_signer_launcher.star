@@ -302,7 +302,7 @@ def generate_credentials(plan, args, store, files={}):
     cmds = [
         "chmod +x {0}".format(script_path),
         "{0} {1}".format(script_path, " ".join(args)),
-        "chmod 666 {0}/*".format(TLS_DIR),
+        "chmod -R 777 {0}/".format(TLS_DIR),
     ]
 
     return plan.run_sh(
