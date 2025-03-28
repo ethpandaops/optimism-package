@@ -17,7 +17,7 @@ ethereum_package_static_files = import_module(
 )
 
 
-def run(plan, args={}):
+def run(plan, args={}, custom_launchers=None):
     """Deploy Optimism L2s on an Ethereum L1.
 
     Args:
@@ -120,6 +120,7 @@ def run(plan, args={}):
                 persistent,
                 observability_helper,
                 interop_params,
+                custom_launchers
             )
         )
 
