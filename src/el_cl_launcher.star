@@ -49,6 +49,7 @@ def launch(
     observability_helper,
     supervisors_params,
     da_server_context,
+    custom_launchers,
     registry=_registry.Registry(),
 ):
     el_launchers = {
@@ -99,6 +100,9 @@ def launch(
         },
     }
 
+    if custom_launchers and "el_launcher" in custom_launchers:
+        el_launchers["custom"] = custom_launchers["el_launcher"]
+
     el_builder_launchers = {
         "op-geth": {
             "launcher": op_geth_builder.new_op_geth_builder_launcher(
@@ -129,6 +133,9 @@ def launch(
         },
     }
 
+    if custom_launchers and "el_builder_launcher" in custom_launchers:
+        el_builder_launchers["custom"] = custom_launchers["el_builder_launcher"]
+
     cl_launchers = {
         "op-node": {
             "launcher": op_node.new_op_node_launcher(
@@ -150,6 +157,9 @@ def launch(
         },
     }
 
+    if custom_launchers and "cl_launcher" in custom_launchers:
+        cl_launchers["custom"] = custom_launchers["cl_launcher"]
+
     cl_builder_launchers = {
         "op-node": {
             "launcher": op_node_builder.new_op_node_builder_launcher(
@@ -158,6 +168,9 @@ def launch(
             "launch_method": op_node_builder.launch,
         },
     }
+
+    if custom_launchers and "cl_builder_launcher" in custom_launchers:
+        cl_builder_launchers["custom"] = custom_launchers["cl_builder_launcher"]
 
     sidecar_launchers = {
         "rollup-boost": {
@@ -170,6 +183,9 @@ def launch(
             "launch_method": rollup_boost.launch,
         }
     }
+
+    if custom_launchers and "sidecar_launcher" in custom_launchers:
+        sidecar_launchers["custom"] = custom_launchers["sidecar_launcher"]
 
     all_cl_contexts = []
     all_el_contexts = []

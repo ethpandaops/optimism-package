@@ -73,6 +73,7 @@ def test_launch_with_defaults(plan):
         observability_helper=observability_helper,
         supervisors_params=parsed_input_args.supervisors,
         da_server_context=da_server_context,
+        custom_launchers=None
     )
 
     el_service_name = "op-el-2151908-1-op-reth-op-node-"
@@ -205,6 +206,7 @@ def test_launch_with_el_op_besu(plan):
         observability_helper=observability_helper,
         supervisors_params=parsed_input_args.supervisors,
         da_server_context=da_server_context,
+        custom_launchers=None
     )
 
     el_service_name = "op-el-2151908-1-op-besu-op-node-"
@@ -257,6 +259,96 @@ def test_launch_with_el_op_besu(plan):
                 ]
             )
         ],
+    )
+
+def test_launch_with_custom_launcher(plan):
+    parsed_input_args = input_parser.input_parser(
+        plan,
+        {
+            "chains": [
+                {
+                    "participants": [
+                        {
+                            "el_type": "custom",
+                            "el_image": "op-reth:latest",
+                            "cl_type": "op-node",
+                            "cl_image": "op-node:latest",
+                        }
+                    ]
+                }
+            ]
+        },
+    )
+
+    observability_helper = observability.make_helper(parsed_input_args.observability)
+    chains = parsed_input_args.chains
+    chain = chains[0]
+
+    # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
+    sequencer_private_key_mock = "sequencer_private_key"
+    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+        sequencer_private_key_mock
+    )
+
+    all_el_contexts, all_cl_contexts = el_cl_launcher.launch(
+        plan=plan,
+        jwt_file=jwt_file,
+        network_params=chain.network_params,
+        mev_params=chain.mev_params,
+        deployment_output=deployment_output,
+        participants=chain.participants,
+        num_participants=len(chains),
+        l1_config_env_vars=l1_config_env_vars,
+        l2_services_suffix="",
+        global_log_level="info",
+        global_node_selectors=[],
+        global_tolerations=[],
+        persistent=False,
+        additional_services=[],
+        observability_helper=observability_helper,
+        interop_params=parsed_input_args.interop,
+        da_server_context=da_server_context,
+        custom_launchers={
+            "el_launcher": {
+                "launcher": {},
+                "launch_method": custom_launch,
+            },
+        }
+    )
+
+    el_service_name = "custom-launcher"
+    el_service = plan.get_service(el_service_name)
+    el_service_config = kurtosistest.get_service_config(el_service_name)
+
+    expect.eq(el_service_config.image, "custom-image")
+
+    pass
+
+def custom_launch(
+    plan,
+    launcher,
+    service_name,
+    participant,
+    global_log_level,
+    persistent,
+    tolerations,
+    node_selectors,
+    existing_el_clients,
+    sequencer_enabled,
+    sequencer_context,
+    observability_helper,
+    interop_params,
+):
+    plan.add_service("custom-launcher", ServiceConfig(
+        image = "custom-image"
+    ))
+
+    # Just some mocked data that's used in other parts of the codebase
+    return struct(
+        client_name="custom",
+        el_metrics_info=[],
+        ip_addr="192.168.0.1",
+        engine_rpc_port_num=123,
     )
 
     # TODO Once files are available on kurtosistest.get_service_config, make sure the JWT file is being mounted
