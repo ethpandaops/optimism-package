@@ -59,11 +59,7 @@ def launch(
     )
 
     populated_clients = generate_client_creds(
-        plan,
-        network_params,
-        deployment_output,
-        signer_ca_artifact,
-        clients
+        plan, network_params, deployment_output, signer_ca_artifact, clients
     )
 
     client_key_artifacts = create_key_artifacts(
@@ -108,7 +104,7 @@ def create_tls_artifacts(
     service_instance_name,
 ):
     signer_ca = generate_ca(plan, service_instance_name)
-    
+
     signer_tls = generate_client_tls(
         plan,
         signer_ca,
@@ -246,7 +242,9 @@ def configure_op_signer(cmd, files, signer_context, client_type):
     cmd.append("--signer.tls.ca=" + TLS_CA_PATH)
     cmd.append("--signer.tls.cert=" + TLS_CERT_PATH)
     cmd.append("--signer.tls.key=" + TLS_KEY_PATH)
-    cmd.append("--signer.endpoint=" + util.make_service_https_url(signer_context.service))
+    cmd.append(
+        "--signer.endpoint=" + util.make_service_https_url(signer_context.service)
+    )
     cmd.append("--signer.address=" + client.address)
 
     configure_tls_files(
@@ -310,7 +308,8 @@ def generate_credentials(plan, args, store, files={}):
         image="alpine/openssl:3.3.3",
         files={
             "/script": script_artifact,
-        } | files,
+        }
+        | files,
         env_vars={
             "OP_SIGNER_GEN_TLS_DOCKER": "false",
             "TLS_DIR": TLS_DIR,
@@ -327,7 +326,7 @@ def generate_ca(plan, service_instance_name):
         [
             StoreSpec(
                 src="{0}/*".format(TLS_DIR),
-                name="{0}-tls-ca".format(service_instance_name)
+                name="{0}-tls-ca".format(service_instance_name),
             )
         ],
     )[0]
@@ -344,14 +343,21 @@ def generate_client_tls(plan, signer_ca_artifact, client_hostnames):
             )
             for client in client_hostnames
         ],
-        files={ TLS_DIR: signer_ca_artifact },
+        files={TLS_DIR: signer_ca_artifact},
     )
 
 
-def generate_client_creds(plan, network_params, deployment_output, signer_ca_artifact, client_map):
+def generate_client_creds(
+    plan, network_params, deployment_output, signer_ca_artifact, client_map
+):
     clients = []
     for client_type, client_name in client_map.items():
-        clients.append(make_client(client_type, util.make_service_instance_name(client_name, network_params)))
+        clients.append(
+            make_client(
+                client_type,
+                util.make_service_instance_name(client_name, network_params),
+            )
+        )
 
     client_tls_artifacts = generate_client_tls(
         plan,
