@@ -150,13 +150,12 @@ def make_ws_url(host, port_num):
 
 
 def make_service_url_authority(service, port_id):
-    return make_url_authority(
-        service.hostname, get_service_port_num(service, port_id)
-    )
+    return make_url_authority(service.hostname, get_service_port_num(service, port_id))
 
 
 def make_service_http_url(service, port_id=constants.HTTP_PORT_ID):
     return prefix_url_scheme_http(make_service_url_authority(service, port_id))
+
 
 def make_service_https_url(service, port_id=constants.HTTP_PORT_ID):
     return prefix_url_scheme_https(make_service_url_authority(service, port_id))
