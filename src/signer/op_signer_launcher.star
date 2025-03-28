@@ -203,7 +203,19 @@ def make_service_config(
 
     cmd = []
 
+    files = {
+        CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
+        CLIENT_KEY_DIRPATH_ON_SERVICE: Directory(
+            artifact_names=[
+                client_key_artifacts[client_hostname].artifact
+                for client_hostname in client_key_artifacts
+            ]
+        ),
+    }
+
     # apply customizations
+
+    configure_tls_files(files, ca_artifact, tls_artifact)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
@@ -214,6 +226,7 @@ def make_service_config(
         image="{0}:{1}".format(signer_params.image, signer_params.tag),
         ports=ports,
         cmd=cmd,
+        files=files,
         env_vars={
             "OP_SIGNER_TLS_CA": TLS_CA_PATH,
             "OP_SIGNER_TLS_CERT": TLS_CERT_PATH,
@@ -223,21 +236,6 @@ def make_service_config(
                 CONFIG_DIRPATH_ON_SERVICE, CONFIG_FILE_NAME
             ),
         },
-        files={
-            TLS_DIR: Directory(
-                artifact_names=[
-                    ca_artifact,
-                    tls_artifact,
-                ]
-            ),
-            CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
-            CLIENT_KEY_DIRPATH_ON_SERVICE: Directory(
-                artifact_names=[
-                    client_key_artifacts[client_hostname].artifact
-                    for client_hostname in client_key_artifacts
-                ]
-            ),
-        },
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
 
@@ -245,15 +243,24 @@ def make_service_config(
 def configure_op_signer(cmd, files, signer_context, client_type):
     client = signer_context.clients[client_type]
 
+    cmd.append("--signer.tls.ca=" + TLS_CA_PATH)
     cmd.append("--signer.tls.cert=" + TLS_CERT_PATH)
     cmd.append("--signer.tls.key=" + TLS_KEY_PATH)
     cmd.append("--signer.endpoint=" + util.make_service_https_url(signer_context.service))
     cmd.append("--signer.address=" + client.address)
 
+    configure_tls_files(
+        files,
+        signer_context.ca_artifact,
+        client.tls_artifact,
+    )
+
+
+def configure_tls_files(files, ca_artifact, tls_artifact):
     files[TLS_DIR] = Directory(
         artifact_names=[
-            client.tls_artifact,
-            signer_context.ca_artifact,
+            ca_artifact,
+            tls_artifact,
         ]
     )
 
@@ -306,6 +313,7 @@ def generate_credentials(plan, args, store, files={}):
         } | files,
         env_vars={
             "OP_SIGNER_GEN_TLS_DOCKER": "false",
+            "TLS_DIR": TLS_DIR,
         },
         run=util.join_cmds(cmds),
         store=store,
