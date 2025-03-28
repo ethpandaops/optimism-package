@@ -73,7 +73,7 @@ def test_launch_with_defaults(plan):
         observability_helper=observability_helper,
         interop_params=parsed_input_args.interop,
         da_server_context=da_server_context,
-        custom_launchers=None
+        custom_launchers=None,
     )
 
     el_service_name = "op-el-1-op-reth-op-node-"
@@ -204,7 +204,7 @@ def test_launch_with_el_op_besu(plan):
         observability_helper=observability_helper,
         interop_params=parsed_input_args.interop,
         da_server_context=da_server_context,
-        custom_launchers=None
+        custom_launchers=None,
     )
 
     el_service_name = "op-el-1-op-besu-op-node-"
@@ -259,6 +259,7 @@ def test_launch_with_el_op_besu(plan):
         ],
     )
 
+
 def test_launch_with_custom_launcher(plan):
     parsed_input_args = input_parser.input_parser(
         plan,
@@ -311,7 +312,7 @@ def test_launch_with_custom_launcher(plan):
                 "launcher": custom_launcher,
                 "launch_method": custom_launch,
             },
-        }
+        },
     )
 
     el_service_name = "custom-launcher"
@@ -322,8 +323,10 @@ def test_launch_with_custom_launcher(plan):
 
     pass
 
+
 def custom_launcher(deployment_output, jwt_file, network, network_id):
     pass
+
 
 def custom_launch(
     plan,
@@ -340,9 +343,7 @@ def custom_launch(
     observability_helper,
     interop_params,
 ):
-    plan.add_service("custom-launcher", ServiceConfig(
-        image = "custom-image"
-    ))
+    plan.add_service("custom-launcher", ServiceConfig(image="custom-image"))
 
     # Just some mocked data that's used in other parts of the codebase
     return struct(

@@ -120,7 +120,7 @@ def run(plan, args={}, custom_launchers=None):
                 persistent,
                 observability_helper,
                 interop_params,
-                custom_launchers
+                custom_launchers,
             )
         )
 

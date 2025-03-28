@@ -104,7 +104,7 @@ def launch(
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": custom_launchers["el_launcher"]["launch_method"]
+            "launch_method": custom_launchers["el_launcher"]["launch_method"],
         }
 
     el_builder_launchers = {
@@ -145,7 +145,7 @@ def launch(
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": custom_launchers["el_builder_launcher"]["launch_method"]
+            "launch_method": custom_launchers["el_builder_launcher"]["launch_method"],
         }
 
     cl_launchers = {
@@ -166,11 +166,9 @@ def launch(
     if custom_launchers and "cl_launcher" in custom_launchers:
         cl_launchers["custom"] = {
             "launcher": custom_launchers["cl_launcher"]["launcher"](
-                deployment_output,
-                jwt_file,
-                network_params
+                deployment_output, jwt_file, network_params
             ),
-            "launch_method": custom_launchers["cl_launcher"]["launch_method"]
+            "launch_method": custom_launchers["cl_launcher"]["launch_method"],
         }
 
     cl_builder_launchers = {
@@ -185,11 +183,9 @@ def launch(
     if custom_launchers and "cl_builder_launcher" in custom_launchers:
         cl_builder_launchers["custom"] = {
             "launcher": custom_launchers["cl_builder_launcher"]["launcher"](
-                deployment_output,
-                jwt_file,
-                network_params
+                deployment_output, jwt_file, network_params
             ),
-            "launch_method": custom_launchers["cl_builder_launcher"]["launch_method"]
+            "launch_method": custom_launchers["cl_builder_launcher"]["launch_method"],
         }
 
     sidecar_launchers = {
@@ -212,7 +208,7 @@ def launch(
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": custom_launchers["sidecar_launcher"]["launch_method"]
+            "launch_method": custom_launchers["sidecar_launcher"]["launch_method"],
         }
 
     all_cl_contexts = []
