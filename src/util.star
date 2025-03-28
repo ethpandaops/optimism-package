@@ -2,11 +2,30 @@ constants = import_module("./package_io/constants.star")
 
 DEPLOYMENT_UTILS_IMAGE = "mslipper/deployment-utils:latest"
 
+NETWORK_DATA_DIR = "/network-data"
+
 
 def read_network_config_value(plan, network_config_file, json_file, json_path):
-    mounts = {"/network-data": network_config_file}
+    mounts = {NETWORK_DATA_DIR: network_config_file}
     return read_json_value(
-        plan, "/network-data/{0}.json".format(json_file), json_path, mounts
+        plan, "{0}/{1}.json".format(NETWORK_DATA_DIR, json_file), json_path, mounts
+    )
+
+
+def read_service_network_config_value(
+    plan, network_config_file, service_type, network_params, json_path
+):
+    return read_network_config_value(
+        plan,
+        network_config_file,
+        "{0}-{1}".format(service_type, network_params.network_id),
+        json_path,
+    )
+
+
+def read_service_private_key(plan, network_config_file, service_type, network_params):
+    return read_service_network_config_value(
+        plan, network_config_file, service_type, network_params, ".privateKey"
     )
 
 
@@ -86,6 +105,14 @@ def join_cmds(commands):
     return " && ".join(commands)
 
 
+def make_op_service_name(service_type):
+    return "op-{0}".format(service_type)
+
+
+def make_service_instance_name(service_name, network_params):
+    return "{0}-{1}".format(service_name, network_params.network)
+
+
 def get_service_port_num(service, port_id):
     return service.ports[port_id].number
 
@@ -106,6 +133,10 @@ def prefix_url_scheme_http(authority):
     return prefix_url_scheme("http", authority)
 
 
+def prefix_url_scheme_https(authority):
+    return prefix_url_scheme("https", authority)
+
+
 def prefix_url_scheme_ws(authority):
     return prefix_url_scheme("ws", authority)
 
@@ -119,13 +150,15 @@ def make_ws_url(host, port_num):
 
 
 def make_service_url_authority(service, port_id):
-    return make_url_authority(
-        service.ip_address, get_service_port_num(service, port_id)
-    )
+    return make_url_authority(service.hostname, get_service_port_num(service, port_id))
 
 
 def make_service_http_url(service, port_id=constants.HTTP_PORT_ID):
     return prefix_url_scheme_http(make_service_url_authority(service, port_id))
+
+
+def make_service_https_url(service, port_id=constants.HTTP_PORT_ID):
+    return prefix_url_scheme_https(make_service_url_authority(service, port_id))
 
 
 def make_service_ws_url(service, port_id=constants.WS_PORT_ID):
@@ -144,3 +177,9 @@ def make_execution_rpc_url(el_context):
         el_context.ip_addr,
         el_context.rpc_port_num,
     )
+
+
+def configure_op_service_rpc(cmd, port_num):
+    cmd.append("--rpc.addr=0.0.0.0")
+    cmd.append("--rpc.port={0}".format(port_num))
+    cmd.append("--rpc.enable-admin")
