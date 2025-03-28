@@ -308,7 +308,7 @@ def test_launch_with_custom_launcher(plan):
         da_server_context=da_server_context,
         custom_launchers={
             "el_launcher": {
-                "launcher": {},
+                "launcher": custom_launcher,
                 "launch_method": custom_launch,
             },
         }
@@ -320,6 +320,9 @@ def test_launch_with_custom_launcher(plan):
 
     expect.eq(el_service_config.image, "custom-image")
 
+    pass
+
+def custom_launcher(deployment_output, jwt_file, network, network_id):
     pass
 
 def custom_launch(
@@ -348,5 +351,4 @@ def custom_launch(
         ip_addr="192.168.0.1",
         engine_rpc_port_num=123,
     )
-
     # TODO Once files are available on kurtosistest.get_service_config, make sure the JWT file is being mounted
