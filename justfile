@@ -19,4 +19,4 @@ lint:
     kurtosis-lint \
         --checked-calls \
         --local-imports \
-        main.star src/
+        main.star src/ test/
