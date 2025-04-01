@@ -1,6 +1,4 @@
-transaction_fuzzer = import_module(
-    "/src/transaction_fuzzer/transaction_fuzzer.star"
-)
+transaction_fuzzer = import_module("/src/transaction_fuzzer/transaction_fuzzer.star")
 input_parser = import_module("/src/package_io/input_parser.star")
 observability = import_module("/src/observability/observability.star")
 ethereum_package_constants = import_module(
@@ -47,9 +45,7 @@ def test_launch_with_defaults(plan):
         global_node_selectors=parsed_input_args.global_node_selectors,
     )
 
-    fuzzer_service_config = kurtosistest.get_service_config(
-        service_name=service_name
-    )
+    fuzzer_service_config = kurtosistest.get_service_config(service_name=service_name)
     expect.ne(fuzzer_service_config, None)
     expect.eq(fuzzer_service_config.image, fuzzer_image)
     expect.eq(fuzzer_service_config.env_vars, {})
