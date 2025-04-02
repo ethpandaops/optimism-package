@@ -508,7 +508,7 @@ optimism_package:
   # Defaults to empty
   global_tolerations: []
 
-  # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
+  # Whether the environment should be persistent; this is WIP and is slowly being rolled out across services
   # Defaults to false
   persistent: false
 
@@ -740,7 +740,7 @@ kurtosis service start <enclave-name> <service-name>
 
 ## Observability
 
-This package optionally provisions an in-enclave observability stack consiisting of Grafana, prometheus, promtail, and loki, which collects logs and metrics from the enclave.
+This package optionally provisions an in-enclave observability stack consisting of Grafana, prometheus, promtail, and loki, which collects logs and metrics from the enclave.
 
 This feature is enabled by default, but can be disabled like so:
 
