@@ -109,7 +109,7 @@ def launch_l2(
             )
             tx_fuzzer.launch(
                 plan,
-                "op-transaction-fuzzer-{0}".format(chain.network_params.name),
+                "op-transaction-fuzzer-{0}".format(network_params.name),
                 fuzz_target,
                 tx_fuzzer_params,
                 global_node_selectors,
