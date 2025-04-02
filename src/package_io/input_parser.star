@@ -54,6 +54,9 @@ DEFAULT_DA_SERVER_PARAMS = {
     ],
 }
 
+DEFAULT_TX_FUZZER_IMAGES = {
+    "tx-fuzzer": "ethpandaops/tx-fuzz:master",
+}
 
 DEFAULT_ADDITIONAL_SERVICES = []
 
@@ -253,6 +256,12 @@ def input_parser(plan, input_args):
                     cmd=result["da_server_params"]["cmd"],
                 ),
                 additional_services=result["additional_services"],
+                tx_fuzzer_params=struct(
+                    image=result["tx_fuzzer_params"]["image"],
+                    tx_fuzzer_extra_args=result["tx_fuzzer_params"][
+                        "tx_fuzzer_extra_args"
+                    ],
+                ),
             )
             for result in results["chains"]
         ],
@@ -413,6 +422,9 @@ def parse_network_params(plan, input_args):
                 )
                 participants.append(participant_copy)
 
+        tx_fuzzer_params = default_tx_fuzzer_params()
+        tx_fuzzer_params.update(chain.get("tx_fuzzer_params", {}))
+
         result = {
             "participants": participants,
             "network_params": network_params,
@@ -425,6 +437,7 @@ def parse_network_params(plan, input_args):
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
+            "tx_fuzzer_params": tx_fuzzer_params,
         }
         chains.append(result)
 
@@ -549,6 +562,7 @@ def default_chains():
             "mev_params": default_mev_params(),
             "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
+            "tx_fuzzer_params": default_tx_fuzzer_params(),
         }
     ]
 
@@ -706,4 +720,11 @@ def default_da_server_params():
         "enabled": False,
         "image": DEFAULT_DA_SERVER_PARAMS["image"],
         "cmd": DEFAULT_DA_SERVER_PARAMS["cmd"],
+    }
+
+
+def default_tx_fuzzer_params():
+    return {
+        "image": "ethpandaops/tx-fuzz:master",
+        "tx_fuzzer_extra_args": [],
     }
