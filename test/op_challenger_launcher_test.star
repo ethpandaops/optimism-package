@@ -1,9 +1,7 @@
 op_challenger_launcher = import_module(
     "/src/challenger/op-challenger/op_challenger_launcher.star"
 )
-op_signer_launcher = import_module(
-    "/src/signer/op_signer_launcher.star"
-)
+op_signer_launcher = import_module("/src/signer/op_signer_launcher.star")
 input_parser = import_module("/src/package_io/input_parser.star")
 observability = import_module("/src/observability/observability.star")
 ethereum_package_constants = import_module(
@@ -13,6 +11,7 @@ constants = import_module("/src/package_io/constants.star")
 util = import_module("/src/util.star")
 
 test_utils = import_module("/test/test_utils.star")
+
 
 def test_launch_with_defaults(plan):
     parsed_input_args = input_parser.input_parser(
@@ -51,7 +50,7 @@ def test_launch_with_defaults(plan):
 
     chains = parsed_input_args.chains
     chain = chains[0]
-    
+
     service_type = op_challenger_launcher.SERVICE_TYPE
     service_name = op_challenger_launcher.SERVICE_NAME
     service_instance_name = util.make_service_instance_name(
@@ -111,9 +110,7 @@ def test_launch_with_defaults(plan):
         observability_helper=observability_helper,
     )
 
-    challenger_service_config = kurtosistest.get_service_config(
-        service_instance_name
-    )
+    challenger_service_config = kurtosistest.get_service_config(service_instance_name)
     expect.ne(challenger_service_config, None)
     expect.eq(challenger_service_config.env_vars, {})
     expect.eq(

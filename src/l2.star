@@ -91,7 +91,7 @@ def launch_l2(
             network_params.network_id,
         )
         plan.print("Successfully launched op-blockscout")
-        
+
     if "tx_fuzzer" in l2_args.additional_services:
         plan.print("Launching transaction spammer")
         fuzz_target = "http://{0}:{1}".format(

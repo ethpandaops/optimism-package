@@ -213,7 +213,7 @@ def test_launch_with_el_op_besu(plan):
     expect.ne(el_service_config, None)
     expect.eq(el_service_config.image, "op-besu:latest")
     expect.eq(el_service_config.env_vars, {})
-    
+
     test_utils.contains_all(
         el_service_config.cmd,
         [
@@ -244,16 +244,14 @@ def test_launch_with_el_op_besu(plan):
                 ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER
             ),
             "--engine-host-allowlist=*",
-            "--engine-rpc-port={0}".format(
-                el_service.ports["engine-rpc"].number
-            ),
+            "--engine-rpc-port={0}".format(el_service.ports["engine-rpc"].number),
             "--sync-mode=FULL",
             "--bonsai-limit-trie-logs-enabled=false",
             "--version-compatibility-protection=false",
             "--metrics-enabled",
             "--metrics-host=0.0.0.0",
             "--metrics-port=9001",
-        ]
+        ],
     )
 
     # TODO Once files are available on kurtosistest.get_service_config, make sure the JWT file is being mounted
