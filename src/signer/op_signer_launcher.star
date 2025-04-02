@@ -59,7 +59,7 @@ def launch(
     )
 
     populated_clients = generate_client_creds(
-        plan, network_params, deployment_output, signer_ca_artifact, clients
+        plan, network_params, signer_params, deployment_output, signer_ca_artifact, clients
     )
 
     client_key_artifacts = create_key_artifacts(
@@ -219,7 +219,7 @@ def make_service_config(
     cmd += signer_params.extra_params
 
     return ServiceConfig(
-        image="{0}:{1}".format(signer_params.image, signer_params.tag),
+        image=make_image(signer_params),
         ports=ports,
         cmd=cmd,
         files=files,
@@ -234,6 +234,9 @@ def make_service_config(
         },
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
+
+def make_image(signer_params):
+    return "{0}:{1}".format(signer_params.image, signer_params.tag)
 
 
 def configure_op_signer(cmd, files, signer_context, client_type):
@@ -280,7 +283,7 @@ def make_populated_client(client, key, address, tls_artifact):
     )
 
 
-def generate_credentials(plan, args, store, files={}):
+def generate_credentials(plan, signer_params, args, store, files={}):
     gen_script = "gen-local-creds.sh"
     script_path = "/script/{0}".format(gen_script)
 
@@ -291,8 +294,8 @@ def generate_credentials(plan, args, store, files={}):
     # script_artifact = plan.get_files_artifact(name=script_artifact_name)
     # if script_artifact == None:
     script_artifact = plan.upload_files(
-        src="github.com/ethereum-optimism/infra/op-signer/{0}@edobry/op-signer-gen-tls".format(
-            gen_script
+        src="github.com/ethereum-optimism/infra/op-signer/{0}@op-signer/{1}".format(
+            gen_script, signer_params.tag
         ),
         # name=script_artifact_name,
     )
@@ -319,9 +322,10 @@ def generate_credentials(plan, args, store, files={}):
     ).files_artifacts
 
 
-def generate_ca(plan, service_instance_name):
+def generate_ca(plan, signer_params, service_instance_name):
     return generate_credentials(
         plan,
+        signer_params,
         ["ca"],
         [
             StoreSpec(
@@ -332,9 +336,10 @@ def generate_ca(plan, service_instance_name):
     )[0]
 
 
-def generate_client_tls(plan, signer_ca_artifact, client_hostnames):
+def generate_client_tls(plan, signer_params, signer_ca_artifact, client_hostnames):
     return generate_credentials(
         plan,
+        signer_params,
         ["client_tls"] + client_hostnames,
         [
             StoreSpec(
@@ -348,7 +353,7 @@ def generate_client_tls(plan, signer_ca_artifact, client_hostnames):
 
 
 def generate_client_creds(
-    plan, network_params, deployment_output, signer_ca_artifact, client_map
+    plan, network_params, signer_params, deployment_output, signer_ca_artifact, client_map
 ):
     clients = []
     for client_type, client_name in client_map.items():
@@ -361,6 +366,7 @@ def generate_client_creds(
 
     client_tls_artifacts = generate_client_tls(
         plan,
+        signer_params,
         signer_ca_artifact,
         [client.hostname for client in clients],
     )
