@@ -160,7 +160,6 @@ def make_service_config(
     return ServiceConfig(
         image=image,
         ports=ports,
-        entrypoint=ENTRYPOINT_ARGS,
         cmd=cmd,
         files=files,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

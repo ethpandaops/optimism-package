@@ -113,10 +113,6 @@ def test_launch_with_defaults(plan):
     challenger_service_config = kurtosistest.get_service_config(service_instance_name)
     expect.ne(challenger_service_config, None)
     expect.eq(challenger_service_config.env_vars, {})
-    expect.eq(
-        challenger_service_config.entrypoint,
-        ["sh", "-c"],
-    )
 
     test_utils.contains_all(
         challenger_service_config.cmd,
