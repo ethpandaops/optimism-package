@@ -120,31 +120,28 @@ def test_launch_with_defaults(plan):
         ["sh", "-c"],
     )
 
-    flags = " ".join([
-        "--cannon-l2-genesis=/network-configs/genesis-2151908.json",
-        "--cannon-rollup-config=/network-configs/rollup-2151908.json",
-        "--game-factory-address=dispute_game_factory_address",
-        "--datadir=/data/op-challenger/op-challenger-data",
-        "--l1-beacon=CL_RPC_URL",
-        "--l1-eth-rpc=L1_RPC_URL",
-        "--l2-eth-rpc=rpc_http_url",
-        "--private-key=challenger_private_key",
-        "--rollup-rpc=beacon_http_url",
-        "--trace-type=cannon,permissioned",
-        "--signer.tls.ca=/tls/ca.crt",
-        "--signer.tls.cert=/tls/tls.crt",
-        "--signer.tls.key=/tls/tls.key",
-        "--signer.endpoint=https://op-signer-kurtosis-test:8545",
-        "--signer.address=challenger_address",
-        "--metrics.enabled",
-        "--metrics.addr=0.0.0.0",
-        "--metrics.port=9001",
-        "--cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
-    ])
-
     expect.eq(
         challenger_service_config.cmd,
         [
-            "mkdir -p /data/op-challenger/op-challenger-data && op-challenger " + flags
+            "op-challenger",
+            "--cannon-l2-genesis=/network-configs/genesis-2151908.json",
+            "--cannon-rollup-config=/network-configs/rollup-2151908.json",
+            "--game-factory-address=dispute_game_factory_address",
+            "--datadir=/data/op-challenger/op-challenger-data",
+            "--l1-beacon=CL_RPC_URL",
+            "--l1-eth-rpc=L1_RPC_URL",
+            "--l2-eth-rpc=rpc_http_url",
+            "--private-key=challenger_private_key",
+            "--rollup-rpc=beacon_http_url",
+            "--trace-type=cannon,permissioned",
+            "--signer.tls.ca=/tls/ca.crt",
+            "--signer.tls.cert=/tls/tls.crt",
+            "--signer.tls.key=/tls/tls.key",
+            "--signer.endpoint=https://op-signer-kurtosis-test:8545",
+            "--signer.address=challenger_address",
+            "--metrics.enabled",
+            "--metrics.addr=0.0.0.0",
+            "--metrics.port=9001",
+            "--cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
         ],
     )

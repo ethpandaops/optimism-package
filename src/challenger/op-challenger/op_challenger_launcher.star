@@ -149,7 +149,6 @@ def make_service_config(
         fail("One of cannon_prestate_path or cannon_prestates_url must be set")
 
     cmd += challenger_params.extra_params
-    cmd = "mkdir -p {0} && {1}".format(DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd))
 
     # legacy default image logic
     image = (
@@ -162,7 +161,7 @@ def make_service_config(
         image=image,
         ports=ports,
         entrypoint=ENTRYPOINT_ARGS,
-        cmd=[cmd],
+        cmd=cmd,
         files=files,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
