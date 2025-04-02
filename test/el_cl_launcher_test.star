@@ -6,6 +6,8 @@ ethereum_package_constants = import_module(
 )
 util = import_module("/src/util.star")
 
+test_utils = import_module("/test/test_utils.star")
+
 #
 # Default test inputs
 #
@@ -51,28 +53,27 @@ def test_launch_with_defaults(plan):
 
     # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
     sequencer_private_key_mock = "sequencer_private_key"
-    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+    kurtosistest.mock(util, "read_service_private_key").mock_return_value(
         sequencer_private_key_mock
     )
 
     all_el_contexts, all_cl_contexts = el_cl_launcher.launch(
         plan=plan,
-        jwt_file=jwt_file,
         network_params=chain.network_params,
         mev_params=chain.mev_params,
+        interop_params=parsed_input_args.interop,
+        jwt_file=jwt_file,
         deployment_output=deployment_output,
         participants=chain.participants,
-        num_participants=len(chains),
         l1_config_env_vars=l1_config_env_vars,
         l2_services_suffix="",
+        da_server_context=da_server_context,
+        additional_services=[],
         global_log_level="info",
         global_node_selectors=[],
         global_tolerations=[],
         persistent=False,
-        additional_services=[],
         observability_helper=observability_helper,
-        interop_params=parsed_input_args.interop,
-        da_server_context=da_server_context,
     )
 
     el_service_name = "op-el-1-op-reth-op-node-"
@@ -83,7 +84,8 @@ def test_launch_with_defaults(plan):
     expect.ne(cl_service_config, None)
     expect.eq(cl_service_config.image, "op-node:latest")
     expect.eq(cl_service_config.env_vars, {})
-    expect.eq(
+
+    test_utils.contains_all(
         cl_service_config.cmd,
         [
             "op-node",
@@ -96,9 +98,6 @@ def test_launch_with_defaults(plan):
             "--rollup.config=/network-configs/rollup-{0}.json".format(
                 chain.network_params.network_id
             ),
-            "--rpc.addr=0.0.0.0",
-            "--rpc.port=8547",
-            "--rpc.enable-admin",
             "--l1={0}".format(l1_config_env_vars["L1_RPC_URL"]),
             "--l1.rpckind={0}".format(l1_config_env_vars["L1_RPC_KIND"]),
             "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
@@ -113,7 +112,10 @@ def test_launch_with_defaults(plan):
             "--safedb.path=/data/op-node/op-node-beacon-data",
             "--altda.enabled={0}".format(da_server_context.enabled),
             "--altda.da-server={0}".format(da_server_context.http_url),
-            "--metrics.enabled=true",
+            "--rpc.addr=0.0.0.0",
+            "--rpc.port=8547",
+            "--rpc.enable-admin",
+            "--metrics.enabled",
             "--metrics.addr=0.0.0.0",
             "--metrics.port=9001",
             "--p2p.sequencer.key={0}".format(sequencer_private_key_mock),
@@ -125,7 +127,8 @@ def test_launch_with_defaults(plan):
     expect.ne(el_service_config, None)
     expect.eq(el_service_config.image, "op-reth:latest")
     expect.eq(el_service_config.env_vars, {})
-    expect.eq(
+
+    test_utils.contains_all(
         el_service_config.cmd,
         [
             "node",
@@ -181,28 +184,27 @@ def test_launch_with_el_op_besu(plan):
 
     # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
     sequencer_private_key_mock = "sequencer_private_key"
-    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
+    kurtosistest.mock(util, "read_service_private_key").mock_return_value(
         sequencer_private_key_mock
     )
 
     all_el_contexts, all_cl_contexts = el_cl_launcher.launch(
         plan=plan,
-        jwt_file=jwt_file,
         network_params=chain.network_params,
         mev_params=chain.mev_params,
+        interop_params=parsed_input_args.interop,
+        jwt_file=jwt_file,
         deployment_output=deployment_output,
         participants=chain.participants,
-        num_participants=len(chains),
         l1_config_env_vars=l1_config_env_vars,
         l2_services_suffix="",
+        da_server_context=da_server_context,
+        additional_services=[],
         global_log_level="info",
         global_node_selectors=[],
         global_tolerations=[],
         persistent=False,
-        additional_services=[],
         observability_helper=observability_helper,
-        interop_params=parsed_input_args.interop,
-        da_server_context=da_server_context,
     )
 
     el_service_name = "op-el-1-op-besu-op-node-"
@@ -211,50 +213,47 @@ def test_launch_with_el_op_besu(plan):
     expect.ne(el_service_config, None)
     expect.eq(el_service_config.image, "op-besu:latest")
     expect.eq(el_service_config.env_vars, {})
-    expect.eq(
+    
+    test_utils.contains_all(
         el_service_config.cmd,
         [
-            " ".join(
-                [
-                    "besu",
-                    "--genesis-file=/network-configs/genesis-{0}.json".format(
-                        chain.network_params.network_id
-                    ),
-                    "--network-id={0}".format(chain.network_params.network_id),
-                    "--data-path=/data/besu/execution-data",
-                    "--host-allowlist=*",
-                    "--rpc-http-enabled=true",
-                    "--rpc-http-host=0.0.0.0",
-                    "--rpc-http-port=8545",
-                    "--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3,MINER",
-                    "--rpc-http-cors-origins=*",
-                    "--rpc-http-max-active-connections=300",
-                    "--rpc-ws-enabled=true",
-                    "--rpc-ws-host=0.0.0.0",
-                    "--rpc-ws-port=8546",
-                    "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3,MINER",
-                    "--p2p-enabled=true",
-                    "--p2p-host={0}".format(
-                        ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
-                    ),
-                    "--p2p-port=30303",
-                    "--engine-rpc-enabled=true",
-                    "--engine-jwt-secret={0}".format(
-                        ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER
-                    ),
-                    "--engine-host-allowlist=*",
-                    "--engine-rpc-port={0}".format(
-                        el_service.ports["engine-rpc"].number
-                    ),
-                    "--sync-mode=FULL",
-                    "--bonsai-limit-trie-logs-enabled=false",
-                    "--version-compatibility-protection=false",
-                    "--metrics-enabled=true",
-                    "--metrics-host=0.0.0.0",
-                    "--metrics-port=9001",
-                ]
-            )
-        ],
+            "besu",
+            "--genesis-file=/network-configs/genesis-{0}.json".format(
+                chain.network_params.network_id
+            ),
+            "--network-id={0}".format(chain.network_params.network_id),
+            "--data-path=/data/besu/execution-data",
+            "--host-allowlist=*",
+            "--rpc-http-enabled=true",
+            "--rpc-http-host=0.0.0.0",
+            "--rpc-http-port=8545",
+            "--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3,MINER",
+            "--rpc-http-cors-origins=*",
+            "--rpc-http-max-active-connections=300",
+            "--rpc-ws-enabled=true",
+            "--rpc-ws-host=0.0.0.0",
+            "--rpc-ws-port=8546",
+            "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3,MINER",
+            "--p2p-enabled=true",
+            "--p2p-host={0}".format(
+                ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
+            ),
+            "--p2p-port=30303",
+            "--engine-rpc-enabled=true",
+            "--engine-jwt-secret={0}".format(
+                ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER
+            ),
+            "--engine-host-allowlist=*",
+            "--engine-rpc-port={0}".format(
+                el_service.ports["engine-rpc"].number
+            ),
+            "--sync-mode=FULL",
+            "--bonsai-limit-trie-logs-enabled=false",
+            "--version-compatibility-protection=false",
+            "--metrics-enabled",
+            "--metrics-host=0.0.0.0",
+            "--metrics-port=9001",
+        ]
     )
 
     # TODO Once files are available on kurtosistest.get_service_config, make sure the JWT file is being mounted

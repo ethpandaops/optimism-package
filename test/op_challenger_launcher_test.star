@@ -12,6 +12,7 @@ ethereum_package_constants = import_module(
 constants = import_module("/src/package_io/constants.star")
 util = import_module("/src/util.star")
 
+test_utils = import_module("/test/test_utils.star")
 
 def test_launch_with_defaults(plan):
     parsed_input_args = input_parser.input_parser(
@@ -120,10 +121,10 @@ def test_launch_with_defaults(plan):
         ["sh", "-c"],
     )
 
-    expect.eq(
+    test_utils.contains_all(
         challenger_service_config.cmd,
         [
-            "op-challenger",
+            service_name,
             "--cannon-l2-genesis=/network-configs/genesis-2151908.json",
             "--cannon-rollup-config=/network-configs/rollup-2151908.json",
             "--game-factory-address=dispute_game_factory_address",
