@@ -83,7 +83,6 @@ def launch_l2(
         plan.print("Launching op-blockscout")
         blockscout.launch_blockscout(
             plan,
-            l2_services_suffix,
             l1_rpc_url,
             all_el_contexts[0],  # first l2 EL url
             network_params.name,
