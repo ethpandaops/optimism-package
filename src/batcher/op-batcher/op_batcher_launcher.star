@@ -6,25 +6,27 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+input_parser = import_module("../../package_io/input_parser.star")
 constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 
 observability = import_module("../../observability/observability.star")
-prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+op_signer_launcher = import_module("../../signer/op_signer_launcher.star")
 
 #
 #  ---------------------------------- Batcher client -------------------------------------
-# The Docker container runs as the "op-batcher" user so we can't write to root
-BATCHER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-batcher/op-batcher-data"
+
+SERVICE_TYPE = "batcher"
+SERVICE_NAME = util.make_op_service_name(SERVICE_TYPE)
 
 # Port nums
-BATCHER_HTTP_PORT_NUM = 8548
+HTTP_PORT_NUM = 8548
 
 
 def get_used_ports():
     used_ports = {
         constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            BATCHER_HTTP_PORT_NUM,
+            HTTP_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
@@ -37,48 +39,46 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 
 def launch(
     plan,
-    service_name,
-    image,
     el_context,
     cl_context,
     l1_config_env_vars,
-    gs_batcher_private_key,
+    signer_context,
     batcher_params,
     network_params,
     observability_helper,
     da_server_context,
 ):
-    config = get_batcher_config(
-        plan,
-        image,
-        service_name,
-        el_context,
-        cl_context,
-        l1_config_env_vars,
-        gs_batcher_private_key,
-        batcher_params,
-        observability_helper,
-        da_server_context,
+    service_instance_name = util.make_service_instance_name(
+        SERVICE_NAME, network_params
     )
 
-    service = plan.add_service(service_name, config)
-    service_url = util.make_service_http_url(service)
+    service = plan.add_service(
+        service_instance_name,
+        make_service_config(
+            plan,
+            el_context,
+            cl_context,
+            l1_config_env_vars,
+            signer_context,
+            batcher_params,
+            observability_helper,
+            da_server_context,
+        ),
+    )
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
     )
 
-    return service_url
+    return service
 
 
-def get_batcher_config(
+def make_service_config(
     plan,
-    image,
-    service_name,
     el_context,
     cl_context,
     l1_config_env_vars,
-    gs_batcher_private_key,
+    signer_context,
     batcher_params,
     observability_helper,
     da_server_context,
@@ -86,7 +86,7 @@ def get_batcher_config(
     ports = dict(get_used_ports())
 
     cmd = [
-        "op-batcher",
+        SERVICE_NAME,
         "--l2-eth-rpc=" + el_context.rpc_http_url,
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--poll-interval=1s",
@@ -94,12 +94,9 @@ def get_batcher_config(
         "--num-confirmations=1",
         "--safe-abort-nonce-too-low-count=3",
         "--resubmission-timeout=30s",
-        "--rpc.addr=0.0.0.0",
-        "--rpc.port=" + str(BATCHER_HTTP_PORT_NUM),
-        "--rpc.enable-admin",
         "--max-channel-duration=1",
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
-        "--private-key=" + gs_batcher_private_key,
+        "--private-key=" + signer_context.clients[SERVICE_TYPE].key,
         # da commitments currently have to be sent as calldata to the batcher inbox
         "--data-availability-type="
         + ("calldata" if da_server_context.enabled else "blobs"),
@@ -110,16 +107,29 @@ def get_batcher_config(
         "--altda.da-service",
     ]
 
+    files = {}
+
     # apply customizations
+
+    util.configure_op_service_rpc(cmd, HTTP_PORT_NUM)
+    op_signer_launcher.configure_op_signer(cmd, files, signer_context, SERVICE_TYPE)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
 
     cmd += batcher_params.extra_params
 
+    # legacy default image logic
+    image = (
+        batcher_params.image
+        if batcher_params.image != ""
+        else input_parser.DEFAULT_BATCHER_IMAGES[SERVICE_NAME]
+    )
+
     return ServiceConfig(
         image=image,
         ports=ports,
         cmd=cmd,
+        files=files,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

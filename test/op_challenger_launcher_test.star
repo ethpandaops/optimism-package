@@ -1,12 +1,16 @@
 op_challenger_launcher = import_module(
     "/src/challenger/op-challenger/op_challenger_launcher.star"
 )
+op_signer_launcher = import_module("/src/signer/op_signer_launcher.star")
 input_parser = import_module("/src/package_io/input_parser.star")
 observability = import_module("/src/observability/observability.star")
 ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
+constants = import_module("/src/package_io/constants.star")
 util = import_module("/src/util.star")
+
+test_utils = import_module("/test/test_utils.star")
 
 
 def test_launch_with_defaults(plan):
@@ -15,6 +19,9 @@ def test_launch_with_defaults(plan):
         {
             "chains": [
                 {
+                    "network_params": {
+                        "network": "kurtosis-test",
+                    },
                     "participants": [
                         {
                             "el_type": "op-reth",
@@ -43,9 +50,12 @@ def test_launch_with_defaults(plan):
 
     chains = parsed_input_args.chains
     chain = chains[0]
-    l2_num = 0
-    challenger_service_name = "op-challenger"
-    challenger_image = input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
+
+    service_type = op_challenger_launcher.SERVICE_TYPE
+    service_name = op_challenger_launcher.SERVICE_NAME
+    service_instance_name = util.make_service_instance_name(
+        service_name, chain.network_params
+    )
 
     deployment_output = "/path/to/deployment_output"
     l1_config_env_vars = {
@@ -54,24 +64,45 @@ def test_launch_with_defaults(plan):
         "CL_RPC_URL": "CL_RPC_URL",
     }
 
-    # We'll mock read_network_config_value since it returns a runtime value that we would not be able to retrieve
-    dispute_game_factory_mock = "dispute_game_factory"
-    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
-        dispute_game_factory_mock
-    )
     challenger_private_key_mock = "challenger_private_key"
-    kurtosistest.mock(util, "read_network_config_value").mock_return_value(
-        challenger_private_key_mock
+    challenger_address_mock = "challenger_address"
+
+    signer_client = op_signer_launcher.make_client(
+        service_type,
+        service_instance_name,
     )
+
+    signer_context = struct(
+        service=struct(
+            hostname=util.make_service_instance_name(
+                op_signer_launcher.SERVICE_NAME, chain.network_params
+            ),
+            ports={
+                constants.HTTP_PORT_ID: struct(
+                    number=op_signer_launcher.HTTP_PORT_NUM,
+                ),
+            },
+        ),
+        ca_artifact="ca_artifact_mock",
+        clients={
+            service_type: op_signer_launcher.make_populated_client(
+                client=signer_client,
+                key=challenger_private_key_mock,
+                address=challenger_address_mock,
+                tls_artifact="tls_artifact_mock",
+            )
+        },
+    )
+
+    dispute_game_factory_address_mock = "dispute_game_factory_address"
 
     op_challenger_launcher.launch(
         plan=plan,
-        l2_num=l2_num,
-        service_name=challenger_service_name,
-        image=challenger_image,
         el_context=el_context,
         cl_context=cl_context,
         l1_config_env_vars=l1_config_env_vars,
+        signer_context=signer_context,
+        game_factory_address=dispute_game_factory_address_mock,
         deployment_output=deployment_output,
         network_params=chain.network_params,
         challenger_params=chain.challenger_params,
@@ -79,19 +110,32 @@ def test_launch_with_defaults(plan):
         observability_helper=observability_helper,
     )
 
-    challenger_service_config = kurtosistest.get_service_config(
-        service_name=challenger_service_name
-    )
+    challenger_service_config = kurtosistest.get_service_config(service_instance_name)
     expect.ne(challenger_service_config, None)
-    expect.eq(challenger_service_config.image, challenger_image)
     expect.eq(challenger_service_config.env_vars, {})
-    expect.eq(
-        challenger_service_config.entrypoint,
-        ["sh", "-c"],
-    )
-    expect.eq(
+
+    test_utils.contains_all(
         challenger_service_config.cmd,
         [
-            "mkdir -p /data/op-challenger/op-challenger-data && op-challenger --cannon-l2-genesis=/network-configs/genesis-2151908.json --cannon-rollup-config=/network-configs/rollup-2151908.json --game-factory-address=challenger_private_key --datadir=/data/op-challenger/op-challenger-data --l1-beacon=CL_RPC_URL --l1-eth-rpc=L1_RPC_URL --l2-eth-rpc=rpc_http_url --private-key=challenger_private_key --rollup-rpc=beacon_http_url --trace-type=cannon,permissioned --metrics.enabled --metrics.addr=0.0.0.0 --metrics.port=9001 --cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon"
+            service_name,
+            "--cannon-l2-genesis=/network-configs/genesis-2151908.json",
+            "--cannon-rollup-config=/network-configs/rollup-2151908.json",
+            "--game-factory-address=dispute_game_factory_address",
+            "--datadir=/data/op-challenger/op-challenger-data",
+            "--l1-beacon=CL_RPC_URL",
+            "--l1-eth-rpc=L1_RPC_URL",
+            "--l2-eth-rpc=rpc_http_url",
+            "--private-key=challenger_private_key",
+            "--rollup-rpc=beacon_http_url",
+            "--trace-type=cannon,permissioned",
+            "--signer.tls.ca=/tls/ca.crt",
+            "--signer.tls.cert=/tls/tls.crt",
+            "--signer.tls.key=/tls/tls.key",
+            "--signer.endpoint=https://op-signer-kurtosis-test:8545",
+            "--signer.address=challenger_address",
+            "--metrics.enabled",
+            "--metrics.addr=0.0.0.0",
+            "--metrics.port=9001",
+            "--cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
         ],
     )

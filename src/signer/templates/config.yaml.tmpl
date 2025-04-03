@@ -1,0 +1,6 @@
+provider: LOCAL
+auth:
+  {{ range $client_name, $client_key := .Clients }}
+  - name: {{ $client_name }}
+    key: {{ $.KeyDir }}/{{ $client_key.filename }}
+  {{ end }}
