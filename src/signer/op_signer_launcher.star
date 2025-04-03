@@ -55,11 +55,17 @@ def launch(
 
     signer_ca_artifact, signer_tls_artifact = create_tls_artifacts(
         plan,
+        signer_params,
         service_instance_name,
     )
 
     populated_clients = generate_client_creds(
-        plan, network_params, signer_params, deployment_output, signer_ca_artifact, clients
+        plan,
+        network_params,
+        signer_params,
+        deployment_output,
+        signer_ca_artifact,
+        clients,
     )
 
     client_key_artifacts = create_key_artifacts(
@@ -101,12 +107,14 @@ def launch(
 
 def create_tls_artifacts(
     plan,
+    signer_params,
     service_instance_name,
 ):
-    signer_ca = generate_ca(plan, service_instance_name)
+    signer_ca = generate_ca(plan, signer_params, service_instance_name)
 
     signer_tls = generate_client_tls(
         plan,
+        signer_params,
         signer_ca,
         [service_instance_name],
     )[0]
@@ -235,6 +243,7 @@ def make_service_config(
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
 
+
 def make_image(signer_params):
     return "{0}:{1}".format(signer_params.image, signer_params.tag)
 
@@ -294,7 +303,7 @@ def generate_credentials(plan, signer_params, args, store, files={}):
     # script_artifact = plan.get_files_artifact(name=script_artifact_name)
     # if script_artifact == None:
     script_artifact = plan.upload_files(
-        src="github.com/ethereum-optimism/infra/op-signer/{0}@op-signer/{1}".format(
+        src="github.com/ethereum-optimism/infra/op-signer/{0}@op-signer_{1}".format(
             gen_script, signer_params.tag
         ),
         # name=script_artifact_name,
@@ -353,7 +362,12 @@ def generate_client_tls(plan, signer_params, signer_ca_artifact, client_hostname
 
 
 def generate_client_creds(
-    plan, network_params, signer_params, deployment_output, signer_ca_artifact, client_map
+    plan,
+    network_params,
+    signer_params,
+    deployment_output,
+    signer_ca_artifact,
+    client_map,
 ):
     clients = []
     for client_type, client_name in client_map.items():
