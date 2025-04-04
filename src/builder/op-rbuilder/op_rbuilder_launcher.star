@@ -243,7 +243,7 @@ def get_config(
 
     if interop_params.enabled:
         cmd.append(
-            "--rollup.supervisor-url={0}".format(interop_constants.SUPERVISOR_ENDPOINT)
+            "--rollup.supervisor-http={0}".format(interop_constants.SUPERVISOR_ENDPOINT)
         )
 
     config_args = {
