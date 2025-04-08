@@ -1,0 +1,42 @@
+ethereum_package:
+  participants:
+  - el_type: geth
+    cl_type: teku
+optimism_package:
+  interop:
+    enabled: true
+  op_contract_deployer_params:
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:f79ed8b9c9cbdbf8bb492074f3f98da7f072e21a
+    l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-f9a55787fd592c2fa6d4c253a3ad7904ce55f255ab59cc6d2a576c938f021896.tar.gz
+    l2_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-f9a55787fd592c2fa6d4c253a3ad7904ce55f255ab59cc6d2a576c938f021896.tar.gz
+  chains:
+    - participants:
+        - el_type: op-geth
+          cl_type: op-node
+          el_image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.2-rc.3
+          cl_image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.3-dev.1
+      network_params:
+        network: "interop-1"
+        network_id: "901"
+        name: "interop-1"
+        isthmus_time_offset: 0
+        interop_time_offset: 0
+        fund_dev_accounts: true
+    - participants:
+        - el_type: op-geth
+          cl_type: op-node
+          el_image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.2-rc.3
+          el_builder_image: ghcr.io/flashbots/op-rbuilder:0.1.1-interop
+          cl_builder_image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.3-dev.1
+          el_builder_type: op-rbuilder
+          el_builder_key: ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+      network_params:
+        network: "interop-2"
+        network_id: "902"
+        name: "interop-2"
+        isthmus_time_offset: 0
+        interop_time_offset: 0
+        fund_dev_accounts: true
+      additional_services: [ "rollup-boost" ]
+      mev_params:
+        rollup_boost_image: "flashbots/rollup-boost@sha256:22e3af472d53286de0bb1b7ef76e2571dcbd1502971028fdbab557760f660d90"

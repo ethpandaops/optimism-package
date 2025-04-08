@@ -13,7 +13,8 @@ jobs:
       matrix:
         file_name:
           [
-            "./network_params.yaml"
+            "./network_params.yaml",
+            "./.github/tests/rollup-boost-rbuilder.yaml"
           ]
     runs-on: ubuntu-latest
     steps:
