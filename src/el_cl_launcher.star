@@ -27,6 +27,8 @@ op_reth_builder = import_module("./builder/op-reth/op_reth_launcher.star")
 op_rbuilder_builder = import_module("./builder/op-rbuilder/op_rbuilder_launcher.star")
 op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
 
+# Conductor
+op_conductor = import_module("./op-conductor/op_conductor_launcher.star")
 
 def launch(
     plan,
@@ -165,6 +167,7 @@ def launch(
     sequencer_enabled = True
     sequencer_context = None
     rollup_boost_enabled = "rollup-boost" in additional_services
+    conductor_enabled = True # TODO: Dynamically set from input args
     external_builder = mev_params.builder_host != "" and mev_params.builder_port != ""
 
     for index, participant in enumerate(participants):
@@ -350,6 +353,10 @@ def launch(
         else:
             sidecar_context = None
 
+        
+
+        # If conductor is enabled, launch op-conductor here,
+        # then launch op-node with conductor enabled
         cl_context = cl_launch_method(
             plan,
             cl_launcher,
