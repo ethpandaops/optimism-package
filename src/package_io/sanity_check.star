@@ -144,7 +144,13 @@ SUBCATEGORY_PARAMS = {
         "fund_dev_accounts",
     ],
     "batcher_params": ["image", "extra_params"],
-    "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
+    "proposer_params": [
+        "enabled",
+        "image",
+        "extra_params",
+        "game_type",
+        "proposal_interval",
+    ],
     "challenger_params": [
         "enabled",
         "image",

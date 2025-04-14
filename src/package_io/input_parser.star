@@ -230,6 +230,7 @@ def input_parser(plan, input_args):
                     ],
                 ),
                 proposer_params=struct(
+                    enabled=result["proposer_params"]["enabled"],
                     image=result["proposer_params"]["image"],
                     extra_params=result["proposer_params"]["extra_params"],
                     game_type=result["proposer_params"]["game_type"],
@@ -576,6 +577,7 @@ def default_challenger_params():
 
 def default_proposer_params():
     return {
+        "enabled": True,
         "image": DEFAULT_PROPOSER_IMAGES["op-proposer"],
         "extra_params": [],
         "game_type": 1,
