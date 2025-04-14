@@ -133,8 +133,18 @@ optimism_package:
       image: "grafana/grafana:11.5.0"
   # Interop configuration
   interop:
-    # Whether or not to enable interop mode
-    enabled: false
+    # A list of interop sets - connected L2 chains
+    # 
+    # If left empty, interop is disabled
+    sets: 
+        # Optional human-readable name for this interop set
+      - name:
+        # List of L2 IDs that participate in this set
+        participants: []
+        # Supervisor overrides for this particular interop set
+        # 
+        # Leave empty to use the default supervisor configuration
+        supervisor_params:
     # Default supervisor configuration
     supervisor_params:
       # The Docker image that should be used for the supervisor; leave blank to use the default op-supervisor image
