@@ -138,13 +138,18 @@ optimism_package:
     # If left empty, interop is disabled
     sets: 
         # Optional human-readable name for this interop set
-      - name:
-        # List of L2 IDs that participate in this set
-        participants: []
+      - name: "interop-set-0"
+        # List of L2 network_ids that participate in this set
+        # 
+        # Please refer to chains[].network_params.network_id for more information
+        participants: ["2151908"]
         # Supervisor overrides for this particular interop set
         # 
         # Leave empty to use the default supervisor configuration
         supervisor_params:
+      - name: "interop-set-1"
+        # "*" can be used to quickly add all networks into one interop set
+        participants: "*"
     # Default supervisor configuration
     supervisor_params:
       # The Docker image that should be used for the supervisor; leave blank to use the default op-supervisor image
