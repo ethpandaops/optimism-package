@@ -90,3 +90,71 @@ def test_external_l1_network_params_input_parser_set_fields(plan):
     parsed_params = input_parser.external_l1_network_params_input_parser(plan, params)
 
     expect.eq(parsed_params, struct(**params))
+
+def test_interop_default_args(plan):
+    parsed_params = input_parser.parse_network_params(plan, {})
+
+    expect.eq(parsed_params["interop"], input_parser.default_interop_params())
+
+def test_interop_supervisor_params(plan):
+    supervisor_args = { "image": "supervisor.jpeg", "dependency_set": None, "extra_params": None }
+    parsed_params = input_parser.parse_network_params(plan, {
+        "interop": {
+            "supervisor_params": supervisor_args,
+        },
+    })
+
+    expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
+        "supervisor_params": {
+            "image": "supervisor.jpeg",
+            "dependency_set": "",
+            "extra_params": [],
+        },
+    })
+
+def test_interop_default_set_params(plan):
+    supervisor_args = { "image": "supervisor.jpeg" }
+    parsed_params = input_parser.parse_network_params(plan, {
+        "interop": {
+            "supervisor_params": supervisor_args,
+            "sets": [{}]
+        },
+    })
+
+    expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
+        "supervisor_params": input_parser.default_supervisor_params() | supervisor_args,
+        "sets": [{
+            "participants": [],
+            "name": "interop-set-0",
+            "supervisor_params": input_parser.default_supervisor_params() | supervisor_args
+        }]
+    })
+
+def test_interop_set_params(plan):
+    supervisor_args = { "image": "supervisor.jpeg" }
+    parsed_params = input_parser.parse_network_params(plan, {
+        "interop": {
+            "supervisor_params": supervisor_args,
+            "sets": [{}]
+        },
+    })
+
+    expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
+        "supervisor_params": input_parser.default_supervisor_params() | supervisor_args,
+        "sets": [{
+            "participants": [],
+            "name": "interop-set-0",
+            "supervisor_params": input_parser.default_supervisor_params() | supervisor_args
+        }]
+    })
+
+def test_interop_set_none_params(plan):
+    parsed_params = input_parser.parse_network_params(plan, {
+        "interop": {
+            "sets": [None]
+        },
+    })
+
+    expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
+        "sets": []
+    })

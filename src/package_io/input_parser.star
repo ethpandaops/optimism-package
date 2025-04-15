@@ -2,8 +2,9 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
-constants = import_module("../package_io/constants.star")
+constants = import_module("./constants.star")
 sanity_check = import_module("./sanity_check.star")
+util = import_module("../util.star")
 
 DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
@@ -314,13 +315,7 @@ def parse_network_params(plan, input_args):
 
     # configure interop
 
-    results["interop"] = default_interop_params()
-    results["interop"].update(input_args.get("interop", {}))
-
-    results["interop"]["supervisor_params"] = default_supervisor_params()
-    results["interop"]["supervisor_params"].update(
-        input_args.get("interop", {}).get("supervisor_params", {})
-    )
+    results["interop"] = build_interop_params(input_args.get("interop", {}))
 
     # configure altda
 
@@ -516,10 +511,78 @@ def default_promtail_params():
         "max_mem": 2048,
     }
 
-
 def default_interop_params():
     return {
-        "enabled": False,
+        # Interop sets organize the networks into disconnected interop chain sets
+        # 
+        # If there are no sets defined, interop is effectively disabled.
+        "sets": [],
+        # Default values to apply for all interop sets' supervisors
+        "supervisor_params": default_supervisor_params(),
+    }
+
+def default_supervisor_params():
+    return {
+        "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
+        "dependency_set": "",
+        "extra_params": [],
+    }
+
+# This function normalizes the interop args to ensure that all values are set
+def build_interop_params(interop_args):
+    interop_args_without_none = util.filter_none(interop_args)
+    supervisor_params = build_interop_supervisor_params(interop_args_without_none.get("supervisor_params", {}))
+    sets_params = build_interop_sets_params(interop_args_without_none.get("sets", []), supervisor_params)
+
+    return {
+        "sets": sets_params,
+        # This value is potentially no longer necessary here as all the interop sets
+        # have their supervisor params set
+        "supervisor_params": supervisor_params,
+    }
+
+# This function normalizes the interop supervisor_params args to ensure that all values are set
+# 
+# It is being used in two places:
+# 
+# - to build the default interop supervisor params, in which case the default values are the global defaults
+# - to build the interop supervisor params for each interop set, in which case the default values are the interop supervisor params
+def build_interop_supervisor_params(
+    interop_supervisor_args,
+    default_interop_supervisor_params = default_supervisor_params()
+):
+    interop_supervisor_args_without_none = util.filter_none(interop_supervisor_args)
+
+    return {
+        "image": interop_supervisor_args_without_none.get("image", default_interop_supervisor_params["image"]),
+        "dependency_set": interop_supervisor_args_without_none.get("dependency_set", default_interop_supervisor_params["dependency_set"]),
+        "extra_params": interop_supervisor_args_without_none.get("extra_params", default_interop_supervisor_params["extra_params"]),
+    }
+
+# This function normalizes the interop sets args to ensure that all values are set
+def build_interop_sets_params(interop_sets_args, interop_supervisor_params):
+    return [
+        build_interop_set_params(
+            interop_set_args,
+            interop_set_index,
+            interop_supervisor_params
+        )
+        for interop_set_index, interop_set_args in enumerate(interop_sets_args) if interop_set_args != None
+    ]
+
+# This function normalizes the interop sets args to ensure that all values are set
+def build_interop_set_params(
+    interop_set_args,
+    # The suffix is used to create a default name for the interop set if no name is provided
+    interop_set_suffix,
+    interop_supervisor_params
+):
+    interop_set_args_without_none = util.filter_none(interop_set_args)
+
+    return {
+        "name": interop_set_args_without_none.get("name", "interop-set-{}".format(interop_set_suffix)),
+        "participants": interop_set_args_without_none.get("participants", []),
+        "supervisor_params": build_interop_supervisor_params(interop_set_args_without_none.get("supervisor_params", {}), interop_supervisor_params)
     }
 
 
@@ -531,14 +594,6 @@ def default_altda_deploy_config():
         "da_resolve_window": 100,
         "da_bond_size": 0,
         "da_resolver_refund_percentage": 0,
-    }
-
-
-def default_supervisor_params():
-    return {
-        "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
-        "dependency_set": "",
-        "extra_params": [],
     }
 
 
