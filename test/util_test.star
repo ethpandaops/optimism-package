@@ -68,3 +68,13 @@ def test_filter_none(plan):
     expect.eq(util.filter_none({ "key": "" }), { "key": "" })
     expect.eq(util.filter_none({ "key": [] }), { "key": [] })
     expect.eq(util.filter_none({ "key": {} }), { "key": {} })
+
+def test_get_duplicates(plan):
+    expect.eq(util.get_duplicates([]), [])
+    expect.eq(util.get_duplicates([1]), [])
+    expect.eq(util.get_duplicates([1, 1]), [1])
+    expect.eq(util.get_duplicates([1, 1, 1, 2, 2, 2, 3]), [1, 2])
+    expect.eq(util.get_duplicates([1, 2, "1"]), [])
+    expect.eq(util.get_duplicates([{}, {}]), [{}])
+    expect.eq(util.get_duplicates([{}, {"key": "value"}]), [])
+    expect.eq(util.get_duplicates([[1], [1]]), [[1]])
