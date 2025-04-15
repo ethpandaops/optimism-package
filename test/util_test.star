@@ -58,3 +58,13 @@ def test_label_from_image_long_image_name_long_suffix(plan):
     image_label = util.label_from_image(image_name)
     expect.eq(len(image_label), 63)
     expect.eq(image_suffix[-63:], image_label)
+
+def test_filter_none(plan):
+    expect.eq(util.filter_none({}), {})
+    expect.eq(util.filter_none({ "key": "value" }), { "key": "value" })
+    expect.eq(util.filter_none({ "key": None }), {})
+    expect.eq(util.filter_none({ "key": False }), { "key": False })
+    expect.eq(util.filter_none({ "key": 0 }), { "key": 0 })
+    expect.eq(util.filter_none({ "key": "" }), { "key": "" })
+    expect.eq(util.filter_none({ "key": [] }), { "key": [] })
+    expect.eq(util.filter_none({ "key": {} }), { "key": {} })

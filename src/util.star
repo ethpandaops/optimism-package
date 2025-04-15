@@ -144,3 +144,7 @@ def make_execution_rpc_url(el_context):
         el_context.ip_addr,
         el_context.rpc_port_num,
     )
+
+# Removes all None values from a dictionary and returns a new dictionary.
+def filter_none(d):
+    return {k: v for k, v in d.items() if v != None}
