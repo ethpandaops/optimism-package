@@ -122,9 +122,10 @@ def test_interop_default_set_params(plan):
     })
 
     expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
+        "enabled": True,
         "supervisor_params": input_parser.default_supervisor_params() | supervisor_args,
         "sets": [{
-            "participants": [],
+            "participants": ["2151908"],
             "name": "interop-set-0",
             "supervisor_params": input_parser.default_supervisor_params() | supervisor_args
         }]
@@ -140,13 +141,122 @@ def test_interop_set_params(plan):
     })
 
     expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
+        "enabled": True,
         "supervisor_params": input_parser.default_supervisor_params() | supervisor_args,
         "sets": [{
-            "participants": [],
+            "participants": ["2151908"],
             "name": "interop-set-0",
             "supervisor_params": input_parser.default_supervisor_params() | supervisor_args
         }]
     })
+
+def test_interop_set_all_participants_by_default(plan):
+    parsed_params = input_parser.parse_network_params(plan, {
+        "chains": [{
+            "network_params": {
+                "network_id": "network-0",
+            },
+        }, {
+            "network_params": {
+                "network_id": "network-1",
+            },
+        }],
+        "interop": {
+            "sets": [{}]
+        },
+    })
+
+    expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
+        "enabled": True,
+        "sets": [{
+            "name": "interop-set-0",
+            "participants": ["network-0", "network-1"],
+            "supervisor_params": input_parser.default_supervisor_params()
+        }]
+    })
+
+def test_interop_set_all_participants_explicitly(plan):
+    parsed_params = input_parser.parse_network_params(plan, {
+        "chains": [{
+            "network_params": {
+                "network_id": "network-0",
+            },
+        }, {
+            "network_params": {
+                "network_id": "network-1",
+            },
+        }],
+        "interop": {
+            "sets": [{
+                "participants": "*"
+            }]
+        },
+    })
+
+    expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
+        "enabled": True,
+        "sets": [{
+            "name": "interop-set-0",
+            "participants": ["network-0", "network-1"],
+            "supervisor_params": input_parser.default_supervisor_params()
+        }]
+    })
+
+# This test tests an invalid configuration that we want to support to model misconfiguration
+# 
+# In this test case we have two interop sets that both contain the same network
+def test_interop_set_all_participants_multiple_times(plan):
+    parsed_params = input_parser.parse_network_params(plan, {
+        "chains": [{
+            "network_params": {
+                "network_id": "network-0",
+            },
+        }],
+        "interop": {
+            "sets": [{}, {}]
+        },
+    })
+
+    expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
+        "enabled": True,
+        "sets": [{
+            "name": "interop-set-0",
+            "participants": ["network-0"],
+            "supervisor_params": input_parser.default_supervisor_params(),
+        }, {
+            "name": "interop-set-1",
+            "participants": ["network-0"],
+            "supervisor_params": input_parser.default_supervisor_params(),
+        }]
+    })
+
+def test_interop_set_duplicate_participants(plan):
+    expect.fails(lambda: input_parser.parse_network_params(plan, {
+        "chains": [{
+            "network_params": {
+                "network_id": "network-0",
+            },
+        }],
+        "interop": {
+            "sets": [{
+                "participants": ["network-0", "network-0"],
+            }]
+        },
+    }), "Duplicate network ids in list of interop participants: \\[\"network-0\"\\]")
+
+def test_interop_set_nonexistent_participants(plan):
+    expect.fails(lambda: input_parser.parse_network_params(plan, {
+        "chains": [{
+            "network_params": {
+                "network_id": "network-0",
+            },
+        }],
+        "interop": {
+            "sets": [{
+                "participants": ["network-1"],
+            }]
+        },
+    }), "Unknown network id in list of interop participants: network-1")
 
 def test_interop_set_none_params(plan):
     parsed_params = input_parser.parse_network_params(plan, {
@@ -157,4 +267,21 @@ def test_interop_set_none_params(plan):
 
     expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
         "sets": []
+    })
+
+def test_interop_explicitly_disabled(plan):
+    parsed_params = input_parser.parse_network_params(plan, {
+        "interop": {
+            "enabled": False,
+            "sets": [{}]
+        },
+    })
+
+    expect.eq(parsed_params["interop"], input_parser.default_interop_params() | {
+        "enabled": False,
+        "sets": [{
+            "name": "interop-set-0",
+            "participants": ["2151908"],
+            "supervisor_params": input_parser.default_supervisor_params()
+        }]
     })
