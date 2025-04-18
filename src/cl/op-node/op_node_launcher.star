@@ -73,6 +73,7 @@ def launch(
     observability_helper,
     interop_params,
     da_server_context,
+    conductor_enabled,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
         endpoint="/",
@@ -107,6 +108,7 @@ def launch(
         observability_helper,
         interop_params,
         da_server_context,
+        conductor_enabled,
     )
 
     service = plan.add_service(service_name, config)
@@ -152,6 +154,7 @@ def get_beacon_config(
     observability_helper,
     interop_params,
     da_server_context,
+    conductor_enabled,
 ):
     ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
 
@@ -240,6 +243,11 @@ def get_beacon_config(
             "--p2p.sequencer.key=" + sequencer_private_key,
             "--sequencer.enabled",
             "--sequencer.l1-confs=2",
+        ]
+
+    if conductor_enabled:
+        cmd += [
+            "--conductor.enabled={0}".format("true"),
         ]
 
     if len(existing_cl_clients) > 0:

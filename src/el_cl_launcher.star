@@ -9,6 +9,7 @@ ethereum_package_input_parser = import_module(
 input_parser = import_module("./package_io/input_parser.star")
 
 observability = import_module("./observability/observability.star")
+constants = import_module("./package_io/constants.star")
 
 # EL
 op_geth = import_module("./el/op-geth/op_geth_launcher.star")
@@ -30,6 +31,8 @@ op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
 # Conductor
 op_conductor = import_module("./op-conductor/op_conductor_launcher.star")
 
+
+# TODO: Make op_conductor_enabled a configuration on network_params
 def launch(
     plan,
     network_params,
@@ -150,6 +153,12 @@ def launch(
         },
     }
 
+    op_conductor_launcher = {
+        "op-conductor": {
+            "launch_method": op_conductor.launch,
+        }
+    }
+
     sidecar_launchers = {
         "rollup-boost": {
             "launcher": rollup_boost.new_rollup_boost_launcher(
@@ -164,266 +173,189 @@ def launch(
 
     all_cl_contexts = []
     all_el_contexts = []
+
     sequencer_enabled = True
     sequencer_context = None
     rollup_boost_enabled = "rollup-boost" in additional_services
-    conductor_enabled = True # TODO: Dynamically set from input args
-    external_builder = mev_params.builder_host != "" and mev_params.builder_port != ""
+
+    conductor_enabled = True  # TODO: Dynamically set from input args
+    conductor_bootstrapped = False
 
     for index, participant in enumerate(participants):
-        cl_type = participant.cl_type
-        el_type = participant.el_type
-        cl_builder_type = participant.cl_builder_type
-        el_builder_type = participant.el_builder_type
-
-        node_selectors = ethereum_package_input_parser.get_client_node_selectors(
-            participant.node_selectors,
-            global_node_selectors,
-        )
-
-        el_tolerations = ethereum_package_input_parser.get_client_tolerations(
-            participant.el_tolerations, participant.tolerations, global_tolerations
-        )
-
-        cl_tolerations = ethereum_package_input_parser.get_client_tolerations(
-            participant.cl_tolerations, participant.tolerations, global_tolerations
-        )
-
-        if el_type not in el_launchers:
-            fail(
-                "Unsupported launcher '{0}', need one of '{1}'".format(
-                    el_type, ",".join(el_launchers.keys())
-                )
-            )
-        if cl_type not in cl_launchers:
-            fail(
-                "Unsupported launcher '{0}', need one of '{1}'".format(
-                    cl_type, ",".join(cl_launchers.keys())
-                )
-            )
-
-        if el_builder_type not in el_builder_launchers:
-            fail(
-                "Unsupported launcher '{0}', need one of '{1}'".format(
-                    el_builder_type, ",".join(el_builder_launchers.keys())
-                )
-            )
-
-        if cl_builder_type not in cl_builder_launchers:
-            fail(
-                "Unsupported launcher '{0}', need one of '{1}'".format(
-                    cl_builder_type, ",".join(cl_builder_launchers.keys())
-                )
-            )
-
-        el_launcher, el_launch_method = (
-            el_launchers[el_type]["launcher"],
-            el_launchers[el_type]["launch_method"],
-        )
-
-        cl_launcher, cl_launch_method = (
-            cl_launchers[cl_type]["launcher"],
-            cl_launchers[cl_type]["launch_method"],
-        )
-
-        el_builder_launcher, el_builder_launch_method = (
-            el_builder_launchers[el_builder_type]["launcher"],
-            el_builder_launchers[el_builder_type]["launch_method"],
-        )
-
-        cl_builder_launcher, cl_builder_launch_method = (
-            cl_builder_launchers[cl_builder_type]["launcher"],
-            cl_builder_launchers[cl_builder_type]["launch_method"],
-        )
-
-        sidecar_launcher, sidecar_launch_method = (
-            sidecar_launchers["rollup-boost"]["launcher"],
-            sidecar_launchers["rollup-boost"]["launch_method"],
-        )
-
-        # Zero-pad the index using the calculated zfill value
-        index_str = ethereum_package_shared_utils.zfill_custom(
-            index + 1, len(str(len(participants)))
-        )
-
-        el_service_name = "op-el-{0}-{1}-{2}-{3}".format(
-            index_str, el_type, cl_type, l2_services_suffix
-        )
-        cl_service_name = "op-cl-{0}-{1}-{2}-{3}".format(
-            index_str, cl_type, el_type, l2_services_suffix
-        )
-        el_builder_service_name = "op-el-builder-{0}-{1}-{2}-{3}".format(
-            index_str, el_builder_type, cl_builder_type, l2_services_suffix
-        )
-        cl_builder_service_name = "op-cl-builder-{0}-{1}-{2}-{3}".format(
-            index_str, cl_builder_type, el_builder_type, l2_services_suffix
-        )
-        sidecar_service_name = "op-rollup-boost-{0}-{1}".format(
-            index_str, l2_services_suffix
-        )
-
-        el_context = el_launch_method(
+        el_context, cl_context, sidecar_context = launch_participant(
             plan,
-            el_launcher,
-            el_service_name,
-            participant,
-            global_log_level,
-            persistent,
-            el_tolerations,
-            node_selectors,
-            all_el_contexts,
-            sequencer_enabled,
-            sequencer_context,
-            observability_helper,
+            network_params,
+            mev_params,
             interop_params,
-        )
-
-        all_el_contexts.append(el_context)
-        if sequencer_enabled:
-            sequencer_context = el_context
-
-        for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
-            observability.register_node_metrics_job(
-                observability_helper,
-                el_context.client_name,
-                "execution",
-                network_params.network,
-                metrics_info,
-            )
-
-        if rollup_boost_enabled and sequencer_enabled:
-            plan.print("Starting rollup boost")
-
-            if external_builder:
-                el_builder_context = struct(
-                    ip_addr=mev_params.builder_host,
-                    engine_rpc_port_num=mev_params.builder_port,
-                    rpc_port_num=mev_params.builder_port,
-                    rpc_http_url="http://{0}:{1}".format(
-                        mev_params.builder_host, mev_params.builder_port
-                    ),
-                    client_name="external-builder",
-                )
-            else:
-                sequencer_context = (
-                    all_el_contexts[0] if len(all_el_contexts) > 0 else None
-                )
-                el_builder_context = el_builder_launch_method(
-                    plan,
-                    el_builder_launcher,
-                    el_builder_service_name,
-                    participant,
-                    global_log_level,
-                    persistent,
-                    el_tolerations,
-                    node_selectors,
-                    all_el_contexts,
-                    False,  # sequencer_enabled
-                    sequencer_context,
-                    observability_helper,
-                    interop_params,
-                )
-                for metrics_info in [
-                    x for x in el_builder_context.el_metrics_info if x != None
-                ]:
-                    observability.register_node_metrics_job(
-                        observability_helper,
-                        el_builder_context.client_name,
-                        "execution-builder",
-                        network_params.network,
-                        metrics_info,
-                    )
-            rollup_boost_image = (
-                mev_params.rollup_boost_image
-                if mev_params.rollup_boost_image != ""
-                else input_parser.DEFAULT_SIDECAR_IMAGES["rollup-boost"]
-            )
-
-            sidecar_context = sidecar_launch_method(
-                plan,
-                sidecar_launcher,
-                sidecar_service_name,
-                rollup_boost_image,
-                all_el_contexts,
-                el_context,
-                el_builder_context,
-            )
-
-            all_el_contexts.append(el_builder_context)
-        else:
-            sidecar_context = None
-
-        
-
-        # If conductor is enabled, launch op-conductor here,
-        # then launch op-node with conductor enabled
-        cl_context = cl_launch_method(
-            plan,
-            cl_launcher,
-            cl_service_name,
+            jwt_file,
+            deployment_output,
             participant,
-            global_log_level,
-            persistent,
-            cl_tolerations,
-            node_selectors,
-            sidecar_context
-            if rollup_boost_enabled and sequencer_enabled
-            else el_context,
-            all_cl_contexts,
             l1_config_env_vars,
-            sequencer_enabled,
-            observability_helper,
-            interop_params,
+            l2_services_suffix,
             da_server_context,
+            additional_services,
+            global_log_level,
+            global_node_selectors,
+            global_tolerations,
+            persistent,
+            observability_helper,
+            sequencer_enabled,
+            rollup_boost_enabled,
+            el_launchers,
+            el_builder_launchers,
+            cl_launchers,
+            cl_builder_launchers,
+            sidecar_launchers,
+            conductor_enabled,
+            index,
+            len(str(len(participants))),
+            all_cl_contexts,
+            all_el_contexts,
+            sequencer_context,
         )
 
-        all_cl_contexts.append(cl_context)
-
-        for metrics_info in [x for x in cl_context.cl_nodes_metrics_info if x != None]:
-            observability.register_node_metrics_job(
-                observability_helper,
-                cl_context.client_name,
-                "beacon",
-                network_params.network,
-                metrics_info,
-                {
-                    "supernode": str(cl_context.supernode),
-                },
-            )
-
-        # We don't deploy CL for external builder
-        if rollup_boost_enabled and sequencer_enabled and not external_builder:
-            cl_builder_context = cl_builder_launch_method(
+        if conductor_enabled and sequencer_enabled:
+            # Zero-pad the index using the calculated zfill value
+            conductor_service_name = "op-conductor-0"
+            # Bootstrap the conductor server
+            conductor_context_bootstrap = op_conductor_launcher["op-conductor"][
+                "launch_method"
+            ](
                 plan,
-                cl_builder_launcher,
-                cl_builder_service_name,
-                participant,
-                global_log_level,
-                persistent,
-                cl_tolerations,
-                node_selectors,
-                el_builder_context,
-                all_cl_contexts,
-                l1_config_env_vars,
-                False,
+                cl_context,
+                sidecar_context if sidecar_context != None else el_context,
                 observability_helper,
-                interop_params,
-                da_server_context,
+                deployment_output,
+                network_params,
+                True,  # bootstrap enabled
+                "0",
             )
-            for metrics_info in [
-                x for x in cl_builder_context.cl_nodes_metrics_info if x != None
-            ]:
-                observability.register_node_metrics_job(
-                    observability_helper,
-                    cl_builder_context.client_name,
-                    "beacon-builder",
-                    network_params.network,
-                    metrics_info,
-                    {
-                        "supernode": str(cl_builder_context.supernode),
-                    },
+
+            # Launch op-node (maybe rollup-boost) and el
+            el_context, cl_context, sidecar_context = launch_participant(
+                plan,
+                network_params,
+                mev_params,
+                interop_params,
+                jwt_file,
+                deployment_output,
+                participant,
+                l1_config_env_vars,
+                l2_services_suffix,
+                da_server_context,
+                additional_services,
+                global_log_level,
+                global_node_selectors,
+                global_tolerations,
+                persistent,
+                observability_helper,
+                sequencer_enabled,
+                rollup_boost_enabled,
+                el_launchers,
+                el_builder_launchers,
+                cl_launchers,
+                cl_builder_launchers,
+                sidecar_launchers,
+                conductor_enabled,
+                index,
+                len(str(len(participants))) + 1,
+                all_cl_contexts,
+                all_el_contexts,
+                sequencer_context,
+            )
+
+            conductor_context_1 = op_conductor_launcher["op-conductor"][
+                "launch_method"
+            ](
+                plan,
+                cl_context,
+                sidecar_context if sidecar_context != None else el_context,
+                observability_helper,
+                deployment_output,
+                network_params,
+                False,
+                "1",
+            )
+
+            # Launch op-node (maybe rollup-boost) and el
+            el_context, cl_context, sidecar_context = launch_participant(
+                plan,
+                network_params,
+                mev_params,
+                interop_params,
+                jwt_file,
+                deployment_output,
+                participant,
+                l1_config_env_vars,
+                l2_services_suffix,
+                da_server_context,
+                additional_services,
+                global_log_level,
+                global_node_selectors,
+                global_tolerations,
+                persistent,
+                observability_helper,
+                sequencer_enabled,
+                rollup_boost_enabled,
+                el_launchers,
+                el_builder_launchers,
+                cl_launchers,
+                cl_builder_launchers,
+                sidecar_launchers,
+                conductor_enabled,
+                index,
+                len(str(len(participants))) + 2,
+                all_cl_contexts,
+                all_el_contexts,
+                sequencer_context,
+            )
+
+            conductor_context_2 = op_conductor_launcher["op-conductor"][
+                "launch_method"
+            ](
+                plan,
+                cl_context,
+                sidecar_context if sidecar_context != None else el_context,
+                observability_helper,
+                deployment_output,
+                network_params,
+                False,
+                "2",
+            )
+
+            # call conductor_addServerAsVoter for on bootstrap server for both spawned services
+            # Set op-node's, as trusted peers of each other
+            # TODO:
+            # bootstrap other two conductor services
+            PostHttpRequestRecipe(
+                endpoint="{0}".format(conductor_context_bootstrap.conductor_rpc_url),
+                content_type="application/json",
+                body="{"
+                + "'jsonrpc':'2.0','method':'conductor_addServerAsVoter','params':[{0}, {1}, {2}],'id':1".format(
+                    conductor_context_1.conductor_raft_server_id,
+                    conductor_context_1.conductor_consensus_addr,
+                    conductor_context_1.conductor_raft_config_version,
                 )
-            all_cl_contexts.append(cl_builder_context)
+                + "}",
+                port_id=constants.HTTP_PORT_ID,
+            )
+
+            PostHttpRequestRecipe(
+                endpoint="{0}".format(conductor_context_bootstrap.conductor_rpc_url),
+                content_type="application/json",
+                body="{"
+                + "'jsonrpc':'2.0','method':'conductor_addServerAsVoter','params':[{0}, {1}, {2}],'id':1".format(
+                    conductor_context_2.conductor_raft_server_id,
+                    conductor_context_2.conductor_consensus_addr,
+                    conductor_context_2.conductor_raft_config_version,
+                )
+                + "}",
+                port_id=constants.HTTP_PORT_ID,
+            )
+
+            # verify cluster membership of the two spawned op-conductor services with conductor_clusterMembership
+            # TODO:
+            # restart the bootstrap server with OP_CONDUCTOR_RAFT_BOOTSTRAP: "false" and OP_CONDUCTOR_PAUSED: "false"
 
         # only the first participant is the sequencer
         if sequencer_enabled:
@@ -431,3 +363,289 @@ def launch(
 
     plan.print("Successfully added {0} EL/CL participants".format(len(participants)))
     return all_el_contexts, all_cl_contexts
+
+
+def launch_participant(
+    plan,
+    network_params,
+    mev_params,
+    interop_params,
+    jwt_file,
+    deployment_output,
+    participant,
+    l1_config_env_vars,
+    l2_services_suffix,
+    da_server_context,
+    additional_services,
+    global_log_level,
+    global_node_selectors,
+    global_tolerations,
+    persistent,
+    observability_helper,
+    sequencer_enabled,
+    rollup_boost_enabled,
+    el_launchers,
+    el_builder_launchers,
+    cl_launchers,
+    cl_builder_launchers,
+    sidecar_launchers,
+    conductor_enabled,
+    index,
+    length,
+    all_cl_contexts,
+    all_el_contexts,
+    sequencer_context,
+):
+    external_builder = mev_params.builder_host != "" and mev_params.builder_port != ""
+
+    cl_type = participant.cl_type
+    el_type = participant.el_type
+    cl_builder_type = participant.cl_builder_type
+    el_builder_type = participant.el_builder_type
+
+    node_selectors = ethereum_package_input_parser.get_client_node_selectors(
+        participant.node_selectors,
+        global_node_selectors,
+    )
+
+    el_tolerations = ethereum_package_input_parser.get_client_tolerations(
+        participant.el_tolerations, participant.tolerations, global_tolerations
+    )
+
+    cl_tolerations = ethereum_package_input_parser.get_client_tolerations(
+        participant.cl_tolerations, participant.tolerations, global_tolerations
+    )
+
+    if el_type not in el_launchers:
+        fail(
+            "Unsupported launcher '{0}', need one of '{1}'".format(
+                el_type, ",".join(el_launchers.keys())
+            )
+        )
+    if cl_type not in cl_launchers:
+        fail(
+            "Unsupported launcher '{0}', need one of '{1}'".format(
+                cl_type, ",".join(cl_launchers.keys())
+            )
+        )
+
+    if el_builder_type not in el_builder_launchers:
+        fail(
+            "Unsupported launcher '{0}', need one of '{1}'".format(
+                el_builder_type, ",".join(el_builder_launchers.keys())
+            )
+        )
+
+    if cl_builder_type not in cl_builder_launchers:
+        fail(
+            "Unsupported launcher '{0}', need one of '{1}'".format(
+                cl_builder_type, ",".join(cl_builder_launchers.keys())
+            )
+        )
+
+    el_launcher, el_launch_method = (
+        el_launchers[el_type]["launcher"],
+        el_launchers[el_type]["launch_method"],
+    )
+
+    cl_launcher, cl_launch_method = (
+        cl_launchers[cl_type]["launcher"],
+        cl_launchers[cl_type]["launch_method"],
+    )
+
+    el_builder_launcher, el_builder_launch_method = (
+        el_builder_launchers[el_builder_type]["launcher"],
+        el_builder_launchers[el_builder_type]["launch_method"],
+    )
+
+    cl_builder_launcher, cl_builder_launch_method = (
+        cl_builder_launchers[cl_builder_type]["launcher"],
+        cl_builder_launchers[cl_builder_type]["launch_method"],
+    )
+
+    sidecar_launcher, sidecar_launch_method = (
+        sidecar_launchers["rollup-boost"]["launcher"],
+        sidecar_launchers["rollup-boost"]["launch_method"],
+    )
+
+    # Zero-pad the index using the calculated zfill value
+    index_str = ethereum_package_shared_utils.zfill_custom(index + 1, length)
+
+    el_service_name = "op-el-{0}-{1}-{2}-{3}".format(
+        index_str, el_type, cl_type, l2_services_suffix
+    )
+    cl_service_name = "op-cl-{0}-{1}-{2}-{3}".format(
+        index_str, cl_type, el_type, l2_services_suffix
+    )
+    el_builder_service_name = "op-el-builder-{0}-{1}-{2}-{3}".format(
+        index_str, el_builder_type, cl_builder_type, l2_services_suffix
+    )
+    cl_builder_service_name = "op-cl-builder-{0}-{1}-{2}-{3}".format(
+        index_str, cl_builder_type, el_builder_type, l2_services_suffix
+    )
+    sidecar_service_name = "op-rollup-boost-{0}-{1}".format(
+        index_str, l2_services_suffix
+    )
+
+    el_context = el_launch_method(
+        plan,
+        el_launcher,
+        el_service_name,
+        participant,
+        global_log_level,
+        persistent,
+        el_tolerations,
+        node_selectors,
+        all_el_contexts,
+        sequencer_enabled,
+        sequencer_context,
+        observability_helper,
+        interop_params,
+    )
+
+    all_el_contexts.append(el_context)
+
+    if sequencer_enabled:
+        sequencer_context = el_context
+
+    for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
+        observability.register_node_metrics_job(
+            observability_helper,
+            el_context.client_name,
+            "execution",
+            network_params.network,
+            metrics_info,
+        )
+
+    sidecar_context = None
+
+    if rollup_boost_enabled and sequencer_enabled:
+        plan.print("Starting rollup boost")
+
+        if external_builder:
+            el_builder_context = struct(
+                ip_addr=mev_params.builder_host,
+                engine_rpc_port_num=mev_params.builder_port,
+                rpc_port_num=mev_params.builder_port,
+                rpc_http_url="http://{0}:{1}".format(
+                    mev_params.builder_host, mev_params.builder_port
+                ),
+                client_name="external-builder",
+            )
+        else:
+            sequencer_context = all_el_contexts[0] if len(all_el_contexts) > 0 else None
+            el_builder_context = el_builder_launch_method(
+                plan,
+                el_builder_launcher,
+                el_builder_service_name,
+                participant,
+                global_log_level,
+                persistent,
+                el_tolerations,
+                node_selectors,
+                all_el_contexts,
+                False,  # sequencer_enabled
+                sequencer_context,
+                observability_helper,
+                interop_params,
+            )
+            for metrics_info in [
+                x for x in el_builder_context.el_metrics_info if x != None
+            ]:
+                observability.register_node_metrics_job(
+                    observability_helper,
+                    el_builder_context.client_name,
+                    "execution-builder",
+                    network_params.network,
+                    metrics_info,
+                )
+        rollup_boost_image = (
+            mev_params.rollup_boost_image
+            if mev_params.rollup_boost_image != ""
+            else input_parser.DEFAULT_SIDECAR_IMAGES["rollup-boost"]
+        )
+
+        sidecar_context = sidecar_launch_method(
+            plan,
+            sidecar_launcher,
+            sidecar_service_name,
+            rollup_boost_image,
+            all_el_contexts,
+            el_context,
+            el_builder_context,
+        )
+
+        all_el_contexts.append(el_builder_context)
+    else:
+        sidecar_context = None
+
+    # If conductor is enabled, launch op-conductor here,
+    # then launch op-node with conductor enabled
+    cl_context = cl_launch_method(
+        plan,
+        cl_launcher,
+        cl_service_name,
+        participant,
+        global_log_level,
+        persistent,
+        cl_tolerations,
+        node_selectors,
+        sidecar_context if rollup_boost_enabled and sequencer_enabled else el_context,
+        all_cl_contexts,
+        l1_config_env_vars,
+        sequencer_enabled,
+        observability_helper,
+        interop_params,
+        da_server_context,
+        conductor_enabled,
+    )
+
+    all_cl_contexts.append(cl_context)
+
+    for metrics_info in [x for x in cl_context.cl_nodes_metrics_info if x != None]:
+        observability.register_node_metrics_job(
+            observability_helper,
+            cl_context.client_name,
+            "beacon",
+            network_params.network,
+            metrics_info,
+            {
+                "supernode": str(cl_context.supernode),
+            },
+        )
+
+    # We don't deploy CL for external builder
+    if rollup_boost_enabled and sequencer_enabled and not external_builder:
+        cl_builder_context = cl_builder_launch_method(
+            plan,
+            cl_builder_launcher,
+            cl_builder_service_name,
+            participant,
+            global_log_level,
+            persistent,
+            cl_tolerations,
+            node_selectors,
+            el_builder_context,
+            all_cl_contexts,
+            l1_config_env_vars,
+            False,
+            observability_helper,
+            interop_params,
+            da_server_context,
+        )
+        for metrics_info in [
+            x for x in cl_builder_context.cl_nodes_metrics_info if x != None
+        ]:
+            observability.register_node_metrics_job(
+                observability_helper,
+                cl_builder_context.client_name,
+                "beacon-builder",
+                network_params.network,
+                metrics_info,
+                {
+                    "supernode": str(cl_builder_context.supernode),
+                },
+            )
+        all_cl_contexts.append(cl_builder_context)
+
+    return el_context, cl_context, sidecar_context
