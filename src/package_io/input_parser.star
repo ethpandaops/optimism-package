@@ -19,6 +19,10 @@ DEFAULT_CL_IMAGES = {
     "hildr": "ghcr.io/optimism-java/hildr:latest",
 }
 
+DEFAULT_CONDUCTOR_IMAGES = {
+    "op-conductor": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:develop",
+}
+
 DEFAULT_BATCHER_IMAGES = {
     "op-batcher": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
 }

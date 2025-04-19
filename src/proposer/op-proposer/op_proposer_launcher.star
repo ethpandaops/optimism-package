@@ -48,6 +48,7 @@ def launch(
     proposer_params,
     network_params,
     observability_helper,
+    conductor_contexts,
 ):
     service_instance_name = util.make_service_instance_name(
         SERVICE_NAME, network_params
@@ -63,6 +64,7 @@ def launch(
             game_factory_address,
             proposer_params,
             observability_helper,
+            conductor_contexts,
         ),
     )
 
@@ -81,6 +83,7 @@ def make_service_config(
     game_factory_address,
     proposer_params,
     observability_helper,
+    conductor_contexts,
 ):
     ports = dict(get_used_ports())
 
@@ -88,7 +91,14 @@ def make_service_config(
         SERVICE_NAME,
         "--poll-interval=12s",
         "--rpc.port=" + str(HTTP_PORT_NUM),
-        "--rollup-rpc=" + cl_context.beacon_http_url,
+        "--rollup-rpc="
+        + "{0},{1},{2}".format(
+            conductor_contexts[0].conductor_rpc_url,
+            conductor_contexts[1].conductor_rpc_url,
+            conductor_contexts[2].conductor_rpc_url,
+        )
+        if len(conductor_contexts) > 0
+        else cl_context.beacon_http_url,
         "--game-factory-address=" + str(game_factory_address),
         "--private-key=" + signer_context.clients[SERVICE_TYPE].key,
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
