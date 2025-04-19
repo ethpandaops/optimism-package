@@ -491,14 +491,14 @@ def launch(
             )
 
             # stop the bootstrap server
-            plan.stop_service(
-                name=conductor_context_bootstrap.service_name,
-                description="stopping bootstrap conductor",
-            )
+            # plan.stop_service(
+            #     name=conductor_context_bootstrap.service_name,
+            #     description="stopping bootstrap conductor",
+            # )
 
-            bootstrap_server = plan.get_service(
-                name=conductor_context_bootstrap.service_name
-            )
+            # bootstrap_server = plan.get_service(
+            #     name=conductor_context_bootstrap.service_name
+            # )
 
             # resume all three conductor services
 
