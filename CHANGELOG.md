@@ -1,5 +1,67 @@
 # Changelog
 
+## [1.3.0](https://github.com/ethpandaops/optimism-package/compare/1.2.0...1.3.0) (2025-04-19)
+
+
+### Features
+
+* Add docs section about using contender as l2 transaction source ([#175](https://github.com/ethpandaops/optimism-package/issues/175)) ([eea3e1b](https://github.com/ethpandaops/optimism-package/commit/eea3e1b6f4a3350e3177749671186c6fdd449f61))
+* add new lint tool ([#197](https://github.com/ethpandaops/optimism-package/issues/197)) ([6d078a9](https://github.com/ethpandaops/optimism-package/commit/6d078a9ee0aee1166030d70b1aaa569a193bc0f5))
+* additional service tx fuzzer ([#192](https://github.com/ethpandaops/optimism-package/issues/192)) ([9c5203a](https://github.com/ethpandaops/optimism-package/commit/9c5203af40c724aff71cad6ccb53baef301b583f))
+* adds op-challenger support ([#116](https://github.com/ethpandaops/optimism-package/issues/116)) ([6aba40a](https://github.com/ethpandaops/optimism-package/commit/6aba40a4eb4146a97b2c50b7c1ed8de720f7d2d8))
+* adds op-proposer support ([#111](https://github.com/ethpandaops/optimism-package/issues/111)) ([f062776](https://github.com/ethpandaops/optimism-package/commit/f062776d768c7b653a37733dbb6fe8831a8fdef0))
+* adds support for permissionless game, challenger interop support ([#155](https://github.com/ethpandaops/optimism-package/issues/155)) ([825b5f5](https://github.com/ethpandaops/optimism-package/commit/825b5f5c245d7402ac7b22e25bc3dcd40b168a48))
+* Allow overriding faultGameAbsolutePrestate in op-deployer ([#125](https://github.com/ethpandaops/optimism-package/issues/125)) ([2e7b7cd](https://github.com/ethpandaops/optimism-package/commit/2e7b7cd70ab093d482d72c2f5b3a6a8bd7880b3e))
+* alt-da support ([#154](https://github.com/ethpandaops/optimism-package/issues/154)) ([0a1593a](https://github.com/ethpandaops/optimism-package/commit/0a1593a2bf49e8f05c5d5908dd69a5cd52aaa8e8))
+* EL builder sequencer and bootstrap issues ([#178](https://github.com/ethpandaops/optimism-package/issues/178)) ([a9e3b2d](https://github.com/ethpandaops/optimism-package/commit/a9e3b2dd26e0938bbffe5df93c1a5b3823114d84))
+* generate op-supervisor dependency set json ([#131](https://github.com/ethpandaops/optimism-package/issues/131)) ([464fbba](https://github.com/ethpandaops/optimism-package/commit/464fbbaeaa0b4feefe13d1a9db782f6f39bd7fd4))
+* **grafana:** add grafana support ([#137](https://github.com/ethpandaops/optimism-package/issues/137)) ([3e6f9de](https://github.com/ethpandaops/optimism-package/commit/3e6f9de33c43cabdb4b5c5e4240f118014b69474))
+* improve URL handling ([#174](https://github.com/ethpandaops/optimism-package/issues/174)) ([5fb6ecf](https://github.com/ethpandaops/optimism-package/commit/5fb6ecfdb865234fb08cefc288e618f62b57ed9e))
+* **op-deployer:** optionally receive contracts from enclave artifact ([#203](https://github.com/ethpandaops/optimism-package/issues/203)) ([509ef69](https://github.com/ethpandaops/optimism-package/commit/509ef6949fc88ded4e06d84596f9d5dbf8ae8941))
+* **op-signer:** add op-signer support ([#207](https://github.com/ethpandaops/optimism-package/issues/207)) ([40c365b](https://github.com/ethpandaops/optimism-package/commit/40c365bee2aae41ce0ea869642fb2231d7611028))
+* **op-supervisor:** add op-supervisor component ([#110](https://github.com/ethpandaops/optimism-package/issues/110)) ([99fe41d](https://github.com/ethpandaops/optimism-package/commit/99fe41d3e28a28278240139a6027f951aed49a08))
+* **prometheus:** add prometheus support ([#134](https://github.com/ethpandaops/optimism-package/issues/134)) ([e22047a](https://github.com/ethpandaops/optimism-package/commit/e22047ad61965690596875b3a5b8726fb4fd99e0))
+* **proxyd:** add proxyd support ([#195](https://github.com/ethpandaops/optimism-package/issues/195)) ([36444bb](https://github.com/ethpandaops/optimism-package/commit/36444bbcc886dd2574f5fa8512548e0ee0bf8234))
+* **rbuilder:** Add op-rbuilder as exectuion layer builder option ([#169](https://github.com/ethpandaops/optimism-package/issues/169)) ([ff57cb4](https://github.com/ethpandaops/optimism-package/commit/ff57cb42f6f1880618a8ded6dfe8cfa7862ee853))
+* **rbuilder:** Fix rbuilder flag and update builder op-node to latest format ([#217](https://github.com/ethpandaops/optimism-package/issues/217)) ([c993cd0](https://github.com/ethpandaops/optimism-package/commit/c993cd0b9716fb063c1e514e19374e27e1b10b3c))
+* **reproduicibility:** pin ethereum-package dependency ([#135](https://github.com/ethpandaops/optimism-package/issues/135)) ([e9eede2](https://github.com/ethpandaops/optimism-package/commit/e9eede2d74c5187344c6153ecd927cee612842db))
+* **test:** Unit testing using kurtestosis ([#161](https://github.com/ethpandaops/optimism-package/issues/161)) ([1887774](https://github.com/ethpandaops/optimism-package/commit/18877745fe64ce97403b2dba27d9bad9f45ca7a5))
+* update rollup-boost params ([#177](https://github.com/ethpandaops/optimism-package/issues/177)) ([f6ebd93](https://github.com/ethpandaops/optimism-package/commit/f6ebd935e25d5fc3a7a8672aa1cd88bbcc13d0cf))
+
+
+### Bug Fixes
+
+* `kt run .` without --args-file should run without error ([#166](https://github.com/ethpandaops/optimism-package/issues/166)) ([d137619](https://github.com/ethpandaops/optimism-package/commit/d137619ec1e3677366dc3198a16390b68026153d))
+* Add depset-config dummy flag for challenger ([#188](https://github.com/ethpandaops/optimism-package/issues/188)) ([b6b95c4](https://github.com/ethpandaops/optimism-package/commit/b6b95c425054005bef72194728c91dc9c5d5483a))
+* Add isthmus activation time to gen2spec tool ([#120](https://github.com/ethpandaops/optimism-package/issues/120)) ([9032461](https://github.com/ethpandaops/optimism-package/commit/90324612abb79f2216a571b33a77ab52eb32a9a4))
+* additional fixes for rollup-boost drift ([#163](https://github.com/ethpandaops/optimism-package/issues/163)) ([8d6ded4](https://github.com/ethpandaops/optimism-package/commit/8d6ded44ce07f0d80892d20bc2d084f78b87adae))
+* Bump the default version of OP contract deployer ([#146](https://github.com/ethpandaops/optimism-package/issues/146)) ([81fa02f](https://github.com/ethpandaops/optimism-package/commit/81fa02f781a6748df0f0d965698896c2c17c3d0c))
+* Correct handling global params and set the log level of reth ([#183](https://github.com/ethpandaops/optimism-package/issues/183)) ([dad910a](https://github.com/ethpandaops/optimism-package/commit/dad910ae88a3a20bb5cc6e1f9fd67a353964c0a7))
+* default optimism_args to empty ([#196](https://github.com/ethpandaops/optimism-package/issues/196)) ([a8d31b4](https://github.com/ethpandaops/optimism-package/commit/a8d31b4f1d0c7752f021edd326db1372f88978f8))
+* don't truncate names too arbitrarily ([#138](https://github.com/ethpandaops/optimism-package/issues/138)) ([edb9ce2](https://github.com/ethpandaops/optimism-package/commit/edb9ce2da76447011931582af7a5cdfafaf34515))
+* explicitly set op-deployer cache to a reasonable value ([#193](https://github.com/ethpandaops/optimism-package/issues/193)) ([0b78140](https://github.com/ethpandaops/optimism-package/commit/0b7814012ba6b0a60ea3cf23f9e54a4cc763aa43))
+* Generate all addresses, fix launchers ([#130](https://github.com/ethpandaops/optimism-package/issues/130)) ([0bc10d1](https://github.com/ethpandaops/optimism-package/commit/0bc10d1dff3ff503ec8c948b976441eb93d68c80))
+* **grafana:** use absolute file path ([#176](https://github.com/ethpandaops/optimism-package/issues/176)) ([b62804e](https://github.com/ethpandaops/optimism-package/commit/b62804e3777289ef70fb45e129003a260bb738c0))
+* nightly tests ([#194](https://github.com/ethpandaops/optimism-package/issues/194)) ([631fe94](https://github.com/ethpandaops/optimism-package/commit/631fe949da9eaf557d39be8b0ec89d9289726b74))
+* **observability:** label improvements ([#185](https://github.com/ethpandaops/optimism-package/issues/185)) ([e735f56](https://github.com/ethpandaops/optimism-package/commit/e735f568ae531cd1006869561ff93a77b6678d5e))
+* **observability:** network label for supervisor ([#187](https://github.com/ethpandaops/optimism-package/issues/187)) ([884f4eb](https://github.com/ethpandaops/optimism-package/commit/884f4eb813884c4c8e5deead6ca4e0c54b85da90))
+* **observability:** remove supervisor network label ([#190](https://github.com/ethpandaops/optimism-package/issues/190)) ([bb4a36d](https://github.com/ethpandaops/optimism-package/commit/bb4a36df8dc53bc07b3f10edb40a54272fd76d6e))
+* **proxyd:** uniquify proxyd-config artifact ([#206](https://github.com/ethpandaops/optimism-package/issues/206)) ([6a71ee2](https://github.com/ethpandaops/optimism-package/commit/6a71ee255617cccdaf1e021f46776fed56c8c386))
+* Remove dead code in main.star ([#114](https://github.com/ethpandaops/optimism-package/issues/114)) ([9e47fd6](https://github.com/ethpandaops/optimism-package/commit/9e47fd6392d874c2881e530051fcf2a889b54cfe))
+* remove some UUOC ([#128](https://github.com/ethpandaops/optimism-package/issues/128)) ([6ed6c57](https://github.com/ethpandaops/optimism-package/commit/6ed6c57f5d7230b73873989894a9ce28c007f46d))
+* removes op-node default param l1.trustrpc ([#140](https://github.com/ethpandaops/optimism-package/issues/140)) ([35d4f73](https://github.com/ethpandaops/optimism-package/commit/35d4f73e3c5047e49681234b0d6cf92e8ee40a6d))
+* repair supervisor-&gt;node cnx ([#127](https://github.com/ethpandaops/optimism-package/issues/127)) ([6d6c96e](https://github.com/ethpandaops/optimism-package/commit/6d6c96ed2ed265b2627f0b22092f0865a1645cdd))
+* restore semantics of empty strings in input ([#150](https://github.com/ethpandaops/optimism-package/issues/150)) ([c32a626](https://github.com/ethpandaops/optimism-package/commit/c32a626c575983331c1d4fc52c507588e385ed56))
+* rollup boost not starting ([#117](https://github.com/ethpandaops/optimism-package/issues/117)) ([6eba979](https://github.com/ethpandaops/optimism-package/commit/6eba97967c2c3e4d14d6078d4f4546726e65b98f))
+* rollup boost plan errors ([#147](https://github.com/ethpandaops/optimism-package/issues/147)) ([069b11d](https://github.com/ethpandaops/optimism-package/commit/069b11dd0bc51fa35e69a9f6b77f82ba040c3923))
+* set useInterop flag properly ([#122](https://github.com/ethpandaops/optimism-package/issues/122)) ([92438b5](https://github.com/ethpandaops/optimism-package/commit/92438b5821c0948edaba55baf23d11ba0be6add3))
+* sets op-node sequencer/verifier confs to 2/1 ([#141](https://github.com/ethpandaops/optimism-package/issues/141)) ([4cfd2da](https://github.com/ethpandaops/optimism-package/commit/4cfd2daf026932526995a223581f7b53a598fc19))
+* single sequencer ([#201](https://github.com/ethpandaops/optimism-package/issues/201)) ([24cb639](https://github.com/ethpandaops/optimism-package/commit/24cb63981e7139b526054556fc0a90dc1f667017))
+* stop pointing op-node to op-supervisor ([#124](https://github.com/ethpandaops/optimism-package/issues/124)) ([ae515ea](https://github.com/ethpandaops/optimism-package/commit/ae515ea62588e09fcc1e071f4ad11dd2f4a03134))
+* teku set older version ([#223](https://github.com/ethpandaops/optimism-package/issues/223)) ([c79d15e](https://github.com/ethpandaops/optimism-package/commit/c79d15eb9a20355d33d564aa52318a7b25fb60f4))
+* **util:** name artifacts created by write_to_file ([#205](https://github.com/ethpandaops/optimism-package/issues/205)) ([44cee08](https://github.com/ethpandaops/optimism-package/commit/44cee081211ead86ef0082166df2a3ec9d273c72))
+* wallets.json multi-chain support ([#123](https://github.com/ethpandaops/optimism-package/issues/123)) ([288176c](https://github.com/ethpandaops/optimism-package/commit/288176cdd14d1f88122508eb76dcad6c64324cd1))
+
 ## [1.2.0](https://github.com/ethpandaops/optimism-package/compare/1.1.0...1.2.0) (2024-12-13)
 
 
