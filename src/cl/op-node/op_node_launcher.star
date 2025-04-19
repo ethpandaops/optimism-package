@@ -13,7 +13,7 @@ ethereum_package_constants = import_module(
 ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
-
+op_conductor = import_module("../../op-conductor/op_conductor_launcher.star")
 constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 observability = import_module("../../observability/observability.star")
@@ -74,6 +74,7 @@ def launch(
     interop_params,
     da_server_context,
     conductor_enabled,
+    conductor_service_config,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
         endpoint="/",
@@ -109,6 +110,7 @@ def launch(
         interop_params,
         da_server_context,
         conductor_enabled,
+        conductor_service_config,
     )
 
     service = plan.add_service(service_name, config)
@@ -155,6 +157,7 @@ def get_beacon_config(
     interop_params,
     da_server_context,
     conductor_enabled,
+    conductor_service_config,
 ):
     ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
 
@@ -245,9 +248,15 @@ def get_beacon_config(
             "--sequencer.l1-confs=2",
         ]
 
-    if conductor_enabled:
+    if conductor_enabled and conductor_service_config != None:
         cmd += [
             "--conductor.enabled={0}".format("true"),
+            "--conductor.rpc={0}".format(
+                "{0}:{1}".format(
+                    conductor_service_config.private_ip_address_placeholder,
+                    op_conductor.RPC_PORT_NUM,
+                )
+            ),
         ]
 
     if len(existing_cl_clients) > 0:

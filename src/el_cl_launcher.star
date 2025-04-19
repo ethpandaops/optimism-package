@@ -156,6 +156,7 @@ def launch(
     op_conductor_launcher = {
         "op-conductor": {
             "launch_method": op_conductor.launch,
+            "service_config_method": op_conductor.get_config,
         }
     }
 
@@ -180,59 +181,82 @@ def launch(
 
     conductor_enabled = True  # TODO: Dynamically set from input args
     conductor_bootstrapped = False
-
+    conductor_contexts = []
     for index, participant in enumerate(participants):
-        el_context, cl_context, sidecar_context = launch_participant(
-            plan,
-            network_params,
-            mev_params,
-            interop_params,
-            jwt_file,
-            deployment_output,
-            participant,
-            l1_config_env_vars,
-            l2_services_suffix,
-            da_server_context,
-            additional_services,
-            global_log_level,
-            global_node_selectors,
-            global_tolerations,
-            persistent,
-            observability_helper,
-            sequencer_enabled,
-            rollup_boost_enabled,
-            el_launchers,
-            el_builder_launchers,
-            cl_launchers,
-            cl_builder_launchers,
-            sidecar_launchers,
-            conductor_enabled,
-            index,
-            len(str(len(participants))),
-            all_cl_contexts,
-            all_el_contexts,
-            sequencer_context,
-        )
-
         if conductor_enabled and sequencer_enabled:
-            # Zero-pad the index using the calculated zfill value
-            conductor_service_name = "op-conductor-0"
             # Bootstrap the conductor server
+            conductor_service_config = op_conductor_launcher["op-conductor"][
+                "service_config_method"
+            ](
+                plan,
+                observability_helper,
+                deployment_output,
+                network_params,
+                "true",  # conductor_bootstrapped
+                "true",  # paused
+            )
+
+            el_context, cl_context_0, sidecar_context = launch_participant(
+                plan,
+                network_params,
+                mev_params,
+                interop_params,
+                jwt_file,
+                deployment_output,
+                participant,
+                l1_config_env_vars,
+                l2_services_suffix,
+                da_server_context,
+                additional_services,
+                global_log_level,
+                global_node_selectors,
+                global_tolerations,
+                persistent,
+                observability_helper,
+                sequencer_enabled,
+                rollup_boost_enabled,
+                el_launchers,
+                el_builder_launchers,
+                cl_launchers,
+                cl_builder_launchers,
+                sidecar_launchers,
+                conductor_enabled,
+                index,
+                len(str(len(participants))),
+                all_cl_contexts,
+                all_el_contexts,
+                sequencer_context,
+                conductor_service_config,
+            )
+
             conductor_context_bootstrap = op_conductor_launcher["op-conductor"][
                 "launch_method"
             ](
                 plan,
-                cl_context,
+                cl_context_0,
                 sidecar_context if sidecar_context != None else el_context,
                 observability_helper,
                 deployment_output,
                 network_params,
-                True,  # bootstrap enabled
                 "0",
+                conductor_service_config,
+            )
+
+            conductor_contexts.append(conductor_context_bootstrap)
+
+            conductor_service_config = op_conductor_launcher["op-conductor"][
+                "service_config_method"
+            ](
+                plan,
+                observability_helper,
+                deployment_output,
+                network_params,
+                "false",  # conductor_bootstrapped
+                "true",  # paused
             )
 
             # Launch op-node (maybe rollup-boost) and el
-            el_context, cl_context, sidecar_context = launch_participant(
+            el_context, cl_context_1, sidecar_context = launch_participant(
                 plan,
                 network_params,
                 mev_params,
@@ -262,23 +286,37 @@ def launch(
                 all_cl_contexts,
                 all_el_contexts,
                 sequencer_context,
+                conductor_service_config,
             )
 
             conductor_context_1 = op_conductor_launcher["op-conductor"][
                 "launch_method"
             ](
                 plan,
-                cl_context,
+                cl_context_1,
                 sidecar_context if sidecar_context != None else el_context,
                 observability_helper,
                 deployment_output,
                 network_params,
-                False,
                 "1",
+                conductor_service_config,
+            )
+
+            conductor_contexts.append(conductor_context_1)
+
+            conductor_service_config = op_conductor_launcher["op-conductor"][
+                "service_config_method"
+            ](
+                plan,
+                observability_helper,
+                deployment_output,
+                network_params,
+                "false",  # conductor_bootstrapped
+                "true",  # paused
             )
 
             # Launch op-node (maybe rollup-boost) and el
-            el_context, cl_context, sidecar_context = launch_participant(
+            el_context, cl_context_2, sidecar_context = launch_participant(
                 plan,
                 network_params,
                 mev_params,
@@ -308,50 +346,168 @@ def launch(
                 all_cl_contexts,
                 all_el_contexts,
                 sequencer_context,
+                conductor_service_config,
             )
 
             conductor_context_2 = op_conductor_launcher["op-conductor"][
                 "launch_method"
             ](
                 plan,
-                cl_context,
+                cl_context_2,
                 sidecar_context if sidecar_context != None else el_context,
                 observability_helper,
                 deployment_output,
                 network_params,
-                False,
                 "2",
+                conductor_service_config,
+            )
+
+            conductor_contexts.append(conductor_context_2)
+
+            # Add cl_context_1, and cl_context_2 as trusted peers of cl_context_0
+            recipe_0 = PostHttpRequestRecipe(
+                endpoint="/",
+                content_type="application/json",
+                body="{"
+                + '"jsonrpc":"2.0","method":"opp2p_connectPeer","params":["{0}"],"id":1'.format(
+                    cl_context_1.multiaddr
+                )
+                + "}",
+                port_id=constants.HTTP_PORT_ID,
+            )
+
+            recipe_1 = PostHttpRequestRecipe(
+                endpoint="/",
+                content_type="application/json",
+                body="{"
+                + '"jsonrpc":"2.0","method":"opp2p_connectPeer","params":["{0}"],"id":1'.format(
+                    cl_context_2.multiaddr
+                )
+                + "}",
+                port_id=constants.HTTP_PORT_ID,
+            )
+
+            plan.request(
+                recipe=recipe_0,
+                service_name=cl_context_0.beacon_service_name,
+                acceptable_codes=[200],
+            )
+
+            plan.request(
+                recipe=recipe_1,
+                service_name=cl_context_0.beacon_service_name,
+                acceptable_codes=[200],
             )
 
             # call conductor_addServerAsVoter for on bootstrap server for both spawned services
             # Set op-node's, as trusted peers of each other
             # TODO:
             # bootstrap other two conductor services
-            PostHttpRequestRecipe(
-                endpoint="{0}".format(conductor_context_bootstrap.conductor_rpc_url),
+            recipe = PostHttpRequestRecipe(
+                endpoint="/",
                 content_type="application/json",
                 body="{"
-                + "'jsonrpc':'2.0','method':'conductor_addServerAsVoter','params':[{0}, {1}, {2}],'id':1".format(
+                + '"jsonrpc":"2.0","method":"conductor_addServerAsVoter","params":["{0}", "{1}", {2}],"id":1'.format(
                     conductor_context_1.conductor_raft_server_id,
                     conductor_context_1.conductor_consensus_addr,
                     conductor_context_1.conductor_raft_config_version,
                 )
                 + "}",
-                port_id=constants.HTTP_PORT_ID,
+                port_id=constants.RPC_PORT_ID,
             )
 
-            PostHttpRequestRecipe(
-                endpoint="{0}".format(conductor_context_bootstrap.conductor_rpc_url),
+            plan.request(
+                recipe=recipe,
+                service_name=conductor_context_bootstrap.service_name,
+                acceptable_codes=[200],
+            )
+
+            recipe = PostHttpRequestRecipe(
+                endpoint="/",
                 content_type="application/json",
                 body="{"
-                + "'jsonrpc':'2.0','method':'conductor_addServerAsVoter','params':[{0}, {1}, {2}],'id':1".format(
+                + '"jsonrpc":"2.0","method":"conductor_addServerAsVoter","params":["{0}", "{1}", {2}],"id":1'.format(
                     conductor_context_2.conductor_raft_server_id,
                     conductor_context_2.conductor_consensus_addr,
                     conductor_context_2.conductor_raft_config_version,
                 )
                 + "}",
-                port_id=constants.HTTP_PORT_ID,
+                port_id=constants.RPC_PORT_ID,
             )
+
+            plan.request(
+                recipe=recipe,
+                service_name=conductor_context_bootstrap.service_name,
+                acceptable_codes=[200],
+            )
+
+            # Assert cluster membership of the two spawned op-conductor services
+            recipe = PostHttpRequestRecipe(
+                endpoint="/",
+                content_type="application/json",
+                body='{"jsonrpc":"2.0","method":"conductor_clusterMembership","params":[],"id":1}',
+                port_id=constants.RPC_PORT_ID,
+                extract={
+                    "servers": ".result.servers",
+                },
+            )
+
+            response = plan.request(
+                recipe=recipe,
+                service_name=conductor_context_bootstrap.service_name,
+                acceptable_codes=[200],
+            )
+
+            servers = response["extract.servers"]
+
+            plan.print(
+                "Successfully bootstrapped cluster membership: {0}".format(servers)
+            )
+
+            recipe = PostHttpRequestRecipe(
+                endpoint="/",
+                content_type="application/json",
+                body='{"jsonrpc":"2.0","method":"conductor_resume","params":[],"id":1}',
+                port_id=constants.RPC_PORT_ID,
+            )
+
+            # Note: Any restarts on the containers will cause the conductor services to be paused
+            plan.request(
+                recipe=recipe,
+                service_name=conductor_context_bootstrap.service_name,
+                acceptable_codes=[200],
+            )
+
+            plan.request(
+                recipe=recipe,
+                service_name=conductor_context_1.service_name,
+                acceptable_codes=[200],
+            )
+
+            plan.request(
+                recipe=recipe,
+                service_name=conductor_context_2.service_name,
+                acceptable_codes=[200],
+            )
+
+            # stop the bootstrap server
+            plan.stop_service(
+                name=conductor_context_bootstrap.service_name,
+                description="stopping bootstrap conductor",
+            )
+
+            bootstrap_server = plan.get_service(
+                name=conductor_context_bootstrap.service_name
+            )
+
+            # resume all three conductor services
+
+            # set OP_CONDUCTOR_RAFT_BOOTSTRAP: "false and OP_CONDUCTOR_PAUSED: "false"
+            # restart leader server
+
+            # stop the other two conductor services
+            # set OP_CONDUCTOR_PAUSED: "false"
+            # restart the other two conductor services
 
             # verify cluster membership of the two spawned op-conductor services with conductor_clusterMembership
             # TODO:
@@ -362,7 +518,8 @@ def launch(
             sequencer_enabled = False
 
     plan.print("Successfully added {0} EL/CL participants".format(len(participants)))
-    return all_el_contexts, all_cl_contexts
+
+    return all_el_contexts, all_cl_contexts, conductor_contexts
 
 
 def launch_participant(
@@ -395,6 +552,7 @@ def launch_participant(
     all_cl_contexts,
     all_el_contexts,
     sequencer_context,
+    conductor_service_config=None,
 ):
     external_builder = mev_params.builder_host != "" and mev_params.builder_port != ""
 
@@ -598,6 +756,7 @@ def launch_participant(
         interop_params,
         da_server_context,
         conductor_enabled,
+        conductor_service_config,
     )
 
     all_cl_contexts.append(cl_context)

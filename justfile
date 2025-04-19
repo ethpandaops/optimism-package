@@ -23,3 +23,10 @@ lint:
 
 test:
     mise exec -- kurtosis-test .
+
+devnet-up:
+    kurtosis run . --args-file network_params.yaml --enclave op-kurtosis
+
+devnet-down:
+    kurtosis enclave rm -f op-kurtosis
+    kurtosis clean

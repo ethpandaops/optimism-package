@@ -33,7 +33,7 @@ def launch_participant_network(
     challenger_params = chain_args.challenger_params
 
     # First EL and sequencer CL
-    all_el_contexts, all_cl_contexts = el_cl_client_launcher.launch(
+    all_el_contexts, all_cl_contexts, conductor_contexts = el_cl_client_launcher.launch(
         plan,
         network_params,
         chain_args.mev_params,
@@ -103,6 +103,7 @@ def launch_participant_network(
         network_params,
         observability_helper,
         da_server_context,
+        conductor_contexts,
     )
 
     game_factory_address = util.read_network_config_value(
@@ -120,6 +121,7 @@ def launch_participant_network(
         proposer_params,
         network_params,
         observability_helper,
+        conductor_contexts,
     )
 
     if challenger_params.enabled:

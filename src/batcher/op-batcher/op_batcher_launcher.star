@@ -47,6 +47,7 @@ def launch(
     network_params,
     observability_helper,
     da_server_context,
+    conductor_contexts,
 ):
     service_instance_name = util.make_service_instance_name(
         SERVICE_NAME, network_params
@@ -63,6 +64,7 @@ def launch(
             batcher_params,
             observability_helper,
             da_server_context,
+            conductor_contexts,
         ),
     )
 
@@ -82,13 +84,27 @@ def make_service_config(
     batcher_params,
     observability_helper,
     da_server_context,
+    conductor_contexts,
 ):
     ports = dict(get_used_ports())
-
     cmd = [
         SERVICE_NAME,
-        "--l2-eth-rpc=" + el_context.rpc_http_url,
-        "--rollup-rpc=" + cl_context.beacon_http_url,
+        "--l2-eth-rpc="
+        + "{0},{1},{2}".format(
+            conductor_contexts[0].conductor_rpc_url,
+            conductor_contexts[1].conductor_rpc_url,
+            conductor_contexts[2].conductor_rpc_url,
+        )
+        if len(conductor_contexts) > 0
+        else el_context.rpc_http_url,
+        "--rollup-rpc="
+        + "{0},{1},{2}".format(
+            conductor_contexts[0].conductor_rpc_url,
+            conductor_contexts[1].conductor_rpc_url,
+            conductor_contexts[2].conductor_rpc_url,
+        )
+        if len(conductor_contexts) > 0
+        else cl_context.beacon_http_url,
         "--poll-interval=1s",
         "--sub-safety-margin=6",
         "--num-confirmations=1",

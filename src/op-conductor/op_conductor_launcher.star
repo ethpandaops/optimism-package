@@ -21,8 +21,11 @@ SERVICE_NAME = util.make_op_service_name(SERVICE_TYPE)
 
 CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/{0}/{0}-data".format(SERVICE_NAME)
 
-CONDUCTOR_RAFT_CONFIG_VERSION = 0  # TODO:
+CONDUCTOR_RAFT_CONFIG_VERSION = 0
 CONDUCTOR_RAFT_SERVER_ID = "1234"
+CONDUCTOR_HEALTH_CHECK_INTERVAL = 2
+CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT = 1
+CONDUCTOR_HEALTH_CHECK_UNSAFE_INTERVAL = 200
 
 CONSENSUS_PORT_ID = "consensus"
 
@@ -51,8 +54,8 @@ def launch(
     observability_helper,
     deployment_output,
     network_params,
-    conductor_bootstrapped,
     index_str,
+    service_config,
 ):
     service_instance_name = util.make_service_instance_name(
         SERVICE_NAME, network_params
@@ -60,17 +63,19 @@ def launch(
 
     service_name = "{0}-{1}".format(SERVICE_NAME, index_str)
 
+    execution_rpc = util.make_http_url(
+        el_context.ip_addr,
+        el_context.rpc_port_num,
+    )
+
+    consensus_rpc = util.make_http_url(cl_context.ip_addr, cl_context.http_port)
+
+    service_config.env_vars["OP_CONDUCTOR_EXECUTION_RPC"] = execution_rpc
+    service_config.env_vars["OP_CONDUCTOR_NODE_RPC"] = consensus_rpc
+
     service = plan.add_service(
         service_name,
-        get_config(
-            plan,
-            cl_context,
-            el_context,
-            observability_helper,
-            deployment_output,
-            network_params,
-            conductor_bootstrapped,
-        ),
+        service_config,
     )
 
     http_url = "http://{0}:{1}".format(
@@ -96,12 +101,11 @@ def launch(
 
 def get_config(
     plan,
-    cl_context,
-    el_context,
     observability_helper,
     deployment_output,
     network_params,
     conductor_bootstrapped,
+    conductor_paused,
 ):
     ports = dict(get_used_ports())
 
@@ -110,36 +114,33 @@ def get_config(
         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
     }
 
-    execution_rpc = util.make_http_url(
-        el_context.ip_addr,
-        el_context.rpc_port_num,
-    )
-
-    consensus_rpc = util.make_http_url(cl_context.ip_addr, cl_context.http_port)
-
     env_vars = {
         "OP_CONDUCTOR_CONSENSUS_PORT": str(CONSENSUS_PORT_NUM),
         "OP_CONDUCTOR_CONSENSUS_ADDR": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "OP_CONDUCTOR_EXECUTION_RPC": execution_rpc,
-        "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": "2",
-        "OP_CONDUCTOR_HEALTHCHECK_MIN_PEER_COUNT": "1",  # set based on your internal p2p network peer count
-        "OP_CONDUCTOR_HEALTHCHECK_UNSAFE_INTERVAL": "30",  # recommend a 2-3x multiple of your network block time to account for temporary performance issues
+        # "OP_CONDUCTOR_EXECUTION_RPC": execution_rpc,
+        "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(CONDUCTOR_HEALTH_CHECK_INTERVAL),
+        "OP_CONDUCTOR_HEALTHCHECK_MIN_PEER_COUNT": str(
+            CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT
+        ),  # set based on your internal p2p network peer count
+        "OP_CONDUCTOR_HEALTHCHECK_UNSAFE_INTERVAL": str(
+            CONDUCTOR_HEALTH_CHECK_UNSAFE_INTERVAL
+        ),  # recommend a 2-3x multiple of your network block time to account for temporary performance issues
         "OP_CONDUCTOR_LOG_FORMAT": "logfmt",
         "OP_CONDUCTOR_LOG_LEVEL": "info",
         "OP_CONDUCTOR_ROLLUP_CONFIG": "{0}/rollup-{1}.json".format(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
             network_params.network_id,
         ),
-        "OP_CONDUCTOR_RAFT_BOOTSTRAP": "".format(
-            not conductor_bootstrapped,
+        "OP_CONDUCTOR_RAFT_BOOTSTRAP": "{0}".format(
+            conductor_bootstrapped,
         ),
-        "OP_CONDUCTOR_PAUSED": "".format(
-            not conductor_bootstrapped,
+        "OP_CONDUCTOR_PAUSED": "{0}".format(
+            conductor_paused,
         ),
         "OP_CONDUCTOR_METRICS_ADDR": "0.0.0.0",
         "OP_CONDUCTOR_METRICS_ENABLED": "true",
         "OP_CONDUCTOR_METRICS_PORT": CONDUCTOR_METRICS_PORT_NUM,
-        "OP_CONDUCTOR_NODE_RPC": consensus_rpc,
+        # "OP_CONDUCTOR_NODE_RPC": consensus_rpc,
         "OP_CONDUCTOR_RAFT_SERVER_ID": CONDUCTOR_RAFT_SERVER_ID,
         "OP_CONDUCTOR_RAFT_STORAGE_DIR": CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "OP_CONDUCTOR_RPC_ADDR": "0.0.0.0",
