@@ -714,6 +714,7 @@ def default_ethereum_package_network_params():
             {
                 "el_type": "geth",
                 "cl_type": "teku",
+                "cl_image": "consensys/teku:25.4.0",
             }
         ],
         "network_params": {
