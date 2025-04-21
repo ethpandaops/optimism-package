@@ -57,7 +57,6 @@ ethereum_package:
   participants:
   - el_type: geth
     cl_type: teku
-    cl_image: consensys/teku:25.4.0
   network_params:
     preset: minimal
     genesis_delay: 5
