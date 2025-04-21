@@ -74,7 +74,7 @@ def launch(
     interop_params,
     da_server_context,
     conductor_enabled,
-    conductor_service_config,
+    conductor_rpc,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
         endpoint="/",
@@ -110,7 +110,7 @@ def launch(
         interop_params,
         da_server_context,
         conductor_enabled,
-        conductor_service_config,
+        conductor_rpc,
     )
 
     service = plan.add_service(service_name, config)
@@ -157,7 +157,7 @@ def get_beacon_config(
     interop_params,
     da_server_context,
     conductor_enabled,
-    conductor_service_config,
+    conductor_rpc,
 ):
     ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
 
@@ -248,16 +248,13 @@ def get_beacon_config(
             "--sequencer.l1-confs=2",
         ]
 
-    if conductor_enabled and conductor_service_config != None:
+    if conductor_enabled:
         cmd += [
             "--conductor.enabled={0}".format("true"),
-            "--conductor.rpc={0}".format(
-                "{0}:{1}".format(
-                    conductor_service_config.private_ip_address_placeholder,
-                    op_conductor.RPC_PORT_NUM,
-                )
-            ),
+            "--conductor.rpc={0}".format(conductor_rpc),
         ]
+
+        env_vars.update({"OP_NODE_SEQUENCER_STOPPED": "true"})
 
     if len(existing_cl_clients) > 0:
         cmd.append(

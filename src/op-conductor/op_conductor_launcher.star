@@ -25,11 +25,22 @@ CONDUCTOR_RAFT_CONFIG_VERSION = 0
 CONDUCTOR_RAFT_SERVER_ID = "1234"
 CONDUCTOR_HEALTH_CHECK_INTERVAL = 2
 CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT = 1
-CONDUCTOR_HEALTH_CHECK_UNSAFE_INTERVAL = 200
+CONDUCTOR_HEALTH_CHECK_UNSAFE_INTERVAL = 300
 
 CONSENSUS_PORT_ID = "consensus"
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
+
+
+def get_conductor_ip_address(index_str):
+    if index_str == "0":
+        return "172.16.0.23"
+    elif index_str == "1":
+        return "172.16.0.27"
+    elif index_str == "2":
+        return "172.16.0.31"
+    else:
+        return ""
 
 
 def get_used_ports():
@@ -94,7 +105,7 @@ def launch(
         conductor_rpc_port=RPC_PORT_NUM,
         conductor_rpc_url=http_url,
         conductor_consensus_addr=consensus_addr,
-        conductor_raft_server_id=CONDUCTOR_RAFT_SERVER_ID,
+        conductor_raft_server_id=CONDUCTOR_RAFT_SERVER_ID + index_str,
         conductor_raft_config_version=str(CONDUCTOR_RAFT_CONFIG_VERSION),
     )
 
@@ -106,6 +117,7 @@ def get_config(
     network_params,
     conductor_bootstrapped,
     conductor_paused,
+    index_str,
 ):
     ports = dict(get_used_ports())
 
@@ -116,7 +128,10 @@ def get_config(
 
     env_vars = {
         "OP_CONDUCTOR_CONSENSUS_PORT": str(CONSENSUS_PORT_NUM),
-        "OP_CONDUCTOR_CONSENSUS_ADDR": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "OP_CONDUCTOR_CONSENSUS_ADDR": "0.0.0.0",
+        "OP_CONDUCTOR_CONSENSUS_ADVERTISED": get_conductor_ip_address(index_str)
+        + ":"
+        + str(CONSENSUS_PORT_NUM),
         # "OP_CONDUCTOR_EXECUTION_RPC": execution_rpc,
         "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(CONDUCTOR_HEALTH_CHECK_INTERVAL),
         "OP_CONDUCTOR_HEALTHCHECK_MIN_PEER_COUNT": str(
@@ -141,7 +156,7 @@ def get_config(
         "OP_CONDUCTOR_METRICS_ENABLED": "true",
         "OP_CONDUCTOR_METRICS_PORT": CONDUCTOR_METRICS_PORT_NUM,
         # "OP_CONDUCTOR_NODE_RPC": consensus_rpc,
-        "OP_CONDUCTOR_RAFT_SERVER_ID": CONDUCTOR_RAFT_SERVER_ID,
+        "OP_CONDUCTOR_RAFT_SERVER_ID": CONDUCTOR_RAFT_SERVER_ID + index_str,
         "OP_CONDUCTOR_RAFT_STORAGE_DIR": CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "OP_CONDUCTOR_RPC_ADDR": "0.0.0.0",
         "OP_CONDUCTOR_RPC_ENABLE_ADMIN": "true",
@@ -155,5 +170,5 @@ def get_config(
         ports=ports,
         env_vars=env_vars,
         files=files,
-        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=get_conductor_ip_address(index_str),
     )
