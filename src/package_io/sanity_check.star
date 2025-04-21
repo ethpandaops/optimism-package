@@ -8,6 +8,7 @@ ROOT_PARAMS = [
     "global_node_selectors",
     "global_tolerations",
     "persistent",
+    "faucet",
 ]
 
 OBSERVABILITY_PARAMS = [
@@ -17,6 +18,11 @@ OBSERVABILITY_PARAMS = [
     "loki_params",
     "promtail_params",
     "grafana_params",
+]
+
+FAUCET_PARAMS = [
+    "enabled",
+    "image",
 ]
 
 PROMETHEUS_PARAMS = [
@@ -255,6 +261,14 @@ def sanity_check(plan, optimism_config):
                 "grafana_params",
                 GRAFANA_PARAMS,
             )
+
+    if "faucet" in optimism_config:
+        validate_params(
+            plan,
+            optimism_config["faucet"],
+            "faucet",
+            FAUCET_PARAMS,
+        )
 
     if "interop" in optimism_config:
         validate_params(

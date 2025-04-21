@@ -59,6 +59,12 @@ DEFAULT_TX_FUZZER_IMAGES = {
     "tx-fuzzer": "ethpandaops/tx-fuzz:master",
 }
 
+DEFAULT_FAUCET_IMAGES = {
+    # TODO: update to use a versioned image when available
+    # For now, we'll need users to pass the image explicitly
+    "op-faucet": "",
+}
+
 DEFAULT_ADDITIONAL_SERVICES = []
 
 
@@ -119,6 +125,10 @@ def input_parser(plan, input_args):
                 min_mem=results["observability"]["grafana_params"]["min_mem"],
                 max_mem=results["observability"]["grafana_params"]["max_mem"],
             ),
+        ),
+        faucet=struct(
+            enabled=results["faucet"]["enabled"],
+            image=results["faucet"]["image"],
         ),
         interop=struct(
             enabled=results["interop"]["enabled"],
@@ -308,6 +318,9 @@ def parse_network_params(plan, input_args):
     results["observability"] = default_observability_params()
     results["observability"].update(input_args.get("observability", {}))
 
+    results["faucet"] = default_faucet_params()
+    results["faucet"].update(input_args.get("faucet", {}))
+
     results["observability"]["prometheus_params"] = default_prometheus_params()
     results["observability"]["prometheus_params"].update(
         input_args.get("observability", {}).get("prometheus_params", {})
@@ -479,6 +492,13 @@ def default_observability_params():
     return {
         "enabled": True,
         "enable_k8s_features": False,
+    }
+
+
+def default_faucet_params():
+    return {
+        "enabled": False,
+        "image": DEFAULT_FAUCET_IMAGES["op-faucet"],
     }
 
 
