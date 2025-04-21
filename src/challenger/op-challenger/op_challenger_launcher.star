@@ -6,19 +6,15 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-input_parser = import_module("../../package_io/input_parser.star")
 observability = import_module("../../observability/observability.star")
-op_signer_launcher = import_module("../../signer/op_signer_launcher.star")
+prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
 interop_constants = import_module("../../interop/constants.star")
 util = import_module("../../util.star")
 
 #
 #  ---------------------------------- Challenger client -------------------------------------
-SERVICE_TYPE = "challenger"
-SERVICE_NAME = util.make_op_service_name(SERVICE_TYPE)
-
-DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/{0}/{0}-data".format(SERVICE_NAME)
+CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-challenger/op-challenger-data"
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 
@@ -29,61 +25,50 @@ def get_used_ports():
 
 def launch(
     plan,
+    l2_num,
+    service_name,
+    image,
     el_context,
     cl_context,
     l1_config_env_vars,
-    signer_context,
-    game_factory_address,
     deployment_output,
     network_params,
     challenger_params,
     interop_params,
     observability_helper,
 ):
-    service_instance_name = util.make_service_instance_name(
-        SERVICE_NAME, network_params
+    config = get_challenger_config(
+        plan,
+        l2_num,
+        service_name,
+        image,
+        el_context,
+        cl_context,
+        l1_config_env_vars,
+        deployment_output,
+        network_params,
+        challenger_params,
+        interop_params,
+        observability_helper,
     )
 
-    cannon_prestate_artifact = None
-    if challenger_params.cannon_prestate_path:
-        cannon_prestate_artifact = plan.upload_files(
-            src=challenger_params.cannon_prestate_path,
-            name="{}-prestates".format(service_instance_name),
-        )
-
-    service = plan.add_service(
-        service_instance_name,
-        make_service_config(
-            plan,
-            cannon_prestate_artifact,
-            el_context,
-            cl_context,
-            l1_config_env_vars,
-            signer_context,
-            game_factory_address,
-            deployment_output,
-            network_params,
-            challenger_params,
-            interop_params,
-            observability_helper,
-        ),
-    )
+    service = plan.add_service(service_name, config)
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
     )
 
-    return service
+    return "op_challenger"
 
 
-def make_service_config(
+def get_challenger_config(
     plan,
-    cannon_prestate_artifact,
+    l2_num,
+    service_name,
+    image,
     el_context,
     cl_context,
     l1_config_env_vars,
-    signer_context,
-    game_factory_address,
     deployment_output,
     network_params,
     challenger_params,
@@ -92,8 +77,21 @@ def make_service_config(
 ):
     ports = dict(get_used_ports())
 
+    game_factory_address = util.read_network_config_value(
+        plan,
+        deployment_output,
+        "state",
+        ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
+    )
+    challenger_key = util.read_network_config_value(
+        plan,
+        deployment_output,
+        "challenger-{0}".format(network_params.network_id),
+        ".privateKey",
+    )
+
     cmd = [
-        SERVICE_NAME,
+        "op-challenger",
         "--cannon-l2-genesis="
         + "{0}/genesis-{1}.json".format(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
@@ -105,11 +103,11 @@ def make_service_config(
             network_params.network_id,
         ),
         "--game-factory-address=" + game_factory_address,
-        "--datadir=" + DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "--datadir=" + CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--l1-beacon=" + l1_config_env_vars["CL_RPC_URL"],
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--l2-eth-rpc=" + el_context.rpc_http_url,
-        "--private-key=" + signer_context.clients[SERVICE_TYPE].key,
+        "--private-key=" + challenger_key,
         "--rollup-rpc=" + cl_context.beacon_http_url,
         "--trace-type=" + ",".join(challenger_params.cannon_trace_types),
     ]
@@ -121,8 +119,6 @@ def make_service_config(
     }
 
     # apply customizations
-
-    op_signer_launcher.configure_op_signer(cmd, files, signer_context, SERVICE_TYPE)
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
@@ -140,7 +136,11 @@ def make_service_config(
         and challenger_params.cannon_prestates_url
     ):
         fail("Only one of cannon_prestate_path and cannon_prestates_url can be set")
-    elif cannon_prestate_artifact != None:
+    elif challenger_params.cannon_prestate_path:
+        cannon_prestate_artifact = plan.upload_files(
+            src=challenger_params.cannon_prestate_path,
+            name="{}-prestates".format(service_name),
+        )
         files["/prestates"] = cannon_prestate_artifact
         cmd.append("--cannon-prestate=/prestates/prestate-proof.json")
     elif challenger_params.cannon_prestates_url:
@@ -149,18 +149,15 @@ def make_service_config(
         fail("One of cannon_prestate_path or cannon_prestates_url must be set")
 
     cmd += challenger_params.extra_params
-
-    # legacy default image logic
-    image = (
-        challenger_params.image
-        if challenger_params.image != ""
-        else input_parser.DEFAULT_CHALLENGER_IMAGES[SERVICE_NAME]
+    cmd = "mkdir -p {0} && {1}".format(
+        CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
     )
 
     return ServiceConfig(
         image=image,
         ports=ports,
-        cmd=cmd,
+        entrypoint=ENTRYPOINT_ARGS,
+        cmd=[cmd],
         files=files,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

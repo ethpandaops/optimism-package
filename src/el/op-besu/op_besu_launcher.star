@@ -214,7 +214,7 @@ def get_config(
 
     if observability_helper.enabled:
         cmd += [
-            "--metrics-enabled",
+            "--metrics-enabled=true",
             "--metrics-host=0.0.0.0",
             "--metrics-port={0}".format(observability.METRICS_PORT_NUM),
         ]
@@ -240,11 +240,12 @@ def get_config(
         )
 
     cmd += participant.el_extra_params
+    cmd_str = " ".join(cmd)
 
     config_args = {
         "image": participant.el_image,
         "ports": ports,
-        "cmd": cmd,
+        "cmd": [cmd_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

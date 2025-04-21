@@ -245,11 +245,6 @@ def input_parser(plan, input_args):
                     game_type=result["proposer_params"]["game_type"],
                     proposal_interval=result["proposer_params"]["proposal_interval"],
                 ),
-                signer_params=struct(
-                    image=result["signer_params"]["image"],
-                    tag=result["signer_params"]["tag"],
-                    extra_params=result["signer_params"]["extra_params"],
-                ),
                 mev_params=struct(
                     rollup_boost_image=result["mev_params"]["rollup_boost_image"],
                     builder_host=result["mev_params"]["builder_host"],
@@ -354,12 +349,8 @@ def parse_network_params(plan, input_args):
         challenger_params = default_challenger_params()
         challenger_params.update(chain.get("challenger_params", {}))
 
-        signer_params = default_signer_params()
-        signer_params.update(chain.get("signer_params", {}))
-
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
-
         da_server_params = default_da_server_params()
         da_server_params.update(chain.get("da_server_params", {}))
 
@@ -441,7 +432,6 @@ def parse_network_params(plan, input_args):
             "batcher_params": batcher_params,
             "challenger_params": challenger_params,
             "proposer_params": proposer_params,
-            "signer_params": signer_params,
             "mev_params": mev_params,
             "da_server_params": da_server_params,
             "additional_services": chain.get(
@@ -569,7 +559,6 @@ def default_chains():
             "batcher_params": default_batcher_params(),
             "proposer_params": default_proposer_params(),
             "challenger_params": default_challenger_params(),
-            "signer_params": default_signer_params(),
             "mev_params": default_mev_params(),
             "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
@@ -625,14 +614,6 @@ def default_proposer_params():
         "extra_params": [],
         "game_type": 1,
         "proposal_interval": "10m",
-    }
-
-
-def default_signer_params():
-    return {
-        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-signer",
-        "tag": "v1.5.0",
-        "extra_params": [],
     }
 
 

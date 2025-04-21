@@ -20,6 +20,3 @@ lint:
         --checked-calls \
         --local-imports \
         main.star src/ test/
-
-test:
-    mise exec -- kurtosis-test .

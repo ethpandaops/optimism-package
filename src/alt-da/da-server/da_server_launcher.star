@@ -25,14 +25,13 @@ def get_used_ports():
 
 def launch_da_server(
     plan,
+    service_name,
     image,
     cmd,
-    network_params,
 ):
-    service_name = "da-server-{0}".format(network_params.name)
-
     config = get_da_server_config(
         plan,
+        service_name,
         image,
         cmd,
     )
@@ -50,6 +49,7 @@ def launch_da_server(
 
 def get_da_server_config(
     plan,
+    service_name,
     image,
     cmd,
 ):

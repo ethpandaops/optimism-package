@@ -155,7 +155,6 @@ SUBCATEGORY_PARAMS = {
         "cannon_prestates_url",
         "cannon_trace_types",
     ],
-    "signer_params": ["image", "tag", "extra_params"],
     "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
     "da_server_params": [
         "enabled",
