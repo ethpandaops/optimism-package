@@ -6,7 +6,7 @@ FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806
 
 FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
-util = import_module("../util.star")
+utils = import_module("../util.star")
 
 ethereum_package_genesis_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
@@ -85,15 +85,15 @@ def deploy_contracts(
         env_vars=l1_config_env_vars,
         store=[
             StoreSpec(
-                src=util.NETWORK_DATA_DIR,
+                src="/network-data",
                 name="op-deployer-configs",
             )
         ],
-        run=util.join_cmds(
+        run=" && ".join(
             [
-                "mkdir -p {0}".format(util.NETWORK_DATA_DIR),
-                "op-deployer init --intent-config-type custom --l1-chain-id $L1_CHAIN_ID --l2-chain-ids {0} --workdir {1}".format(
-                    l2_chain_ids, util.NETWORK_DATA_DIR
+                "mkdir -p /network-data",
+                "op-deployer init --intent-config-type custom --l1-chain-id $L1_CHAIN_ID --l2-chain-ids {0} --workdir /network-data".format(
+                    l2_chain_ids
                 ),
             ]
         ),
@@ -118,7 +118,7 @@ def deploy_contracts(
     plan.run_sh(
         name="op-deployer-fund",
         description="Collect keys, and fund addresses",
-        image=util.DEPLOYMENT_UTILS_IMAGE,
+        image=utils.DEPLOYMENT_UTILS_IMAGE,
         env_vars={
             "DEPLOYER_PRIVATE_KEY": priv_key,
             "FUND_PRIVATE_KEY": ethereum_package_genesis_constants.PRE_FUNDED_ACCOUNTS[
@@ -130,12 +130,12 @@ def deploy_contracts(
         | l1_config_env_vars,
         store=[
             StoreSpec(
-                src=util.NETWORK_DATA_DIR,
+                src="/network-data",
                 name="op-deployer-configs",
             )
         ],
         files={
-            util.NETWORK_DATA_DIR: op_deployer_init.files_artifacts[0],
+            "/network-data": op_deployer_init.files_artifacts[0],
             "/fund-script": fund_script_artifact,
         },
         run='bash /fund-script/fund.sh "{0}"'.format(l2_chain_ids),
@@ -245,63 +245,51 @@ def deploy_contracts(
         intent["chains"].append(intent_chain)
 
     intent_json = json.encode(intent)
-    intent_json_artifact = util.write_to_file(plan, intent_json, "/tmp", "intent.json")
+    intent_json_artifact = utils.write_to_file(plan, intent_json, "/tmp", "intent.json")
 
     op_deployer_configure = plan.run_sh(
         name="op-deployer-configure",
         description="Configure L2 contract deployments",
-        image=util.DEPLOYMENT_UTILS_IMAGE,
+        image=utils.DEPLOYMENT_UTILS_IMAGE,
         store=[
             StoreSpec(
-                src=util.NETWORK_DATA_DIR,
+                src="/network-data",
                 name="op-deployer-configs",
             )
         ],
         files={
-            util.NETWORK_DATA_DIR: op_deployer_init.files_artifacts[0],
+            "/network-data": op_deployer_init.files_artifacts[0],
             "/tmp": intent_json_artifact,
         },
-        run=util.join_cmds(
+        run=" && ".join(
             [
                 # zhwrd: this mess is temporary until we implement json reading for op-deployer intent file
                 # convert intent_json to yaml. this is necessary because its unreliable to evaluate command substitutions in json.
-                "cat /tmp/intent.json | dasel -r json -w yaml > {0}/intent.yaml".format(
-                    util.NETWORK_DATA_DIR
-                ),
+                """cat /tmp/intent.json | dasel -r json -w yaml > /network-data/intent.yaml""",
                 # evaluate the command substitutions
-                "eval \"echo '$(cat {0}/intent.yaml)'\" | dasel -r yaml -w json > {0}/intent-b.json".format(
-                    util.NETWORK_DATA_DIR
-                ),
+                "eval \"echo '$(cat /network-data/intent.yaml)'\" | dasel -r yaml -w json > /network-data/intent-b.json",
                 # convert op-deployer generated intent.toml to json
-                "dasel -r toml -w json -f {0}/intent.toml > {0}/intent-a.json".format(
-                    util.NETWORK_DATA_DIR
-                ),
+                "dasel -r toml -w json -f /network-data/intent.toml > /network-data/intent-a.json",
                 # merge the two intent.json files, ensuring that the chains array is merged correctly
-                "jq -s 'add + {{chains: map(.chains) | transpose | map(add)}}' {0}/intent-a.json {0}/intent-b.json > {0}/intent-merged.json".format(
-                    util.NETWORK_DATA_DIR
-                ),
+                "jq -s 'add + {chains: map(.chains) | transpose | map(add)}' /network-data/intent-a.json /network-data/intent-b.json > /network-data/intent-merged.json",
                 # convert the merged intent.json back to toml
-                "cat {0}/intent-merged.json | dasel -r json -w toml > {0}/intent.toml".format(
-                    util.NETWORK_DATA_DIR
-                ),
+                "cat /network-data/intent-merged.json | dasel -r json -w toml > /network-data/intent.toml",
             ]
         ),
     )
 
     apply_cmds = [
-        "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir {0}".format(
-            util.NETWORK_DATA_DIR
-        ),
+        "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data",
     ]
     for chain in optimism_args.chains:
         network_id = chain.network_params.network_id
         apply_cmds.extend(
             [
-                "op-deployer inspect genesis --workdir {0} --outfile {0}/genesis-{1}.json {1}".format(
-                    util.NETWORK_DATA_DIR, network_id
+                "op-deployer inspect genesis --workdir /network-data --outfile /network-data/genesis-{0}.json {0}".format(
+                    network_id
                 ),
-                "op-deployer inspect rollup --workdir {0} --outfile {0}/rollup-{1}.json {1}".format(
-                    util.NETWORK_DATA_DIR, network_id
+                "op-deployer inspect rollup --workdir /network-data --outfile /network-data/rollup-{0}.json {0}".format(
+                    network_id
                 ),
             ]
         )
@@ -317,37 +305,34 @@ def deploy_contracts(
         | l1_config_env_vars,
         store=[
             StoreSpec(
-                src=util.NETWORK_DATA_DIR,
+                src="/network-data",
                 name="op-deployer-configs",
             )
         ],
         files={
-            util.NETWORK_DATA_DIR: op_deployer_configure.files_artifacts[0],
+            "/network-data": op_deployer_configure.files_artifacts[0],
         }
         | contracts_extra_files,
-        run=util.join_cmds(apply_cmds),
-        wait=None,
+        run=" && ".join(apply_cmds),
     )
 
     for chain in optimism_args.chains:
         plan.run_sh(
             name="op-deployer-generate-chainspec",
             description="Generate chainspec",
-            image=util.DEPLOYMENT_UTILS_IMAGE,
+            image=utils.DEPLOYMENT_UTILS_IMAGE,
             env_vars={"CHAIN_ID": str(chain.network_params.network_id)},
             store=[
                 StoreSpec(
-                    src=util.NETWORK_DATA_DIR,
+                    src="/network-data",
                     name="op-deployer-configs",
                 )
             ],
             files={
-                util.NETWORK_DATA_DIR: op_deployer_output.files_artifacts[0],
+                "/network-data": op_deployer_output.files_artifacts[0],
                 "/fund-script": fund_script_artifact,
             },
-            run='jq --from-file /fund-script/gen2spec.jq < "{0}/genesis-{1}.json" > "{0}/chainspec-{1}.json"'.format(
-                util.NETWORK_DATA_DIR, chain.network_params.network_id
-            ),
+            run='jq --from-file /fund-script/gen2spec.jq < "/network-data/genesis-$CHAIN_ID.json" > "/network-data/chainspec-$CHAIN_ID.json"',
         )
 
     return op_deployer_output.files_artifacts[0]
@@ -358,6 +343,4 @@ def chain_key(index, key):
 
 
 def read_chain_cmd(filename, l2_chain_id):
-    return "`jq -r .address {0}/{1}-{2}.json`".format(
-        util.NETWORK_DATA_DIR, filename, l2_chain_id
-    )
+    return "`jq -r .address /network-data/{0}-{1}.json`".format(filename, l2_chain_id)

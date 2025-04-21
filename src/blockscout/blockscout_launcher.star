@@ -44,6 +44,7 @@ VERIF_USED_PORTS = {
 
 def launch_blockscout(
     plan,
+    l2_services_suffix,
     l1_rpc_url,
     l2_el_context,
     l2_network_name,
@@ -60,13 +61,17 @@ def launch_blockscout(
 
     postgres_output = postgres.run(
         plan,
-        service_name="{0}-postgres{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_network_name),
+        service_name="{0}-postgres{1}".format(
+            SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
+        ),
         database="blockscout",
         extra_configs=["max_connections=1000"],
     )
 
     config_verif = get_config_verif()
-    verif_service_name = "{0}-verif{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_network_name)
+    verif_service_name = "{0}-verif{1}".format(
+        SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
+    )
     verif_service = plan.add_service(verif_service_name, config_verif)
     verif_url = "http://{}:{}".format(
         verif_service.hostname, verif_service.ports["http"].number
@@ -88,7 +93,7 @@ def launch_blockscout(
         },
     )
     blockscout_service = plan.add_service(
-        "{0}{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_network_name), config_backend
+        "{0}{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_services_suffix), config_backend
     )
     plan.print(blockscout_service)
 

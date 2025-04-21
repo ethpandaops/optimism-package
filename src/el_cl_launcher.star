@@ -30,21 +30,22 @@ op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
 
 def launch(
     plan,
+    jwt_file,
     network_params,
     mev_params,
-    interop_params,
-    jwt_file,
     deployment_output,
     participants,
+    num_participants,
     l1_config_env_vars,
     l2_services_suffix,
-    da_server_context,
-    additional_services,
     global_log_level,
     global_node_selectors,
     global_tolerations,
     persistent,
+    additional_services,
     observability_helper,
+    interop_params,
+    da_server_context,
 ):
     el_launchers = {
         "op-geth": {
@@ -422,5 +423,5 @@ def launch(
         if sequencer_enabled:
             sequencer_enabled = False
 
-    plan.print("Successfully added {0} EL/CL participants".format(len(participants)))
+    plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts
