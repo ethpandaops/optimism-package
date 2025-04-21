@@ -244,20 +244,28 @@ def launch(
             index + 1, len(str(len(participants)))
         )
 
-        el_service_name = "op-el-{0}-{1}-{2}-{3}".format(
-            index_str, el_type, cl_type, l2_services_suffix
+        el_service_name = "op-el-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id, index_str, el_type, cl_type, l2_services_suffix
         )
-        cl_service_name = "op-cl-{0}-{1}-{2}-{3}".format(
-            index_str, cl_type, el_type, l2_services_suffix
+        cl_service_name = "op-cl-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id, index_str, cl_type, el_type, l2_services_suffix
         )
-        el_builder_service_name = "op-el-builder-{0}-{1}-{2}-{3}".format(
-            index_str, el_builder_type, cl_builder_type, l2_services_suffix
+        el_builder_service_name = "op-el-builder-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id,
+            index_str,
+            el_builder_type,
+            cl_builder_type,
+            l2_services_suffix,
         )
-        cl_builder_service_name = "op-cl-builder-{0}-{1}-{2}-{3}".format(
-            index_str, cl_builder_type, el_builder_type, l2_services_suffix
+        cl_builder_service_name = "op-cl-builder-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id,
+            index_str,
+            cl_builder_type,
+            el_builder_type,
+            l2_services_suffix,
         )
-        sidecar_service_name = "op-rollup-boost-{0}-{1}".format(
-            index_str, l2_services_suffix
+        sidecar_service_name = "op-rollup-boost-{0}-{1}-{2}".format(
+            network_params.network_id, index_str, l2_services_suffix
         )
 
         el_context = el_launch_method(
