@@ -1,4 +1,3 @@
-constants = import_module("../package_io/constants.star")
 util = import_module("../util.star")
 
 INTEROP_WS_PORT_ID = "interop-ws"

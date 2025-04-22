@@ -136,5 +136,6 @@ def launch_participant_network(
     )
 
     return struct(
+        network_id=network_params.network_id,
         participants=all_participants,
     )

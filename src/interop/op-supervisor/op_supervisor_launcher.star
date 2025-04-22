@@ -8,10 +8,10 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-constants = import_module("../../package_io/constants.star")
 observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
+constants = import_module("../../package_io/constants.star")
 interop_constants = import_module("../constants.star")
 
 
@@ -30,15 +30,15 @@ DATA_DIR = "/etc/op-supervisor"
 DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
 
 
-def create_dependency_set(chains):
+def create_dependency_set(l2s):
     result = {
         "dependencies": {
-            str(chain.network_params.network_id): {
-                "chainIndex": str(chain.network_params.network_id),
+            str(l2.network_id): {
+                "chainIndex": str(l2.network_id),
                 "activationTime": 0,
                 "historyMinTime": 0,
             }
-            for chain in chains
+            for l2 in l2s
         }
     }
     return result
@@ -46,40 +46,66 @@ def create_dependency_set(chains):
 
 def launch(
     plan,
+    interop_set,
     l1_config_env_vars,
-    chains,
     l2s,
     jwt_file,
-    supervisor_params,
     observability_helper,
 ):
-    dependency_set_json = supervisor_params.dependency_set
-    if not dependency_set_json:
-        dependency_set = create_dependency_set(chains)
-        dependency_set_json = json.encode(dependency_set)
+    # First we check that the supervisor is enabled for this interop set
+    if not interop_set.enabled:
+        plan.print(
+            "op-supervisor is not enabled for interop set {}, skipping launch".format(
+                interop_set.name
+            )
+        )
+        return None
 
+    # Then we check that we have some participants
+    if len(interop_set.participants) == 0:
+        plan.print(
+            "op-supervisor has no participants for interop set {}, skipping launch".format(
+                interop_set.name
+            )
+        )
+        return None
+
+    # Now we filter out the participating L2s
+    interop_set_l2s = [l2 for l2 in l2s if l2.network_id in interop_set.participants]
+
+    # Now we create dependency set if none was provided
+    dependency_set_json = interop_set.supervisor_params.dependency_set or json.encode(
+        create_dependency_set(interop_set_l2s)
+    )
+
+    # And write it to an artifact
     dependency_set_artifact = utils.write_to_file(
         plan, dependency_set_json, DATA_DIR, DEPENDENCY_SET_FILE_NAME
     )
 
-    config = get_supervisor_config(
-        plan,
-        l1_config_env_vars,
-        l2s,
-        jwt_file,
-        dependency_set_artifact,
-        supervisor_params,
-        observability_helper,
+    # We create a service name based on the interop set name
+    service_name = "{}-{}".format(
+        interop_constants.SUPERVISOR_SERVICE_NAME, interop_set.name
     )
 
-    service = plan.add_service(interop_constants.SUPERVISOR_SERVICE_NAME, config)
+    config = get_supervisor_config(
+        plan=plan,
+        l1_config_env_vars=l1_config_env_vars,
+        l2s=interop_set_l2s,
+        jwt_file=jwt_file,
+        dependency_set_artifact=dependency_set_artifact,
+        supervisor_params=interop_set.supervisor_params,
+        observability_helper=observability_helper,
+    )
+
+    service = plan.add_service(service_name, config)
 
     observability.register_op_service_metrics_job(
         observability_helper,
         service,
     )
 
-    return "op_supervisor"
+    return service
 
 
 def get_supervisor_config(

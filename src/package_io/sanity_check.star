@@ -54,10 +54,7 @@ GRAFANA_PARAMS = [
     "max_mem",
 ]
 
-INTEROP_PARAMS = [
-    "enabled",
-    "supervisor_params",
-]
+INTEROP_PARAMS = ["enabled", "supervisor_params", "sets"]
 
 SUPERVISOR_PARAMS = [
     "image",
