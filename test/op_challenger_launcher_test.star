@@ -83,14 +83,18 @@ def test_launch_with_defaults(plan):
             ),
         ),
         l1_config_env_vars=l1_config_env_vars,
-        l2s=[struct(
-            network_id="1000",
-            participants=[struct(
-                el_context=el_context,
-                cl_context=cl_context,
-            )],
-        )],
-        jwt_file = "/path/to/jwt_file",
+        l2s=[
+            struct(
+                network_id="1000",
+                participants=[
+                    struct(
+                        el_context=el_context,
+                        cl_context=cl_context,
+                    )
+                ],
+            )
+        ],
+        jwt_file="/path/to/jwt_file",
         observability_helper=observability_helper,
     )
 
