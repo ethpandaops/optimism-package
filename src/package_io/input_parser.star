@@ -451,7 +451,7 @@ def parse_network_params(plan, input_args):
 
     # configure interop
 
-    results["interop"] = build_interop_params(input_args.get("interop", {}), chains)
+    results["interop"] = compile_interop_params(input_args.get("interop", {}), chains)
 
     # configure op-deployer
 
@@ -548,15 +548,15 @@ def default_supervisor_params():
 
 
 # This function normalizes the interop args to ensure that all values are set
-def build_interop_params(interop_args, chains):
+def compile_interop_params(interop_args, chains):
     # We first filter the None values so that we can merge dicts easily
     interop_args_without_none = util.filter_none(interop_args)
 
     # Then we build the sub-params
-    supervisor_params = build_interop_supervisor_params(
+    supervisor_params = compile_interop_supervisor_params(
         interop_args_without_none.get("supervisor_params", {})
     )
-    sets_params = build_interop_sets_params(
+    sets_params = compile_interop_sets_params(
         interop_args_without_none.get("sets", []), supervisor_params, chains
     )
 
@@ -578,7 +578,7 @@ def build_interop_params(interop_args, chains):
 #
 # - to build the default interop supervisor params, in which case the default values are the global defaults
 # - to build the interop supervisor params for each interop set, in which case the default values are the interop supervisor params
-def build_interop_supervisor_params(
+def compile_interop_supervisor_params(
     interop_supervisor_args,
     default_interop_supervisor_params=default_supervisor_params(),
 ):
@@ -598,9 +598,9 @@ def build_interop_supervisor_params(
 
 
 # This function normalizes the interop sets args to ensure that all values are set
-def build_interop_sets_params(interop_sets_args, interop_supervisor_params, chains):
+def compile_interop_sets_params(interop_sets_args, interop_supervisor_params, chains):
     interop_sets_params = [
-        build_interop_set_params(
+        compile_interop_set_params(
             interop_set_args, interop_set_index, interop_supervisor_params, chains
         )
         for interop_set_index, interop_set_args in enumerate(interop_sets_args)
@@ -621,7 +621,7 @@ def build_interop_sets_params(interop_sets_args, interop_supervisor_params, chai
 
 
 # This function normalizes the interop sets args to ensure that all values are set
-def build_interop_set_params(
+def compile_interop_set_params(
     interop_set_args,
     # The suffix is used to create a default name for the interop set if no name is provided
     interop_set_suffix,
@@ -648,7 +648,7 @@ def build_interop_set_params(
     )
 
     # The interop set supervisor params are optional and default to the global interop supervisor params
-    interop_set_supervisor_params = build_interop_supervisor_params(
+    interop_set_supervisor_params = compile_interop_supervisor_params(
         interop_set_args_without_none.get("supervisor_params", {}),
         interop_supervisor_params,
     )
