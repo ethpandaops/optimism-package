@@ -1,6 +1,9 @@
 main = import_module("/main.star")
 
 interop_constants = import_module("/src/interop/constants.star")
+op_supervisor_launcher = import_module(
+    "/src/interop/op-supervisor/op_supervisor_launcher.star"
+)
 
 
 def get_l2_cl_services(plan):
@@ -334,4 +337,13 @@ def test_op_supervisor_everything_in_one_set(plan):
                 ],
             ]
         ),
+    )
+
+
+def test_create_dependency_set_filename(plan):
+    expect.eq(
+        op_supervisor_launcher.create_dependency_set_filename(
+            struct(name="my-interop-set")
+        ),
+        "dependency_set-my-interop-set.json",
     )

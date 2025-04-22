@@ -27,7 +27,10 @@ def get_used_ports():
 
 
 DATA_DIR = "/etc/op-supervisor"
-DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
+
+
+def create_dependency_set_filename(interop_set):
+    return "dependency_set-{}.json".format(interop_set.name)
 
 
 def create_dependency_set(l2s):
@@ -79,8 +82,9 @@ def launch(
     )
 
     # And write it to an artifact
+    dependency_set_filename = create_dependency_set_filename(interop_set)
     dependency_set_artifact = utils.write_to_file(
-        plan, dependency_set_json, DATA_DIR, DEPENDENCY_SET_FILE_NAME
+        plan, dependency_set_json, DATA_DIR, dependency_set_filename
     )
 
     # We create a service name based on the interop set name
@@ -94,6 +98,7 @@ def launch(
         l2s=interop_set_l2s,
         jwt_file=jwt_file,
         dependency_set_artifact=dependency_set_artifact,
+        dependency_set_filename=dependency_set_filename,
         supervisor_params=interop_set.supervisor_params,
         observability_helper=observability_helper,
     )
@@ -114,6 +119,7 @@ def get_supervisor_config(
     l2s,
     jwt_file,
     dependency_set_artifact,
+    dependency_set_filename,
     supervisor_params,
     observability_helper,
 ):
@@ -136,7 +142,7 @@ def get_supervisor_config(
         env_vars={
             "OP_SUPERVISOR_DATADIR": "/db",
             "OP_SUPERVISOR_DEPENDENCY_SET": "{0}/{1}".format(
-                DATA_DIR, DEPENDENCY_SET_FILE_NAME
+                DATA_DIR, dependency_set_filename
             ),
             "OP_SUPERVISOR_L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "OP_SUPERVISOR_L2_CONSENSUS_NODES": ",".join(
