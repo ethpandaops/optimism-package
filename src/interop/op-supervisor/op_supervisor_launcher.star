@@ -110,7 +110,10 @@ def launch(
         service,
     )
 
-    return service
+    return struct(
+        service=service,
+        networks=interop_set_l2s,
+    )
 
 
 def get_supervisor_config(
