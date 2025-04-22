@@ -143,7 +143,7 @@ SUBCATEGORY_PARAMS = {
         "interop_time_offset",
         "fund_dev_accounts",
     ],
-    "batcher_params": ["image", "extra_params"],
+    "batcher_params": ["image", "extra_params", "max_channel_duration"],
     "proposer_params": [
         "enabled",
         "image",

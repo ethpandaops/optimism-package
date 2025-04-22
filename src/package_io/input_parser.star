@@ -213,7 +213,8 @@ def input_parser(plan, input_args):
                 ),
                 batcher_params=struct(
                     image=result["batcher_params"]["image"],
-                    extra_params=result["batcher_params"]["extra_params"],
+                    max_channel_duration=result["batcher_params"]["max_channel_duration"],
+                    extra_params=result["batcher_params"].get("extra_params", []),
                 ),
                 challenger_params=struct(
                     enabled=result["challenger_params"]["enabled"],
@@ -560,6 +561,7 @@ def default_network_params():
 def default_batcher_params():
     return {
         "image": DEFAULT_BATCHER_IMAGES["op-batcher"],
+        "max_channel_duration": 1,
         "extra_params": [],
     }
 
