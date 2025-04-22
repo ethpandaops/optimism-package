@@ -417,7 +417,7 @@ def test_interop_explicitly_disabled(plan):
     )
 
 
-def test_interop__set_explicitly_disabled(plan):
+def test_interop_set_explicitly_disabled(plan):
     parsed_params = input_parser.parse_network_params(
         plan,
         {
