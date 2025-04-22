@@ -258,6 +258,7 @@ def test_op_supervisor_multiple_interop_sets(plan):
         ),
     )
 
+
 def test_op_supervisor_everything_in_one_set(plan):
     main.run(
         plan,
@@ -299,9 +300,7 @@ def test_op_supervisor_everything_in_one_set(plan):
     )
 
     supervisor_services = get_supervisor_services_by_service_name(plan)
-    supervisor_service = supervisor_services[
-        "op-supervisor-the-interopest-of-sets"
-    ]
+    supervisor_service = supervisor_services["op-supervisor-the-interopest-of-sets"]
     expect.ne(supervisor_service, None)
 
     cl_services = get_l2_cl_services(plan)
@@ -313,9 +312,7 @@ def test_op_supervisor_everything_in_one_set(plan):
         for s in cl_services
     }
 
-    supervisor_service_config = kurtosistest.get_service_config(
-        supervisor_service.name
-    )
+    supervisor_service_config = kurtosistest.get_service_config(supervisor_service.name)
     expect.eq(
         supervisor_service_config.env_vars["OP_SUPERVISOR_L2_CONSENSUS_NODES"],
         ",".join(
