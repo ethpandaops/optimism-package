@@ -257,3 +257,84 @@ def test_op_supervisor_multiple_interop_sets(plan):
             ]
         ),
     )
+
+def test_op_supervisor_everything_in_one_set(plan):
+    main.run(
+        plan,
+        {
+            "optimism_package": {
+                "chains": [
+                    {
+                        "network_params": {
+                            "network_id": "1000",
+                        }
+                    },
+                    {
+                        "network_params": {
+                            "network_id": "2000",
+                        }
+                    },
+                    {
+                        "network_params": {
+                            "network_id": "3000",
+                        }
+                    },
+                    {
+                        "participants": [{}, {}],
+                        "network_params": {
+                            "network_id": "4000",
+                        },
+                    },
+                ],
+                "interop": {
+                    "sets": [
+                        {
+                            "name": "the-interopest-of-sets",
+                            "participants": "*",
+                        },
+                    ],
+                },
+            },
+        },
+    )
+
+    supervisor_services = get_supervisor_services_by_service_name(plan)
+    supervisor_service = supervisor_services[
+        "op-supervisor-the-interopest-of-sets"
+    ]
+    expect.ne(supervisor_service, None)
+
+    cl_services = get_l2_cl_services(plan)
+    cl_services_urls_by_service_name = {
+        s.name: "ws://{0}:{1}".format(
+            s.ip_address,
+            interop_constants.INTEROP_WS_PORT_NUM,
+        )
+        for s in cl_services
+    }
+
+    supervisor_service_config = kurtosistest.get_service_config(
+        supervisor_service.name
+    )
+    expect.eq(
+        supervisor_service_config.env_vars["OP_SUPERVISOR_L2_CONSENSUS_NODES"],
+        ",".join(
+            [
+                cl_services_urls_by_service_name[
+                    "op-cl-1000-1-op-node-op-geth-op-kurtosis"
+                ],
+                cl_services_urls_by_service_name[
+                    "op-cl-2000-1-op-node-op-geth-op-kurtosis"
+                ],
+                cl_services_urls_by_service_name[
+                    "op-cl-3000-1-op-node-op-geth-op-kurtosis"
+                ],
+                cl_services_urls_by_service_name[
+                    "op-cl-4000-1-op-node-op-geth-op-kurtosis"
+                ],
+                cl_services_urls_by_service_name[
+                    "op-cl-4000-2-op-node-op-geth-op-kurtosis"
+                ],
+            ]
+        ),
+    )
