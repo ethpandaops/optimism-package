@@ -133,8 +133,31 @@ optimism_package:
       image: "grafana/grafana:11.5.0"
   # Interop configuration
   interop:
-    # Whether or not to enable interop mode
+    # Interop can be enabled and disabled using this flag
+    # 
+    # By default, interop will be enabled if there is at least one interop set specified
     enabled: false
+    # A list of interop sets - connected L2 chains
+    # 
+    # If left empty, interop is disabled
+    sets: 
+        # Optional human-readable name for this interop set
+      - name: "interop-set-0"
+        # List of L2 network_ids that participate in this set
+        # 
+        # Please refer to chains[].network_params.network_id for more information
+        participants: ["2151908"]
+        # Supervisor overrides for this particular interop set
+        # 
+        # Leave empty to use the default supervisor configuration
+        supervisor_params:
+        # Interop set can be disabled for ease of local development
+        # 
+        # Defaults to true
+        enabled: true
+      - name: "interop-set-1"
+        # "*" can be used to quickly add all networks into one interop set
+        participants: "*"
     # Default supervisor configuration
     supervisor_params:
       # The Docker image that should be used for the supervisor; leave blank to use the default op-supervisor image

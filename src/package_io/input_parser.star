@@ -2,8 +2,9 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
-constants = import_module("../package_io/constants.star")
+constants = import_module("./constants.star")
 sanity_check = import_module("./sanity_check.star")
+util = import_module("../util.star")
 
 DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
@@ -128,6 +129,21 @@ def input_parser(plan, input_args):
                 ],
                 extra_params=results["interop"]["supervisor_params"]["extra_params"],
             ),
+            sets=[
+                struct(
+                    enabled=interop_set["enabled"],
+                    name=interop_set["name"],
+                    participants=interop_set["participants"],
+                    supervisor_params=struct(
+                        image=interop_set["supervisor_params"]["image"],
+                        dependency_set=interop_set["supervisor_params"][
+                            "dependency_set"
+                        ],
+                        extra_params=interop_set["supervisor_params"]["extra_params"],
+                    ),
+                )
+                for interop_set in results["interop"]["sets"]
+            ],
         ),
         altda_deploy_config=struct(
             use_altda=results["altda_deploy_config"]["use_altda"],
@@ -312,16 +328,6 @@ def parse_network_params(plan, input_args):
         input_args.get("observability", {}).get("grafana_params", {})
     )
 
-    # configure interop
-
-    results["interop"] = default_interop_params()
-    results["interop"].update(input_args.get("interop", {}))
-
-    results["interop"]["supervisor_params"] = default_supervisor_params()
-    results["interop"]["supervisor_params"].update(
-        input_args.get("interop", {}).get("supervisor_params", {})
-    )
-
     # configure altda
 
     results["altda_deploy_config"] = default_altda_deploy_config()
@@ -443,6 +449,10 @@ def parse_network_params(plan, input_args):
 
     results["chains"] = chains
 
+    # configure interop
+
+    results["interop"] = compile_interop_params(input_args.get("interop", {}), chains)
+
     # configure op-deployer
 
     results["op_contract_deployer_params"] = default_op_contract_deployer_params()
@@ -520,7 +530,169 @@ def default_promtail_params():
 def default_interop_params():
     return {
         "enabled": False,
+        # Interop sets organize the networks into disconnected interop chain sets
+        #
+        # If there are no sets defined, interop is effectively disabled.
+        "sets": [],
+        # Default values to apply for all interop sets' supervisors
+        "supervisor_params": default_supervisor_params(),
     }
+
+
+def default_supervisor_params():
+    return {
+        "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
+        "dependency_set": "",
+        "extra_params": [],
+    }
+
+
+# This function normalizes the interop args to ensure that all values are set
+def compile_interop_params(interop_args, chains):
+    # We first filter the None values so that we can merge dicts easily
+    interop_args_without_none = util.filter_none(interop_args)
+
+    # Then we build the sub-params
+    supervisor_params = compile_interop_supervisor_params(
+        interop_args_without_none.get("supervisor_params", {})
+    )
+    sets_params = compile_interop_sets_params(
+        interop_args_without_none.get("sets", []), supervisor_params, chains
+    )
+
+    # If enabled is not explicitly set, we enable interop if there are any sets defined
+    enabled_param = interop_args_without_none.get("enabled", len(sets_params) > 0)
+
+    return {
+        "enabled": enabled_param,
+        "sets": sets_params,
+        # This value is potentially no longer necessary here as all the interop sets
+        # have their supervisor params set
+        "supervisor_params": supervisor_params,
+    }
+
+
+# This function normalizes the interop supervisor_params args to ensure that all values are set
+#
+# It is being used in two places:
+#
+# - to build the default interop supervisor params, in which case the default values are the global defaults
+# - to build the interop supervisor params for each interop set, in which case the default values are the interop supervisor params
+def compile_interop_supervisor_params(
+    interop_supervisor_args,
+    default_interop_supervisor_params=default_supervisor_params(),
+):
+    interop_supervisor_args_without_none = util.filter_none(interop_supervisor_args)
+
+    return {
+        "image": interop_supervisor_args_without_none.get(
+            "image", default_interop_supervisor_params["image"]
+        ),
+        "dependency_set": interop_supervisor_args_without_none.get(
+            "dependency_set", default_interop_supervisor_params["dependency_set"]
+        ),
+        "extra_params": interop_supervisor_args_without_none.get(
+            "extra_params", default_interop_supervisor_params["extra_params"]
+        ),
+    }
+
+
+# This function normalizes the interop sets args to ensure that all values are set
+def compile_interop_sets_params(interop_sets_args, interop_supervisor_params, chains):
+    interop_sets_params = [
+        compile_interop_set_params(
+            interop_set_args, interop_set_index, interop_supervisor_params, chains
+        )
+        for interop_set_index, interop_set_args in enumerate(interop_sets_args)
+        if interop_set_args != None
+    ]
+
+    # We need to make sure the interop set names are unique
+    interop_set_names = [interop_set["name"] for interop_set in interop_sets_params]
+    duplicate_interop_set_names = util.get_duplicates(interop_set_names)
+    if len(duplicate_interop_set_names) > 0:
+        fail(
+            "Duplicate interop set names: {}".format(
+                ",".join(duplicate_interop_set_names)
+            )
+        )
+
+    return interop_sets_params
+
+
+# This function normalizes the interop sets args to ensure that all values are set
+def compile_interop_set_params(
+    interop_set_args,
+    # The suffix is used to create a default name for the interop set if no name is provided
+    interop_set_suffix,
+    interop_supervisor_params,
+    chains,
+):
+    interop_set_args_without_none = util.filter_none(interop_set_args)
+
+    # Iterop set name is optional
+    interop_set_name = interop_set_args_without_none.get(
+        "name", "interop-set-{}".format(interop_set_suffix)
+    )
+
+    # Interop set participants can be specified as "*" to include all networks (default)
+    # or as a list of network ids
+    interop_set_participants = interop_set_args_without_none.get("participants", "*")
+    expanded_interop_set_participants = expand_interop_set_participants(
+        interop_set_participants, chains
+    )
+
+    # If enabled is not explicitly set, we enable interop if there are any participants defined
+    interop_set_enabled = interop_set_args_without_none.get(
+        "enabled", len(expanded_interop_set_participants) > 0
+    )
+
+    # The interop set supervisor params are optional and default to the global interop supervisor params
+    interop_set_supervisor_params = compile_interop_supervisor_params(
+        interop_set_args_without_none.get("supervisor_params", {}),
+        interop_supervisor_params,
+    )
+
+    return {
+        "enabled": interop_set_enabled,
+        "name": interop_set_name,
+        "participants": expanded_interop_set_participants,
+        "supervisor_params": interop_set_supervisor_params,
+    }
+
+
+def expand_interop_set_participants(interop_set_participants, chains):
+    # kurtosis starlark doesn't support sets so we'll use a hashmap instead
+    all_network_ids = {chain["network_params"]["network_id"]: True for chain in chains}
+
+    # "*" is used as a shortcut to include all networks
+    if interop_set_participants == "*":
+        return all_network_ids.keys()
+    elif type(interop_set_participants) == "list":
+        # First we check that all the network IDs exist
+        network_ids = [
+            network_id
+            if all_network_ids.get(network_id)
+            else fail(
+                "Unknown network id in list of interop participants: {}".format(
+                    network_id
+                )
+            )
+            for network_id in interop_set_participants
+        ]
+
+        # Then we make sure that there are no duplicates within one interop set
+        duplicate_network_ids = util.get_duplicates(network_ids)
+        if len(duplicate_network_ids) > 0:
+            fail(
+                "Duplicate network ids in list of interop participants: {}".format(
+                    ",".join(duplicate_network_ids)
+                )
+            )
+
+        return network_ids
+    else:
+        fail("Invalid interop set participants: {}".format(interop_set_participants))
 
 
 def default_altda_deploy_config():
@@ -531,14 +703,6 @@ def default_altda_deploy_config():
         "da_resolve_window": 100,
         "da_bond_size": 0,
         "da_resolver_refund_percentage": 0,
-    }
-
-
-def default_supervisor_params():
-    return {
-        "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
-        "dependency_set": "",
-        "extra_params": [],
     }
 
 
