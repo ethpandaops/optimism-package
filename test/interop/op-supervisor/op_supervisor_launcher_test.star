@@ -339,6 +339,7 @@ def test_op_supervisor_everything_in_one_set(plan):
         ),
     )
 
+
 def test_op_supervisor_with_challenger(plan):
     main.run(
         plan,
@@ -361,7 +362,7 @@ def test_op_supervisor_with_challenger(plan):
                         },
                         "network_params": {
                             "network_id": "3000",
-                        }
+                        },
                     },
                     {
                         "network_params": {
@@ -397,16 +398,38 @@ def test_op_supervisor_with_challenger(plan):
     expect.true("op-challenger-3000" not in challenger_service_configs_by_name)
     expect.true("op-challenger-4000" in challenger_service_configs_by_name)
 
-    challenger_service_config1000 = challenger_service_configs_by_name["op-challenger-1000"]
-    challenger_service_config2000 = challenger_service_configs_by_name["op-challenger-2000"]
-    challenger_service_config4000 = challenger_service_configs_by_name["op-challenger-4000"]
+    challenger_service_config1000 = challenger_service_configs_by_name[
+        "op-challenger-1000"
+    ]
+    challenger_service_config2000 = challenger_service_configs_by_name[
+        "op-challenger-2000"
+    ]
+    challenger_service_config4000 = challenger_service_configs_by_name[
+        "op-challenger-4000"
+    ]
 
     # The first challenger should point to the first supervisor since that's the only one for the 1000 network
-    expect.true("--supervisor-rpc={0}".format("http://op-supervisor-the-interopest-of-sets:8545") in challenger_service_config1000.cmd[0])
+    expect.true(
+        "--supervisor-rpc={0}".format(
+            "http://op-supervisor-the-interopest-of-sets:8545"
+        )
+        in challenger_service_config1000.cmd[0]
+    )
     # The second challenger should point to the first supervisor since that's the first one of the two for the 2000 network
-    expect.true("--supervisor-rpc={0}".format("http://op-supervisor-the-interopest-of-sets:8545") in challenger_service_config2000.cmd[0])
+    expect.true(
+        "--supervisor-rpc={0}".format(
+            "http://op-supervisor-the-interopest-of-sets:8545"
+        )
+        in challenger_service_config2000.cmd[0]
+    )
     # The third challenger should point to the second supervisor since that's the only one for the 4000 network
-    expect.true("--supervisor-rpc={0}".format("http://op-supervisor-sibling-of-the-interopest-of-sets:8545") in challenger_service_config4000.cmd[0])
+    expect.true(
+        "--supervisor-rpc={0}".format(
+            "http://op-supervisor-sibling-of-the-interopest-of-sets:8545"
+        )
+        in challenger_service_config4000.cmd[0]
+    )
+
 
 def test_create_dependency_set_filename(plan):
     expect.eq(

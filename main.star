@@ -128,7 +128,7 @@ def run(plan, args={}):
         supervisors = [
             supervisor
             # Since starlark does not support the walrus operator, we need to use a nested list comprehension
-            # 
+            #
             # TODO We do this since launcher can return None, maybe it's worth removing all the disabled values from the list beforehand
             for supervisor in [
                 op_supervisor_launcher.launch(
@@ -165,7 +165,8 @@ def run(plan, args={}):
         l2_supervisors = [
             supervisor
             for supervisor in supervisors
-            if chain.network_params.network_id in [n.network_id for n in supervisor.networks]
+            if chain.network_params.network_id
+            in [n.network_id for n in supervisor.networks]
         ]
 
         # If there are multiple supervisors, we just let the user know
