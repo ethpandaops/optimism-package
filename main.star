@@ -101,62 +101,99 @@ def run(plan, args={}):
         name="op_jwt_file",
     )
 
-    l2s = []
-    for l2_num, chain in enumerate(optimism_args.chains):
-        l2s.append(
-            l2_launcher.launch_l2(
-                plan,
-                l2_num,
-                chain.network_params.name,
-                chain,
-                jwt_file,
-                deployment_output,
-                l1_config_env_vars,
-                l1_priv_key,
-                l1_rpc_url,
-                global_log_level,
-                global_node_selectors,
-                global_tolerations,
-                persistent,
-                observability_helper,
-                interop_params,
-            )
+    l2s = [
+        l2_launcher.launch_l2(
+            plan,
+            l2_num,
+            chain.network_params.name,
+            chain,
+            jwt_file,
+            deployment_output,
+            l1_config_env_vars,
+            l1_priv_key,
+            l1_rpc_url,
+            global_log_level,
+            global_node_selectors,
+            global_tolerations,
+            persistent,
+            observability_helper,
+            interop_params,
         )
+        for l2_num, chain in enumerate(optimism_args.chains)
+    ]
 
+    supervisors = []
     if interop_params.enabled:
-        for i, interop_set in enumerate(interop_params.sets):
-            op_supervisor_launcher.launch(
-                plan=plan,
-                interop_set=interop_set,
-                l1_config_env_vars=l1_config_env_vars,
-                l2s=l2s,
-                jwt_file=jwt_file,
-                observability_helper=observability_helper,
-            )
+        # We collect the output of the supervisor launcher since it  will be used by the challenger
+        supervisors = [
+            supervisor
+            # Since starlark does not support the walrus operator, we need to use a nested list comprehension
+            # 
+            # TODO We do this since launcher can return None, maybe it's worth removing all the disabled values from the list beforehand
+            for supervisor in [
+                op_supervisor_launcher.launch(
+                    plan=plan,
+                    interop_set=interop_set,
+                    l1_config_env_vars=l1_config_env_vars,
+                    l2s=l2s,
+                    jwt_file=jwt_file,
+                    observability_helper=observability_helper,
+                )
+                for interop_set in interop_params.sets
+            ]
+            if supervisor != None
+        ]
 
     # challenger must launch after supervisor because it depends on it for interop
     for l2_num, l2 in enumerate(l2s):
         chain = optimism_args.chains[l2_num]
+
+        # Nothing happens if the challenger is not enabled
+        if not chain.challenger_params.enabled:
+            continue
+
         op_challenger_image = (
             chain.challenger_params.image
             if chain.challenger_params.image != ""
             else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
         )
-        if chain.challenger_params.enabled:
-            op_challenger_launcher.launch(
-                plan,
-                l2_num,
-                "op-challenger-{0}".format(chain.network_params.name),
-                chain.challenger_params.image,
-                l2.participants[0].el_context,
-                l2.participants[0].cl_context,
-                l1_config_env_vars,
-                deployment_output,
-                chain.network_params,
-                chain.challenger_params,
-                interop_params,
-                observability_helper,
+
+        # We now need to find the supervisor service for the current L2
+        #
+        # Since we allow multiple supervisors to be registered for the same L2 (to allow for intentional misconfiguration),
+        # we need to find all the supervisors for the current L2, then we pick the first one
+        l2_supervisors = [
+            supervisor
+            for supervisor in supervisors
+            if chain.network_params.network_id in [n.network_id for n in supervisor.networks]
+        ]
+
+        # If there are multiple supervisors, we just let the user know
+        num_l2_supervisors = len(l2_supervisors)
+        if num_l2_supervisors > 1:
+            plan.print(
+                "Found more than one ({0} to be precise) supervisor for network {1}. Only the first one will be used for the challenger".format(
+                    num_l2_supervisors, l2.network_id
+                )
             )
+
+        # We pick the first supervisor
+        l2_supervisor = l2_supervisors[0] if num_l2_supervisors > 0 else None
+
+        op_challenger_launcher.launch(
+            plan=plan,
+            l2_num=l2_num,
+            service_name="op-challenger-{0}".format(l2.network_id),
+            image=op_challenger_image,
+            el_context=l2.participants[0].el_context,
+            cl_context=l2.participants[0].cl_context,
+            l1_config_env_vars=l1_config_env_vars,
+            deployment_output=deployment_output,
+            network_params=chain.network_params,
+            challenger_params=chain.challenger_params,
+            supervisor=l2_supervisor,
+            observability_helper=observability_helper,
+        )
 
     observability.launch(
         plan, observability_helper, global_node_selectors, observability_params
