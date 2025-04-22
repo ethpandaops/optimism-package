@@ -98,7 +98,7 @@ def make_service_config(
             conductor_contexts[2].conductor_rpc_url,
         )
         if len(conductor_contexts) > 0
-        else cl_context.beacon_http_url,
+        else "--rollup-rpc=" + cl_context.beacon_http_url,
         "--game-factory-address=" + str(game_factory_address),
         "--private-key=" + signer_context.clients[SERVICE_TYPE].key,
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],

@@ -96,7 +96,7 @@ def make_service_config(
             conductor_contexts[2].conductor_rpc_url,
         )
         if len(conductor_contexts) > 0
-        else el_context.rpc_http_url,
+        else "--l2-eth-rpc=" + el_context.rpc_http_url,
         "--rollup-rpc="
         + "{0},{1},{2}".format(
             conductor_contexts[0].conductor_rpc_url,
@@ -104,7 +104,7 @@ def make_service_config(
             conductor_contexts[2].conductor_rpc_url,
         )
         if len(conductor_contexts) > 0
-        else cl_context.beacon_http_url,
+        else "--rollup-rpc=" + cl_context.beacon_http_url,
         "--poll-interval=1s",
         "--sub-safety-margin=6",
         "--num-confirmations=1",
