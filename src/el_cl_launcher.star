@@ -183,25 +183,12 @@ def launch(
     conductor_bootstrapped = False
     conductor_contexts = []
     for index, participant in enumerate(participants):
+        index_str = ethereum_package_shared_utils.zfill_custom(
+            index + 1, len(str(len(participants)))
+        )
+
         if conductor_enabled and sequencer_enabled:
-            # Bootstrap the conductor server
-            conductor_service_config = op_conductor_launcher["op-conductor"][
-                "service_config_method"
-            ](
-                plan,
-                observability_helper,
-                deployment_output,
-                network_params,
-                "true",  # conductor_bootstrapped
-                "true",  # paused
-                "0",
-            )
-
-            conductor_rpc = "http://{0}:{1}".format(
-                op_conductor.get_conductor_ip_address("0"), op_conductor.RPC_PORT_NUM
-            )
-
-            el_context, cl_context_0, sidecar_context = launch_participant(
+            launch_conductor_quorum(
                 plan,
                 network_params,
                 mev_params,
@@ -225,48 +212,16 @@ def launch(
                 cl_launchers,
                 cl_builder_launchers,
                 sidecar_launchers,
-                conductor_enabled,
+                op_conductor_launcher,
                 index,
-                len(str(len(participants))),
+                len(participants),
                 all_cl_contexts,
                 all_el_contexts,
+                conductor_contexts,
                 sequencer_context,
-                conductor_rpc,
             )
-
-            conductor_context_bootstrap = op_conductor_launcher["op-conductor"][
-                "launch_method"
-            ](
-                plan,
-                cl_context_0,
-                sidecar_context if sidecar_context != None else el_context,
-                observability_helper,
-                deployment_output,
-                network_params,
-                "0",
-                conductor_service_config,
-            )
-
-            conductor_contexts.append(conductor_context_bootstrap)
-
-            conductor_service_config = op_conductor_launcher["op-conductor"][
-                "service_config_method"
-            ](
-                plan,
-                observability_helper,
-                deployment_output,
-                network_params,
-                "false",  # conductor_bootstrapped
-                "true",  # paused
-                "1",
-            )
-
-            conductor_rpc = "http://{0}:{1}".format(
-                op_conductor.get_conductor_ip_address("1"), op_conductor.RPC_PORT_NUM
-            )
-
-            # Launch op-node (maybe rollup-boost) and el
-            el_context, cl_context_1, sidecar_context = launch_participant(
+        else:
+            launch_participant(
                 plan,
                 network_params,
                 mev_params,
@@ -290,295 +245,12 @@ def launch(
                 cl_launchers,
                 cl_builder_launchers,
                 sidecar_launchers,
-                conductor_enabled,
-                index,
-                len(str(len(participants))) + 1,
+                False,
+                index_str,
                 all_cl_contexts,
                 all_el_contexts,
                 sequencer_context,
-                conductor_rpc,
             )
-
-            conductor_context_1 = op_conductor_launcher["op-conductor"][
-                "launch_method"
-            ](
-                plan,
-                cl_context_1,
-                sidecar_context if sidecar_context != None else el_context,
-                observability_helper,
-                deployment_output,
-                network_params,
-                "1",
-                conductor_service_config,
-            )
-
-            conductor_contexts.append(conductor_context_1)
-
-            conductor_service_config = op_conductor_launcher["op-conductor"][
-                "service_config_method"
-            ](
-                plan,
-                observability_helper,
-                deployment_output,
-                network_params,
-                "false",  # conductor_bootstrapped
-                "true",  # paused
-                "2",
-            )
-
-            conductor_rpc = "http://{0}:{1}".format(
-                op_conductor.get_conductor_ip_address("2"), op_conductor.RPC_PORT_NUM
-            )
-
-            # Launch op-node (maybe rollup-boost) and el
-            el_context, cl_context_2, sidecar_context = launch_participant(
-                plan,
-                network_params,
-                mev_params,
-                interop_params,
-                jwt_file,
-                deployment_output,
-                participant,
-                l1_config_env_vars,
-                l2_services_suffix,
-                da_server_context,
-                additional_services,
-                global_log_level,
-                global_node_selectors,
-                global_tolerations,
-                persistent,
-                observability_helper,
-                sequencer_enabled,
-                rollup_boost_enabled,
-                el_launchers,
-                el_builder_launchers,
-                cl_launchers,
-                cl_builder_launchers,
-                sidecar_launchers,
-                conductor_enabled,
-                index,
-                len(str(len(participants))) + 2,
-                all_cl_contexts,
-                all_el_contexts,
-                sequencer_context,
-                conductor_rpc,
-            )
-
-            conductor_context_2 = op_conductor_launcher["op-conductor"][
-                "launch_method"
-            ](
-                plan,
-                cl_context_2,
-                sidecar_context if sidecar_context != None else el_context,
-                observability_helper,
-                deployment_output,
-                network_params,
-                "2",
-                conductor_service_config,
-            )
-
-            conductor_contexts.append(conductor_context_2)
-
-            # Add cl_context_1, and cl_context_2 as trusted peers of cl_context_0
-            recipe_0 = PostHttpRequestRecipe(
-                endpoint="/",
-                content_type="application/json",
-                body="{"
-                + '"jsonrpc":"2.0","method":"opp2p_connectPeer","params":["{0}"],"id":1'.format(
-                    cl_context_1.multiaddr
-                )
-                + "}",
-                port_id=constants.HTTP_PORT_ID,
-            )
-
-            recipe_1 = PostHttpRequestRecipe(
-                endpoint="/",
-                content_type="application/json",
-                body="{"
-                + '"jsonrpc":"2.0","method":"opp2p_connectPeer","params":["{0}"],"id":1'.format(
-                    cl_context_2.multiaddr
-                )
-                + "}",
-                port_id=constants.HTTP_PORT_ID,
-            )
-
-            plan.request(
-                recipe=recipe_0,
-                service_name=cl_context_0.beacon_service_name,
-                acceptable_codes=[200],
-            )
-
-            plan.request(
-                recipe=recipe_1,
-                service_name=cl_context_0.beacon_service_name,
-                acceptable_codes=[200],
-            )
-
-            # call conductor_addServerAsVoter for on bootstrap server for both spawned services
-            # Set op-node's, as trusted peers of each other
-            # TODO:
-            # bootstrap other two conductor services
-            recipe = PostHttpRequestRecipe(
-                endpoint="/",
-                content_type="application/json",
-                body="{"
-                + '"jsonrpc":"2.0","method":"conductor_addServerAsVoter","params":["{0}", "{1}", {2}],"id":1'.format(
-                    conductor_context_1.conductor_raft_server_id,
-                    conductor_context_1.conductor_consensus_addr,
-                    conductor_context_1.conductor_raft_config_version,
-                )
-                + "}",
-                port_id=constants.RPC_PORT_ID,
-            )
-
-            plan.request(
-                recipe=recipe,
-                service_name=conductor_context_bootstrap.service_name,
-                acceptable_codes=[200],
-            )
-
-            recipe = PostHttpRequestRecipe(
-                endpoint="/",
-                content_type="application/json",
-                body="{"
-                + '"jsonrpc":"2.0","method":"conductor_addServerAsVoter","params":["{0}", "{1}", {2}],"id":1'.format(
-                    conductor_context_2.conductor_raft_server_id,
-                    conductor_context_2.conductor_consensus_addr,
-                    conductor_context_2.conductor_raft_config_version,
-                )
-                + "}",
-                port_id=constants.RPC_PORT_ID,
-            )
-
-            plan.request(
-                recipe=recipe,
-                service_name=conductor_context_bootstrap.service_name,
-                acceptable_codes=[200],
-            )
-
-            # Assert cluster membership of the two spawned op-conductor services
-            recipe = PostHttpRequestRecipe(
-                endpoint="/",
-                content_type="application/json",
-                body='{"jsonrpc":"2.0","method":"conductor_clusterMembership","params":[],"id":1}',
-                port_id=constants.RPC_PORT_ID,
-                extract={
-                    "servers": ".result.servers",
-                },
-            )
-
-            response = plan.request(
-                recipe=recipe,
-                service_name=conductor_context_bootstrap.service_name,
-                acceptable_codes=[200],
-            )
-
-            servers = response["extract.servers"]
-
-            plan.print(
-                "Successfully bootstrapped cluster membership: {0}".format(servers)
-            )
-
-            # Extract the unsafe head hash from op-node-0
-            optimism_sync_status_recipe = PostHttpRequestRecipe(
-                endpoint="/",
-                content_type="application/json",
-                body='{"jsonrpc":"2.0","method":"optimism_syncStatus","params":[],"id":1}',
-                port_id=constants.HTTP_PORT_ID,
-                extract={"hash": ".result.unsafe_l2.hash"},
-            )
-
-            response = plan.request(
-                recipe=optimism_sync_status_recipe,
-                service_name=cl_context_0.beacon_service_name,
-                acceptable_codes=[200],
-            )
-
-            unsafe_hash = response["extract.hash"]
-
-            plan.print(
-                "Successfully extracted unsafe head hash: {0}".format(unsafe_hash)
-            )
-
-            # Start sequencing op-node-0
-            start_sequencing_recipe = PostHttpRequestRecipe(
-                endpoint="/",
-                content_type="application/json",
-                body="{"
-                + '"jsonrpc":"2.0","method":"admin_startSequencer","params":["{0}"],"id":1'.format(
-                    unsafe_hash
-                )
-                + "}",
-                port_id=constants.HTTP_PORT_ID,
-            )
-
-            plan.request(
-                recipe=start_sequencing_recipe,
-                service_name=cl_context_0.beacon_service_name,
-                acceptable_codes=[200],
-            )
-
-            recipe = PostHttpRequestRecipe(
-                endpoint="/",
-                content_type="application/json",
-                body='{"jsonrpc":"2.0","method":"conductor_resume","params":[],"id":1}',
-                port_id=constants.RPC_PORT_ID,
-            )
-
-            # Note: Any restarts on the containers will cause the conductor services to be paused
-            plan.request(
-                recipe=recipe,
-                service_name=conductor_context_bootstrap.service_name,
-                acceptable_codes=[200],
-            )
-
-            plan.request(
-                recipe=recipe,
-                service_name=conductor_context_1.service_name,
-                acceptable_codes=[200],
-            )
-
-            plan.request(
-                recipe=recipe,
-                service_name=conductor_context_2.service_name,
-                acceptable_codes=[200],
-            )
-
-            # transfer_leader_recipe = PostHttpRequestRecipe(
-            #     endpoint="/",
-            #     content_type="application/json",
-            #     body='{"jsonrpc":"2.0","method":"conductor_transferLeader","params":[],"id":1}',
-            #     port_id=constants.RPC_PORT_ID,
-            # )
-
-            # plan.request(
-            #     recipe=transfer_leader_recipe,
-            #     service_name=conductor_context_bootstrap.service_name,
-            #     acceptable_codes=[200],
-            # )
-
-            # stop the bootstrap server
-            # plan.stop_service(
-            #     name=conductor_context_bootstrap.service_name,
-            #     description="stopping bootstrap conductor",
-            # )
-
-            # bootstrap_server = plan.get_service(
-            #     name=conductor_context_bootstrap.service_name
-            # )
-
-            # resume all three conductor services
-
-            # set OP_CONDUCTOR_RAFT_BOOTSTRAP: "false and OP_CONDUCTOR_PAUSED: "false"
-            # restart leader server
-
-            # stop the other two conductor services
-            # set OP_CONDUCTOR_PAUSED: "false"
-            # restart the other two conductor services
-
-            # verify cluster membership of the two spawned op-conductor services with conductor_clusterMembership
-            # TODO:
-            # restart the bootstrap server with OP_CONDUCTOR_RAFT_BOOTSTRAP: "false" and OP_CONDUCTOR_PAUSED: "false"
 
         # only the first participant is the sequencer
         if sequencer_enabled:
@@ -614,8 +286,7 @@ def launch_participant(
     cl_builder_launchers,
     sidecar_launchers,
     conductor_enabled,
-    index,
-    length,
+    index_str,
     all_cl_contexts,
     all_el_contexts,
     sequencer_context,
@@ -692,9 +363,6 @@ def launch_participant(
         sidecar_launchers["rollup-boost"]["launcher"],
         sidecar_launchers["rollup-boost"]["launch_method"],
     )
-
-    # Zero-pad the index using the calculated zfill value
-    index_str = ethereum_package_shared_utils.zfill_custom(index + 1, length)
 
     el_service_name = "op-el-{0}-{1}-{2}-{3}".format(
         index_str, el_type, cl_type, l2_services_suffix
@@ -875,3 +543,386 @@ def launch_participant(
         all_cl_contexts.append(cl_builder_context)
 
     return el_context, cl_context, sidecar_context
+
+
+def launch_conductor_quorum(
+    plan,
+    network_params,
+    mev_params,
+    interop_params,
+    jwt_file,
+    deployment_output,
+    participant,
+    l1_config_env_vars,
+    l2_services_suffix,
+    da_server_context,
+    additional_services,
+    global_log_level,
+    global_node_selectors,
+    global_tolerations,
+    persistent,
+    observability_helper,
+    sequencer_enabled,
+    rollup_boost_enabled,
+    el_launchers,
+    el_builder_launchers,
+    cl_launchers,
+    cl_builder_launchers,
+    sidecar_launchers,
+    op_conductor_launcher,
+    index,
+    participants_length,
+    all_cl_contexts,
+    all_el_contexts,
+    conductor_contexts,
+    sequencer_context,
+):
+    index_str = ethereum_package_shared_utils.zfill_custom(
+        index + 1, len(str(participants_length))
+    )
+
+    # Bootstrap the conductor server
+    conductor_service_config = op_conductor.get_config(
+        plan,
+        observability_helper,
+        deployment_output,
+        network_params,
+        "true",  # conductor_bootstrapped
+        "true",  # paused
+        "0",
+    )
+
+    conductor_rpc = "http://{0}:{1}".format(
+        op_conductor.get_conductor_ip_address("0"), op_conductor.RPC_PORT_NUM
+    )
+
+    el_context, cl_context_0, sidecar_context = launch_participant(
+        plan,
+        network_params,
+        mev_params,
+        interop_params,
+        jwt_file,
+        deployment_output,
+        participant,
+        l1_config_env_vars,
+        l2_services_suffix,
+        da_server_context,
+        additional_services,
+        global_log_level,
+        global_node_selectors,
+        global_tolerations,
+        persistent,
+        observability_helper,
+        sequencer_enabled,
+        rollup_boost_enabled,
+        el_launchers,
+        el_builder_launchers,
+        cl_launchers,
+        cl_builder_launchers,
+        sidecar_launchers,
+        True,  # conductor_enabled
+        index_str,
+        all_cl_contexts,
+        all_el_contexts,
+        sequencer_context,
+        conductor_rpc,
+    )
+
+    conductor_context_bootstrap = op_conductor.launch(
+        plan,
+        cl_context_0,
+        sidecar_context if sidecar_context != None else el_context,
+        observability_helper,
+        deployment_output,
+        network_params,
+        index_str,
+        conductor_service_config,
+    )
+
+    conductor_contexts.append(conductor_context_bootstrap)
+
+    index_str = ethereum_package_shared_utils.zfill_custom(
+        index + 2, len(str(participants_length))
+    )
+
+    conductor_service_config = op_conductor.get_config(
+        plan,
+        observability_helper,
+        deployment_output,
+        network_params,
+        "false",  # conductor_bootstrapped
+        "true",  # paused
+        "1",
+    )
+
+    conductor_rpc = "http://{0}:{1}".format(
+        op_conductor.get_conductor_ip_address("1"), op_conductor.RPC_PORT_NUM
+    )
+
+    # Launch op-node (maybe rollup-boost) and el
+    el_context, cl_context_1, sidecar_context = launch_participant(
+        plan,
+        network_params,
+        mev_params,
+        interop_params,
+        jwt_file,
+        deployment_output,
+        participant,
+        l1_config_env_vars,
+        l2_services_suffix,
+        da_server_context,
+        additional_services,
+        global_log_level,
+        global_node_selectors,
+        global_tolerations,
+        persistent,
+        observability_helper,
+        sequencer_enabled,
+        rollup_boost_enabled,
+        el_launchers,
+        el_builder_launchers,
+        cl_launchers,
+        cl_builder_launchers,
+        sidecar_launchers,
+        True,  # conductor_enabled
+        index_str,
+        all_cl_contexts,
+        all_el_contexts,
+        sequencer_context,
+        conductor_rpc,
+    )
+
+    conductor_context_1 = op_conductor.launch(
+        plan,
+        cl_context_1,
+        sidecar_context if sidecar_context != None else el_context,
+        observability_helper,
+        deployment_output,
+        network_params,
+        index_str,
+        conductor_service_config,
+    )
+
+    conductor_contexts.append(conductor_context_1)
+
+    index_str = ethereum_package_shared_utils.zfill_custom(
+        index + 3, len(str(participants_length))
+    )
+
+    conductor_service_config = op_conductor.get_config(
+        plan,
+        observability_helper,
+        deployment_output,
+        network_params,
+        "false",  # conductor_bootstrapped
+        "true",  # paused
+        "2",
+    )
+
+    conductor_rpc = "http://{0}:{1}".format(
+        op_conductor.get_conductor_ip_address("2"), op_conductor.RPC_PORT_NUM
+    )
+
+    # Launch op-node (maybe rollup-boost) and el
+    el_context, cl_context_2, sidecar_context = launch_participant(
+        plan,
+        network_params,
+        mev_params,
+        interop_params,
+        jwt_file,
+        deployment_output,
+        participant,
+        l1_config_env_vars,
+        l2_services_suffix,
+        da_server_context,
+        additional_services,
+        global_log_level,
+        global_node_selectors,
+        global_tolerations,
+        persistent,
+        observability_helper,
+        sequencer_enabled,
+        rollup_boost_enabled,
+        el_launchers,
+        el_builder_launchers,
+        cl_launchers,
+        cl_builder_launchers,
+        sidecar_launchers,
+        True,  # conductor_enabled
+        index_str,
+        all_cl_contexts,
+        all_el_contexts,
+        sequencer_context,
+        conductor_rpc,
+    )
+
+    conductor_context_2 = op_conductor.launch(
+        plan,
+        cl_context_2,
+        sidecar_context if sidecar_context != None else el_context,
+        observability_helper,
+        deployment_output,
+        network_params,
+        index_str,
+        conductor_service_config,
+    )
+
+    conductor_contexts.append(conductor_context_2)
+
+    # Connect the bootstrap op-node as a peer to the other two op-nodes
+    connect_peer_recipe_0 = PostHttpRequestRecipe(
+        endpoint="/",
+        content_type="application/json",
+        body="{"
+        + '"jsonrpc":"2.0","method":"opp2p_connectPeer","params":["{0}"],"id":1'.format(
+            cl_context_1.multiaddr
+        )
+        + "}",
+        port_id=constants.HTTP_PORT_ID,
+    )
+
+    connect_peer_recipe_1 = PostHttpRequestRecipe(
+        endpoint="/",
+        content_type="application/json",
+        body="{"
+        + '"jsonrpc":"2.0","method":"opp2p_connectPeer","params":["{0}"],"id":1'.format(
+            cl_context_2.multiaddr
+        )
+        + "}",
+        port_id=constants.HTTP_PORT_ID,
+    )
+
+    plan.request(
+        recipe=connect_peer_recipe_0,
+        service_name=cl_context_0.beacon_service_name,
+        acceptable_codes=[200],
+    )
+
+    plan.request(
+        recipe=connect_peer_recipe_1,
+        service_name=cl_context_0.beacon_service_name,
+        acceptable_codes=[200],
+    )
+
+    # Bootstrap the Quorum
+    add_server_as_voter_recipe = PostHttpRequestRecipe(
+        endpoint="/",
+        content_type="application/json",
+        body="{"
+        + '"jsonrpc":"2.0","method":"conductor_addServerAsVoter","params":["{0}", "{1}", {2}],"id":1'.format(
+            conductor_context_1.conductor_raft_server_id,
+            conductor_context_1.conductor_consensus_addr,
+            conductor_context_1.conductor_raft_config_version,
+        )
+        + "}",
+        port_id=constants.RPC_PORT_ID,
+    )
+
+    plan.request(
+        recipe=add_server_as_voter_recipe,
+        service_name=conductor_context_bootstrap.service_name,
+        acceptable_codes=[200],
+    )
+
+    add_server_as_voter_recipe = PostHttpRequestRecipe(
+        endpoint="/",
+        content_type="application/json",
+        body="{"
+        + '"jsonrpc":"2.0","method":"conductor_addServerAsVoter","params":["{0}", "{1}", {2}],"id":1'.format(
+            conductor_context_2.conductor_raft_server_id,
+            conductor_context_2.conductor_consensus_addr,
+            conductor_context_2.conductor_raft_config_version,
+        )
+        + "}",
+        port_id=constants.RPC_PORT_ID,
+    )
+
+    plan.request(
+        recipe=add_server_as_voter_recipe,
+        service_name=conductor_context_bootstrap.service_name,
+        acceptable_codes=[200],
+    )
+
+    # Check the cluster membership
+    cluster_membership_recipe = PostHttpRequestRecipe(
+        endpoint="/",
+        content_type="application/json",
+        body='{"jsonrpc":"2.0","method":"conductor_clusterMembership","params":[],"id":1}',
+        port_id=constants.RPC_PORT_ID,
+        extract={
+            "servers": ".result.servers",
+        },
+    )
+
+    response = plan.request(
+        recipe=cluster_membership_recipe,
+        service_name=conductor_context_bootstrap.service_name,
+        acceptable_codes=[200],
+    )
+
+    servers = response["extract.servers"]
+
+    plan.print("Successfully bootstrapped cluster membership: {0}".format(servers))
+
+    optimism_sync_status_recipe = PostHttpRequestRecipe(
+        endpoint="/",
+        content_type="application/json",
+        body='{"jsonrpc":"2.0","method":"optimism_syncStatus","params":[],"id":1}',
+        port_id=constants.HTTP_PORT_ID,
+        extract={"hash": ".result.unsafe_l2.hash"},
+    )
+
+    response = plan.request(
+        recipe=optimism_sync_status_recipe,
+        service_name=cl_context_0.beacon_service_name,
+        acceptable_codes=[200],
+    )
+
+    unsafe_hash = response["extract.hash"]
+
+    plan.print("Successfully extracted unsafe head hash: {0}".format(unsafe_hash))
+
+    # Start sequencing on the boostrap server
+    start_sequencing_recipe = PostHttpRequestRecipe(
+        endpoint="/",
+        content_type="application/json",
+        body="{"
+        + '"jsonrpc":"2.0","method":"admin_startSequencer","params":["{0}"],"id":1'.format(
+            unsafe_hash
+        )
+        + "}",
+        port_id=constants.HTTP_PORT_ID,
+    )
+
+    plan.request(
+        recipe=start_sequencing_recipe,
+        service_name=cl_context_0.beacon_service_name,
+        acceptable_codes=[200],
+    )
+
+    # Resume all 3 conductor services
+    conductor_resume_recipe = PostHttpRequestRecipe(
+        endpoint="/",
+        content_type="application/json",
+        body='{"jsonrpc":"2.0","method":"conductor_resume","params":[],"id":1}',
+        port_id=constants.RPC_PORT_ID,
+    )
+
+    # Note: Any restarts on the containers will cause the conductor services to be paused
+    plan.request(
+        recipe=conductor_resume_recipe,
+        service_name=conductor_context_bootstrap.service_name,
+        acceptable_codes=[200],
+    )
+
+    plan.request(
+        recipe=conductor_resume_recipe,
+        service_name=conductor_context_1.service_name,
+        acceptable_codes=[200],
+    )
+
+    plan.request(
+        recipe=conductor_resume_recipe,
+        service_name=conductor_context_2.service_name,
+        acceptable_codes=[200],
+    )
