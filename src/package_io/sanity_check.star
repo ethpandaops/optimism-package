@@ -166,6 +166,7 @@ SUBCATEGORY_PARAMS = {
         "image",
         "tx_fuzzer_extra_args",
     ],
+    "conductor_params": ["image", "conductor_enabled"],
 }
 
 OP_CONTRACT_DEPLOYER_PARAMS = [

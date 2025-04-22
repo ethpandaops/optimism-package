@@ -31,7 +31,7 @@ def launch_participant_network(
     batcher_params = chain_args.batcher_params
     proposer_params = chain_args.proposer_params
     challenger_params = chain_args.challenger_params
-
+    conductor_params = chain_args.conductor_params
     # First EL and sequencer CL
     all_el_contexts, all_cl_contexts, conductor_contexts = el_cl_client_launcher.launch(
         plan,
@@ -50,6 +50,7 @@ def launch_participant_network(
         global_tolerations,
         persistent,
         observability_helper,
+        conductor_params,
     )
 
     all_participants = []

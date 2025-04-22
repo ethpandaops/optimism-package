@@ -271,6 +271,10 @@ def input_parser(plan, input_args):
                         "tx_fuzzer_extra_args"
                     ],
                 ),
+                conductor_params=struct(
+                    image=result["conductor_params"]["image"],
+                    conductor_enabled=result["conductor_params"]["conductor_enabled"],
+                ),
             )
             for result in results["chains"]
         ],
@@ -367,6 +371,9 @@ def parse_network_params(plan, input_args):
         da_server_params = default_da_server_params()
         da_server_params.update(chain.get("da_server_params", {}))
 
+        conductor_params = default_conductor_params()
+        conductor_params.update(chain.get("conductor_params", {}))
+
         network_name = network_params["name"]
         network_id = network_params["network_id"]
 
@@ -448,6 +455,7 @@ def parse_network_params(plan, input_args):
             "signer_params": signer_params,
             "mev_params": mev_params,
             "da_server_params": da_server_params,
+            "conductor_params": conductor_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
@@ -601,6 +609,13 @@ def default_batcher_params():
     return {
         "image": DEFAULT_BATCHER_IMAGES["op-batcher"],
         "extra_params": [],
+    }
+
+
+def default_conductor_params():
+    return {
+        "image": DEFAULT_CONDUCTOR_IMAGES["op-conductor"],
+        "conductor_enabled": True,
     }
 
 

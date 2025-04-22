@@ -50,6 +50,7 @@ def launch(
     global_tolerations,
     persistent,
     observability_helper,
+    conductor_params,
 ):
     el_launchers = {
         "op-geth": {
@@ -179,15 +180,16 @@ def launch(
     sequencer_context = None
     rollup_boost_enabled = "rollup-boost" in additional_services
 
-    conductor_enabled = True  # TODO: Dynamically set from input args
-    conductor_bootstrapped = False
+    conductor_enabled = conductor_params.conductor_enabled
     conductor_contexts = []
+
     for index, participant in enumerate(participants):
         index_str = ethereum_package_shared_utils.zfill_custom(
             index + 1, len(str(len(participants)))
         )
 
         if conductor_enabled and sequencer_enabled:
+            conductor_image = conductor_params.image
             launch_conductor_quorum(
                 plan,
                 network_params,
@@ -219,6 +221,7 @@ def launch(
                 all_el_contexts,
                 conductor_contexts,
                 sequencer_context,
+                conductor_image,
             )
         else:
             launch_participant(
@@ -576,6 +579,7 @@ def launch_conductor_quorum(
     all_el_contexts,
     conductor_contexts,
     sequencer_context,
+    conductor_image,
 ):
     index_str = ethereum_package_shared_utils.zfill_custom(
         index + 1, len(str(participants_length))
@@ -590,6 +594,7 @@ def launch_conductor_quorum(
         "true",  # conductor_bootstrapped
         "true",  # paused
         "0",
+        conductor_image,
     )
 
     conductor_rpc = "http://{0}:{1}".format(
@@ -653,6 +658,7 @@ def launch_conductor_quorum(
         "false",  # conductor_bootstrapped
         "true",  # paused
         "1",
+        conductor_image,
     )
 
     conductor_rpc = "http://{0}:{1}".format(
@@ -717,6 +723,7 @@ def launch_conductor_quorum(
         "false",  # conductor_bootstrapped
         "true",  # paused
         "2",
+        conductor_image,
     )
 
     conductor_rpc = "http://{0}:{1}".format(

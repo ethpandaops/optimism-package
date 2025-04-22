@@ -118,6 +118,7 @@ def get_config(
     conductor_bootstrapped,
     conductor_paused,
     index_str,
+    image,
 ):
     ports = dict(get_used_ports())
 
@@ -162,7 +163,6 @@ def get_config(
         "OP_CONDUCTOR_RPC_PORT": str(RPC_PORT_NUM),
     }
 
-    image = input_parser.DEFAULT_CONDUCTOR_IMAGES[SERVICE_NAME]
     return ServiceConfig(
         image=image,
         ports=ports,
