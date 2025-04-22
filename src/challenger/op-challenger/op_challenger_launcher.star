@@ -125,8 +125,6 @@ def get_challenger_config(
         observability.configure_op_service_metrics(cmd, ports)
 
     if supervisor != None:
-        kurtosistest.debug(supervisor.service.ports[constants.RPC_PORT_ID].url)
-
         cmd.append(
             "--supervisor-rpc={0}".format(
                 supervisor.service.ports[constants.RPC_PORT_ID].url
