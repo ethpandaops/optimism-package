@@ -3,6 +3,9 @@ op_challenger_launcher = import_module(
 )
 input_parser = import_module("/src/package_io/input_parser.star")
 observability = import_module("/src/observability/observability.star")
+op_supervisor_launcher = import_module(
+    "/src/interop/op-supervisor/op_supervisor_launcher.star"
+)
 ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
@@ -33,9 +36,11 @@ def test_launch_with_defaults(plan):
 
     el_context = struct(
         rpc_http_url="rpc_http_url",
+        ip_addr="1.2.3.4",
     )
     cl_context = struct(
         beacon_http_url="beacon_http_url",
+        ip_addr="4.3.2.1",
     )
     # el_context, cl_context = launch_test_el_cl(plan, parsed_input_args)
 
@@ -64,6 +69,31 @@ def test_launch_with_defaults(plan):
         challenger_private_key_mock
     )
 
+    supervisor = op_supervisor_launcher.launch(
+        plan=plan,
+        interop_set=struct(
+            enabled=True,
+            name="interop-set",
+            participants=["1000"],
+            supervisor_params=struct(
+                enabled=True,
+                image="op-supervisor:latest",
+                dependency_set=None,
+                extra_params=[],
+            ),
+        ),
+        l1_config_env_vars=l1_config_env_vars,
+        l2s=[struct(
+            network_id="1000",
+            participants=[struct(
+                el_context=el_context,
+                cl_context=cl_context,
+            )],
+        )],
+        jwt_file = "/path/to/jwt_file",
+        observability_helper=observability_helper,
+    )
+
     op_challenger_launcher.launch(
         plan=plan,
         l2_num=l2_num,
@@ -75,7 +105,7 @@ def test_launch_with_defaults(plan):
         deployment_output=deployment_output,
         network_params=chain.network_params,
         challenger_params=chain.challenger_params,
-        interop_params=parsed_input_args.interop,
+        supervisor=supervisor,
         observability_helper=observability_helper,
     )
 
@@ -92,6 +122,6 @@ def test_launch_with_defaults(plan):
     expect.eq(
         challenger_service_config.cmd,
         [
-            "mkdir -p /data/op-challenger/op-challenger-data && op-challenger --cannon-l2-genesis=/network-configs/genesis-2151908.json --cannon-rollup-config=/network-configs/rollup-2151908.json --game-factory-address=challenger_private_key --datadir=/data/op-challenger/op-challenger-data --l1-beacon=CL_RPC_URL --l1-eth-rpc=L1_RPC_URL --l2-eth-rpc=rpc_http_url --private-key=challenger_private_key --rollup-rpc=beacon_http_url --trace-type=cannon,permissioned --metrics.enabled --metrics.addr=0.0.0.0 --metrics.port=9001 --cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon"
+            "mkdir -p /data/op-challenger/op-challenger-data && op-challenger --cannon-l2-genesis=/network-configs/genesis-2151908.json --cannon-rollup-config=/network-configs/rollup-2151908.json --game-factory-address=challenger_private_key --datadir=/data/op-challenger/op-challenger-data --l1-beacon=CL_RPC_URL --l1-eth-rpc=L1_RPC_URL --l2-eth-rpc=rpc_http_url --private-key=challenger_private_key --rollup-rpc=beacon_http_url --trace-type=cannon,permissioned --metrics.enabled --metrics.addr=0.0.0.0 --metrics.port=9001 --supervisor-rpc=http://op-supervisor-interop-set:8545 --cannon-depset-config=dummy-file.json --cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon"
         ],
     )
