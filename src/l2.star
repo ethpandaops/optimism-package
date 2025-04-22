@@ -48,8 +48,6 @@ def launch_l2(
         )
         plan.print("Successfully launched da-server")
 
-    kurtosistest.debug(l2_num)
-
     l2 = participant_network.launch_participant_network(
         plan,
         l2_args.participants,
