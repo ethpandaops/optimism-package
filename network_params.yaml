@@ -53,6 +53,10 @@ optimism_package:
   global_node_selectors: {}
   global_tolerations: []
   persistent: false
+  interop:
+    sets:
+      - name: "interop"
+        participants: "*"
 ethereum_package:
   participants:
   - el_type: geth
