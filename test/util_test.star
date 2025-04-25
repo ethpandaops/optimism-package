@@ -61,6 +61,7 @@ def test_label_from_image_long_image_name_long_suffix(plan):
 
 
 def test_filter_none(plan):
+    # Dictionaries
     expect.eq(util.filter_none({}), {})
     expect.eq(util.filter_none({"key": "value"}), {"key": "value"})
     expect.eq(util.filter_none({"key": None}), {})
@@ -69,6 +70,31 @@ def test_filter_none(plan):
     expect.eq(util.filter_none({"key": ""}), {"key": ""})
     expect.eq(util.filter_none({"key": []}), {"key": []})
     expect.eq(util.filter_none({"key": {}}), {"key": {}})
+
+    # Lists
+    expect.eq(util.filter_none([]), [])
+    expect.eq(util.filter_none(["value"]), ["value"])
+    expect.eq(util.filter_none([None, None]), [])
+    expect.eq(util.filter_none([False]), [False])
+    expect.eq(util.filter_none([0]), [0])
+    expect.eq(util.filter_none([""]), [""])
+    expect.eq(util.filter_none([[]]), [[]])
+    expect.eq(util.filter_none([{}]), [{}])
+
+    # Other values
+    expect.fails(lambda: util.filter_none(1), "Unsupported type for filter_none: int")
+    expect.fails(
+        lambda: util.filter_none(""), "Unsupported type for filter_none: string"
+    )
+    expect.fails(
+        lambda: util.filter_none(False), "Unsupported type for filter_none: bool"
+    )
+    expect.fails(
+        lambda: util.filter_none(struct()), "Unsupported type for filter_none: struct"
+    )
+    expect.fails(
+        lambda: util.filter_none(None), "Unsupported type for filter_none: NoneType"
+    )
 
 
 def test_get_duplicates(plan):

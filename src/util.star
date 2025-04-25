@@ -147,8 +147,14 @@ def make_execution_rpc_url(el_context):
 
 
 # Removes all None values from a dictionary and returns a new dictionary.
-def filter_none(d):
-    return {k: v for k, v in d.items() if v != None}
+def filter_none(p):
+    p_type = type(p)
+    if p_type == "list":
+        return [v for v in p if v != None]
+    elif p_type == "dict":
+        return {k: v for k, v in p.items() if v != None}
+    else:
+        fail("Unsupported type for filter_none: {0}".format(p_type))
 
 
 # Returns a list of duplicate items in the input list.
