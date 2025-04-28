@@ -44,8 +44,6 @@ def launch(
     service = plan.add_service(service_name, config)
 
     if observability_helper.enabled:
-        observability.configure_op_service_metrics(config.cmd, config.ports)
-
         for l2 in challenger_l2s:
             observability.register_op_service_metrics_job(
                 observability_helper, service, l2.name
@@ -64,6 +62,7 @@ def get_challenger_config(
     l1_config_env_vars,
     l2s,
     deployment_output,
+    observability_helper,
 ):
     # FIXME Challenger is now taking the first network value as the source of truth for
     # both the contract addresses and the private keys
@@ -114,10 +113,22 @@ def get_challenger_config(
         "--datadir={}".format(CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER),
         "--l1-beacon={}".format(l1_config_env_vars["CL_RPC_URL"]),
         "--l1-eth-rpc={}".format(l1_config_env_vars["L1_RPC_URL"]),
-        "--l2-eth-rpc={}".format(",".join([",".join([p.el_context.rpc_http_url for p in l2.participants]) for l2 in l2s])),
+        "--l2-eth-rpc={}".format(
+            ",".join(
+                [
+                    ",".join([p.el_context.rpc_http_url for p in l2.participants])
+                    for l2 in l2s
+                ]
+            )
+        ),
         "--private-key={}".format(challenger_key),
         "--rollup-rpc={}".format(
-            ",".join([",".join([p.cl_context.beacon_http_url for p in l2.participants]) for l2 in l2s])
+            ",".join(
+                [
+                    ",".join([p.cl_context.beacon_http_url for p in l2.participants])
+                    for l2 in l2s
+                ]
+            )
         ),
         "--trace-type={}".format(",".join(params.cannon_trace_types)),
     ]
@@ -145,11 +156,15 @@ def get_challenger_config(
         CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
     )
 
+    ports = {}
+    if observability_helper.enabled:
+        observability.configure_op_service_metrics(cmd, ports)
+
     return ServiceConfig(
         image=params.image,
         entrypoint=ENTRYPOINT_ARGS,
         cmd=[cmd],
         files=files,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ports={},
+        ports=ports,
     )
