@@ -153,13 +153,14 @@ def get_challenger_config(
         fail("One of cannon_prestate_path or cannon_prestates_url must be set")
 
     cmd += params.extra_params
-    cmd = "mkdir -p {0} && {1}".format(
-        CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
-    )
-
+    
     ports = {}
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
+    
+    cmd = "mkdir -p {0} && {1}".format(
+        CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
+    )
 
     return ServiceConfig(
         image=params.image,
