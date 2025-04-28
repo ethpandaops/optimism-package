@@ -114,10 +114,10 @@ def get_challenger_config(
         "--datadir={}".format(CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER),
         "--l1-beacon={}".format(l1_config_env_vars["CL_RPC_URL"]),
         "--l1-eth-rpc={}".format(l1_config_env_vars["L1_RPC_URL"]),
-        "--l2-eth-rpc={}".format(",".join([l2.el_context.rpc_http_url for l2 in l2s])),
+        "--l2-eth-rpc={}".format(",".join([",".join([p.el_context.rpc_http_url for p in l2.participants]) for l2 in l2s])),
         "--private-key={}".format(challenger_key),
         "--rollup-rpc={}".format(
-            ",".join([l2.cl_context.beacon_http_url for l2 in l2s])
+            ",".join([",".join([p.cl_context.beacon_http_url for p in l2.participants]) for l2 in l2s])
         ),
         "--trace-type={}".format(",".join(params.cannon_trace_types)),
     ]
