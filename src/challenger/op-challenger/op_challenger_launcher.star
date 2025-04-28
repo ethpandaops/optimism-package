@@ -151,4 +151,5 @@ def get_challenger_config(
         cmd=[cmd],
         files=files,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        ports={},
     )
