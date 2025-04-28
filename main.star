@@ -126,15 +126,15 @@ def run(plan, args={}):
         )
 
     if interop_params.enabled:
-        for i, interop_set in enumerate(interop_params.sets):
-            op_supervisor_launcher.launch(
-                plan=plan,
-                interop_set=interop_set,
-                l1_config_env_vars=l1_config_env_vars,
-                l2s=l2s,
-                jwt_file=jwt_file,
-                observability_helper=observability_helper,
-            )
+        op_supervisor_launcher.launch(
+            plan,
+            l1_config_env_vars,
+            optimism_args.chains,
+            l2s,
+            jwt_file,
+            interop_params.supervisor_params,
+            observability_helper,
+        )
 
     # challenger must launch after supervisor because it depends on it for interop
     for l2_num, l2 in enumerate(l2s):
