@@ -9,7 +9,6 @@ ethereum_package_constants = import_module(
 observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
-constants = import_module("../../package_io/constants.star")
 interop_constants = import_module("../../interop/constants.star")
 util = import_module("../../util.star")
 
@@ -35,22 +34,22 @@ def launch(
     deployment_output,
     network_params,
     challenger_params,
-    supervisor,
+    interop_params,
     observability_helper,
 ):
     config = get_challenger_config(
-        plan=plan,
-        l2_num=l2_num,
-        service_name=service_name,
-        image=image,
-        el_context=el_context,
-        cl_context=cl_context,
-        l1_config_env_vars=l1_config_env_vars,
-        deployment_output=deployment_output,
-        network_params=network_params,
-        challenger_params=challenger_params,
-        supervisor=supervisor,
-        observability_helper=observability_helper,
+        plan,
+        l2_num,
+        service_name,
+        image,
+        el_context,
+        cl_context,
+        l1_config_env_vars,
+        deployment_output,
+        network_params,
+        challenger_params,
+        interop_params,
+        observability_helper,
     )
 
     service = plan.add_service(service_name, config)
@@ -73,7 +72,7 @@ def get_challenger_config(
     deployment_output,
     network_params,
     challenger_params,
-    supervisor,
+    interop_params,
     observability_helper,
 ):
     ports = dict(get_used_ports())
@@ -124,12 +123,8 @@ def get_challenger_config(
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
 
-    if supervisor != None:
-        cmd.append(
-            "--supervisor-rpc={0}".format(
-                supervisor.service.ports[constants.RPC_PORT_ID].url
-            )
-        )
+    if interop_params.enabled:
+        cmd.append("--supervisor-rpc=" + interop_constants.SUPERVISOR_ENDPOINT)
         # TraceTypeSupper{Cannon|Permissioned} needs --cannon-depset-config to be set
         # Added at https://github.com/ethereum-optimism/optimism/pull/14666
         # Temporary fix: Add a dummy flag
