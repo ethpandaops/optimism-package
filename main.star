@@ -147,54 +147,14 @@ def run(plan, args={}):
         ]
 
     # challenger must launch after supervisor because it depends on it for interop
-    for l2_num, l2 in enumerate(l2s):
-        chain = optimism_args.chains[l2_num]
-
-        # Nothing happens if the challenger is not enabled
-        if not chain.challenger_params.enabled:
-            continue
-
-        op_challenger_image = (
-            chain.challenger_params.image
-            if chain.challenger_params.image != ""
-            else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
-        )
-
-        # We now need to find the supervisor service for the current L2
-        #
-        # Since we allow multiple supervisors to be registered for the same L2 (to allow for intentional misconfiguration),
-        # we need to find all the supervisors for the current L2, then we pick the first one
-        l2_supervisors = [
-            supervisor
-            for supervisor in supervisors
-            if chain.network_params.network_id
-            in [n.network_id for n in supervisor.networks]
-        ]
-
-        # If there are multiple supervisors, we just let the user know
-        num_l2_supervisors = len(l2_supervisors)
-        if num_l2_supervisors > 1:
-            plan.print(
-                "Found more than one ({0} to be precise) supervisor for network {1}. Only the first one will be used for the challenger".format(
-                    num_l2_supervisors, l2.network_id
-                )
-            )
-
-        # We pick the first supervisor
-        l2_supervisor = l2_supervisors[0] if num_l2_supervisors > 0 else None
-
-        op_challenger_launcher.launch(
+    for challenger_name, challenger in optimism_args.challengers.items():
+        op_challenger = op_challenger_launcher.launch(
             plan=plan,
-            l2_num=l2_num,
-            service_name="op-challenger-{0}".format(l2.network_id),
-            image=op_challenger_image,
-            el_context=l2.participants[0].el_context,
-            cl_context=l2.participants[0].cl_context,
+            name=challenger_name,
+            params=challenger,
             l1_config_env_vars=l1_config_env_vars,
+            l2s=l2s,
             deployment_output=deployment_output,
-            network_params=chain.network_params,
-            challenger_params=chain.challenger_params,
-            supervisor=l2_supervisor,
             observability_helper=observability_helper,
         )
 

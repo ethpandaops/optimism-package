@@ -447,3 +447,124 @@ def test_interop_set_explicitly_disabled(plan):
             ],
         },
     )
+
+
+def test_challenger_default_args(plan):
+    parsed_params = input_parser.parse_network_params(plan, {})
+
+    expect.eq(
+        parsed_params["challengers"],
+        {},
+    )
+
+
+def test_challenger_instance_default_args(plan):
+    parsed_params = input_parser.parse_network_params(
+        plan,
+        {
+            "chains": [
+                {
+                    "network_params": {
+                        "network_id": "1000",
+                    },
+                },
+                {
+                    "network_params": {
+                        "network_id": "2000",
+                    },
+                },
+            ],
+            "challengers": {
+                "challenger--default-values": {},
+                "challenger--overrides": {
+                    "enabled": False,
+                    "image": "docker://another-image",
+                    "participants": ["2000"],
+                    "extra_params": [],
+                    "cannon_prestate_path": "",
+                    "cannon_prestates_url": "http://prestates",
+                    "cannon_trace_types": ["malicious"],
+                },
+            },
+        },
+    )
+
+    expect.eq(
+        parsed_params["challengers"],
+        {
+            "challenger--default-values": {
+                "enabled": True,
+                "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
+                "extra_params": [],
+                "participants": ["1000", "2000"],
+                "cannon_prestate_path": "",
+                "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
+                "cannon_trace_types": ["cannon", "permissioned"],
+            },
+            "challenger--overrides": {
+                "enabled": False,
+                "image": "docker://another-image",
+                "extra_params": [],
+                "participants": ["2000"],
+                "cannon_prestate_path": "",
+                "cannon_prestates_url": "http://prestates",
+                "cannon_trace_types": ["malicious"],
+            },
+        },
+    )
+
+
+def test_challenger_instance_missing_network(plan):
+    expect.fails(
+        lambda: input_parser.parse_network_params(
+            plan,
+            {
+                "challengers": {
+                    "invalid": {
+                        "enabled": True,
+                        "image": "docker://image",
+                        "participants": ["1000"],
+                        "extra_params": ["--fast"],
+                        "cannon_prestate_path": "",
+                        "cannon_prestates_url": "http://prestates",
+                        "cannon_trace_types": ["permissioned"],
+                    },
+                },
+            },
+        ),
+        "Unknown network id in list of interop participants: 1000",
+    )
+
+
+def test_challenger_invalid_prestates(plan):
+    expect.fails(
+        lambda: input_parser.parse_network_params(
+            plan,
+            {
+                "challengers": {
+                    "invalid-prestates": {
+                        "cannon_prestate_path": "/dev/null",
+                        "cannon_prestates_url": "http://prestates",
+                    },
+                },
+            },
+        ),
+        "Only one of cannon_prestate_path and cannon_prestates_url can be set for challenger invalid-prestates",
+    )
+
+
+def test_challenger_missing_prestates(plan):
+    expect.fails(
+        lambda: input_parser.parse_network_params(
+            plan,
+            {
+                "challengers": {
+                    "missing-prestates": {
+                        "cannon_prestate_path": "",
+                        "cannon_prestates_url": "",
+                    },
+                },
+            },
+        ),
+        "At least one of cannon_prestate_path and cannon_prestates_url must be set for challenger missing-prestates",
+    )

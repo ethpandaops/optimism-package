@@ -357,9 +357,6 @@ def test_op_supervisor_with_challenger(plan):
                         }
                     },
                     {
-                        "challenger_params": {
-                            "enabled": False,
-                        },
                         "network_params": {
                             "network_id": "3000",
                         },
@@ -382,6 +379,7 @@ def test_op_supervisor_with_challenger(plan):
                         },
                     ],
                 },
+                "challengers": {"default": {}},
             },
         },
     )

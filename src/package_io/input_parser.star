@@ -130,6 +130,18 @@ def input_parser(plan, input_args):
             enabled=results["faucet"]["enabled"],
             image=results["faucet"]["image"],
         ),
+        challengers={
+            name: struct(
+                image=challenger["image"],
+                extra_params=challenger["extra_params"],
+                participants=challenger["participants"],
+                cannon_prestate_path=challenger["cannon_prestate_path"],
+                cannon_prestates_url=challenger["cannon_prestates_url"],
+                cannon_trace_types=challenger["cannon_trace_types"],
+            )
+            for name, challenger in results["challengers"].items()
+            if challenger["enabled"]
+        },
         interop=struct(
             enabled=results["interop"]["enabled"],
             supervisor_params=struct(
@@ -251,20 +263,6 @@ def input_parser(plan, input_args):
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
                 ),
-                challenger_params=struct(
-                    enabled=result["challenger_params"]["enabled"],
-                    image=result["challenger_params"]["image"],
-                    extra_params=result["challenger_params"]["extra_params"],
-                    cannon_prestate_path=result["challenger_params"][
-                        "cannon_prestate_path"
-                    ],
-                    cannon_prestates_url=result["challenger_params"][
-                        "cannon_prestates_url"
-                    ],
-                    cannon_trace_types=result["challenger_params"][
-                        "cannon_trace_types"
-                    ],
-                ),
                 proposer_params=struct(
                     image=result["proposer_params"]["image"],
                     extra_params=result["proposer_params"]["extra_params"],
@@ -365,9 +363,6 @@ def parse_network_params(plan, input_args):
         proposer_params = default_proposer_params()
         proposer_params.update(chain.get("proposer_params", {}))
 
-        challenger_params = default_challenger_params()
-        challenger_params.update(chain.get("challenger_params", {}))
-
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
         da_server_params = default_da_server_params()
@@ -449,7 +444,6 @@ def parse_network_params(plan, input_args):
             "network_params": network_params,
             "proxyd_params": proxyd_params,
             "batcher_params": batcher_params,
-            "challenger_params": challenger_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
             "da_server_params": da_server_params,
@@ -465,6 +459,12 @@ def parse_network_params(plan, input_args):
     # configure interop
 
     results["interop"] = compile_interop_params(input_args.get("interop", {}), chains)
+
+    # configure challengers
+
+    results["challengers"] = compile_challengers_params(
+        input_args.get("challengers", {}), chains
+    )
 
     # configure op-deployer
 
@@ -547,6 +547,18 @@ def default_promtail_params():
     }
 
 
+def default_challenger_params():
+    return {
+        "enabled": True,
+        "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
+        "extra_params": [],
+        "participants": "*",
+        "cannon_prestate_path": "",
+        "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
+        "cannon_trace_types": ["cannon", "permissioned"],
+    }
+
+
 def default_interop_params():
     return {
         "enabled": False,
@@ -557,6 +569,79 @@ def default_interop_params():
         # Default values to apply for all interop sets' supervisors
         "supervisor_params": default_supervisor_params(),
     }
+
+
+def compile_challengers_params(challengers_args, chains):
+    # We first filter the None values so that we can merge dicts easily
+    challengers_args_without_none = util.filter_none(challengers_args)
+
+    # Now we compile the params for challenger instances, defaulting the params to the default values above
+    challenger_instances_params = compile_challenger_instances_params(
+        challengers_args_without_none, chains
+    )
+
+    return challenger_instances_params
+
+
+def compile_challenger_instances_params(challenger_instances_args, chains):
+    challenger_instances_params = {
+        challenger_name: compile_challenger_instance_params(
+            challenger_args, challenger_name, chains
+        )
+        for challenger_name, challenger_args in challenger_instances_args.items()
+        if challenger_args != None
+    }
+
+    return challenger_instances_params
+
+
+def compile_challenger_instance_params(
+    challenger_instance_args, challenger_name, chains
+):
+    challenger_instance_args_without_none = util.filter_none(challenger_instance_args)
+    challenger_params = compile_challenger_params(
+        challenger_instance_args_without_none, chains
+    )
+
+    if (
+        challenger_params["cannon_prestate_path"]
+        and challenger_params["cannon_prestates_url"]
+    ):
+        fail(
+            "Only one of cannon_prestate_path and cannon_prestates_url can be set for challenger {}".format(
+                challenger_name
+            )
+        )
+
+    if (
+        not challenger_params["cannon_prestate_path"]
+        and not challenger_params["cannon_prestates_url"]
+    ):
+        fail(
+            "At least one of cannon_prestate_path and cannon_prestates_url must be set for challenger {}".format(
+                challenger_name
+            )
+        )
+
+    return challenger_params
+
+
+def compile_challenger_params(challenger_instance_args, chains):
+    # We first filter the None values so that we can merge dicts easily
+    challenger_instance_args_without_none = util.filter_none(challenger_instance_args)
+    challenger_instance_params = (
+        default_challenger_params() | challenger_instance_args_without_none
+    )
+
+    # We expand the list of participants since we support a special "*" value to include all networks
+    challenger_participants = challenger_instance_params.get("participants", "*")
+    expanded_challenger_participants = expand_interop_set_participants(
+        challenger_participants, chains
+    )
+
+    challenger_instance_params["participants"] = expanded_challenger_participants
+
+    return challenger_instance_params
 
 
 def default_supervisor_params():
@@ -742,7 +827,6 @@ def default_chains():
             "proxyd_params": default_proxyd_params(),
             "batcher_params": default_batcher_params(),
             "proposer_params": default_proposer_params(),
-            "challenger_params": default_challenger_params(),
             "mev_params": default_mev_params(),
             "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
@@ -778,17 +862,6 @@ def default_proxyd_params():
         "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd",
         "tag": "v4.14.2",
         "extra_params": [],
-    }
-
-
-def default_challenger_params():
-    return {
-        "enabled": True,
-        "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
-        "extra_params": [],
-        "cannon_prestate_path": "",
-        "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
-        "cannon_trace_types": ["cannon", "permissioned"],
     }
 
 

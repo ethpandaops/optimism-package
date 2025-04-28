@@ -26,11 +26,9 @@ def test_launch_with_defaults(plan):
                             "cl_image": "op-node:latest",
                         }
                     ],
-                    "challenger_params": {
-                        "enabled": False,
-                    },
                 }
-            ]
+            ],
+            "challengers": {"default": {}},
         },
     )
 
@@ -108,7 +106,6 @@ def test_launch_with_defaults(plan):
         l1_config_env_vars=l1_config_env_vars,
         deployment_output=deployment_output,
         network_params=chain.network_params,
-        challenger_params=chain.challenger_params,
         supervisor=supervisor,
         observability_helper=observability_helper,
     )

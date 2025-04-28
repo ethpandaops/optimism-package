@@ -19,98 +19,107 @@ CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-challenger/op-challenge
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 
-def get_used_ports():
-    used_ports = {}
-    return used_ports
-
-
 def launch(
     plan,
-    l2_num,
-    service_name,
-    image,
-    el_context,
-    cl_context,
+    name,
+    params,
     l1_config_env_vars,
+    l2s,
     deployment_output,
-    network_params,
-    challenger_params,
-    supervisor,
     observability_helper,
 ):
+    # First we filter out the L2s we are interested in
+    challenger_l2s = [l2 for l2 in l2s if l2.network_id in params.participants]
+
+    service_name = "op-challenger-{0}".format(name)
     config = get_challenger_config(
         plan=plan,
-        l2_num=l2_num,
+        params=params,
         service_name=service_name,
-        image=image,
-        el_context=el_context,
-        cl_context=cl_context,
         l1_config_env_vars=l1_config_env_vars,
+        l2s=challenger_l2s,
         deployment_output=deployment_output,
-        network_params=network_params,
-        challenger_params=challenger_params,
-        supervisor=supervisor,
-        observability_helper=observability_helper,
     )
 
     service = plan.add_service(service_name, config)
 
-    observability.register_op_service_metrics_job(
-        observability_helper, service, network_params.network
-    )
+    if observability_helper.enabled:
+        observability.configure_op_service_metrics(config.cmd, config.ports)
 
-    return "op_challenger"
+        for l2 in challenger_l2s:
+            observability.register_op_service_metrics_job(
+                observability_helper, service, l2.name
+            )
+
+    return struct(
+        service=service,
+        networks=challenger_l2s,
+    )
 
 
 def get_challenger_config(
     plan,
-    l2_num,
+    params,
     service_name,
-    image,
-    el_context,
-    cl_context,
     l1_config_env_vars,
+    l2s,
     deployment_output,
-    network_params,
-    challenger_params,
-    supervisor,
-    observability_helper,
 ):
-    ports = dict(get_used_ports())
-
+    # FIXME Challenger is now taking the first network value as the source of truth for
+    # both the contract addresses and the private keys
+    #
+    # The challenger configuration should be adjusted so that its participant networks can only come from the same interop set,
+    # in which case the values for all the networks should be identical
+    first_l2 = l2s[0]
     game_factory_address = util.read_network_config_value(
         plan,
         deployment_output,
         "state",
-        ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
+        '.opChainDeployments[] | select(.id=="{0}") | .l1StandardBridgeProxyAddress'.format(
+            first_l2.network_id
+        ),
     )
     challenger_key = util.read_network_config_value(
         plan,
         deployment_output,
-        "challenger-{0}".format(network_params.network_id),
+        "challenger-{0}".format(first_l2.network_id),
         ".privateKey",
     )
 
     cmd = [
         "op-challenger",
-        "--cannon-l2-genesis="
-        + "{0}/genesis-{1}.json".format(
-            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-            network_params.network_id,
+        "--cannon-l2-genesis={}".format(
+            ",".join(
+                [
+                    "{0}/genesis-{1}.json".format(
+                        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+                        l2.network_id,
+                    )
+                    for l2 in l2s
+                ]
+            )
         ),
-        "--cannon-rollup-config="
-        + "{0}/rollup-{1}.json".format(
-            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-            network_params.network_id,
+        "--cannon-rollup-config={}".format(
+            ",".join(
+                [
+                    "{0}/rollup-{1}.json".format(
+                        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+                        l2.network_id,
+                    )
+                    for l2 in l2s
+                ]
+            )
         ),
         "--game-factory-address=" + game_factory_address,
-        "--datadir=" + CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--l1-beacon=" + l1_config_env_vars["CL_RPC_URL"],
-        "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
-        "--l2-eth-rpc=" + el_context.rpc_http_url,
-        "--private-key=" + challenger_key,
-        "--rollup-rpc=" + cl_context.beacon_http_url,
-        "--trace-type=" + ",".join(challenger_params.cannon_trace_types),
+        "--datadir={}".format(CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER),
+        "--l1-beacon={}".format(l1_config_env_vars["CL_RPC_URL"]),
+        "--l1-eth-rpc={}".format(l1_config_env_vars["L1_RPC_URL"]),
+        "--l2-eth-rpc={}".format(",".join([l2.el_context.rpc_http_url for l2 in l2s])),
+        "--private-key={}".format(challenger_key),
+        "--rollup-rpc={}".format(
+            ",".join([l2.cl_context.beacon_http_url for l2 in l2s])
+        ),
+        "--trace-type={}".format(",".join(params.cannon_trace_types)),
     ]
 
     # configure files
@@ -119,48 +128,25 @@ def get_challenger_config(
         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
     }
 
-    # apply customizations
-
-    if observability_helper.enabled:
-        observability.configure_op_service_metrics(cmd, ports)
-
-    if supervisor != None:
-        cmd.append(
-            "--supervisor-rpc={0}".format(
-                supervisor.service.ports[constants.RPC_PORT_ID].url
-            )
-        )
-        # TraceTypeSupper{Cannon|Permissioned} needs --cannon-depset-config to be set
-        # Added at https://github.com/ethereum-optimism/optimism/pull/14666
-        # Temporary fix: Add a dummy flag
-        # Tracked at issue https://github.com/ethpandaops/optimism-package/issues/189
-        cmd.append("--cannon-depset-config=dummy-file.json")
-
-    if (
-        challenger_params.cannon_prestate_path
-        and challenger_params.cannon_prestates_url
-    ):
-        fail("Only one of cannon_prestate_path and cannon_prestates_url can be set")
-    elif challenger_params.cannon_prestate_path:
+    if params.cannon_prestate_path:
         cannon_prestate_artifact = plan.upload_files(
-            src=challenger_params.cannon_prestate_path,
+            src=params.cannon_prestate_path,
             name="{}-prestates".format(service_name),
         )
         files["/prestates"] = cannon_prestate_artifact
         cmd.append("--cannon-prestate=/prestates/prestate-proof.json")
-    elif challenger_params.cannon_prestates_url:
-        cmd.append("--cannon-prestates-url=" + challenger_params.cannon_prestates_url)
+    elif params.cannon_prestates_url:
+        cmd.append("--cannon-prestates-url=" + params.cannon_prestates_url)
     else:
         fail("One of cannon_prestate_path or cannon_prestates_url must be set")
 
-    cmd += challenger_params.extra_params
+    cmd += params.extra_params
     cmd = "mkdir -p {0} && {1}".format(
         CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
     )
 
     return ServiceConfig(
-        image=image,
-        ports=ports,
+        image=params.image,
         entrypoint=ENTRYPOINT_ARGS,
         cmd=[cmd],
         files=files,
