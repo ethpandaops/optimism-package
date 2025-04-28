@@ -39,6 +39,7 @@ def launch(
         l1_config_env_vars=l1_config_env_vars,
         l2s=challenger_l2s,
         deployment_output=deployment_output,
+        observability_helper=observability_helper,
     )
 
     service = plan.add_service(service_name, config)
