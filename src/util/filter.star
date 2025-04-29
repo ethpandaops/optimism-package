@@ -8,6 +8,7 @@ def remove_none(p):
     else:
         fail("Unsupported type for remove_none: {0}".format(p_type))
 
+
 def remove_keys(p, keys):
     if type(keys) != "list":
         fail("Second argument to remove_keys must be a list, got {}".format(keys))

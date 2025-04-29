@@ -37,21 +37,25 @@ def test_filter_remove_none(plan):
         lambda: filter.remove_none(None), "Unsupported type for remove_none: NoneType"
     )
 
+
 def test_filter_remove_keys(plan):
     expect.eq(filter.remove_keys({}, ["k"]), {})
     expect.eq(filter.remove_keys({"k": 1, "l": 2}, ["k"]), {"l": 2})
     expect.eq(filter.remove_keys({"k": 1, "l": 2}, ["k", "l", "m"]), {})
 
     expect.fails(
-        lambda: filter.remove_keys({}, {}), "Second argument to remove_keys must be a list, got \\{\\}"
+        lambda: filter.remove_keys({}, {}),
+        "Second argument to remove_keys must be a list, got \\{\\}",
     )
 
     expect.fails(
-        lambda: filter.remove_keys({}, struct()), "Second argument to remove_keys must be a list, got struct\\(\\)"
+        lambda: filter.remove_keys({}, struct()),
+        "Second argument to remove_keys must be a list, got struct\\(\\)",
     )
 
     expect.fails(
-        lambda: filter.remove_keys(None, []), "Unsupported type for remove_keys: NoneType"
+        lambda: filter.remove_keys(None, []),
+        "Unsupported type for remove_keys: NoneType",
     )
     expect.fails(
         lambda: filter.remove_keys(6, []), "Unsupported type for remove_keys: int"

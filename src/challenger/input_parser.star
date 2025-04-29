@@ -25,7 +25,11 @@ def _parse_instance(challenger_args, challenger_name, chains):
     # Any extra attributes will cause an error
     extra_keys = _filter.remove_keys(challenger_args, _DEFAULT_ARGS.keys())
     if len(extra_keys) > 0:
-        fail("Invalid attributes in challenger configuration for {}: {}".format(challenger_name, ",".join(extra_keys)))
+        fail(
+            "Invalid attributes in challenger configuration for {}: {}".format(
+                challenger_name, ",".join(extra_keys)
+            )
+        )
 
     # We filter the None values so that we can merge dicts easily
     # and merge the config with the defaults
