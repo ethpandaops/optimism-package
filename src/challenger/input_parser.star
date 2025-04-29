@@ -8,7 +8,7 @@ _DEFAULT_ARGS = {
     "participants": "*",
     "cannon_prestate_path": "",
     "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
-    "cannon_trace_types": ["cannon", "permissioned"],
+    "cannon_trace_types": [],
 }
 
 

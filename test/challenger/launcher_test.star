@@ -30,14 +30,6 @@ def test_challenger_launch_with_defaults(plan):
         },
     )
 
-    el_context = struct(
-        rpc_http_url="rpc_http_url",
-    )
-    cl_context = struct(
-        beacon_http_url="beacon_http_url",
-    )
-    # el_context, cl_context = launch_test_challenger_el_cl(plan, parsed_input_args)
-
     observability_helper = observability.make_helper(parsed_input_args.observability)
 
     chains = parsed_input_args.chains
@@ -71,8 +63,12 @@ def test_challenger_launch_with_defaults(plan):
                 name="my-network",
                 participants=[
                     struct(
-                        cl_context=cl_context,
-                        el_context=el_context,
+                        cl_context=struct(
+        beacon_http_url="beacon_http_url",
+    ),
+                        el_context=struct(
+        rpc_http_url="rpc_http_url",
+    ),
                     )
                 ],
             )
@@ -95,7 +91,5 @@ def test_challenger_launch_with_defaults(plan):
     )
     expect.eq(
         challenger_service_config.cmd,
-        [
-            "mkdir -p /data/op-challenger/op-challenger-data && op-challenger --cannon-l2-genesis=/network-configs/genesis-1000.json --cannon-rollup-config=/network-configs/rollup-1000.json --game-factory-address=challenger_private_key --datadir=/data/op-challenger/op-challenger-data --l1-beacon=CL_RPC_URL --l1-eth-rpc=L1_RPC_URL --l2-eth-rpc=rpc_http_url --private-key=challenger_private_key --rollup-rpc=beacon_http_url --trace-type=cannon,permissioned --cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon --metrics.enabled --metrics.addr=0.0.0.0 --metrics.port=9001"
-        ],
+        ["mkdir -p /data/op-challenger/op-challenger-data && op-challenger --cannon-l2-genesis=/network-configs/genesis-1000.json --cannon-rollup-config=/network-configs/rollup-1000.json --game-factory-address=challenger_private_key --datadir=/data/op-challenger/op-challenger-data --l1-beacon=CL_RPC_URL --l1-eth-rpc=L1_RPC_URL --l2-eth-rpc=rpc_http_url --private-key=challenger_private_key --rollup-rpc=beacon_http_url --trace-type= --cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon --metrics.enabled --metrics.addr=0.0.0.0 --metrics.port=9001"] ,
     )
