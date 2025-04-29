@@ -23,7 +23,7 @@ def test_launch_with_defaults(plan):
                     ],
                 }
             ],
-            "challengers": {"challenger": None}
+            "challengers": {"challenger": None},
         },
     )
 
@@ -63,14 +63,18 @@ def test_launch_with_defaults(plan):
     op_challenger_launcher.launch(
         plan=plan,
         params=parsed_input_args.challengers[0],
-        l2s=[struct(
-            network_id=1000,
-            name="my-network",
-            participants=[struct(
-                cl_context=cl_context,
-                el_context=el_context,     
-            )]
-        )],
+        l2s=[
+            struct(
+                network_id=1000,
+                name="my-network",
+                participants=[
+                    struct(
+                        cl_context=cl_context,
+                        el_context=el_context,
+                    )
+                ],
+            )
+        ],
         supervisor=None,
         # l2_num=l2_num,
         # el_context=el_context,
