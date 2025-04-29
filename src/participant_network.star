@@ -14,7 +14,6 @@ def launch_participant_network(
     network_params,
     proxyd_params,
     batcher_params,
-    challenger_params,
     proposer_params,
     mev_params,
     deployment_output,

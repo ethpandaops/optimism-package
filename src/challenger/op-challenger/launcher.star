@@ -63,7 +63,6 @@ def get_challenger_config(
     supervisor,
     l1_config_env_vars,
     deployment_output,
-    interop_params,
     observability_helper,
 ):
     # We assume that all the participants share the L1 deployments

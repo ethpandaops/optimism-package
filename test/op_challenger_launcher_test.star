@@ -21,11 +21,9 @@ def test_launch_with_defaults(plan):
                             "cl_image": "op-node:latest",
                         }
                     ],
-                    "challenger_params": {
-                        "enabled": False,
-                    },
                 }
-            ]
+            ],
+            "challengers": {"challenger": None}
         },
     )
 
@@ -64,16 +62,24 @@ def test_launch_with_defaults(plan):
 
     op_challenger_launcher.launch(
         plan=plan,
-        l2_num=l2_num,
-        service_name=challenger_service_name,
-        image=challenger_image,
-        el_context=el_context,
-        cl_context=cl_context,
+        params=parsed_input_args.challengers[0],
+        l2s=[struct(
+            network_id=1000,
+            name="my-network",
+            participants=[struct(
+                cl_context=cl_context,
+                el_context=el_context,     
+            )]
+        )],
+        supervisor=None,
+        # l2_num=l2_num,
+        # el_context=el_context,
+        # cl_context=cl_context,
         l1_config_env_vars=l1_config_env_vars,
         deployment_output=deployment_output,
-        network_params=chain.network_params,
-        challenger_params=chain.challenger_params,
-        interop_params=parsed_input_args.interop,
+        # network_params=chain.network_params,
+        # challenger_params=chain.challenger_params,
+        # interop_params=parsed_input_args.interop,
         observability_helper=observability_helper,
     )
 
