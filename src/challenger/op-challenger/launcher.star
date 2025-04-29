@@ -44,9 +44,11 @@ def launch(
 
     service = plan.add_service(params.service_name, config)
 
-    observability.register_op_service_metrics_job(
-        observability_helper, service, network_params.network
-    )
+    if observability_helper.enabled:
+        for l2 in challenger_l2s:
+            observability.register_op_service_metrics_job(
+                observability_helper, service, l2.name
+            )
 
     return struct(
         service=service,
