@@ -6,4 +6,4 @@ def remove_none(p):
     elif p_type == "dict":
         return {k: v for k, v in p.items() if v != None}
     else:
-        fail("Unsupported type for filter_none: {0}".format(p_type))
+        fail("Unsupported type for remove_none: {0}".format(p_type))
