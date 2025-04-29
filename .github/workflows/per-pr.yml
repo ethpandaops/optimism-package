@@ -9,6 +9,7 @@ concurrency:
 
 jobs:
   run_with_args:
+    name: Run kurtosis with arguments
     strategy:
       matrix:
         file_name:
@@ -28,6 +29,7 @@ jobs:
 
   # Make sure that `kurtosis run .` without an --args-file works fine (the defaults in input_parser.star are correct)
   run_without_args:
+    name: Run kurtosis without arguments
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -49,6 +51,7 @@ jobs:
     secrets: inherit
   
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -61,6 +64,7 @@ jobs:
         run: kurtosis lint ${{ github.workspace }}
 
   test:
+    name: Unit tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
