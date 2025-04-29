@@ -2,6 +2,8 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+challenger_input_parser = import_module("/src/challenger/input_parser.star")
+
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
 
@@ -235,20 +237,7 @@ def input_parser(plan, input_args):
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
                 ),
-                challenger_params=struct(
-                    enabled=result["challenger_params"]["enabled"],
-                    image=result["challenger_params"]["image"],
-                    extra_params=result["challenger_params"]["extra_params"],
-                    cannon_prestate_path=result["challenger_params"][
-                        "cannon_prestate_path"
-                    ],
-                    cannon_prestates_url=result["challenger_params"][
-                        "cannon_prestates_url"
-                    ],
-                    cannon_trace_types=result["challenger_params"][
-                        "cannon_trace_types"
-                    ],
-                ),
+                challengers=results["challengers"],
                 proposer_params=struct(
                     image=result["proposer_params"]["image"],
                     extra_params=result["proposer_params"]["extra_params"],
@@ -455,6 +444,12 @@ def parse_network_params(plan, input_args):
         chains.append(result)
 
     results["chains"] = chains
+
+    # configure op-challenger
+
+    results["challengers"] = challenger_input_parser.parse(
+        input_args.get("challengers"), chains
+    )
 
     # configure op-deployer
 
