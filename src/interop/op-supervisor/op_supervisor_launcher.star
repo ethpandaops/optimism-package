@@ -79,9 +79,7 @@ def launch(
         service,
     )
 
-    return struct(
-        service=service
-    )
+    return struct(service=service)
 
 
 def get_supervisor_config(
