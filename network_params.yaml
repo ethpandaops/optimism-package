@@ -61,6 +61,8 @@ optimism_package:
       cannon_trace_types: ["super-cannon", "super-permissioned"]
     challenger-1:
       <<: *x-challenger
+  interop:
+    enabled: True
 ethereum_package:
   participants:
   - el_type: geth
