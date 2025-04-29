@@ -1,5 +1,5 @@
-_util = import_module("/src/util.star")
 _expansion = import_module("/src/util/expansion.star")
+_filter = import_module("/src/util/filter.star")
 
 _DEFAULT_ARGS = {
     "enabled": True,
@@ -13,17 +13,20 @@ _DEFAULT_ARGS = {
 
 
 def parse(args, chains):
-    return [
+    return _filter.remove_none([
         _parse_instance(challenger_args or {}, challenger_name, chains)
         for challenger_name, challenger_args in (args or {}).items()
-    ]
+    ])
 
 
 def _parse_instance(challenger_args, challenger_name, chains):
     # We first filter the None values so that we can merge dicts easily
-    challenger_params = _DEFAULT_ARGS | _util.filter_none(
-        challenger_args
-    )
+    # 
+    # FIXME Remove or error out on extra args
+    challenger_params = _DEFAULT_ARGS | _filter.remove_none(challenger_args)
+
+    if not challenger_params["enabled"]:
+        return None
 
     # We expand the list of participants since we support a special "*" value to include all networks
     network_ids = [c["network_params"]["network_id"] for c in chains]
@@ -33,6 +36,10 @@ def _parse_instance(challenger_args, challenger_name, chains):
         missing_value_message="network ID {0} does not exist, please check challenger configuration for challenger "
         + challenger_name,
     )
+
+    # No participants means that the challenger is disabled
+    if len(challenger_params["participants"]) == 0:
+        return None
 
     # We add name & service name
     challenger_params["name"] = challenger_name
@@ -62,4 +69,4 @@ def _parse_instance(challenger_args, challenger_name, chains):
             )
         )
 
-    return challenger_params
+    return struct(**challenger_params)

@@ -1,9 +1,57 @@
 input_parser = import_module("/src/challenger/input_parser.star")
 
+_chains = [
+    {"network_params": {"network_id": 1000}},
+    {"network_params": {"network_id": 2000}},
+]
+
+
 def test_challenger_input_parser_empty(plan):
-    expect.eq(input_parser.parse(None, []), [])
-    expect.eq(input_parser.parse({}, []), [])
+    expect.eq(input_parser.parse(None, _chains), [])
+    expect.eq(input_parser.parse({}, _chains), [])
+
+def test_challenger_input_parser_disabled(plan):
+    expect.eq(input_parser.parse({"challenger": {"enabled": False}}, _chains), [])
+
+def test_challenger_input_parser_no_participants(plan):
+    expect.eq(input_parser.parse({"challenger": {"participants": []}}, _chains), [])
+
 
 def test_challenger_input_parser_default_args(plan):
-    expect.eq(input_parser.parse({ "challenger": None }, []), [])
-    expect.eq(input_parser.parse({ "challenger": {} }, []), [])
+    expected_params = struct(
+        name="challenger",
+        service_name="op-challenger-challenger",
+        enabled=True,
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
+        extra_params=[],
+        participants=[1000, 2000],
+        cannon_prestate_path="",
+        cannon_prestates_url="https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
+        cannon_trace_types=["cannon", "permissioned"],
+    )
+
+    expect.eq(
+        input_parser.parse({"challenger": None}, _chains),
+        [expected_params],
+    )
+    expect.eq(
+        input_parser.parse({"challenger": {}}, _chains),
+        [expected_params],
+    )
+    expect.eq(
+        input_parser.parse(
+            {
+                "challenger": {
+                    "enabled": None,
+                    "image": None,
+                    "extra_params": None,
+                    "participants": None,
+                    "cannon_prestate_path": None,
+                    "cannon_prestates_url": None,
+                    "cannon_trace_types": None,
+                }
+            },
+            _chains,
+        ),
+        [expected_params],
+    )

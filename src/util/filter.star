@@ -1,5 +1,5 @@
 # Removes all None values from a dictionary (list) returns a new dictionary (list).
-def filter_none(p):
+def remove_none(p):
     p_type = type(p)
     if p_type == "list":
         return [v for v in p if v != None]

@@ -18,36 +18,33 @@ CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-challenger/op-challenge
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 
-def get_used_ports():
-    used_ports = {}
-    return used_ports
-
-
 def launch(
     plan,
-    l2_num,
-    service_name,
-    image,
-    el_context,
-    cl_context,
+    params,
+    # l2_num,
+    # service_name,
+    # image,
+    # el_context,
+    # cl_context,
     l1_config_env_vars,
     deployment_output,
-    network_params,
-    challenger_params,
-    interop_params,
+    # network_params,
+    # challenger_params,
+    # interop_params,
     observability_helper,
 ):
     config = get_challenger_config(
         plan,
-        l2_num,
-        service_name,
-        image,
-        el_context,
-        cl_context,
+        params,
+        # l2_num,
+        # service_name,
+        # image,
+        # el_context,
+        # cl_context,
         l1_config_env_vars,
         deployment_output,
-        network_params,
-        challenger_params,
+        # network_params,
+        # challenger_params,
         interop_params,
         observability_helper,
     )
@@ -58,35 +55,49 @@ def launch(
         observability_helper, service, network_params.network
     )
 
-    return "op_challenger"
+    return struct(
+        service=service,
+    )
 
 
 def get_challenger_config(
     plan,
-    l2_num,
-    service_name,
-    image,
-    el_context,
-    cl_context,
+    params,
+    # l2_num,
+    # service_name,
+    # image,
+    # el_context,
+    # cl_context,
     l1_config_env_vars,
     deployment_output,
-    network_params,
-    challenger_params,
+    # network_params,
+    # challenger_params,
     interop_params,
     observability_helper,
 ):
-    ports = dict(get_used_ports())
+    ports = {}
 
+    # We assume that all the participants share the L1 deployments
+    # 
+    # TODO The "proper" solution for this is still somewhere out there:
+    # - op-deployer output might need to be restructured
+    # - we might need to do some additional checks to make sure the networks really do share the deployments
+    first_network_id = params.participants[0]
+
+    # We'll grab the game factory address from the deployments
     game_factory_address = util.read_network_config_value(
         plan,
         deployment_output,
         "state",
-        ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
+        '.opChainDeployments[] | select(.id=="{0}") | .disputeGameFactoryProxyAddress'.format(
+            util.to_hex_chain_id(first_network_id)
+        ),
     )
     challenger_key = util.read_network_config_value(
         plan,
         deployment_output,
-        "challenger-{0}".format(network_params.network_id),
+        # TODO Make sure this is decimal not hex
+        "challenger-{0}".format(first_network_id),
         ".privateKey",
     )
 
