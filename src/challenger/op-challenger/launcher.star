@@ -140,7 +140,7 @@ def get_challenger_config(
     # Now plug a supervisor in
     if supervisor:
         cmd.append(
-            "--supervisor-rpc={}".format(supervisor.ports[constants.RPC_PORT_ID].url)
+            "--supervisor-rpc={}".format(supervisor.service.ports[constants.RPC_PORT_ID].url)
         )
         # TraceTypeSupper{Cannon|Permissioned} needs --cannon-depset-config to be set
         # Added at https://github.com/ethereum-optimism/optimism/pull/14666
