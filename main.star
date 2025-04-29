@@ -139,7 +139,7 @@ def run(plan, args={}):
         op_challenger_launcher.launch(
             plan=plan,
             params=challenger_params,
-            l2=l2s,
+            l2s=l2s,
             supervisor=supervisor,
             l1_config_env_vars=l1_config_env_vars,
             deployment_output=deployment_output,
