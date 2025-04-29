@@ -13,9 +13,9 @@ def test_challenger_launch_with_defaults(plan):
         {
             "chains": [
                 {
-                            "network_params": {
-                                "network_id": 1000,
-                            },
+                    "network_params": {
+                        "network_id": 1000,
+                    },
                     "participants": [
                         {
                             "el_type": "op-reth",
@@ -95,5 +95,7 @@ def test_challenger_launch_with_defaults(plan):
     )
     expect.eq(
         challenger_service_config.cmd,
-        ["mkdir -p /data/op-challenger/op-challenger-data && op-challenger --cannon-l2-genesis=/network-configs/genesis-1000.json --cannon-rollup-config=/network-configs/rollup-1000.json --game-factory-address=challenger_private_key --datadir=/data/op-challenger/op-challenger-data --l1-beacon=CL_RPC_URL --l1-eth-rpc=L1_RPC_URL --l2-eth-rpc=rpc_http_url --private-key=challenger_private_key --rollup-rpc=beacon_http_url --trace-type=cannon,permissioned --cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon --metrics.enabled --metrics.addr=0.0.0.0 --metrics.port=9001"],
+        [
+            "mkdir -p /data/op-challenger/op-challenger-data && op-challenger --cannon-l2-genesis=/network-configs/genesis-1000.json --cannon-rollup-config=/network-configs/rollup-1000.json --game-factory-address=challenger_private_key --datadir=/data/op-challenger/op-challenger-data --l1-beacon=CL_RPC_URL --l1-eth-rpc=L1_RPC_URL --l2-eth-rpc=rpc_http_url --private-key=challenger_private_key --rollup-rpc=beacon_http_url --trace-type=cannon,permissioned --cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon --metrics.enabled --metrics.addr=0.0.0.0 --metrics.port=9001"
+        ],
     )
