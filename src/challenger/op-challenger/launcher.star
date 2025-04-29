@@ -33,20 +33,13 @@ def launch(
     challenger_l2s = [l2 for l2 in l2s if l2.network_id in params.participants]
 
     config = get_challenger_config(
-        plan,
-        params,
+        plan=plan,
+        params=params,
         l2s=challenger_l2s,
-        # l2_num,
-        # service_name,
-        # image,
-        # el_context,
-        # cl_context,
-        l1_config_env_vars,
-        deployment_output,
-        # network_params,
-        # challenger_params,
-        interop_params,
-        observability_helper,
+        supervisor=supervisor,
+        l1_config_env_vars=l1_config_env_vars,
+        deployment_output=deployment_output,
+        observability_helper=observability_helper,
     )
 
     service = plan.add_service(params.service_name, config)
@@ -72,7 +65,7 @@ def get_challenger_config(
     observability_helper,
 ):
     # We assume that all the participants share the L1 deployments
-    # 
+    #
     # TODO The "proper" solution for this is still somewhere out there:
     # - op-deployer output might need to be restructured
     # - we might need to do some additional checks to make sure the networks really do share the deployments
@@ -145,7 +138,9 @@ def get_challenger_config(
 
     # Now plug a supervisor in
     if supervisor:
-        cmd.append("--supervisor-rpc={}".format(supervisor.ports[constants.RPC_PORT_ID].url))
+        cmd.append(
+            "--supervisor-rpc={}".format(supervisor.ports[constants.RPC_PORT_ID].url)
+        )
         # TraceTypeSupper{Cannon|Permissioned} needs --cannon-depset-config to be set
         # Added at https://github.com/ethereum-optimism/optimism/pull/14666
         # Temporary fix: Add a dummy flag
@@ -171,11 +166,11 @@ def get_challenger_config(
         fail("One of cannon_prestate_path or cannon_prestates_url must be set")
 
     cmd += params.extra_params
-    
+
     ports = {}
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
-    
+
     cmd = "mkdir -p {0} && {1}".format(
         CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
     )

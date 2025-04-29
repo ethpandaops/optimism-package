@@ -10,8 +10,10 @@ def test_challenger_input_parser_empty(plan):
     expect.eq(input_parser.parse(None, _chains), [])
     expect.eq(input_parser.parse({}, _chains), [])
 
+
 def test_challenger_input_parser_disabled(plan):
     expect.eq(input_parser.parse({"challenger": {"enabled": False}}, _chains), [])
+
 
 def test_challenger_input_parser_no_participants(plan):
     expect.eq(input_parser.parse({"challenger": {"participants": []}}, _chains), [])

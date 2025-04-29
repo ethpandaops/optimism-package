@@ -13,15 +13,17 @@ _DEFAULT_ARGS = {
 
 
 def parse(args, chains):
-    return _filter.remove_none([
-        _parse_instance(challenger_args or {}, challenger_name, chains)
-        for challenger_name, challenger_args in (args or {}).items()
-    ])
+    return _filter.remove_none(
+        [
+            _parse_instance(challenger_args or {}, challenger_name, chains)
+            for challenger_name, challenger_args in (args or {}).items()
+        ]
+    )
 
 
 def _parse_instance(challenger_args, challenger_name, chains):
     # We first filter the None values so that we can merge dicts easily
-    # 
+    #
     # FIXME Remove or error out on extra args
     challenger_params = _DEFAULT_ARGS | _filter.remove_none(challenger_args)
 
