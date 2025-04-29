@@ -1,4 +1,4 @@
-expansion = import_module("/src/package_io/expansion.star")
+expansion = import_module("/src/util/expansion.star")
 
 
 def test_expansion_expand_asterisc(plan):

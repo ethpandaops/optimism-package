@@ -53,6 +53,11 @@ optimism_package:
   global_node_selectors: {}
   global_tolerations: []
   persistent: false
+  challengers:
+    challenger-0: &x-challenger
+      participants: "*"
+    challenger-1:
+      <<: *x-challenger
 ethereum_package:
   participants:
   - el_type: geth
