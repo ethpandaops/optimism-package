@@ -125,8 +125,9 @@ def run(plan, args={}):
             )
         )
 
+    supervisor = None
     if interop_params.enabled:
-        op_supervisor_launcher.launch(
+        supervisor = op_supervisor_launcher.launch(
             plan,
             l1_config_env_vars,
             optimism_args.chains,
@@ -136,29 +137,16 @@ def run(plan, args={}):
             observability_helper,
         )
 
-    # challenger must launch after supervisor because it depends on it for interop
-    for l2_num, l2 in enumerate(l2s):
-        chain = optimism_args.chains[l2_num]
-        op_challenger_image = (
-            chain.challenger_params.image
-            if chain.challenger_params.image != ""
-            else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
+    for challenger_params in optimism_args.challengers:
+        op_challenger_launcher.launch(
+            plan=plan,
+            params=challenger_params,
+            l2=l2s,
+            supervisor=supervisor,
+            l1_config_env_vars=l1_config_env_vars,
+            deployment_output=deployment_output,
+            observability_helper=observability_helper,
         )
-        if chain.challenger_params.enabled:
-            op_challenger_launcher.launch(
-                plan,
-                l2_num,
-                "op-challenger-{0}".format(chain.network_params.name),
-                chain.challenger_params.image,
-                l2.participants[0].el_context,
-                l2.participants[0].cl_context,
-                l1_config_env_vars,
-                deployment_output,
-                chain.network_params,
-                chain.challenger_params,
-                interop_params,
-                observability_helper,
-            )
 
     if optimism_args.faucet.enabled:
         _install_faucet(

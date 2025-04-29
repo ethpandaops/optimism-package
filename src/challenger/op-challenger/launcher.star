@@ -9,6 +9,7 @@ ethereum_package_constants = import_module(
 observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
+constants = import_module("../../package_io/constants.star")
 interop_constants = import_module("../../interop/constants.star")
 util = import_module("../../util.star")
 
@@ -21,21 +22,20 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 def launch(
     plan,
     params,
-    # l2_num,
-    # service_name,
-    # image,
-    # el_context,
-    # cl_context,
+    l2s,
+    # TODO Once the multiple supervisors are in, this will need to change
+    supervisor,
     l1_config_env_vars,
     deployment_output,
-    # network_params,
-    # challenger_params,
-    # interop_params,
     observability_helper,
 ):
+    # We need to only grab the networks this challenger is connected to
+    challenger_l2s = [l2 for l2 in l2s if l2.network_id in params.participants]
+
     config = get_challenger_config(
         plan,
         params,
+        l2s=challenger_l2s,
         # l2_num,
         # service_name,
         # image,
@@ -49,7 +49,7 @@ def launch(
         observability_helper,
     )
 
-    service = plan.add_service(service_name, config)
+    service = plan.add_service(params.service_name, config)
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
@@ -57,32 +57,26 @@ def launch(
 
     return struct(
         service=service,
+        l2s=challenger_l2s,
     )
 
 
 def get_challenger_config(
     plan,
     params,
-    # l2_num,
-    # service_name,
-    # image,
-    # el_context,
-    # cl_context,
+    l2s,
+    supervisor,
     l1_config_env_vars,
     deployment_output,
-    # network_params,
-    # challenger_params,
     interop_params,
     observability_helper,
 ):
-    ports = {}
-
     # We assume that all the participants share the L1 deployments
     # 
     # TODO The "proper" solution for this is still somewhere out there:
     # - op-deployer output might need to be restructured
     # - we might need to do some additional checks to make sure the networks really do share the deployments
-    first_network_id = params.participants[0]
+    first_network_id = l2s[0].network_id
 
     # We'll grab the game factory address from the deployments
     game_factory_address = util.read_network_config_value(
@@ -103,25 +97,60 @@ def get_challenger_config(
 
     cmd = [
         "op-challenger",
-        "--cannon-l2-genesis="
-        + "{0}/genesis-{1}.json".format(
-            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-            network_params.network_id,
+        "--cannon-l2-genesis={}".format(
+            ",".join(
+                [
+                    "{0}/genesis-{1}.json".format(
+                        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+                        l2.network_id,
+                    )
+                    for l2 in l2s
+                ]
+            )
         ),
-        "--cannon-rollup-config="
-        + "{0}/rollup-{1}.json".format(
-            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-            network_params.network_id,
+        "--cannon-rollup-config={}".format(
+            ",".join(
+                [
+                    "{0}/rollup-{1}.json".format(
+                        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+                        l2.network_id,
+                    )
+                    for l2 in l2s
+                ]
+            )
         ),
         "--game-factory-address=" + game_factory_address,
-        "--datadir=" + CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--l1-beacon=" + l1_config_env_vars["CL_RPC_URL"],
-        "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
-        "--l2-eth-rpc=" + el_context.rpc_http_url,
-        "--private-key=" + challenger_key,
-        "--rollup-rpc=" + cl_context.beacon_http_url,
-        "--trace-type=" + ",".join(challenger_params.cannon_trace_types),
+        "--datadir={}".format(CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER),
+        "--l1-beacon={}".format(l1_config_env_vars["CL_RPC_URL"]),
+        "--l1-eth-rpc={}".format(l1_config_env_vars["L1_RPC_URL"]),
+        "--l2-eth-rpc={}".format(
+            ",".join(
+                [
+                    ",".join([p.el_context.rpc_http_url for p in l2.participants])
+                    for l2 in l2s
+                ]
+            )
+        ),
+        "--private-key={}".format(challenger_key),
+        "--rollup-rpc={}".format(
+            ",".join(
+                [
+                    ",".join([p.cl_context.beacon_http_url for p in l2.participants])
+                    for l2 in l2s
+                ]
+            )
+        ),
+        "--trace-type={}".format(",".join(params.cannon_trace_types)),
     ]
+
+    # Now plug a supervisor in
+    if supervisor:
+        cmd.append("--supervisor-rpc={}".format(supervisor.ports[constants.RPC_PORT_ID].url))
+        # TraceTypeSupper{Cannon|Permissioned} needs --cannon-depset-config to be set
+        # Added at https://github.com/ethereum-optimism/optimism/pull/14666
+        # Temporary fix: Add a dummy flag
+        # Tracked at issue https://github.com/ethpandaops/optimism-package/issues/189
+        cmd.append("--cannon-depset-config=dummy-file.json")
 
     # configure files
 
@@ -129,46 +158,33 @@ def get_challenger_config(
         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
     }
 
-    # apply customizations
-
-    if observability_helper.enabled:
-        observability.configure_op_service_metrics(cmd, ports)
-
-    if interop_params.enabled:
-        cmd.append("--supervisor-rpc=" + interop_constants.SUPERVISOR_ENDPOINT)
-        # TraceTypeSupper{Cannon|Permissioned} needs --cannon-depset-config to be set
-        # Added at https://github.com/ethereum-optimism/optimism/pull/14666
-        # Temporary fix: Add a dummy flag
-        # Tracked at issue https://github.com/ethpandaops/optimism-package/issues/189
-        cmd.append("--cannon-depset-config=dummy-file.json")
-
-    if (
-        challenger_params.cannon_prestate_path
-        and challenger_params.cannon_prestates_url
-    ):
-        fail("Only one of cannon_prestate_path and cannon_prestates_url can be set")
-    elif challenger_params.cannon_prestate_path:
+    if params.cannon_prestate_path:
         cannon_prestate_artifact = plan.upload_files(
-            src=challenger_params.cannon_prestate_path,
-            name="{}-prestates".format(service_name),
+            src=params.cannon_prestate_path,
+            name="{}-prestates".format(params.service_name),
         )
         files["/prestates"] = cannon_prestate_artifact
         cmd.append("--cannon-prestate=/prestates/prestate-proof.json")
-    elif challenger_params.cannon_prestates_url:
-        cmd.append("--cannon-prestates-url=" + challenger_params.cannon_prestates_url)
+    elif params.cannon_prestates_url:
+        cmd.append("--cannon-prestates-url=" + params.cannon_prestates_url)
     else:
         fail("One of cannon_prestate_path or cannon_prestates_url must be set")
 
-    cmd += challenger_params.extra_params
+    cmd += params.extra_params
+    
+    ports = {}
+    if observability_helper.enabled:
+        observability.configure_op_service_metrics(cmd, ports)
+    
     cmd = "mkdir -p {0} && {1}".format(
         CHALLENGER_DATA_DIRPATH_ON_SERVICE_CONTAINER, " ".join(cmd)
     )
 
     return ServiceConfig(
-        image=image,
-        ports=ports,
+        image=params.image,
         entrypoint=ENTRYPOINT_ARGS,
         cmd=[cmd],
         files=files,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        ports=ports,
     )
