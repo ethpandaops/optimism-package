@@ -5,7 +5,7 @@ on:
     - cron: '0 2 * * *'
 
 concurrency:
-  group: "scheduled-test"
+  group: ${{ github.workflow_ref }}
   cancel-in-progress: false
 
 jobs:
