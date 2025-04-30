@@ -73,6 +73,7 @@ def launch(
     )
 
     service = plan.add_service(interop_constants.SUPERVISOR_SERVICE_NAME, config)
+    service_url = util.make_service_http_url(service)
 
     if observability_helper.enabled:
         observability.register_op_service_metrics_job(
@@ -80,7 +81,7 @@ def launch(
             service,
         )
 
-    return "op_supervisor"
+    return service_url
 
 
 def get_supervisor_config(
