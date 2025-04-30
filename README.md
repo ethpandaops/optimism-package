@@ -410,23 +410,6 @@ optimism_package:
         # A list of optional extra params that will be passed to the batcher container for modifying its behaviour
         extra_params: []
 
-      # Default challenger configuration
-      challenger_params:
-        # Whether or not to enable the challenger
-        enabled: true
-
-        # The Docker image that should be used for the challenger; leave blank to use the default op-challenger image
-        image: ""
-
-        # A list of optional extra params that will be passed to the challenger container for modifying its behaviour
-        extra_params: []
-
-        # Path to folder containing cannon prestate-proof.json file
-        cannon_prestates_path: "static_files/prestates"
-
-        # Base URL to absolute prestates to use when generating trace data.
-        cannon_prestates_url: ""
-
       # Default proposer configuration
       proposer_params:
         # The Docker image that should be used for the proposer; leave blank to use the default op-proposer image
@@ -476,6 +459,36 @@ optimism_package:
           - "--addr=0.0.0.0"
           - "--port=3100"
           - "--log.level=debug"
+
+  challengers:
+    my-challenger:
+      # Whether this challenger is active
+      enabled: true
+
+      # The Docker image that should be used for the challenger; leave blank to use the default op-challenger image
+      image: ""
+
+      # List of L2 chains that this challenger is connected to
+      # 
+      # This field accepts several configuration types:
+      # 
+      # A list of network IDs, in which case the challenger will connect to all the nodes in these network
+      participants: ["2151908"]
+
+      # OR "*" meaning the challenger will connect to all nodes of all L2 networks
+      participants: "*"
+
+      # A list of optional extra params that will be passed to the challenger container for modifying its behaviour
+      extra_params: []
+
+      # Path to folder containing cannon prestate-proof.json file
+      cannon_prestates_path: "static_files/prestates"
+
+      # OR Base URL to absolute prestates to use when generating trace data.
+      cannon_prestates_url: ""
+
+      # Directory in which the challenger will store its data
+      datadir: "/data/op-challenger/op-challenger-data"
 
   # L2 contract deployer configuration - used for all L2 networks.
   # The docker image that should be used for the L2 contract deployer.

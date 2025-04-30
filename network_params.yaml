@@ -26,6 +26,8 @@ optimism_package:
         node_selectors: {}
         tolerations: []
         count: 1
+      - el_type: op-reth
+        cl_type: op-node
       network_params:
         network: "kurtosis"
         network_id: "2151908"
@@ -53,6 +55,14 @@ optimism_package:
   global_node_selectors: {}
   global_tolerations: []
   persistent: false
+  challengers:
+    challenger-0: &x-challenger
+      participants: "*"
+      cannon_trace_types: ["super-cannon", "super-permissioned"]
+    challenger-1:
+      <<: *x-challenger
+  interop:
+    enabled: True
 ethereum_package:
   participants:
   - el_type: geth

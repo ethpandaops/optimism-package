@@ -1,5 +1,6 @@
 ROOT_PARAMS = [
     "observability",
+    "challengers",
     "interop",
     "altda_deploy_config",
     "chains",
