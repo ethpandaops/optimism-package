@@ -42,6 +42,8 @@ BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/kona-node/beacon-data"
 BEACON_DISCOVERY_PORT_NUM = 9003
 BEACON_HTTP_PORT_NUM = 8547
 
+METRICS_PATH = "/"
+
 
 def get_used_ports(discovery_port):
     used_ports = {
@@ -126,7 +128,9 @@ def launch(
     service = plan.add_service(service_name, config)
     service_url = util.make_service_http_url(service)
 
-    metrics_info = observability.new_metrics_info(observability_helper, service)
+    metrics_info = observability.new_metrics_info(
+        observability_helper, service, METRICS_PATH
+    )
 
     response = plan.request(
         recipe=beacon_node_identity_recipe, service_name=service_name
