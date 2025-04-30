@@ -1,4 +1,4 @@
-utils = import_module("../../util.star")
+util = import_module("../../util.star")
 
 ethereum_package_shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
@@ -58,7 +58,7 @@ def launch(
         dependency_set = create_dependency_set(chains)
         dependency_set_json = json.encode(dependency_set)
 
-    dependency_set_artifact = utils.write_to_file(
+    dependency_set_artifact = util.write_to_file(
         plan, dependency_set_json, DATA_DIR, DEPENDENCY_SET_FILE_NAME
     )
 
