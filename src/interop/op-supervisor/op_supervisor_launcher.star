@@ -74,10 +74,11 @@ def launch(
 
     service = plan.add_service(interop_constants.SUPERVISOR_SERVICE_NAME, config)
 
-    observability.register_op_service_metrics_job(
-        observability_helper,
-        service,
-    )
+    if observability_helper.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper,
+            service,
+        )
 
     return "op_supervisor"
 
