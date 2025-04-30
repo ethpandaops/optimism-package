@@ -79,7 +79,7 @@ def launch(
         service,
     )
 
-    return "op_supervisor"
+    return struct(service=service)
 
 
 def get_supervisor_config(
