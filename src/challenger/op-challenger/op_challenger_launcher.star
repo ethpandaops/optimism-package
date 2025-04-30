@@ -53,14 +53,13 @@ def launch(
     )
 
     service = plan.add_service(service_name, config)
-    service_url = util.make_service_http_url(service)
 
     if observability_helper.enabled:
         observability.register_op_service_metrics_job(
             observability_helper, service, network_params.network
         )
 
-    return service_url
+    return "op_challenger"
 
 
 def get_challenger_config(
