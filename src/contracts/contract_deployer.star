@@ -70,9 +70,38 @@ def _normalize_artifacts_locators(plan, l1_locator, l2_locator):
     return l1_artifacts_locator, l2_artifacts_locator, extra_files
 
 
+def deploy_prestate_builder(plan, image):
+    return plan.add_service(
+        name="prestate-builder",
+        description="add a prestate builder svc",
+        config=ServiceConfig(
+            image=image,
+            ports={
+                "http": PortSpec(
+                    number=8080,
+                    application_protocol="http",
+                ),
+            },
+        ),
+    )
+
+
 def deploy_contracts(
     plan, priv_key, l1_config_env_vars, optimism_args, l1_network, altda_args
 ):
+    prestate_builder_image = (
+        optimism_args.op_contract_deployer_params.prestate_builder_image
+    )
+    prestate_builder_url = None
+    if prestate_builder_image:
+        prestate_builder = deploy_prestate_builder(
+            plan,
+            prestate_builder_image,
+        )
+        prestate_builder_url = "http://{0}:{1}".format(
+            prestate_builder.hostname, prestate_builder.ports["http"].number
+        )
+
     l2_chain_ids_list = [
         str(chain.network_params.network_id) for chain in optimism_args.chains
     ]
@@ -278,8 +307,12 @@ def deploy_contracts(
         ),
     )
 
+    apply_cmd = "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data"
+    if prestate_builder_url:
+        apply_cmd += " --op-program-svc-url {0}".format(prestate_builder_url)
+
     apply_cmds = [
-        "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data",
+        apply_cmd,
     ]
     for chain in optimism_args.chains:
         network_id = chain.network_params.network_id
@@ -335,7 +368,10 @@ def deploy_contracts(
             run='jq --from-file /fund-script/gen2spec.jq < "/network-data/genesis-$CHAIN_ID.json" > "/network-data/chainspec-$CHAIN_ID.json"',
         )
 
-    return op_deployer_output.files_artifacts[0]
+    return struct(
+        output=op_deployer_output.files_artifacts[0],
+        prestates_url=prestate_builder_url,
+    )
 
 
 def chain_key(index, key):

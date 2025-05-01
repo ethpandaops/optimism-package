@@ -421,10 +421,10 @@ optimism_package:
         # A list of optional extra params that will be passed to the challenger container for modifying its behaviour
         extra_params: []
 
-        # Path to folder containing cannon prestate-proof.json file
+        # Path to folder containing cannon prestate-proof.json file. Mutually exclusive with cannon_prestates_url.
         cannon_prestates_path: "static_files/prestates"
 
-        # Base URL to absolute prestates to use when generating trace data.
+        # Base URL to absolute prestates to use when generating trace data. Mutually excluive with cannon_prestates_path.
         cannon_prestates_url: ""
 
       # Default proposer configuration
@@ -481,10 +481,15 @@ optimism_package:
   # The docker image that should be used for the L2 contract deployer.
   # Locators can be http(s) URLs, or point to an enclave artifact with
   # a pseudo URL artifact://NAME
+  # If specified, prestate_builder_image will be deployed as a service
+  # that takes genesis/rollup information as input and generates the
+  # corresponding prestate. In that case, challenger will be pointed to the outcome,
+  # effectively ignoring cannon_prestate_path / cannon_prestate_url.
   op_contract_deployer_params:
     image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.11
     l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz
     l2_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz
+    prestate_builder_image: ""
 
   # The global log level that all clients should log at
   # Valid values are "error", "warn", "info", "debug", and "trace"

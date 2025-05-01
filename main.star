@@ -87,7 +87,7 @@ def run(plan, args={}):
         plan.print("Waiting for L1 to start up")
         wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
 
-    deployment_output = contract_deployer.deploy_contracts(
+    deployment = contract_deployer.deploy_contracts(
         plan,
         l1_priv_key,
         l1_config_env_vars,
@@ -95,6 +95,8 @@ def run(plan, args={}):
         l1_network,
         altda_deploy_config,
     )
+    deployment_output = deployment.output
+    prestates_url = deployment.prestates_url
 
     jwt_file = plan.upload_files(
         src=ethereum_package_static_files.JWT_PATH_FILEPATH,
@@ -144,18 +146,19 @@ def run(plan, args={}):
         )
         if chain.challenger_params.enabled:
             op_challenger_launcher.launch(
-                plan,
-                l2_num,
-                "op-challenger-{0}".format(chain.network_params.name),
-                chain.challenger_params.image,
-                l2.participants[0].el_context,
-                l2.participants[0].cl_context,
-                l1_config_env_vars,
-                deployment_output,
-                chain.network_params,
-                chain.challenger_params,
-                interop_params,
-                observability_helper,
+                plan=plan,
+                l2_num=l2_num,
+                service_name="op-challenger-{0}".format(chain.network_params.name),
+                image=chain.challenger_params.image,
+                el_context=l2.participants[0].el_context,
+                cl_context=l2.participants[0].cl_context,
+                l1_config_env_vars=l1_config_env_vars,
+                deployment_output=deployment_output,
+                network_params=chain.network_params,
+                challenger_params=chain.challenger_params,
+                interop_params=interop_params,
+                observability_helper=observability_helper,
+                prestates_url=prestates_url,
             )
 
     if optimism_args.faucet.enabled:
