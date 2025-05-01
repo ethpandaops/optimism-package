@@ -13,10 +13,21 @@ open-service enclaveName serviceName:
         
 open-grafana enclaveName:
     just open-service {{enclaveName}} grafana
+
+fix-style:
+    kurtosis lint . --format
+
+lint-style:
+    kurtosis lint .
     
 # TODO(enable more checks)
-lint:
+lint-code:
     kurtosis-lint \
         --checked-calls \
         --local-imports \
         main.star src/ test/
+
+lint: lint-style lint-code
+
+test:
+    kurtosis-test .
