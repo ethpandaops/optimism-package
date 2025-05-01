@@ -17,7 +17,7 @@ setup() {
     assert [ -n "$OP_GETH_SERVICE_UUID" ]
 
     # Now we find its RPC URL
-    local OP_GETH_RPC_URL=$(kurtosis service inspect $ENCLAVE_ID $OP_GETH_SERVICE_UUID | grep ' rpc:' | awk '{print $4;}')
+    local OP_GETH_RPC_URL=$(kurtosis port print $ENCLAVE_ID $OP_GETH_SERVICE_UUID rpc)
     assert [ -n "$OP_GETH_RPC_URL" ]
 
     # We ask the RPC for the node info
