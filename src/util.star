@@ -36,7 +36,9 @@ def write_to_file(plan, contents, directory, file_name):
     run = plan.run_sh(
         description="Write value to a file artifact",
         image=DEPLOYMENT_UTILS_IMAGE,
-        store=[file_path],
+        store=[
+            StoreSpec(src=file_path, name=file_name),
+        ],
         run="mkdir -p '{0}' && echo '{2}' > '{1}'".format(
             directory, file_path, contents
         ),

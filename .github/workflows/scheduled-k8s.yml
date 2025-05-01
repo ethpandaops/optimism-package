@@ -1,0 +1,15 @@
+name: Run k8s test
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+
+concurrency:
+  group: ${{ github.workflow_ref }}
+  cancel-in-progress: false
+
+jobs:
+  run_k8s_test:
+    name: Run k8s tests
+    uses: ./.github/workflows/reusable-run-k8s.yml
+    secrets: inherit

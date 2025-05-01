@@ -22,8 +22,9 @@ hildr = import_module("./cl/hildr/hildr_launcher.star")
 
 # MEV
 rollup_boost = import_module("./mev/rollup-boost/rollup_boost_launcher.star")
-op_geth_builder = import_module("./el/op-geth/op_geth_builder_launcher.star")
-op_reth_builder = import_module("./el/op-reth/op_reth_builder_launcher.star")
+op_geth_builder = import_module("./builder/op-geth/op_geth_launcher.star")
+op_reth_builder = import_module("./builder/op-reth/op_reth_launcher.star")
+op_rbuilder_builder = import_module("./builder/op-rbuilder/op_rbuilder_launcher.star")
 op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
 
 
@@ -113,6 +114,15 @@ def launch(
             ),
             "launch_method": op_reth_builder.launch,
         },
+        "op-rbuilder": {
+            "launcher": op_rbuilder_builder.new_op_rbuilder_builder_launcher(
+                deployment_output,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": op_rbuilder_builder.launch,
+        },
     }
 
     cl_launchers = {
@@ -154,6 +164,7 @@ def launch(
     all_cl_contexts = []
     all_el_contexts = []
     sequencer_enabled = True
+    sequencer_context = None
     rollup_boost_enabled = "rollup-boost" in additional_services
     external_builder = mev_params.builder_host != "" and mev_params.builder_port != ""
 
@@ -233,23 +244,30 @@ def launch(
             index + 1, len(str(len(participants)))
         )
 
-        el_service_name = "op-el-{0}-{1}-{2}-{3}".format(
-            index_str, el_type, cl_type, l2_services_suffix
+        el_service_name = "op-el-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id, index_str, el_type, cl_type, l2_services_suffix
         )
-        cl_service_name = "op-cl-{0}-{1}-{2}-{3}".format(
-            index_str, cl_type, el_type, l2_services_suffix
+        cl_service_name = "op-cl-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id, index_str, cl_type, el_type, l2_services_suffix
         )
-        el_builder_service_name = "op-el-builder-{0}-{1}-{2}-{3}".format(
-            index_str, el_builder_type, cl_builder_type, l2_services_suffix
+        el_builder_service_name = "op-el-builder-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id,
+            index_str,
+            el_builder_type,
+            cl_builder_type,
+            l2_services_suffix,
         )
-        cl_builder_service_name = "op-cl-builder-{0}-{1}-{2}-{3}".format(
-            index_str, cl_builder_type, el_builder_type, l2_services_suffix
+        cl_builder_service_name = "op-cl-builder-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id,
+            index_str,
+            cl_builder_type,
+            el_builder_type,
+            l2_services_suffix,
         )
-        sidecar_service_name = "op-rollup-boost-{0}-{1}".format(
-            index_str, l2_services_suffix
+        sidecar_service_name = "op-rollup-boost-{0}-{1}-{2}".format(
+            network_params.network_id, index_str, l2_services_suffix
         )
 
-        sequencer_context = all_el_contexts[0] if len(all_el_contexts) > 0 else None
         el_context = el_launch_method(
             plan,
             el_launcher,
@@ -266,9 +284,9 @@ def launch(
             interop_params,
         )
 
-        # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
-        # and all_cl_contexts[0] are used
-        all_el_contexts.insert(0, el_context)
+        all_el_contexts.append(el_context)
+        if sequencer_enabled:
+            sequencer_context = el_context
 
         for metrics_info in [x for x in el_context.el_metrics_info if x != None]:
             observability.register_node_metrics_job(
@@ -361,9 +379,7 @@ def launch(
             da_server_context,
         )
 
-        # We need to make sure that el_context and cl_context are first in the list, as down the line all_el_contexts[0]
-        # and all_cl_contexts[0] are used
-        all_cl_contexts.insert(0, cl_context)
+        all_cl_contexts.append(cl_context)
 
         for metrics_info in [x for x in cl_context.cl_nodes_metrics_info if x != None]:
             observability.register_node_metrics_job(
@@ -410,6 +426,10 @@ def launch(
                     },
                 )
             all_cl_contexts.append(cl_builder_context)
+
+        # only the first participant is the sequencer
+        if sequencer_enabled:
+            sequencer_enabled = False
 
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts

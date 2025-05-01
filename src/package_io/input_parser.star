@@ -11,6 +11,7 @@ DEFAULT_EL_IMAGES = {
     "op-erigon": "testinprod/op-erigon:latest",
     "op-nethermind": "nethermind/nethermind:latest",
     "op-besu": "ghcr.io/optimism-java/op-besu:latest",
+    "op-rbuilder": "ghcr.io/flashbots/op-rbuilder:latest",
 }
 
 DEFAULT_CL_IMAGES = {
@@ -53,6 +54,15 @@ DEFAULT_DA_SERVER_PARAMS = {
     ],
 }
 
+DEFAULT_TX_FUZZER_IMAGES = {
+    "tx-fuzzer": "ethpandaops/tx-fuzz:master",
+}
+
+DEFAULT_FAUCET_IMAGES = {
+    # TODO: update to use a versioned image when available
+    # For now, we'll need users to pass the image explicitly
+    "op-faucet": "",
+}
 
 DEFAULT_ADDITIONAL_SERVICES = []
 
@@ -115,6 +125,10 @@ def input_parser(plan, input_args):
                 max_mem=results["observability"]["grafana_params"]["max_mem"],
             ),
         ),
+        faucet=struct(
+            enabled=results["faucet"]["enabled"],
+            image=results["faucet"]["image"],
+        ),
         interop=struct(
             enabled=results["interop"]["enabled"],
             supervisor_params=struct(
@@ -165,6 +179,7 @@ def input_parser(plan, input_args):
                         cl_max_mem=participant["cl_max_mem"],
                         el_builder_type=participant["el_builder_type"],
                         el_builder_image=participant["el_builder_image"],
+                        el_builder_key=participant["el_builder_key"],
                         el_builder_log_level=participant["el_builder_log_level"],
                         el_builder_extra_env_vars=participant[
                             "el_builder_extra_env_vars"
@@ -211,6 +226,11 @@ def input_parser(plan, input_args):
                     interop_time_offset=result["network_params"]["interop_time_offset"],
                     fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
                 ),
+                proxyd_params=struct(
+                    image=result["proxyd_params"]["image"],
+                    tag=result["proxyd_params"]["tag"],
+                    extra_params=result["proxyd_params"]["extra_params"],
+                ),
                 batcher_params=struct(
                     image=result["batcher_params"]["image"],
                     max_channel_duration=result["batcher_params"]["max_channel_duration"],
@@ -248,6 +268,12 @@ def input_parser(plan, input_args):
                     cmd=result["da_server_params"]["cmd"],
                 ),
                 additional_services=result["additional_services"],
+                tx_fuzzer_params=struct(
+                    image=result["tx_fuzzer_params"]["image"],
+                    tx_fuzzer_extra_args=result["tx_fuzzer_params"][
+                        "tx_fuzzer_extra_args"
+                    ],
+                ),
             )
             for result in results["chains"]
         ],
@@ -277,6 +303,9 @@ def parse_network_params(plan, input_args):
 
     results["observability"] = default_observability_params()
     results["observability"].update(input_args.get("observability", {}))
+
+    results["faucet"] = default_faucet_params()
+    results["faucet"].update(input_args.get("faucet", {}))
 
     results["observability"]["prometheus_params"] = default_prometheus_params()
     results["observability"]["prometheus_params"].update(
@@ -322,6 +351,9 @@ def parse_network_params(plan, input_args):
     for chain in input_args.get("chains", default_chains()):
         network_params = default_network_params()
         network_params.update(chain.get("network_params", {}))
+
+        proxyd_params = default_proxyd_params()
+        proxyd_params.update(chain.get("proxyd_params", {}))
 
         batcher_params = default_batcher_params()
         batcher_params.update(chain.get("batcher_params", {}))
@@ -405,9 +437,13 @@ def parse_network_params(plan, input_args):
                 )
                 participants.append(participant_copy)
 
+        tx_fuzzer_params = default_tx_fuzzer_params()
+        tx_fuzzer_params.update(chain.get("tx_fuzzer_params", {}))
+
         result = {
             "participants": participants,
             "network_params": network_params,
+            "proxyd_params": proxyd_params,
             "batcher_params": batcher_params,
             "challenger_params": challenger_params,
             "proposer_params": proposer_params,
@@ -416,6 +452,7 @@ def parse_network_params(plan, input_args):
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
+            "tx_fuzzer_params": tx_fuzzer_params,
         }
         chains.append(result)
 
@@ -447,6 +484,13 @@ def default_observability_params():
     return {
         "enabled": True,
         "enable_k8s_features": False,
+    }
+
+
+def default_faucet_params():
+    return {
+        "enabled": False,
+        "image": DEFAULT_FAUCET_IMAGES["op-faucet"],
     }
 
 
@@ -533,12 +577,14 @@ def default_chains():
         {
             "participants": [default_participant()],
             "network_params": default_network_params(),
+            "proxyd_params": default_proxyd_params(),
             "batcher_params": default_batcher_params(),
             "proposer_params": default_proposer_params(),
             "challenger_params": default_challenger_params(),
             "mev_params": default_mev_params(),
             "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
+            "tx_fuzzer_params": default_tx_fuzzer_params(),
         }
     ]
 
@@ -562,6 +608,14 @@ def default_batcher_params():
     return {
         "image": DEFAULT_BATCHER_IMAGES["op-batcher"],
         "max_channel_duration": 1,
+        "extra_params": [],
+    }
+
+
+def default_proxyd_params():
+    return {
+        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd",
+        "tag": "v4.14.2",
         "extra_params": [],
     }
 
@@ -615,6 +669,7 @@ def default_participant():
         "cl_max_mem": 0,
         "el_builder_type": "op-geth",
         "el_builder_image": "",
+        "el_builder_key": "",
         "el_builder_log_level": "",
         "el_builder_extra_env_vars": {},
         "el_builder_extra_labels": {},
@@ -689,4 +744,11 @@ def default_da_server_params():
         "enabled": False,
         "image": DEFAULT_DA_SERVER_PARAMS["image"],
         "cmd": DEFAULT_DA_SERVER_PARAMS["cmd"],
+    }
+
+
+def default_tx_fuzzer_params():
+    return {
+        "image": "ethpandaops/tx-fuzz:master",
+        "tx_fuzzer_extra_args": [],
     }
