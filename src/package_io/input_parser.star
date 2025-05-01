@@ -2,6 +2,8 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+challenger_input_parser = import_module("/src/challenger/input_parser.star")
+
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
 
@@ -235,20 +237,6 @@ def input_parser(plan, input_args):
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
                 ),
-                challenger_params=struct(
-                    enabled=result["challenger_params"]["enabled"],
-                    image=result["challenger_params"]["image"],
-                    extra_params=result["challenger_params"]["extra_params"],
-                    cannon_prestate_path=result["challenger_params"][
-                        "cannon_prestate_path"
-                    ],
-                    cannon_prestates_url=result["challenger_params"][
-                        "cannon_prestates_url"
-                    ],
-                    cannon_trace_types=result["challenger_params"][
-                        "cannon_trace_types"
-                    ],
-                ),
                 proposer_params=struct(
                     image=result["proposer_params"]["image"],
                     extra_params=result["proposer_params"]["extra_params"],
@@ -275,6 +263,7 @@ def input_parser(plan, input_args):
             )
             for result in results["chains"]
         ],
+        challengers=results["challengers"],
         op_contract_deployer_params=struct(
             image=results["op_contract_deployer_params"]["image"],
             l1_artifacts_locator=results["op_contract_deployer_params"][
@@ -359,9 +348,6 @@ def parse_network_params(plan, input_args):
         proposer_params = default_proposer_params()
         proposer_params.update(chain.get("proposer_params", {}))
 
-        challenger_params = default_challenger_params()
-        challenger_params.update(chain.get("challenger_params", {}))
-
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
         da_server_params = default_da_server_params()
@@ -443,7 +429,6 @@ def parse_network_params(plan, input_args):
             "network_params": network_params,
             "proxyd_params": proxyd_params,
             "batcher_params": batcher_params,
-            "challenger_params": challenger_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
             "da_server_params": da_server_params,
@@ -455,6 +440,12 @@ def parse_network_params(plan, input_args):
         chains.append(result)
 
     results["chains"] = chains
+
+    # configure op-challenger
+
+    results["challengers"] = challenger_input_parser.parse(
+        input_args.get("challengers"), chains
+    )
 
     # configure op-deployer
 
@@ -578,7 +569,6 @@ def default_chains():
             "proxyd_params": default_proxyd_params(),
             "batcher_params": default_batcher_params(),
             "proposer_params": default_proposer_params(),
-            "challenger_params": default_challenger_params(),
             "mev_params": default_mev_params(),
             "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
@@ -614,17 +604,6 @@ def default_proxyd_params():
         "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd",
         "tag": "v4.14.2",
         "extra_params": [],
-    }
-
-
-def default_challenger_params():
-    return {
-        "enabled": True,
-        "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
-        "extra_params": [],
-        "cannon_prestate_path": "",
-        "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
-        "cannon_trace_types": ["cannon", "permissioned"],
     }
 
 
