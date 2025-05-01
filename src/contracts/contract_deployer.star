@@ -224,7 +224,7 @@ def deploy_contracts(
                         "faultGameClockExtension": 10800,
                         "faultGameMaxClockDuration": 302400,
                         "dangerouslyAllowCustomDisputeParameters": True,
-                        "vmType": "CANNON1",
+                        "vmType": "CANNON2",
                         "useCustomOracle": False,
                         "oracleMinProposalSize": 0,
                         "oracleChallengePeriodSeconds": 0,

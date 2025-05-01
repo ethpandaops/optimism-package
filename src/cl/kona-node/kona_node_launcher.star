@@ -44,7 +44,6 @@ BEACON_HTTP_PORT_NUM = 8547
 
 METRICS_PATH = "/"
 
-
 def get_used_ports(discovery_port):
     used_ports = {
         constants.TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
