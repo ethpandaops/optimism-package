@@ -348,9 +348,6 @@ def parse_network_params(plan, input_args):
         proposer_params = default_proposer_params()
         proposer_params.update(chain.get("proposer_params", {}))
 
-        challenger_params = default_challenger_params()
-        challenger_params.update(chain.get("challenger_params", {}))
-
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
         da_server_params = default_da_server_params()
@@ -432,7 +429,6 @@ def parse_network_params(plan, input_args):
             "network_params": network_params,
             "proxyd_params": proxyd_params,
             "batcher_params": batcher_params,
-            "challenger_params": challenger_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
             "da_server_params": da_server_params,
@@ -573,7 +569,6 @@ def default_chains():
             "proxyd_params": default_proxyd_params(),
             "batcher_params": default_batcher_params(),
             "proposer_params": default_proposer_params(),
-            "challenger_params": default_challenger_params(),
             "mev_params": default_mev_params(),
             "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
@@ -609,17 +604,6 @@ def default_proxyd_params():
         "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd",
         "tag": "v4.14.2",
         "extra_params": [],
-    }
-
-
-def default_challenger_params():
-    return {
-        "enabled": True,
-        "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
-        "extra_params": [],
-        "cannon_prestate_path": "",
-        "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
-        "cannon_trace_types": ["cannon", "permissioned"],
     }
 
 
