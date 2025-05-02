@@ -75,7 +75,7 @@ def get_challenger_config(
         plan,
         deployment_output,
         "state",
-        '.opChainDeployments[] | select(.id=="{0}") | .disputeGameFactoryProxyAddress'.format(
+        '.opChainDeployments[] | select(.id=="{0}") | .DisputeGameFactoryProxy'.format(
             util.to_hex_chain_id(first_network_id)
         ),
     )

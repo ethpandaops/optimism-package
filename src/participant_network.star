@@ -105,7 +105,7 @@ def launch_participant_network(
         plan,
         deployment_output,
         "state",
-        ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
+        ".opChainDeployments[{0}].DisputeGameFactoryProxy".format(l2_num),
     )
     proposer_key = util.read_network_config_value(
         plan,
