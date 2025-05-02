@@ -18,6 +18,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "op-node": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+    "kona-node": "ghcr.io/op-rs/kona/kona-node:latest",
     "hildr": "ghcr.io/optimism-java/hildr:latest",
 }
 
