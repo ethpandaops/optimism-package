@@ -1,14 +1,12 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 l2_launcher = import_module("./src/l2.star")
-op_supervisor_launcher = import_module(
-    "./src/interop/op-supervisor/op_supervisor_launcher.star"
-)
-op_challenger_launcher = import_module(
-    "./src/challenger/op-challenger/op_challenger_launcher.star"
-)
+op_supervisor_launcher = import_module("./src/interop/op-supervisor/launcher.star")
+op_challenger_launcher = import_module("./src/challenger/op-challenger/launcher.star")
 
+faucet = import_module("./src/faucet/op-faucet/op_faucet_launcher.star")
 observability = import_module("./src/observability/observability.star")
+util = import_module("./src/util.star")
 
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
@@ -123,8 +121,9 @@ def run(plan, args={}):
             )
         )
 
+    supervisor = None
     if interop_params.enabled:
-        op_supervisor_launcher.launch(
+        supervisor = op_supervisor_launcher.launch(
             plan,
             l1_config_env_vars,
             optimism_args.chains,
@@ -134,29 +133,26 @@ def run(plan, args={}):
             observability_helper,
         )
 
-    # challenger must launch after supervisor because it depends on it for interop
-    for l2_num, l2 in enumerate(l2s):
-        chain = optimism_args.chains[l2_num]
-        op_challenger_image = (
-            chain.challenger_params.image
-            if chain.challenger_params.image != ""
-            else input_parser.DEFAULT_CHALLENGER_IMAGES["op-challenger"]
+    for challenger_params in optimism_args.challengers:
+        op_challenger_launcher.launch(
+            plan=plan,
+            params=challenger_params,
+            l2s=l2s,
+            supervisor=supervisor,
+            l1_config_env_vars=l1_config_env_vars,
+            deployment_output=deployment_output,
+            observability_helper=observability_helper,
         )
-        if chain.challenger_params.enabled:
-            op_challenger_launcher.launch(
-                plan,
-                l2_num,
-                "op-challenger-{0}".format(chain.network_params.name),
-                chain.challenger_params.image,
-                l2.participants[0].el_context,
-                l2.participants[0].cl_context,
-                l1_config_env_vars,
-                deployment_output,
-                chain.network_params,
-                chain.challenger_params,
-                interop_params,
-                observability_helper,
-            )
+
+    if optimism_args.faucet.enabled:
+        _install_faucet(
+            plan=plan,
+            faucet_params=optimism_args.faucet,
+            l1_config_env_vars=l1_config_env_vars,
+            l1_priv_key=l1_priv_key,
+            deployment_output=deployment_output,
+            l2s=l2s,
+        )
 
     observability.launch(
         plan, observability_helper, global_node_selectors, observability_params
@@ -173,3 +169,50 @@ def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
     env_vars["L1_CHAIN_ID"] = str(l1_network_id)
     env_vars["L1_BLOCK_TIME"] = str(l1_network_params.seconds_per_slot)
     return env_vars
+
+
+def _install_faucet(
+    plan,
+    faucet_params,
+    l1_config_env_vars,
+    l1_priv_key,
+    deployment_output,
+    l2s,
+):
+    faucets = [
+        faucet.faucet_data(
+            name="l1",
+            chain_id=l1_config_env_vars["L1_CHAIN_ID"],
+            el_rpc=l1_config_env_vars["L1_RPC_URL"],
+            private_key=l1_priv_key,
+        ),
+    ]
+    for l2 in l2s:
+        chain_id = l2.network_id
+
+        private_key = util.read_network_config_value(
+            plan,
+            deployment_output,
+            "wallets",
+            '."{0}" | .["l2FaucetPrivateKey"]'.format(chain_id),
+        )
+        faucets.append(
+            faucet.faucet_data(
+                name=l2.name,
+                chain_id=chain_id,
+                el_rpc=l2.participants[0].el_context.rpc_http_url,
+                private_key=private_key,
+            )
+        )
+
+    faucet_image = (
+        faucet_params.image
+        if faucet_params.image != ""
+        else input_parser.DEFAULT_FAUCET_IMAGES["op-faucet"]
+    )
+    faucet.launch(
+        plan,
+        "op-faucet",
+        faucet_image,
+        faucets,
+    )

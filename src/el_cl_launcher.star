@@ -18,6 +18,7 @@ op_nethermind = import_module("./el/op-nethermind/op_nethermind_launcher.star")
 op_besu = import_module("./el/op-besu/op_besu_launcher.star")
 # CL
 op_node = import_module("./cl/op-node/op_node_launcher.star")
+kona_node = import_module("./cl/kona-node/kona_node_launcher.star")
 hildr = import_module("./cl/hildr/hildr_launcher.star")
 
 # MEV
@@ -132,6 +133,12 @@ def launch(
             ),
             "launch_method": op_node.launch,
         },
+        "kona-node": {
+            "launcher": kona_node.new_kona_node_launcher(
+                deployment_output, jwt_file, network_params
+            ),
+            "launch_method": kona_node.launch,
+        },
         "hildr": {
             "launcher": hildr.new_hildr_launcher(
                 deployment_output, jwt_file, network_params
@@ -244,20 +251,28 @@ def launch(
             index + 1, len(str(len(participants)))
         )
 
-        el_service_name = "op-el-{0}-{1}-{2}-{3}".format(
-            index_str, el_type, cl_type, l2_services_suffix
+        el_service_name = "op-el-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id, index_str, el_type, cl_type, l2_services_suffix
         )
-        cl_service_name = "op-cl-{0}-{1}-{2}-{3}".format(
-            index_str, cl_type, el_type, l2_services_suffix
+        cl_service_name = "op-cl-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id, index_str, cl_type, el_type, l2_services_suffix
         )
-        el_builder_service_name = "op-el-builder-{0}-{1}-{2}-{3}".format(
-            index_str, el_builder_type, cl_builder_type, l2_services_suffix
+        el_builder_service_name = "op-el-builder-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id,
+            index_str,
+            el_builder_type,
+            cl_builder_type,
+            l2_services_suffix,
         )
-        cl_builder_service_name = "op-cl-builder-{0}-{1}-{2}-{3}".format(
-            index_str, cl_builder_type, el_builder_type, l2_services_suffix
+        cl_builder_service_name = "op-cl-builder-{0}-{1}-{2}-{3}-{4}".format(
+            network_params.network_id,
+            index_str,
+            cl_builder_type,
+            el_builder_type,
+            l2_services_suffix,
         )
-        sidecar_service_name = "op-rollup-boost-{0}-{1}".format(
-            index_str, l2_services_suffix
+        sidecar_service_name = "op-rollup-boost-{0}-{1}-{2}".format(
+            network_params.network_id, index_str, l2_services_suffix
         )
 
         el_context = el_launch_method(

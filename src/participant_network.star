@@ -2,9 +2,6 @@ el_cl_client_launcher = import_module("./el_cl_launcher.star")
 participant_module = import_module("./participant.star")
 input_parser = import_module("./package_io/input_parser.star")
 op_batcher_launcher = import_module("./batcher/op-batcher/op_batcher_launcher.star")
-op_challenger_launcher = import_module(
-    "./challenger/op-challenger/op_challenger_launcher.star"
-)
 op_proposer_launcher = import_module("./proposer/op-proposer/op_proposer_launcher.star")
 proxyd_launcher = import_module("./proxyd/proxyd_launcher.star")
 util = import_module("./util.star")
@@ -17,7 +14,6 @@ def launch_participant_network(
     network_params,
     proxyd_params,
     batcher_params,
-    challenger_params,
     proposer_params,
     mev_params,
     deployment_output,
@@ -109,7 +105,7 @@ def launch_participant_network(
         plan,
         deployment_output,
         "state",
-        ".opChainDeployments[{0}].disputeGameFactoryProxyAddress".format(l2_num),
+        ".opChainDeployments[{0}].DisputeGameFactoryProxy".format(l2_num),
     )
     proposer_key = util.read_network_config_value(
         plan,
@@ -136,5 +132,7 @@ def launch_participant_network(
     )
 
     return struct(
+        name=network_params.name,
+        network_id=network_params.network_id,
         participants=all_participants,
     )

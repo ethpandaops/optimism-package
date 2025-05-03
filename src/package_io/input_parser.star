@@ -2,6 +2,8 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+challenger_input_parser = import_module("/src/challenger/input_parser.star")
+
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
 
@@ -16,6 +18,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "op-node": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+    "kona-node": "ghcr.io/op-rs/kona/kona-node:latest",
     "hildr": "ghcr.io/optimism-java/hildr:latest",
 }
 
@@ -54,6 +57,15 @@ DEFAULT_DA_SERVER_PARAMS = {
     ],
 }
 
+DEFAULT_TX_FUZZER_IMAGES = {
+    "tx-fuzzer": "ethpandaops/tx-fuzz:master",
+}
+
+DEFAULT_FAUCET_IMAGES = {
+    # TODO: update to use a versioned image when available
+    # For now, we'll need users to pass the image explicitly
+    "op-faucet": "",
+}
 
 DEFAULT_ADDITIONAL_SERVICES = []
 
@@ -115,6 +127,10 @@ def input_parser(plan, input_args):
                 min_mem=results["observability"]["grafana_params"]["min_mem"],
                 max_mem=results["observability"]["grafana_params"]["max_mem"],
             ),
+        ),
+        faucet=struct(
+            enabled=results["faucet"]["enabled"],
+            image=results["faucet"]["image"],
         ),
         interop=struct(
             enabled=results["interop"]["enabled"],
@@ -222,20 +238,6 @@ def input_parser(plan, input_args):
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
                 ),
-                challenger_params=struct(
-                    enabled=result["challenger_params"]["enabled"],
-                    image=result["challenger_params"]["image"],
-                    extra_params=result["challenger_params"]["extra_params"],
-                    cannon_prestate_path=result["challenger_params"][
-                        "cannon_prestate_path"
-                    ],
-                    cannon_prestates_url=result["challenger_params"][
-                        "cannon_prestates_url"
-                    ],
-                    cannon_trace_types=result["challenger_params"][
-                        "cannon_trace_types"
-                    ],
-                ),
                 proposer_params=struct(
                     image=result["proposer_params"]["image"],
                     extra_params=result["proposer_params"]["extra_params"],
@@ -253,9 +255,16 @@ def input_parser(plan, input_args):
                     cmd=result["da_server_params"]["cmd"],
                 ),
                 additional_services=result["additional_services"],
+                tx_fuzzer_params=struct(
+                    image=result["tx_fuzzer_params"]["image"],
+                    tx_fuzzer_extra_args=result["tx_fuzzer_params"][
+                        "tx_fuzzer_extra_args"
+                    ],
+                ),
             )
             for result in results["chains"]
         ],
+        challengers=results["challengers"],
         op_contract_deployer_params=struct(
             image=results["op_contract_deployer_params"]["image"],
             l1_artifacts_locator=results["op_contract_deployer_params"][
@@ -282,6 +291,9 @@ def parse_network_params(plan, input_args):
 
     results["observability"] = default_observability_params()
     results["observability"].update(input_args.get("observability", {}))
+
+    results["faucet"] = default_faucet_params()
+    results["faucet"].update(input_args.get("faucet", {}))
 
     results["observability"]["prometheus_params"] = default_prometheus_params()
     results["observability"]["prometheus_params"].update(
@@ -336,9 +348,6 @@ def parse_network_params(plan, input_args):
 
         proposer_params = default_proposer_params()
         proposer_params.update(chain.get("proposer_params", {}))
-
-        challenger_params = default_challenger_params()
-        challenger_params.update(chain.get("challenger_params", {}))
 
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
@@ -413,22 +422,31 @@ def parse_network_params(plan, input_args):
                 )
                 participants.append(participant_copy)
 
+        tx_fuzzer_params = default_tx_fuzzer_params()
+        tx_fuzzer_params.update(chain.get("tx_fuzzer_params", {}))
+
         result = {
             "participants": participants,
             "network_params": network_params,
             "proxyd_params": proxyd_params,
             "batcher_params": batcher_params,
-            "challenger_params": challenger_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
             "da_server_params": da_server_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
+            "tx_fuzzer_params": tx_fuzzer_params,
         }
         chains.append(result)
 
     results["chains"] = chains
+
+    # configure op-challenger
+
+    results["challengers"] = challenger_input_parser.parse(
+        input_args.get("challengers"), chains
+    )
 
     # configure op-deployer
 
@@ -456,6 +474,13 @@ def default_observability_params():
     return {
         "enabled": True,
         "enable_k8s_features": False,
+    }
+
+
+def default_faucet_params():
+    return {
+        "enabled": False,
+        "image": DEFAULT_FAUCET_IMAGES["op-faucet"],
     }
 
 
@@ -545,10 +570,10 @@ def default_chains():
             "proxyd_params": default_proxyd_params(),
             "batcher_params": default_batcher_params(),
             "proposer_params": default_proposer_params(),
-            "challenger_params": default_challenger_params(),
             "mev_params": default_mev_params(),
             "da_server_params": default_da_server_params(),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
+            "tx_fuzzer_params": default_tx_fuzzer_params(),
         }
     ]
 
@@ -580,17 +605,6 @@ def default_proxyd_params():
         "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd",
         "tag": "v4.14.2",
         "extra_params": [],
-    }
-
-
-def default_challenger_params():
-    return {
-        "enabled": True,
-        "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
-        "extra_params": [],
-        "cannon_prestate_path": "",
-        "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
-        "cannon_trace_types": ["cannon", "permissioned"],
     }
 
 
@@ -668,9 +682,9 @@ def default_op_contract_deployer_global_deploy_overrides():
 
 def default_op_contract_deployer_params():
     return {
-        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.12",
-        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz",
-        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz",
+        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2",
+        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
+        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
         "global_deploy_overrides": default_op_contract_deployer_global_deploy_overrides(),
     }
 
@@ -706,4 +720,11 @@ def default_da_server_params():
         "enabled": False,
         "image": DEFAULT_DA_SERVER_PARAMS["image"],
         "cmd": DEFAULT_DA_SERVER_PARAMS["cmd"],
+    }
+
+
+def default_tx_fuzzer_params():
+    return {
+        "image": "ethpandaops/tx-fuzz:master",
+        "tx_fuzzer_extra_args": [],
     }
