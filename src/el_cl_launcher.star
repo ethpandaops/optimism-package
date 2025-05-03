@@ -47,6 +47,7 @@ def launch(
     observability_helper,
     interop_params,
     da_server_context,
+    custom_launchers,
 ):
     el_launchers = {
         "op-geth": {
@@ -96,6 +97,17 @@ def launch(
         },
     }
 
+    if custom_launchers and "el_launcher" in custom_launchers:
+        el_launchers["custom"] = {
+            "launcher": custom_launchers["el_launcher"]["launcher"](
+                deployment_output,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": custom_launchers["el_launcher"]["launch_method"],
+        }
+
     el_builder_launchers = {
         "op-geth": {
             "launcher": op_geth_builder.new_op_geth_builder_launcher(
@@ -126,6 +138,17 @@ def launch(
         },
     }
 
+    if custom_launchers and "el_builder_launcher" in custom_launchers:
+        el_builder_launchers["custom"] = {
+            "launcher": custom_launchers["el_builder_launcher"]["launcher"](
+                deployment_output,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": custom_launchers["el_builder_launcher"]["launch_method"],
+        }
+
     cl_launchers = {
         "op-node": {
             "launcher": op_node.new_op_node_launcher(
@@ -147,6 +170,14 @@ def launch(
         },
     }
 
+    if custom_launchers and "cl_launcher" in custom_launchers:
+        cl_launchers["custom"] = {
+            "launcher": custom_launchers["cl_launcher"]["launcher"](
+                deployment_output, jwt_file, network_params
+            ),
+            "launch_method": custom_launchers["cl_launcher"]["launch_method"],
+        }
+
     cl_builder_launchers = {
         "op-node": {
             "launcher": op_node_builder.new_op_node_builder_launcher(
@@ -155,6 +186,14 @@ def launch(
             "launch_method": op_node_builder.launch,
         },
     }
+
+    if custom_launchers and "cl_builder_launcher" in custom_launchers:
+        cl_builder_launchers["custom"] = {
+            "launcher": custom_launchers["cl_builder_launcher"]["launcher"](
+                deployment_output, jwt_file, network_params
+            ),
+            "launch_method": custom_launchers["cl_builder_launcher"]["launch_method"],
+        }
 
     sidecar_launchers = {
         "rollup-boost": {
@@ -167,6 +206,17 @@ def launch(
             "launch_method": rollup_boost.launch,
         }
     }
+
+    if custom_launchers and "sidecar_launcher" in custom_launchers:
+        sidecar_launchers["custom"] = {
+            "launcher": custom_launchers["sidecar_launcher"]["launcher"](
+                deployment_output,
+                jwt_file,
+                network_params.network,
+                network_params.network_id,
+            ),
+            "launch_method": custom_launchers["sidecar_launcher"]["launch_method"],
+        }
 
     all_cl_contexts = []
     all_el_contexts = []

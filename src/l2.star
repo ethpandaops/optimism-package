@@ -23,6 +23,7 @@ def launch_l2(
     persistent,
     observability_helper,
     interop_params,
+    custom_launchers,
 ):
     network_params = l2_args.network_params
     proxyd_params = l2_args.proxyd_params
@@ -68,6 +69,7 @@ def launch_l2(
         observability_helper,
         interop_params,
         da_server_context,
+        custom_launchers,
     )
 
     all_el_contexts = []
