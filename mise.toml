@@ -7,4 +7,4 @@ just = "1.40.0"
 "yq" = "v4.44.3"
 
 # lint
-"pipx:ethereum-optimism/kurtosis-lint" = "v0.0.5"
+"pipx:ethereum-optimism/kurtosis-lint" = "v0.0.7"

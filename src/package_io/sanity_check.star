@@ -151,7 +151,7 @@ SUBCATEGORY_PARAMS = {
         "interop_time_offset",
         "fund_dev_accounts",
     ],
-    "proxyd_params": ["image", "tag", "extra_params"],
+    "proxyd_params": ["image", "extra_params"],
     "batcher_params": ["image", "extra_params"],
     "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
     "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
@@ -170,10 +170,13 @@ OP_CONTRACT_DEPLOYER_PARAMS = [
     "image",
     "l1_artifacts_locator",
     "l2_artifacts_locator",
-    "global_deploy_overrides",
+    "overrides",
 ]
 
-OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES = ["faultGameAbsolutePrestate"]
+OP_CONTRACT_DEPLOYER_OVERRIDES = [
+    "faultGameAbsolutePrestate",
+    "vmType",
+]
 
 ADDITIONAL_SERVICES_PARAMS = ["blockscout", "rollup-boost", "da_server", "tx_fuzzer"]
 
@@ -344,8 +347,8 @@ def sanity_check(plan, optimism_config):
         validate_params(
             plan,
             optimism_config["op_contract_deployer_params"],
-            "global_deploy_overrides",
-            OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES,
+            "overrides",
+            OP_CONTRACT_DEPLOYER_OVERRIDES,
         )
 
     plan.print("Sanity check for OP package passed")

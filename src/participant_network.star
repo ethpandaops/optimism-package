@@ -5,6 +5,7 @@ op_batcher_launcher = import_module("./batcher/op-batcher/op_batcher_launcher.st
 op_proposer_launcher = import_module("./proposer/op-proposer/op_proposer_launcher.star")
 proxyd_launcher = import_module("./proxyd/proxyd_launcher.star")
 util = import_module("./util.star")
+_registry = import_module("./package_io/registry.star")
 
 
 def launch_participant_network(
@@ -28,8 +29,10 @@ def launch_participant_network(
     observability_helper,
     interop_params,
     da_server_context,
+    registry=_registry.Registry(),
 ):
     num_participants = len(participants)
+
     # First EL and sequencer CL
     all_el_contexts, all_cl_contexts = el_cl_client_launcher.launch(
         plan,
@@ -49,6 +52,7 @@ def launch_participant_network(
         observability_helper,
         interop_params,
         da_server_context,
+        registry=registry,
     )
 
     all_participants = []
@@ -82,15 +86,10 @@ def launch_participant_network(
         "batcher-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    op_batcher_image = (
-        batcher_params.image
-        if batcher_params.image != ""
-        else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
-    )
     op_batcher_launcher.launch(
         plan,
         "op-batcher-{0}".format(l2_services_suffix),
-        op_batcher_image,
+        batcher_params.image or registry.get(_registry.OP_BATCHER),
         all_el_contexts[0],
         all_cl_contexts[0],
         l1_config_env_vars,
@@ -113,15 +112,10 @@ def launch_participant_network(
         "proposer-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    op_proposer_image = (
-        proposer_params.image
-        if proposer_params.image != ""
-        else input_parser.DEFAULT_PROPOSER_IMAGES["op-proposer"]
-    )
     op_proposer_launcher.launch(
         plan,
         "op-proposer-{0}".format(l2_services_suffix),
-        op_proposer_image,
+        proposer_params.image or registry.get(_registry.OP_PROPOSER),
         all_cl_contexts[0],
         l1_config_env_vars,
         proposer_key,
