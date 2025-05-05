@@ -166,11 +166,13 @@ def deploy_contracts(
         "l1ContractsLocator": l1_artifacts_locator,
         "l2ContractsLocator": l2_artifacts_locator,
         "superchainRoles": {
-            "guardian": read_chain_cmd("l1ProxyAdmin", l2_chain_ids_list[0]),
+            "superchainGuardian": read_chain_cmd("l1ProxyAdmin", l2_chain_ids_list[0]),
             "protocolVersionsOwner": read_chain_cmd(
                 "l1ProxyAdmin", l2_chain_ids_list[0]
             ),
-            "proxyAdminOwner": read_chain_cmd("l1ProxyAdmin", l2_chain_ids_list[0]),
+            "superchainProxyAdminOwner": read_chain_cmd(
+                "l1ProxyAdmin", l2_chain_ids_list[0]
+            ),
         },
         "chains": [],
     }

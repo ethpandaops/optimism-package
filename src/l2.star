@@ -81,7 +81,7 @@ def launch_l2(
         plan,
         deployment_output,
         "state",
-        '.opChainDeployments[] | select(.id=="{0}") | .l1StandardBridgeProxyAddress'.format(
+        '.opChainDeployments[] | select(.id=="{0}") | .L1StandardBridgeProxy'.format(
             network_id_as_hex
         ),
     )
