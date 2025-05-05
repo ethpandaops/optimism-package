@@ -1,3 +1,5 @@
+_file = import_module("/src/util/file.star")
+
 utils = import_module("../../util.star")
 
 ethereum_package_shared_utils = import_module(
@@ -58,8 +60,12 @@ def launch(
         dependency_set = create_dependency_set(chains)
         dependency_set_json = json.encode(dependency_set)
 
-    dependency_set_artifact = utils.write_to_file(
-        plan, dependency_set_json, DATA_DIR, DEPENDENCY_SET_FILE_NAME
+    dependency_set_artifact = _file.from_string(
+        plan=plan,
+        path="dependency_set.json",
+        contents=dependency_set_json,
+        artifact_name="op-supervisor dependency set",
+        description="Creating a dependency set JSON file for op-supervisor",
     )
 
     config = get_supervisor_config(
