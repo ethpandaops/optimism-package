@@ -25,14 +25,13 @@ CONFIG_DIRPATH_ON_SERVICE = "/etc/proxyd"
 
 
 def get_used_ports():
-    used_ports = {
+    return {
         constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             HTTP_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
-    return used_ports
 
 
 def launch(
@@ -62,9 +61,10 @@ def launch(
     service = plan.add_service("proxyd-{0}".format(network_params.network_id), config)
     service_url = util.make_service_http_url(service)
 
-    observability.register_op_service_metrics_job(
-        observability_helper, service, network_params.network
-    )
+    if observability_helper.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper, service, network_params.network
+        )
 
     return service_url
 
@@ -118,7 +118,6 @@ def get_proxyd_config(
     ]
 
     # apply customizations
-
     if observability_helper.enabled:
         observability.expose_metrics_port(ports, port_num=METRICS_PORT_NUM)
 
