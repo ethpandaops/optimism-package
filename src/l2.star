@@ -27,7 +27,6 @@ def launch_l2(
     network_params = l2_args.network_params
     proxyd_params = l2_args.proxyd_params
     batcher_params = l2_args.batcher_params
-    challenger_params = l2_args.challenger_params
     proposer_params = l2_args.proposer_params
     mev_params = l2_args.mev_params
     tx_fuzzer_params = l2_args.tx_fuzzer_params
@@ -55,7 +54,6 @@ def launch_l2(
         network_params,
         proxyd_params,
         batcher_params,
-        challenger_params,
         proposer_params,
         mev_params,
         deployment_output,
@@ -83,7 +81,7 @@ def launch_l2(
         plan,
         deployment_output,
         "state",
-        '.opChainDeployments[] | select(.id=="{0}") | .l1StandardBridgeProxyAddress'.format(
+        '.opChainDeployments[] | select(.id=="{0}") | .L1StandardBridgeProxy'.format(
             network_id_as_hex
         ),
     )

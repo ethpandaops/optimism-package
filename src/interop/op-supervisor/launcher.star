@@ -81,7 +81,7 @@ def launch(
             service,
         )
 
-    return service_url
+    return struct(service=service)
 
 
 def get_supervisor_config(
