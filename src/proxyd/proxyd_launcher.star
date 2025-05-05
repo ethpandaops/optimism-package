@@ -125,7 +125,7 @@ def get_proxyd_config(
     cmd += proxyd_params.extra_params
 
     return ServiceConfig(
-        image="{0}:{1}".format(proxyd_params.image, proxyd_params.tag),
+        image=proxyd_params.image,
         ports=ports,
         cmd=cmd,
         files={

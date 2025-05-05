@@ -7,8 +7,17 @@ ethereum_package_constants = import_module(
 constants = import_module("/src/package_io/constants.star")
 util = import_module("/src/util.star")
 
+_registry = import_module("/src/package_io/registry.star")
+
 
 def test_launch_with_defaults(plan):
+    tx_fuzzer_image = "tx-fuzz:latest"
+
+    reg = _registry.Registry(
+        {
+            _registry.TX_FUZZER: tx_fuzzer_image,
+        }
+    )
     parsed_input_args = input_parser.input_parser(
         plan,
         {
@@ -28,9 +37,8 @@ def test_launch_with_defaults(plan):
                 }
             ]
         },
+        registry=reg,
     )
-
-    fuzzer_image = input_parser.DEFAULT_TX_FUZZER_IMAGES["tx-fuzzer"]
 
     chains = parsed_input_args.chains
     chain = chains[0]
@@ -47,7 +55,7 @@ def test_launch_with_defaults(plan):
 
     fuzzer_service_config = kurtosistest.get_service_config(service_name=service_name)
     expect.ne(fuzzer_service_config, None)
-    expect.eq(fuzzer_service_config.image, fuzzer_image)
+    expect.eq(fuzzer_service_config.image, tx_fuzzer_image)
     expect.eq(fuzzer_service_config.env_vars, {})
     expect.eq(
         fuzzer_service_config.entrypoint,
