@@ -28,6 +28,8 @@ op_reth_builder = import_module("./builder/op-reth/op_reth_launcher.star")
 op_rbuilder_builder = import_module("./builder/op-rbuilder/op_rbuilder_launcher.star")
 op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
 
+_registry = import_module("./package_io/registry.star")
+
 
 def launch(
     plan,
@@ -47,6 +49,7 @@ def launch(
     observability_helper,
     interop_params,
     da_server_context,
+    registry=_registry.Registry(),
 ):
     el_launchers = {
         "op-geth": {
@@ -346,17 +349,12 @@ def launch(
                         network_params.network,
                         metrics_info,
                     )
-            rollup_boost_image = (
-                mev_params.rollup_boost_image
-                if mev_params.rollup_boost_image != ""
-                else input_parser.DEFAULT_SIDECAR_IMAGES["rollup-boost"]
-            )
 
             sidecar_context = sidecar_launch_method(
                 plan,
                 sidecar_launcher,
                 sidecar_service_name,
-                rollup_boost_image,
+                mev_params.rollup_boost_image or registry.get(_registry.ROLLUP_BOOST),
                 all_el_contexts,
                 el_context,
                 el_builder_context,
