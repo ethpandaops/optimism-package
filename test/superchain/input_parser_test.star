@@ -46,7 +46,7 @@ def test_superchain_input_parser_disabled(plan):
 def test_superchain_input_parser_extra_attributes(plan):
     expect.fails(
         lambda: input_parser.parse(
-            {"superchain-0": {"name": "x", "extra": None}},
+            {"superchain-0": {"extra": None, "name": "x"}},
             _chains,
         ),
         "Invalid attributes in superchain configuration for superchain-0: extra,name",
