@@ -1,4 +1,4 @@
-input_parser = import_module("/src/interop/input_parser.star")
+input_parser = import_module("/src/superchain/input_parser.star")
 
 _chains = [
     {"network_params": {"network_id": 1000}},
