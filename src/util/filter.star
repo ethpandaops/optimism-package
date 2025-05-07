@@ -24,3 +24,11 @@ def remove_keys(p, keys):
         return {k: v for k, v in p.items() if k not in keys}
     else:
         fail("Unsupported type for remove_keys: want dict, got {0}".format(p_type))
+
+
+# Fails with a message if a dictionary contains any keys that are not listed in the keys list
+def assert_keys(p, keys, message="Invalid attributes specified: {}"):
+    extra_keys = remove_keys(p, keys)
+
+    if len(extra_keys) > 0:
+        fail(message.format(",".join(extra_keys)))

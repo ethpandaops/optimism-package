@@ -72,3 +72,26 @@ def test_filter_remove_keys(plan):
         lambda: filter.remove_keys([], []),
         "Unsupported type for remove_keys: want dict, got list",
     )
+
+
+def test_filter_assert_keys(plan):
+    filter.assert_keys({}, [])
+    filter.assert_keys({}, ["key"])
+    filter.assert_keys({"key": "value"}, ["key"])
+    filter.assert_keys({"key": "value"}, ["key", "other"])
+
+    expect.fails(
+        lambda: filter.assert_keys({"key": True, "kee": None}, []),
+        "Invalid attributes specified: key,kee",
+    )
+    expect.fails(
+        lambda: filter.assert_keys({"kee": "value"}, ["key"]),
+        "Invalid attributes specified: kee",
+    )
+
+    expect.fails(
+        lambda: filter.assert_keys(
+            {"key": False}, [], "Invalid attributes in my little object: {}"
+        ),
+        "Invalid attributes in my little object: key",
+    )
