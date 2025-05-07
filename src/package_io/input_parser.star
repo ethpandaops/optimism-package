@@ -415,7 +415,7 @@ def parse_network_params(plan, registry, input_args):
         args=input_args.get("challengers"), chains=chains
     )
 
-    # configure op-sueprvisor
+    # configure op-supervisor
 
     results["supervisors"] = _supervisor_input_parser.parse(
         args=input_args.get("supervisors"),
