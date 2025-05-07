@@ -417,7 +417,7 @@ def parse_network_params(plan, registry, input_args):
 
     # configure op-sueprvisor
 
-    results["supervisors"] = _sueprvisor_input_parser.parse(
+    results["supervisors"] = _supervisor_input_parser.parse(
         args=input_args.get("supervisors"),
         superchains=results["superchains"],
         registry=registry,
