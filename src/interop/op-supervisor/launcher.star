@@ -1,4 +1,5 @@
 _file = import_module("/src/util/file.star")
+util = import_module("../../util.star")
 
 ethereum_package_shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
