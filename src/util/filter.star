@@ -32,3 +32,11 @@ def assert_keys(p, keys, message="Invalid attributes specified: {}"):
 
     if len(extra_keys) > 0:
         fail(message.format(",".join(extra_keys)))
+
+
+# Returns the first element in a list that matches the predicate, or the default value if no element matches.
+def first(p, predicate=lambda v: v, default=None):
+    for item in p:
+        if predicate(item):
+            return item
+    return default
