@@ -2,6 +2,7 @@ ROOT_PARAMS = [
     "observability",
     "challengers",
     "superchains",
+    "supervisors",
     "interop",
     "altda_deploy_config",
     "chains",
