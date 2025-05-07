@@ -14,6 +14,8 @@ ethereum_package_static_files = import_module(
     "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
 )
 
+_registry = import_module("./src/package_io/registry.star")
+
 
 def run(plan, args={}):
     """Deploy Optimism L2s on an Ethereum L1.
@@ -23,6 +25,9 @@ def run(plan, args={}):
     Returns:
         A full deployment of Optimism L2(s)
     """
+    pinned_images = args.get("registry", {})
+    registry = _registry.Registry(pinned_images)
+
     plan.print("Parsing the L1 input args")
     # If no args are provided, use the default values with minimal preset
     ethereum_args = args.get("ethereum_package", {})
@@ -35,7 +40,12 @@ def run(plan, args={}):
         if "network_params" not in ethereum_args:
             ethereum_args.update(input_parser.default_ethereum_package_network_params())
 
-    optimism_args = input_parser.input_parser(plan, args.get("optimism_package", {}))
+    optimism_args = input_parser.input_parser(
+        plan=plan,
+        input_args=args.get("optimism_package", {}),
+        registry=registry,
+    )
+
     global_tolerations = optimism_args.global_tolerations
     global_node_selectors = optimism_args.global_node_selectors
     global_log_level = optimism_args.global_log_level
@@ -103,21 +113,22 @@ def run(plan, args={}):
     for l2_num, chain in enumerate(optimism_args.chains):
         l2s.append(
             l2_launcher.launch_l2(
-                plan,
-                l2_num,
-                chain.network_params.name,
-                chain,
-                jwt_file,
-                deployment_output,
-                l1_config_env_vars,
-                l1_priv_key,
-                l1_rpc_url,
-                global_log_level,
-                global_node_selectors,
-                global_tolerations,
-                persistent,
-                observability_helper,
-                interop_params,
+                plan=plan,
+                l2_num=l2_num,
+                l2_services_suffix=chain.network_params.name,
+                l2_args=chain,
+                jwt_file=jwt_file,
+                deployment_output=deployment_output,
+                l1_config=l1_config_env_vars,
+                l1_priv_key=l1_priv_key,
+                l1_rpc_url=l1_rpc_url,
+                global_log_level=global_log_level,
+                global_node_selectors=global_node_selectors,
+                global_tolerations=global_tolerations,
+                persistent=persistent,
+                observability_helper=observability_helper,
+                interop_params=interop_params,
+                registry=registry,
             )
         )
 
@@ -147,6 +158,7 @@ def run(plan, args={}):
     if optimism_args.faucet.enabled:
         _install_faucet(
             plan=plan,
+            registry=registry,
             faucet_params=optimism_args.faucet,
             l1_config_env_vars=l1_config_env_vars,
             l1_priv_key=l1_priv_key,
@@ -173,6 +185,7 @@ def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
 
 def _install_faucet(
     plan,
+    registry,
     faucet_params,
     l1_config_env_vars,
     l1_priv_key,
@@ -205,14 +218,9 @@ def _install_faucet(
             )
         )
 
-    faucet_image = (
-        faucet_params.image
-        if faucet_params.image != ""
-        else input_parser.DEFAULT_FAUCET_IMAGES["op-faucet"]
-    )
     faucet.launch(
         plan,
         "op-faucet",
-        faucet_image,
+        faucet_params.image or registry.get(_registry.OP_FAUCET),
         faucets,
     )

@@ -19,7 +19,7 @@ def test_challenger_input_parser_no_participants(plan):
     expect.eq(input_parser.parse({"challenger": {"participants": []}}, _chains), [])
 
 
-def test_challenger_input_parser_extra_attrbites(plan):
+def test_challenger_input_parser_extra_attributes(plan):
     expect.fails(
         lambda: input_parser.parse({"challenger": {"extra": [], "name": ""}}, _chains),
         "Invalid attributes in challenger configuration for challenger: extra,name",
