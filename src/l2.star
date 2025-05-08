@@ -4,6 +4,7 @@ da_server_launcher = import_module("./alt-da/da-server/da_server_launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
 input_parser = import_module("./package_io/input_parser.star")
 util = import_module("./util.star")
+tx_fuzzer = import_module("./transaction_fuzzer/transaction_fuzzer.star")
 
 
 def launch_l2(
@@ -24,10 +25,11 @@ def launch_l2(
     interop_params,
 ):
     network_params = l2_args.network_params
+    proxyd_params = l2_args.proxyd_params
     batcher_params = l2_args.batcher_params
-    challenger_params = l2_args.challenger_params
     proposer_params = l2_args.proposer_params
     mev_params = l2_args.mev_params
+    tx_fuzzer_params = l2_args.tx_fuzzer_params
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))
 
@@ -50,8 +52,8 @@ def launch_l2(
         l2_args.participants,
         jwt_file,
         network_params,
+        proxyd_params,
         batcher_params,
-        challenger_params,
         proposer_params,
         mev_params,
         deployment_output,
@@ -79,7 +81,7 @@ def launch_l2(
         plan,
         deployment_output,
         "state",
-        '.opChainDeployments[] | select(.id=="{0}") | .l1StandardBridgeProxyAddress'.format(
+        '.opChainDeployments[] | select(.id=="{0}") | .L1StandardBridgeProxy'.format(
             network_id_as_hex
         ),
     )
@@ -97,6 +99,20 @@ def launch_l2(
                 network_params.network_id,
             )
             plan.print("Successfully launched op-blockscout")
+        elif additional_service == "tx_fuzzer":
+            plan.print("Launching transaction spammer")
+            fuzz_target = "http://{0}:{1}".format(
+                all_el_contexts[0].ip_addr,
+                all_el_contexts[0].rpc_port_num,
+            )
+            tx_fuzzer.launch(
+                plan,
+                "op-transaction-fuzzer-{0}".format(network_params.name),
+                fuzz_target,
+                tx_fuzzer_params,
+                global_node_selectors,
+            )
+            plan.print("Successfully launched transaction spammer")
 
     plan.print(l2.participants)
     plan.print(
