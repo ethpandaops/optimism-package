@@ -62,4 +62,23 @@ def _parse_instance(superchain_args, superchain_name, chains):
         _net.INTEROP_RPC_PORT_NAME: _net.port(number=9645, application_protocol="ws"),
     }
 
+    # We'll create a dependency set for the superchain based on all the participants
+    superchain_params["dependency_set"] = struct(
+        name="superchain-depset-{}".format(superchain_name),
+        value=_create_dependency_set(superchain_params["participants"]),
+    )
+
     return struct(**superchain_params)
+
+
+def _create_dependency_set(network_ids):
+    return {
+        "dependencies": {
+            str(network_id): {
+                "chainIndex": str(network_id),
+                "activationTime": 0,
+                "historyMinTime": 0,
+            }
+            for network_id in network_ids
+        }
+    }

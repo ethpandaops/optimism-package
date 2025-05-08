@@ -10,12 +10,6 @@ _superchains = [
 ]
 
 _default_supervisor = struct(
-    dependency_set={
-        "dependencies": {
-            "1000": {"chainIndex": "1000", "activationTime": 0, "historyMinTime": 0},
-            "2000": {"chainIndex": "2000", "activationTime": 0, "historyMinTime": 0},
-        }
-    },
     extra_params=[],
     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
     name="supervisor",
@@ -81,7 +75,6 @@ def test_supervisor_input_parser_default_args(plan):
                 "supervisor-0": {
                     "enabled": None,
                     "image": None,
-                    "dependency_set": None,
                     "extra_params": None,
                     "superchain": "superchain-0",
                 }
@@ -91,20 +84,6 @@ def test_supervisor_input_parser_default_args(plan):
         ),
         [
             struct(
-                dependency_set={
-                    "dependencies": {
-                        "1000": {
-                            "chainIndex": "1000",
-                            "activationTime": 0,
-                            "historyMinTime": 0,
-                        },
-                        "2000": {
-                            "chainIndex": "2000",
-                            "activationTime": 0,
-                            "historyMinTime": 0,
-                        },
-                    }
-                },
                 enabled=True,
                 extra_params=[],
                 image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
@@ -121,24 +100,25 @@ def test_supervisor_input_parser_default_args(plan):
     )
 
 
-def test_supervisor_input_parser_custom_(plan):
+def test_supervisor_input_parser_custom_params(plan):
     parsed = input_parser.parse(
         {
             "supervisor-0": {
                 "superchain": "superchain-0",
-                "dependency_set": {},
+                "image": "op-supervisor:smallest",
                 "extra_params": ["--hey"],
             },
         },
         _superchains,
         _default_registry,
     )
+
+    expect.eq(parsed[0].image, "op-supervisor:smallest")
     expect.eq(parsed[0].extra_params, ["--hey"])
-    expect.eq(parsed[0].dependency_set, {})
 
 
 def test_supervisor_input_parser_custom_registry(plan):
-    registry = _registry.Registry({_registry.OP_SUPERVISOR: "op-supervisor:latest"})
+    registry = _registry.Registry({_registry.OP_SUPERVISOR: "op-supervisor:greatest"})
 
     parsed = input_parser.parse(
         {
@@ -147,7 +127,7 @@ def test_supervisor_input_parser_custom_registry(plan):
         _superchains,
         registry,
     )
-    expect.eq(parsed[0].image, "op-supervisor:latest")
+    expect.eq(parsed[0].image, "op-supervisor:greatest")
 
     parsed = input_parser.parse(
         {

@@ -6,7 +6,6 @@ _DEFAULT_ARGS = {
     "enabled": True,
     "superchain": None,
     "image": None,
-    "dependency_set": None,
     "extra_params": [],
 }
 
@@ -74,39 +73,4 @@ def _parse_instance(supervisor_args, supervisor_name, superchains, registry):
         )
     }
 
-    participant_network_ids = [str(p) for p in superchain.participants]
-    supervisor_params["dependency_set"] = (
-        supervisor_params["dependency_set"]
-        if supervisor_params["dependency_set"] != None
-        else _create_dependency_set(participant_network_ids)
-    )
-
-    dependency_set_network_ids = (
-        supervisor_params["dependency_set"].get("dependencies", {}).keys()
-    )
-    missing_network_ids = [
-        network_id
-        for network_id in dependency_set_network_ids
-        if network_id not in participant_network_ids
-    ]
-    if len(missing_network_ids) > 0:
-        fail(
-            "Missing networks {} defined in dependency set for supervisor {}".format(
-                ",".join(missing_network_ids), supervisor_name
-            )
-        )
-
     return struct(**supervisor_params)
-
-
-def _create_dependency_set(network_ids):
-    return {
-        "dependencies": {
-            str(network_id): {
-                "chainIndex": str(network_id),
-                "activationTime": 0,
-                "historyMinTime": 0,
-            }
-            for network_id in network_ids
-        }
-    }
