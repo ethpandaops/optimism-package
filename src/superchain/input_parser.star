@@ -1,5 +1,6 @@
 _expansion = import_module("/src/util/expansion.star")
 _filter = import_module("/src/util/filter.star")
+_net = import_module("/src/util/net.star")
 
 _DEFAULT_ARGS = {
     "enabled": True,
@@ -49,5 +50,16 @@ def _parse_instance(superchain_args, superchain_name, chains):
 
     # We add the name to the config
     superchain_params["name"] = superchain_name
+
+    # We add interop RPC port to the superchain config
+    #
+    # This is used for communication between supervisors and CL clients
+    # and since it's not a port exposed on on the supervisor but rather on the CL client,
+    # we put it here (at least temporarily)
+    #
+    # TODO Once the input parsers for CL clients are refactored, this will be moved there
+    superchain_params["ports"] = {
+        _net.INTEROP_RPC_PORT_NAME: _net.port(number=9645, application_protocol="ws"),
+    }
 
     return struct(**superchain_params)

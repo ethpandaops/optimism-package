@@ -1,5 +1,7 @@
 input_parser = import_module("/src/superchain/input_parser.star")
 
+_net = import_module("/src/util/net.star")
+
 _chains = [
     {"network_params": {"network_id": 1000}},
     {"network_params": {"network_id": 2000}},
@@ -58,6 +60,12 @@ def test_superchain_input_parser_default_args(plan):
         enabled=True,
         name="superchain-0",
         participants=[1000, 2000],
+        ports={
+            "rpc-interop": _net.port(
+                number=9645,
+                application_protocol="ws",
+            )
+        },
     )
 
     expect.eq(

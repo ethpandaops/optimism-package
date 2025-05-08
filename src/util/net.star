@@ -1,4 +1,5 @@
 RPC_PORT_NAME = "rpc"
+INTEROP_RPC_PORT_NAME = "rpc-interop"
 
 
 # Creates a struct representing a service port configuration
