@@ -4,6 +4,7 @@ da_server_launcher = import_module("./alt-da/da-server/da_server_launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
 input_parser = import_module("./package_io/input_parser.star")
 util = import_module("./util.star")
+tx_fuzzer = import_module("./transaction_fuzzer/transaction_fuzzer.star")
 
 
 def launch_l2(
@@ -22,12 +23,14 @@ def launch_l2(
     persistent,
     observability_helper,
     interop_params,
+    registry=None,
 ):
     network_params = l2_args.network_params
+    proxyd_params = l2_args.proxyd_params
     batcher_params = l2_args.batcher_params
-    challenger_params = l2_args.challenger_params
     proposer_params = l2_args.proposer_params
     mev_params = l2_args.mev_params
+    tx_fuzzer_params = l2_args.tx_fuzzer_params
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))
 
@@ -46,26 +49,27 @@ def launch_l2(
         plan.print("Successfully launched da-server")
 
     l2 = participant_network.launch_participant_network(
-        plan,
-        l2_args.participants,
-        jwt_file,
-        network_params,
-        batcher_params,
-        challenger_params,
-        proposer_params,
-        mev_params,
-        deployment_output,
-        l1_config,
-        l2_num,
-        l2_services_suffix,
-        global_log_level,
-        global_node_selectors,
-        global_tolerations,
-        persistent,
-        l2_args.additional_services,
-        observability_helper,
-        interop_params,
-        da_server_context,
+        plan=plan,
+        participants=l2_args.participants,
+        jwt_file=jwt_file,
+        network_params=network_params,
+        proxyd_params=proxyd_params,
+        batcher_params=batcher_params,
+        proposer_params=proposer_params,
+        mev_params=mev_params,
+        deployment_output=deployment_output,
+        l1_config_env_vars=l1_config,
+        l2_num=l2_num,
+        l2_services_suffix=l2_services_suffix,
+        global_log_level=global_log_level,
+        global_node_selectors=global_node_selectors,
+        global_tolerations=global_tolerations,
+        persistent=persistent,
+        additional_services=l2_args.additional_services,
+        observability_helper=observability_helper,
+        interop_params=interop_params,
+        da_server_context=da_server_context,
+        registry=registry,
     )
 
     all_el_contexts = []
@@ -79,7 +83,7 @@ def launch_l2(
         plan,
         deployment_output,
         "state",
-        '.opChainDeployments[] | select(.id=="{0}") | .l1StandardBridgeProxyAddress'.format(
+        '.opChainDeployments[] | select(.id=="{0}") | .L1StandardBridgeProxy'.format(
             network_id_as_hex
         ),
     )
@@ -97,6 +101,20 @@ def launch_l2(
                 network_params.network_id,
             )
             plan.print("Successfully launched op-blockscout")
+        elif additional_service == "tx_fuzzer":
+            plan.print("Launching transaction spammer")
+            fuzz_target = "http://{0}:{1}".format(
+                all_el_contexts[0].ip_addr,
+                all_el_contexts[0].rpc_port_num,
+            )
+            tx_fuzzer.launch(
+                plan,
+                "op-transaction-fuzzer-{0}".format(network_params.name),
+                fuzz_target,
+                tx_fuzzer_params,
+                global_node_selectors,
+            )
+            plan.print("Successfully launched transaction spammer")
 
     plan.print(l2.participants)
     plan.print(

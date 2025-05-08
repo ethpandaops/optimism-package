@@ -7,6 +7,7 @@ FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806
 FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
 utils = import_module("../util.star")
+_filter = import_module("../util/filter.star")
 
 ethereum_package_genesis_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
@@ -17,6 +18,57 @@ CANNED_VALUES = {
     "eip1559DenominatorCanyon": 250,
     "eip1559Elasticity": 6,
 }
+
+
+def _normalize_artifacts_locator(locator):
+    """Transform artifact locator from 'artifact://NAME' format to (name, file_path) pair.
+
+    If the locator doesn't use the artifact:// format, returns (None, original_locator).
+
+    Args:
+        locator: The original artifact locator string
+
+    Returns:
+        tuple: (artifact_name, normalized_locator, mount_point)
+    """
+    if locator and locator.startswith("artifact://"):
+        artifact_name = locator[len("artifact://") :]
+        mount_point = "/{0}".format(artifact_name)
+        return (artifact_name, "file://{0}".format(mount_point), mount_point)
+    return (None, locator, None)
+
+
+def _normalize_artifacts_locators(plan, l1_locator, l2_locator):
+    """Normalize artifact locators with specific mount points.
+
+    Args:
+        plan: The plan object
+        l1_locator: The L1 artifact locator
+        l2_locator: The L2 artifact locator
+
+    Returns:
+        tuple: (l1_artifacts_locator, l2_artifacts_locator, extra_files)
+    """
+    (
+        l1_artifact_name,
+        l1_artifacts_locator,
+        l1_mount_point,
+    ) = _normalize_artifacts_locator(l1_locator)
+    (
+        l2_artifact_name,
+        l2_artifacts_locator,
+        l2_mount_point,
+    ) = _normalize_artifacts_locator(l2_locator)
+
+    extra_files = {}
+    if l1_mount_point:
+        extra_files[l1_mount_point] = plan.get_files_artifact(name=l1_artifact_name)
+    if (
+        l2_mount_point and l2_mount_point not in extra_files
+    ):  # shortcut if both are the same
+        extra_files[l2_mount_point] = plan.get_files_artifact(name=l2_artifact_name)
+
+    return l1_artifacts_locator, l2_artifacts_locator, extra_files
 
 
 def deploy_contracts(
@@ -46,6 +98,17 @@ def deploy_contracts(
                 ),
             ]
         ),
+    )
+
+    # Normalize artifact locators with specific mount points
+    (
+        l1_artifacts_locator,
+        l2_artifacts_locator,
+        contracts_extra_files,
+    ) = _normalize_artifacts_locators(
+        plan,
+        optimism_args.op_contract_deployer_params.l1_artifacts_locator,
+        optimism_args.op_contract_deployer_params.l2_artifacts_locator,
     )
 
     fund_script_artifact = plan.upload_files(
@@ -100,31 +163,35 @@ def deploy_contracts(
 
     intent = {
         "useInterop": optimism_args.interop.enabled,
-        "l1ContractsLocator": optimism_args.op_contract_deployer_params.l1_artifacts_locator,
-        "l2ContractsLocator": optimism_args.op_contract_deployer_params.l2_artifacts_locator,
+        "l1ContractsLocator": l1_artifacts_locator,
+        "l2ContractsLocator": l2_artifacts_locator,
         "superchainRoles": {
-            "guardian": read_chain_cmd("l1ProxyAdmin", l2_chain_ids_list[0]),
+            "superchainGuardian": read_chain_cmd("l1ProxyAdmin", l2_chain_ids_list[0]),
             "protocolVersionsOwner": read_chain_cmd(
                 "l1ProxyAdmin", l2_chain_ids_list[0]
             ),
-            "proxyAdminOwner": read_chain_cmd("l1ProxyAdmin", l2_chain_ids_list[0]),
+            "superchainProxyAdminOwner": read_chain_cmd(
+                "l1ProxyAdmin", l2_chain_ids_list[0]
+            ),
         },
         "chains": [],
     }
 
     absolute_prestate = ""
-    if optimism_args.op_contract_deployer_params.global_deploy_overrides[
+    if (
         "faultGameAbsolutePrestate"
-    ]:
-        absolute_prestate = (
-            optimism_args.op_contract_deployer_params.global_deploy_overrides[
-                "faultGameAbsolutePrestate"
-            ]
-        )
+        in optimism_args.op_contract_deployer_params.overrides
+    ):
+        absolute_prestate = optimism_args.op_contract_deployer_params.overrides[
+            "faultGameAbsolutePrestate"
+        ]
         intent["globalDeployOverrides"] = {
             "dangerouslyAllowCustomDisputeParameters": True,
             "faultGameAbsolutePrestate": absolute_prestate,
         }
+
+    overrides = _filter.remove_none(optimism_args.op_contract_deployer_params.overrides)
+    vm_type = overrides.get("vmType", "CANNON")
 
     for i, chain in enumerate(optimism_args.chains):
         chain_id = str(chain.network_params.network_id)
@@ -162,7 +229,7 @@ def deploy_contracts(
                         "faultGameClockExtension": 10800,
                         "faultGameMaxClockDuration": 302400,
                         "dangerouslyAllowCustomDisputeParameters": True,
-                        "vmType": "CANNON1",
+                        "vmType": vm_type,
                         "useCustomOracle": False,
                         "oracleMinProposalSize": 0,
                         "oracleChallengePeriodSeconds": 0,
@@ -251,7 +318,8 @@ def deploy_contracts(
         files={
             "/network-data": op_deployer_configure.files_artifacts[0],
             "/network-data/allocs": allocs_artifact,
-        },
+        }
+        | contracts_extra_files,
         run=" && ".join(apply_cmds),
     )
 

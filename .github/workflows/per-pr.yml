@@ -4,11 +4,12 @@ on:
   pull_request:
 
 concurrency:
-  group: "tests-${{ github.head_ref }}"
+  group: "${{ github.workflow_ref }}-${{ github.head_ref }}"
   cancel-in-progress: true
 
 jobs:
   run_with_args:
+    name: Run kurtosis with arguments
     strategy:
       matrix:
         file_name:
@@ -18,52 +19,56 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
 
       - name: Run Starlark
         run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }} --verbosity detailed
 
   # Make sure that `kurtosis run .` without an --args-file works fine (the defaults in input_parser.star are correct)
   run_without_args:
+    name: Run kurtosis without arguments
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Setup Kurtosis
-        run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-          kurtosis analytics disable
+      - name: Install mise
+        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
 
       - name: Run Starlark
         run: kurtosis run ${{ github.workspace }} --verbosity detailed
 
+  run_k8s_test:
+    name: Run k8s tests
+    uses: ./.github/workflows/reusable-run-k8s.yml
+    secrets: inherit
+  
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
 
-      - name: Kurtosis Lint
-        run: kurtosis lint ${{ github.workspace }}
+      - name: Run lint
+        run: just lint
 
   test:
+    name: Unit tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
 
-      - name: Run kurtosis-test tests
-        run: kurtosis-test .
+      - name: Run unit tests
+        run: just test
 

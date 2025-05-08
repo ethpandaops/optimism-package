@@ -20,23 +20,15 @@ def read_json_value(plan, json_file, json_path, mounts=None):
     return run.output
 
 
-def read_file(plan, file_path, mounts=None):
-    run = plan.run_sh(
-        description="Read file",
-        image=DEPLOYMENT_UTILS_IMAGE,
-        files=mounts,
-        run="cat {0}".format(file_path),
-    )
-    return run.output
-
-
 def write_to_file(plan, contents, directory, file_name):
     file_path = "{0}/{1}".format(directory, file_name)
 
     run = plan.run_sh(
         description="Write value to a file artifact",
         image=DEPLOYMENT_UTILS_IMAGE,
-        store=[file_path],
+        store=[
+            StoreSpec(src=file_path, name=file_name),
+        ],
         run="mkdir -p '{0}' && echo '{2}' > '{1}'".format(
             directory, file_path, contents
         ),

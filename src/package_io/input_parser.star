@@ -2,44 +2,16 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+_challenger_input_parser = import_module("/src/challenger/input_parser.star")
+_superchain_input_parser = import_module("/src/superchain/input_parser.star")
+_supervisor_input_parser = import_module("/src/supervisor/input_parser.star")
+
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
+_registry = import_module("./registry.star")
 
-DEFAULT_EL_IMAGES = {
-    "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
-    "op-reth": "ghcr.io/paradigmxyz/op-reth:latest",
-    "op-erigon": "testinprod/op-erigon:latest",
-    "op-nethermind": "nethermind/nethermind:latest",
-    "op-besu": "ghcr.io/optimism-java/op-besu:latest",
-}
-
-DEFAULT_CL_IMAGES = {
-    "op-node": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
-    "hildr": "ghcr.io/optimism-java/hildr:latest",
-}
-
-DEFAULT_BATCHER_IMAGES = {
-    "op-batcher": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
-}
-
-DEFAULT_CHALLENGER_IMAGES = {
-    "op-challenger": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
-}
-
-DEFAULT_SUPERVISOR_IMAGES = {
-    "op-supervisor": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
-}
-
-DEFAULT_PROPOSER_IMAGES = {
-    "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
-}
-
-DEFAULT_SIDECAR_IMAGES = {
-    "rollup-boost": "flashbots/rollup-boost:latest",
-}
 
 DEFAULT_DA_SERVER_PARAMS = {
-    "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
     "cmd": [
         "da-server",  # uses keccak commitments by default
         # We use the file storage backend instead of s3 for simplicity.
@@ -52,7 +24,6 @@ DEFAULT_DA_SERVER_PARAMS = {
         "--log.level=debug",
     ],
 }
-
 
 DEFAULT_ADDITIONAL_SERVICES = []
 
@@ -69,9 +40,13 @@ def external_l1_network_params_input_parser(plan, input_args):
     )
 
 
-def input_parser(plan, input_args):
+def input_parser(
+    plan,
+    input_args,
+    registry=_registry.Registry(),
+):
     sanity_check.sanity_check(plan, input_args)
-    results = parse_network_params(plan, input_args)
+    results = parse_network_params(plan, registry, input_args)
 
     return struct(
         observability=struct(
@@ -114,6 +89,10 @@ def input_parser(plan, input_args):
                 min_mem=results["observability"]["grafana_params"]["min_mem"],
                 max_mem=results["observability"]["grafana_params"]["max_mem"],
             ),
+        ),
+        faucet=struct(
+            enabled=results["faucet"]["enabled"],
+            image=results["faucet"]["image"],
         ),
         interop=struct(
             enabled=results["interop"]["enabled"],
@@ -165,6 +144,7 @@ def input_parser(plan, input_args):
                         cl_max_mem=participant["cl_max_mem"],
                         el_builder_type=participant["el_builder_type"],
                         el_builder_image=participant["el_builder_image"],
+                        el_builder_key=participant["el_builder_key"],
                         el_builder_log_level=participant["el_builder_log_level"],
                         el_builder_extra_env_vars=participant[
                             "el_builder_extra_env_vars"
@@ -211,23 +191,13 @@ def input_parser(plan, input_args):
                     interop_time_offset=result["network_params"]["interop_time_offset"],
                     fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
                 ),
+                proxyd_params=struct(
+                    image=result["proxyd_params"]["image"],
+                    extra_params=result["proxyd_params"]["extra_params"],
+                ),
                 batcher_params=struct(
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
-                ),
-                challenger_params=struct(
-                    enabled=result["challenger_params"]["enabled"],
-                    image=result["challenger_params"]["image"],
-                    extra_params=result["challenger_params"]["extra_params"],
-                    cannon_prestate_path=result["challenger_params"][
-                        "cannon_prestate_path"
-                    ],
-                    cannon_prestates_url=result["challenger_params"][
-                        "cannon_prestates_url"
-                    ],
-                    cannon_trace_types=result["challenger_params"][
-                        "cannon_trace_types"
-                    ],
                 ),
                 proposer_params=struct(
                     enabled=result["proposer_params"]["enabled"],
@@ -247,9 +217,18 @@ def input_parser(plan, input_args):
                     cmd=result["da_server_params"]["cmd"],
                 ),
                 additional_services=result["additional_services"],
+                tx_fuzzer_params=struct(
+                    image=result["tx_fuzzer_params"]["image"],
+                    tx_fuzzer_extra_args=result["tx_fuzzer_params"][
+                        "tx_fuzzer_extra_args"
+                    ],
+                ),
             )
             for result in results["chains"]
         ],
+        challengers=results["challengers"],
+        superchains=results["superchains"],
+        supervisors=results["supervisors"],
         op_contract_deployer_params=struct(
             image=results["op_contract_deployer_params"]["image"],
             l1_artifacts_locator=results["op_contract_deployer_params"][
@@ -258,9 +237,7 @@ def input_parser(plan, input_args):
             l2_artifacts_locator=results["op_contract_deployer_params"][
                 "l2_artifacts_locator"
             ],
-            global_deploy_overrides=results["op_contract_deployer_params"][
-                "global_deploy_overrides"
-            ],
+            overrides=results["op_contract_deployer_params"]["overrides"],
         ),
         global_log_level=results["global_log_level"],
         global_node_selectors=results["global_node_selectors"],
@@ -269,7 +246,7 @@ def input_parser(plan, input_args):
     )
 
 
-def parse_network_params(plan, input_args):
+def parse_network_params(plan, registry, input_args):
     results = {}
 
     # configure observability
@@ -277,22 +254,25 @@ def parse_network_params(plan, input_args):
     results["observability"] = default_observability_params()
     results["observability"].update(input_args.get("observability", {}))
 
-    results["observability"]["prometheus_params"] = default_prometheus_params()
+    results["faucet"] = _default_faucet_params(registry)
+    results["faucet"].update(input_args.get("faucet", {}))
+
+    results["observability"]["prometheus_params"] = default_prometheus_params(registry)
     results["observability"]["prometheus_params"].update(
         input_args.get("observability", {}).get("prometheus_params", {})
     )
 
-    results["observability"]["loki_params"] = default_loki_params()
+    results["observability"]["loki_params"] = default_loki_params(registry)
     results["observability"]["loki_params"].update(
         input_args.get("observability", {}).get("loki_params", {})
     )
 
-    results["observability"]["promtail_params"] = default_promtail_params()
+    results["observability"]["promtail_params"] = default_promtail_params(registry)
     results["observability"]["promtail_params"].update(
         input_args.get("observability", {}).get("promtail_params", {})
     )
 
-    results["observability"]["grafana_params"] = default_grafana_params()
+    results["observability"]["grafana_params"] = default_grafana_params(registry)
     results["observability"]["grafana_params"].update(
         input_args.get("observability", {}).get("grafana_params", {})
     )
@@ -302,7 +282,7 @@ def parse_network_params(plan, input_args):
     results["interop"] = default_interop_params()
     results["interop"].update(input_args.get("interop", {}))
 
-    results["interop"]["supervisor_params"] = default_supervisor_params()
+    results["interop"]["supervisor_params"] = default_supervisor_params(registry)
     results["interop"]["supervisor_params"].update(
         input_args.get("interop", {}).get("supervisor_params", {})
     )
@@ -318,22 +298,22 @@ def parse_network_params(plan, input_args):
 
     seen_names = {}
     seen_network_ids = {}
-    for chain in input_args.get("chains", default_chains()):
+    for chain in input_args.get("chains", default_chains(registry)):
         network_params = default_network_params()
         network_params.update(chain.get("network_params", {}))
 
-        batcher_params = default_batcher_params()
+        proxyd_params = _default_proxyd_params(registry)
+        proxyd_params.update(chain.get("proxyd_params", {}))
+
+        batcher_params = _default_batcher_params(registry)
         batcher_params.update(chain.get("batcher_params", {}))
 
-        proposer_params = default_proposer_params()
+        proposer_params = _default_proposer_params(registry)
         proposer_params.update(chain.get("proposer_params", {}))
-
-        challenger_params = default_challenger_params()
-        challenger_params.update(chain.get("challenger_params", {}))
 
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
-        da_server_params = default_da_server_params()
+        da_server_params = default_da_server_params(registry)
         da_server_params.update(chain.get("da_server_params", {}))
 
         network_name = network_params["name"]
@@ -354,7 +334,7 @@ def parse_network_params(plan, input_args):
             cl_type = participant["cl_type"]
             el_image = participant["el_image"]
             if el_image == "":
-                default_image = DEFAULT_EL_IMAGES.get(el_type, "")
+                default_image = registry.get(el_type, "")
                 if default_image == "":
                     fail(
                         "{0} received an empty image name and we don't have a default for it".format(
@@ -365,7 +345,7 @@ def parse_network_params(plan, input_args):
 
             cl_image = participant["cl_image"]
             if cl_image == "":
-                default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
+                default_image = registry.get(cl_type, "")
                 if default_image == "":
                     fail(
                         "{0} received an empty image name and we don't have a default for it".format(
@@ -377,7 +357,7 @@ def parse_network_params(plan, input_args):
             el_builder_type = participant["el_builder_type"]
             el_builder_image = participant["el_builder_image"]
             if el_builder_image == "":
-                default_image = DEFAULT_EL_IMAGES.get(el_builder_type, "")
+                default_image = registry.get(el_builder_type, "")
                 if default_image == "":
                     fail(
                         "{0} received an empty image name and we don't have a default for it".format(
@@ -389,7 +369,7 @@ def parse_network_params(plan, input_args):
             cl_builder_type = participant["cl_builder_type"]
             cl_builder_image = participant["cl_builder_image"]
             if cl_builder_image == "":
-                default_image = DEFAULT_CL_IMAGES.get(cl_builder_type, "")
+                default_image = registry.get(cl_builder_type, "")
                 if default_image == "":
                     fail(
                         "{0} received an empty image name and we don't have a default for it".format(
@@ -404,25 +384,51 @@ def parse_network_params(plan, input_args):
                 )
                 participants.append(participant_copy)
 
+        tx_fuzzer_params = default_tx_fuzzer_params(registry)
+        tx_fuzzer_params.update(chain.get("tx_fuzzer_params", {}))
+
         result = {
             "participants": participants,
             "network_params": network_params,
+            "proxyd_params": proxyd_params,
             "batcher_params": batcher_params,
-            "challenger_params": challenger_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
             "da_server_params": da_server_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
+            "tx_fuzzer_params": tx_fuzzer_params,
         }
         chains.append(result)
 
     results["chains"] = chains
 
+    # configure superchains
+
+    results["superchains"] = _superchain_input_parser.parse(
+        args=input_args.get("superchains"), chains=chains
+    )
+
+    # configure op-challenger
+
+    results["challengers"] = _challenger_input_parser.parse(
+        args=input_args.get("challengers"), chains=chains
+    )
+
+    # configure op-supervisor
+
+    results["supervisors"] = _supervisor_input_parser.parse(
+        args=input_args.get("supervisors"),
+        superchains=results["superchains"],
+        registry=registry,
+    )
+
     # configure op-deployer
 
-    results["op_contract_deployer_params"] = default_op_contract_deployer_params()
+    results["op_contract_deployer_params"] = default_op_contract_deployer_params(
+        registry
+    )
     results["op_contract_deployer_params"].update(
         input_args.get("op_contract_deployer_params", {})
     )
@@ -449,9 +455,16 @@ def default_observability_params():
     }
 
 
-def default_prometheus_params():
+def _default_faucet_params(registry):
     return {
-        "image": "prom/prometheus:v3.1.0",
+        "enabled": False,
+        "image": registry.get(_registry.OP_FAUCET),
+    }
+
+
+def default_prometheus_params(registry):
+    return {
+        "image": registry.get(_registry.PROMETHEUS),
         "storage_tsdb_retention_time": "1d",
         "storage_tsdb_retention_size": "512MB",
         "min_cpu": 10,
@@ -461,9 +474,9 @@ def default_prometheus_params():
     }
 
 
-def default_grafana_params():
+def default_grafana_params(registry):
     return {
-        "image": "grafana/grafana:11.5.0",
+        "image": registry.get(_registry.GRAFANA),
         "dashboard_sources": [
             "github.com/ethereum-optimism/grafana-dashboards-public/resources"
         ],
@@ -474,9 +487,9 @@ def default_grafana_params():
     }
 
 
-def default_loki_params():
+def default_loki_params(registry):
     return {
-        "image": "grafana/loki:3.3.2",
+        "image": registry.get(_registry.LOKI),
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,
@@ -484,9 +497,9 @@ def default_loki_params():
     }
 
 
-def default_promtail_params():
+def default_promtail_params(registry):
     return {
-        "image": "grafana/promtail:3.3.2",
+        "image": registry.get(_registry.PROMTAIL),
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,
@@ -511,9 +524,9 @@ def default_altda_deploy_config():
     }
 
 
-def default_supervisor_params():
+def default_supervisor_params(registry):
     return {
-        "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
+        "image": registry.get(_registry.OP_SUPERVISOR),
         "dependency_set": "",
         "extra_params": [],
     }
@@ -527,17 +540,18 @@ def default_mev_params():
     }
 
 
-def default_chains():
+def default_chains(registry):
     return [
         {
             "participants": [default_participant()],
             "network_params": default_network_params(),
-            "batcher_params": default_batcher_params(),
-            "proposer_params": default_proposer_params(),
-            "challenger_params": default_challenger_params(),
+            "proxyd_params": _default_proxyd_params(registry),
+            "batcher_params": _default_batcher_params(registry),
+            "proposer_params": _default_proposer_params(registry),
             "mev_params": default_mev_params(),
-            "da_server_params": default_da_server_params(),
+            "da_server_params": default_da_server_params(registry),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
+            "tx_fuzzer_params": default_tx_fuzzer_params(registry),
         }
     ]
 
@@ -557,28 +571,24 @@ def default_network_params():
     }
 
 
-def default_batcher_params():
+def _default_batcher_params(registry):
     return {
-        "image": DEFAULT_BATCHER_IMAGES["op-batcher"],
+        "image": registry.get(_registry.OP_BATCHER),
         "extra_params": [],
     }
 
 
-def default_challenger_params():
+def _default_proxyd_params(registry):
     return {
-        "enabled": True,
-        "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
+        "image": registry.get(_registry.PROXYD),
         "extra_params": [],
-        "cannon_prestate_path": "",
-        "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
-        "cannon_trace_types": ["cannon", "permissioned"],
     }
 
 
-def default_proposer_params():
+def _default_proposer_params(registry):
     return {
         "enabled": True,
-        "image": DEFAULT_PROPOSER_IMAGES["op-proposer"],
+        "image": registry.get(_registry.OP_PROPOSER),
         "extra_params": [],
         "game_type": 1,
         "proposal_interval": "10m",
@@ -613,6 +623,7 @@ def default_participant():
         "cl_max_mem": 0,
         "el_builder_type": "op-geth",
         "el_builder_image": "",
+        "el_builder_key": "",
         "el_builder_log_level": "",
         "el_builder_extra_env_vars": {},
         "el_builder_extra_labels": {},
@@ -641,18 +652,12 @@ def default_participant():
     }
 
 
-def default_op_contract_deployer_global_deploy_overrides():
-    return {
-        "faultGameAbsolutePrestate": "",
-    }
-
-
-def default_op_contract_deployer_params():
+def default_op_contract_deployer_params(registry):
     return {
         "image": "xavierromero/op-deployer:20250314",
         "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz",
         "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz",
-        "global_deploy_overrides": default_op_contract_deployer_global_deploy_overrides(),
+        "overrides": {},
     }
 
 
@@ -682,9 +687,16 @@ def default_ethereum_package_network_params():
     }
 
 
-def default_da_server_params():
+def default_da_server_params(registry):
     return {
         "enabled": False,
-        "image": DEFAULT_DA_SERVER_PARAMS["image"],
+        "image": registry.get(_registry.DA_SERVER),
         "cmd": DEFAULT_DA_SERVER_PARAMS["cmd"],
+    }
+
+
+def default_tx_fuzzer_params(registry):
+    return {
+        "image": registry.get(_registry.TX_FUZZER),
+        "tx_fuzzer_extra_args": [],
     }

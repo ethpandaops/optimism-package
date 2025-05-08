@@ -40,7 +40,9 @@ def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
 
 def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NUM):
     ports[port_id] = ethereum_package_shared_utils.new_port_spec(
-        port_num, ethereum_package_shared_utils.TCP_PROTOCOL
+        port_num,
+        ethereum_package_shared_utils.TCP_PROTOCOL,
+        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
 
 
@@ -105,15 +107,18 @@ def register_service_metrics_job(
         "service": service_name,
         "namespace": service_name,
     }
+
+    job_name = service_name
     if network_name != None:
         labels["stack_optimism_io_network"] = network_name
+        job_name += "-" + network_name
 
     labels.update(additional_labels)
 
     add_metrics_job(
         helper,
         new_metrics_job(
-            job_name=service_name,
+            job_name=job_name,
             endpoint=endpoint,
             metrics_path=metrics_path,
             labels=labels,

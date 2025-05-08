@@ -26,6 +26,8 @@ optimism_package:
         node_selectors: {}
         tolerations: []
         count: 1
+      - el_type: op-reth
+        cl_type: op-node
       network_params:
         network: "kurtosis"
         network_id: "2151908"
@@ -36,13 +38,12 @@ optimism_package:
         fund_dev_accounts: true
       batcher_params:
         extra_params: []
-      challenger_params:
-        enabled: true
-        extra_params: []
       mev_params:
         builder_host: ""
         builder_port: ""
       additional_services: []
+      tx_fuzzer_params:
+        tx_fuzzer_extra_args: []
   op_contract_deployer_params:
     # image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.12
     image: xavierromero/op-deployer:20250314
@@ -52,6 +53,14 @@ optimism_package:
   global_node_selectors: {}
   global_tolerations: []
   persistent: false
+  challengers:
+    challenger-0: &x-challenger
+      participants: "*"
+      cannon_trace_types: ["super-cannon", "super-permissioned"]
+    challenger-1:
+      <<: *x-challenger
+  interop:
+    enabled: True
 ethereum_package:
   participants:
   - el_type: geth

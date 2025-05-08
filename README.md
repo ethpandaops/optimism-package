@@ -293,14 +293,20 @@ optimism_package:
         # Valid values are:
         # op-geth
         # op-reth
+        # op-rbuilder
         el_builder_type: ""
 
         # The Docker image that should be used for the builder EL client; leave blank to use the default for the client type
         # Defaults by client:
         # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
         # - op-reth: parithoshj/op-reth:latest
+        # - op-rbuilder: ghcr.io/flashbots/op-rbuilder:latest
         el_builder_image: ""
 
+        # Builder secret key used by op-rbuilder to sign transactions
+        # Defaults to None - not used
+        el_builder_key: ""
+        
         # The type of builder CL client that should be started
         # Valid values are:
         # op-node
@@ -385,6 +391,17 @@ optimism_package:
         # Defaults to True
         fund_dev_accounts: true
 
+      # Default proxyd configuration
+      proxyd_params:
+        # The Docker image that should be used for proxyd; leave blank to use the default image
+        image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd"
+
+        # The Docker tag that should be used for proxyd; leave blank to use the default tag
+        tag: ""
+
+        # A list of optional extra params that will be passed to the proxyd container
+        extra_params: []
+
       # Default batcher configuration
       batcher_params:
         # The Docker image that should be used for the batcher; leave blank to use the default op-batcher image
@@ -392,23 +409,6 @@ optimism_package:
 
         # A list of optional extra params that will be passed to the batcher container for modifying its behaviour
         extra_params: []
-
-      # Default challenger configuration
-      challenger_params:
-        # Whether or not to enable the challenger
-        enabled: true
-
-        # The Docker image that should be used for the challenger; leave blank to use the default op-challenger image
-        image: ""
-
-        # A list of optional extra params that will be passed to the challenger container for modifying its behaviour
-        extra_params: []
-
-        # Path to folder containing cannon prestate-proof.json file
-        cannon_prestates_path: "static_files/prestates"
-
-        # Base URL to absolute prestates to use when generating trace data.
-        cannon_prestates_url: ""
 
       # Default proposer configuration
       proposer_params:
@@ -460,8 +460,40 @@ optimism_package:
           - "--port=3100"
           - "--log.level=debug"
 
-  # L2 contract deployer configuration - used for all L2 networks
-  # The docker image that should be used for the L2 contract deployer
+  challengers:
+    my-challenger:
+      # Whether this challenger is active
+      enabled: true
+
+      # The Docker image that should be used for the challenger; leave blank to use the default op-challenger image
+      image: ""
+
+      # List of L2 chains that this challenger is connected to
+      # 
+      # This field accepts several configuration types:
+      # 
+      # A list of network IDs, in which case the challenger will connect to all the nodes in these network
+      participants: ["2151908"]
+
+      # OR "*" meaning the challenger will connect to all nodes of all L2 networks
+      participants: "*"
+
+      # A list of optional extra params that will be passed to the challenger container for modifying its behaviour
+      extra_params: []
+
+      # Path to folder containing cannon prestate-proof.json file
+      cannon_prestates_path: "static_files/prestates"
+
+      # OR Base URL to absolute prestates to use when generating trace data.
+      cannon_prestates_url: ""
+
+      # Directory in which the challenger will store its data
+      datadir: "/data/op-challenger/op-challenger-data"
+
+  # L2 contract deployer configuration - used for all L2 networks.
+  # The docker image that should be used for the L2 contract deployer.
+  # Locators can be http(s) URLs, or point to an enclave artifact with
+  # a pseudo URL artifact://NAME
   op_contract_deployer_params:
     image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.11
     l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz
@@ -489,7 +521,7 @@ optimism_package:
   # Defaults to empty
   global_tolerations: []
 
-  # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
+  # Whether the environment should be persistent; this is WIP and is slowly being rolled out across services
   # Defaults to false
   persistent: false
 
@@ -629,7 +661,7 @@ To use rollup boost, you can add `rollup-boost` as an additional service and con
 optimism_package:
   chains:
     - participants:
-        - el_builder_type: op-geth
+        - el_builder_type: op-rbuilder
           cl_builder_type: op-node
       mev_params:
         rollup_boost_image: "flashbots/rollup-boost:latest"
@@ -651,7 +683,7 @@ Compile [tx-fuzz](https://github.com/MariusVanDerWijden/tx-fuzz) locally per ins
 
 Install the latest [contender](https://github.com/flashbots/contender) version via cargo:
 ```bash
-cargo install --git https://github.com/flashbots/contender --bin contender --force 
+cargo install --git https://github.com/flashbots/contender --bin contender --force
 ```
 
 Browse the available [scenarios](https://github.com/flashbots/contender/tree/main/scenarios) and pick one that fits your needs. For example, to download the `stress` scenario:
@@ -721,7 +753,7 @@ kurtosis service start <enclave-name> <service-name>
 
 ## Observability
 
-This package optionally provisions an in-enclave observability stack consiisting of Grafana, prometheus, promtail, and loki, which collects logs and metrics from the enclave.
+This package optionally provisions an in-enclave observability stack consisting of Grafana, prometheus, promtail, and loki, which collects logs and metrics from the enclave.
 
 This feature is enabled by default, but can be disabled like so:
 
@@ -805,3 +837,21 @@ kurtosis-test .
 ```
 
 The tests can be found in `*_test.star` scripts located in the `test` directory.
+
+### Dev accounts being used
+
+Index| Address | Private Key | In use | Tool
+---|---|---|---|---
+0| `0xf39F...2266` | `0xac09...f80` | ✅ | [op-transaction-fuzzer](src/transaction_fuzzer/transaction_fuzzer.star#L33)
+1| `0x7099...79C8` | `0x59c6...690d` | ❌ | ""
+2| `0x3C49...3359` | `0x5de4...365a` | ❌ | ""
+3| `0x90F7...9b906` | `0x7c85...a07a6` | ❌ | ""
+4| `0x15d3...9f1b9` | `0x47e1...9c6` | ❌ | ""
+5| `0x9965...0A4dc` | `0x8b3a...ba` | ❌ | ""
+6| `0x976E...9b906` | `0x92db...64e` | ❌ | ""
+7| `0x14dC...3356` | `0x4bbbf...356` | ❌ | ""
+8| `0x2361...226a` | `0xdbda...b97` | ❌ | ""
+9| `0xa0Ee...720` | `0xa0Ee...c6` | ❌ | ""
+
+mnemonic: `test test test test test test test test test test test junk`
+
