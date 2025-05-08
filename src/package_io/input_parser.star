@@ -239,6 +239,7 @@ def input_parser(plan, input_args):
                     extra_params=result["batcher_params"]["extra_params"],
                 ),
                 proposer_params=struct(
+                    enabled=result["proposer_params"]["enabled"],
                     image=result["proposer_params"]["image"],
                     extra_params=result["proposer_params"]["extra_params"],
                     game_type=result["proposer_params"]["game_type"],
@@ -610,6 +611,7 @@ def default_proxyd_params():
 
 def default_proposer_params():
     return {
+        "enabled": True,
         "image": DEFAULT_PROPOSER_IMAGES["op-proposer"],
         "extra_params": [],
         "game_type": 1,
@@ -682,9 +684,9 @@ def default_op_contract_deployer_global_deploy_overrides():
 
 def default_op_contract_deployer_params():
     return {
-        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2",
-        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
-        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
+        "image": "xavierromero/op-deployer:20250314",
+        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz",
+        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz",
         "global_deploy_overrides": default_op_contract_deployer_global_deploy_overrides(),
     }
 
