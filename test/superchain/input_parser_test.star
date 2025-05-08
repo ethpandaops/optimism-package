@@ -66,6 +66,23 @@ def test_superchain_input_parser_default_args(plan):
                 application_protocol="ws",
             )
         },
+        dependency_set=struct(
+            name="superchain-depset-superchain-0",
+            value={
+                "dependencies": {
+                    "1000": {
+                        "chainIndex": "1000",
+                        "activationTime": 0,
+                        "historyMinTime": 0,
+                    },
+                    "2000": {
+                        "chainIndex": "2000",
+                        "activationTime": 0,
+                        "historyMinTime": 0,
+                    },
+                }
+            },
+        ),
     )
 
     expect.eq(
