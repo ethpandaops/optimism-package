@@ -2,7 +2,9 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
-challenger_input_parser = import_module("/src/challenger/input_parser.star")
+_challenger_input_parser = import_module("/src/challenger/input_parser.star")
+_superchain_input_parser = import_module("/src/superchain/input_parser.star")
+_supervisor_input_parser = import_module("/src/supervisor/input_parser.star")
 
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
@@ -224,6 +226,8 @@ def input_parser(
             for result in results["chains"]
         ],
         challengers=results["challengers"],
+        superchains=results["superchains"],
+        supervisors=results["supervisors"],
         op_contract_deployer_params=struct(
             image=results["op_contract_deployer_params"]["image"],
             l1_artifacts_locator=results["op_contract_deployer_params"][
@@ -399,10 +403,24 @@ def parse_network_params(plan, registry, input_args):
 
     results["chains"] = chains
 
+    # configure superchains
+
+    results["superchains"] = _superchain_input_parser.parse(
+        args=input_args.get("superchains"), chains=chains
+    )
+
     # configure op-challenger
 
-    results["challengers"] = challenger_input_parser.parse(
-        input_args.get("challengers"), chains
+    results["challengers"] = _challenger_input_parser.parse(
+        args=input_args.get("challengers"), chains=chains
+    )
+
+    # configure op-supervisor
+
+    results["supervisors"] = _supervisor_input_parser.parse(
+        args=input_args.get("supervisors"),
+        superchains=results["superchains"],
+        registry=registry,
     )
 
     # configure op-deployer
