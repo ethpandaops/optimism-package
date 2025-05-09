@@ -65,6 +65,7 @@ def _parse_instance(superchain_args, superchain_name, chains):
     # We'll create a dependency set for the superchain based on all the participants
     superchain_params["dependency_set"] = struct(
         name="superchain-depset-{}".format(superchain_name),
+        path="superchain-depset-{}.json".format(superchain_name),
         value=_create_dependency_set(superchain_params["participants"]),
     )
 
