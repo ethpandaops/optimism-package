@@ -62,9 +62,10 @@ def launch(
     service = plan.add_service("proxyd-{0}".format(network_params.network_id), config)
     service_url = util.make_service_http_url(service)
 
-    observability.register_op_service_metrics_job(
-        observability_helper, service, network_params.network
-    )
+    if observability_helper.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper, service, network_params.network
+        )
 
     return service_url
 

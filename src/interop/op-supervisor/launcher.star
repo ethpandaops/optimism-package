@@ -1,6 +1,5 @@
 _file = import_module("/src/util/file.star")
-
-utils = import_module("../../util.star")
+util = import_module("../../util.star")
 
 ethereum_package_shared_utils = import_module(
     "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
@@ -79,11 +78,13 @@ def launch(
     )
 
     service = plan.add_service(interop_constants.SUPERVISOR_SERVICE_NAME, config)
+    service_url = util.make_service_http_url(service)
 
-    observability.register_op_service_metrics_job(
-        observability_helper,
-        service,
-    )
+    if observability_helper.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper,
+            service,
+        )
 
     return struct(service=service)
 
