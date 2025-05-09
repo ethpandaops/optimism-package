@@ -7,23 +7,6 @@ _chains = [
 ]
 
 
-def test_superchain_launcher_empty(plan):
-    expect.eq(
-        _launcher.launch(
-            plan=plan,
-            superchains_params=None,
-        ),
-        {},
-    )
-    expect.eq(
-        _launcher.launch(
-            plan=plan,
-            superchains_params=[],
-        ),
-        {},
-    )
-
-
 def test_superchain_launcher_multiple_participants(plan):
     superchains_params = _input_parser.parse(
         {
@@ -42,28 +25,55 @@ def test_superchain_launcher_multiple_participants(plan):
     expect.eq(
         _launcher.launch(
             plan=plan,
-            superchains_params=superchains_params,
+            params=superchains_params[0],
         ),
-        {
-            "superchain-0": struct(
+        struct(
+            dependency_set=struct(
                 artifact="superchain-depset-superchain-0",
                 path="superchain-depset-superchain-0.json",
                 superchain="superchain-0",
-            ),
-            "superchain-1": struct(
+            )
+        ),
+    )
+
+    expect.eq(
+        _launcher.launch(
+            plan=plan,
+            params=superchains_params[1],
+        ),
+        struct(
+            dependency_set=struct(
                 artifact="superchain-depset-superchain-1",
                 path="superchain-depset-superchain-1.json",
                 superchain="superchain-1",
-            ),
-            "superchain-2": struct(
+            )
+        ),
+    )
+
+    expect.eq(
+        _launcher.launch(
+            plan=plan,
+            params=superchains_params[2],
+        ),
+        struct(
+            dependency_set=struct(
                 artifact="superchain-depset-superchain-2",
                 path="superchain-depset-superchain-2.json",
                 superchain="superchain-2",
-            ),
-            "superchain-3": struct(
+            )
+        ),
+    )
+
+    expect.eq(
+        _launcher.launch(
+            plan=plan,
+            params=superchains_params[3],
+        ),
+        struct(
+            dependency_set=struct(
                 artifact="superchain-depset-superchain-3",
                 path="superchain-depset-superchain-3.json",
                 superchain="superchain-3",
-            ),
-        },
+            )
+        ),
     )
