@@ -41,7 +41,9 @@ def test_launch_with_defaults(plan):
                         }
                     ]
                 }
-            ]
+            ],
+            "superchains": {"superchain-0": {}},
+            "supervisors": {"supervisor-0": {"superchain": "superchain-0"}},
         },
     )
 
@@ -71,7 +73,7 @@ def test_launch_with_defaults(plan):
         persistent=False,
         additional_services=[],
         observability_helper=observability_helper,
-        interop_params=parsed_input_args.interop,
+        supervisors_params=parsed_input_args.supervisors,
         da_server_context=da_server_context,
     )
 
@@ -203,7 +205,7 @@ def test_launch_with_el_op_besu(plan):
         persistent=False,
         additional_services=[],
         observability_helper=observability_helper,
-        interop_params=parsed_input_args.interop,
+        supervisors_params=parsed_input_args.supervisors,
         da_server_context=da_server_context,
     )
 

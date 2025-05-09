@@ -27,7 +27,7 @@ def launch_participant_network(
     persistent,
     additional_services,
     observability_helper,
-    interop_params,
+    supervisors_params,
     da_server_context,
     registry=_registry.Registry(),
 ):
@@ -50,7 +50,7 @@ def launch_participant_network(
         persistent=persistent,
         additional_services=additional_services,
         observability_helper=observability_helper,
-        interop_params=interop_params,
+        supervisors_params=supervisors_params,
         da_server_context=da_server_context,
         registry=registry,
     )

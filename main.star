@@ -1,7 +1,8 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 l2_launcher = import_module("./src/l2.star")
-op_supervisor_launcher = import_module("./src/interop/op-supervisor/launcher.star")
+superchain_launcher = import_module("./src/superchain/launcher.star")
+op_supervisor_launcher = import_module("./src/supervisor/op-supervisor/launcher.star")
 op_challenger_launcher = import_module("./src/challenger/op-challenger/launcher.star")
 
 faucet = import_module("./src/faucet/op-faucet/op_faucet_launcher.star")
@@ -53,8 +54,6 @@ def run(plan, args={}):
     altda_deploy_config = optimism_args.altda_deploy_config
 
     observability_params = optimism_args.observability
-    interop_params = optimism_args.interop
-
     observability_helper = observability.make_helper(observability_params)
 
     # Deploy the L1
@@ -111,6 +110,14 @@ def run(plan, args={}):
 
     l2s = []
     for l2_num, chain in enumerate(optimism_args.chains):
+        # We filter out the supervisors applicable to this network
+        l2_supervisors_params = [
+            supervisor_params
+            for supervisor_params in optimism_args.supervisors
+            if chain.network_params.network_id
+            in supervisor_params.superchain.participants
+        ]
+
         l2s.append(
             l2_launcher.launch_l2(
                 plan=plan,
@@ -127,21 +134,25 @@ def run(plan, args={}):
                 global_tolerations=global_tolerations,
                 persistent=persistent,
                 observability_helper=observability_helper,
-                interop_params=interop_params,
+                supervisors_params=l2_supervisors_params,
                 registry=registry,
             )
         )
 
-    supervisor = None
-    if interop_params.enabled:
-        supervisor = op_supervisor_launcher.launch(
-            plan,
-            l1_config_env_vars,
-            optimism_args.chains,
-            l2s,
-            jwt_file,
-            interop_params.supervisor_params,
-            observability_helper,
+    for superchain_params in optimism_args.superchains:
+        superchain_launcher.launch(
+            plan=plan,
+            params=superchain_params,
+        )
+
+    for supervisor_params in optimism_args.supervisors:
+        op_supervisor_launcher.launch(
+            plan=plan,
+            params=supervisor_params,
+            l1_config_env_vars=l1_config_env_vars,
+            l2s=l2s,
+            jwt_file=jwt_file,
+            observability_helper=observability_helper,
         )
 
     for challenger_params in optimism_args.challengers:
@@ -149,7 +160,7 @@ def run(plan, args={}):
             plan=plan,
             params=challenger_params,
             l2s=l2s,
-            supervisor=supervisor,
+            supervisors_params=optimism_args.supervisors,
             l1_config_env_vars=l1_config_env_vars,
             deployment_output=deployment_output,
             observability_helper=observability_helper,
