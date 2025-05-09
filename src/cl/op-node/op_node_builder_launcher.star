@@ -91,22 +91,22 @@ def launch(
     )
 
     config = get_beacon_config(
-        plan,
-        launcher,
-        service_name,
-        participant,
-        log_level,
-        persistent,
-        tolerations,
-        node_selectors,
-        el_context,
-        existing_cl_clients,
-        l1_config_env_vars,
-        beacon_node_identity_recipe,
-        sequencer_enabled,
-        observability_helper,
-        interop_params,
-        da_server_context,
+        plan=plan,
+        launcher=launcher,
+        service_name=service_name,
+        participant=participant,
+        log_level=log_level,
+        persistent=persistent,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        el_context=el_context,
+        existing_cl_clients=existing_cl_clients,
+        l1_config_env_vars=l1_config_env_vars,
+        beacon_node_identity_recipe=beacon_node_identity_recipe,
+        sequencer_enabled=sequencer_enabled,
+        observability_helper=observability_helper,
+        interop_params=interop_params,
+        da_server_context=da_server_context,
     )
 
     service = plan.add_service(service_name, config)

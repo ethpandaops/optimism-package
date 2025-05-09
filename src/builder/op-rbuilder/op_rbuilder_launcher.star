@@ -102,20 +102,20 @@ def launch(
     cl_client_name = service_name.split("-")[4]
 
     config = get_config(
-        plan,
-        launcher,
-        service_name,
-        participant,
-        log_level,
-        persistent,
-        tolerations,
-        node_selectors,
-        existing_el_clients,
-        cl_client_name,
-        sequencer_enabled,
-        sequencer_context,
-        observability_helper,
-        interop_params,
+        plan=plan,
+        launcher=launcher,
+        service_name=service_name,
+        participant=participant,
+        log_level=log_level,
+        persistent=persistent,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        existing_el_clients=existing_el_clients,
+        cl_client_name=cl_client_name,
+        sequencer_enabled=sequencer_enabled,
+        sequencer_context=sequencer_context,
+        observability_helper=observability_helper,
+        interop_params=interop_params,
     )
 
     service = plan.add_service(service_name, config)
