@@ -142,7 +142,7 @@ def run(plan, args={}):
     for superchain_params in optimism_args.superchains:
         superchain_launcher.launch(
             plan=plan,
-            params=superchain_params,
+            superchains_params=superchain_params,
         )
 
     for supervisor_params in optimism_args.supervisors:
