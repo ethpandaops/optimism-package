@@ -68,6 +68,7 @@ def test_superchain_input_parser_default_args(plan):
         },
         dependency_set=struct(
             name="superchain-depset-superchain-0",
+            path="superchain-depset-superchain-0.json",
             value={
                 "dependencies": {
                     "1000": {
