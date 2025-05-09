@@ -47,7 +47,7 @@ def launch(
     persistent,
     additional_services,
     observability_helper,
-    interop_params,
+    supervisors_params,
     da_server_context,
     registry=_registry.Registry(),
 ):
@@ -291,7 +291,7 @@ def launch(
             sequencer_enabled=sequencer_enabled,
             sequencer_context=sequencer_context,
             observability_helper=observability_helper,
-            interop_params=interop_params,
+            supervisors_params=supervisors_params,
         )
 
         all_el_contexts.append(el_context)
@@ -337,7 +337,7 @@ def launch(
                     sequencer_enabled=False,
                     sequencer_context=sequencer_context,
                     observability_helper=observability_helper,
-                    interop_params=interop_params,
+                    supervisors_params=supervisors_params,
                 )
                 for metrics_info in [
                     x for x in el_builder_context.el_metrics_info if x != None
@@ -380,7 +380,7 @@ def launch(
             l1_config_env_vars=l1_config_env_vars,
             sequencer_enabled=sequencer_enabled,
             observability_helper=observability_helper,
-            interop_params=interop_params,
+            supervisors_params=supervisors_params,
             da_server_context=da_server_context,
         )
 
@@ -414,7 +414,7 @@ def launch(
                 l1_config_env_vars=l1_config_env_vars,
                 sequencer_enabled=False,
                 observability_helper=observability_helper,
-                interop_params=interop_params,
+                supervisors_params=supervisors_params,
                 da_server_context=da_server_context,
             )
             for metrics_info in [

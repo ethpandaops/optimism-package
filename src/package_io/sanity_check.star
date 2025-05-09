@@ -3,7 +3,6 @@ ROOT_PARAMS = [
     "challengers",
     "superchains",
     "supervisors",
-    "interop",
     "altda_deploy_config",
     "chains",
     "op_contract_deployer_params",
@@ -61,17 +60,6 @@ GRAFANA_PARAMS = [
     "max_cpu",
     "min_mem",
     "max_mem",
-]
-
-INTEROP_PARAMS = [
-    "enabled",
-    "supervisor_params",
-]
-
-SUPERVISOR_PARAMS = [
-    "image",
-    "dependency_set",
-    "extra_params",
 ]
 
 ALTDA_DEPLOY_CONFIG_PARAMS = [
@@ -271,22 +259,6 @@ def sanity_check(plan, optimism_config):
             FAUCET_PARAMS,
         )
 
-    if "interop" in optimism_config:
-        validate_params(
-            plan,
-            optimism_config,
-            "interop",
-            INTEROP_PARAMS,
-        )
-
-        if "supervisor_params" in optimism_config["interop"]:
-            validate_params(
-                plan,
-                optimism_config["interop"],
-                "supervisor_params",
-                SUPERVISOR_PARAMS,
-            )
-
     if "altda_deploy_config" in optimism_config:
         validate_params(
             plan,
@@ -328,7 +300,6 @@ def sanity_check(plan, optimism_config):
             )
             combined_root_params.append("additional_services")
             combined_root_params.append("op_contract_deployer_params")
-            combined_root_params.append("supervisor_params")
 
             if param not in combined_root_params:
                 fail(

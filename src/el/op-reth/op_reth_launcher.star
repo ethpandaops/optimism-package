@@ -85,7 +85,7 @@ def launch(
     sequencer_enabled,
     sequencer_context,
     observability_helper,
-    interop_params,
+    supervisors_params,
 ):
     log_level = ethereum_package_input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
