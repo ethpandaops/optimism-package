@@ -1,6 +1,7 @@
 _expansion = import_module("/src/util/expansion.star")
 _filter = import_module("/src/util/filter.star")
 _net = import_module("/src/util/net.star")
+_id = import_module("/src/util/id.star")
 
 _DEFAULT_ARGS = {
     "enabled": True,
@@ -26,6 +27,8 @@ def _parse_instance(superchain_args, superchain_name, chains):
         + superchain_name
         + ": {}",
     )
+
+    _id.assert_id(superchain_name)
 
     # We filter the None values so that we can merge dicts easily
     # and merge the config with the defaults

@@ -53,17 +53,17 @@ optimism_package:
   global_tolerations: []
   persistent: false
   challengers:
-    challenger-0: &x-challenger
+    challenger0: &x-challenger
       participants: "*"
       cannon_trace_types: ["super-cannon", "super-permissioned"]
-    challenger-1:
+    challenger1:
       <<: *x-challenger
   superchains:
-    superchain-0:
+    superchain0:
   supervisors:
-    supervisor-0: &x-supervisor
-      superchain: superchain-0
-    supervisor-1:
+    supervisor0: &x-supervisor
+      superchain: superchain0
+    supervisor1:
       <<: *x-supervisor
 ethereum_package:
   participants:

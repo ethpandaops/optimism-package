@@ -1,5 +1,6 @@
 _expansion = import_module("/src/util/expansion.star")
 _filter = import_module("/src/util/filter.star")
+_id = import_module("/src/util/id.star")
 
 _DEFAULT_ARGS = {
     "enabled": True,
@@ -32,6 +33,8 @@ def _parse_instance(challenger_args, challenger_name, chains):
         + ": {}",
     )
 
+    _id.assert_id(challenger_name)
+
     # We filter the None values so that we can merge dicts easily
     # and merge the config with the defaults
     challenger_params = _DEFAULT_ARGS | _filter.remove_none(challenger_args)
@@ -54,7 +57,10 @@ def _parse_instance(challenger_args, challenger_name, chains):
 
     # We add name & service name
     challenger_params["name"] = challenger_name
-    challenger_params["service_name"] = "op-challenger-{}".format(challenger_name)
+    challenger_params["service_name"] = "op-challenger-{}-{}".format(
+        challenger_name,
+        "-".join([str(p) for p in challenger_params["participants"]]),
+    )
 
     # Now we make sure to cover the prestate arg combinations
     #

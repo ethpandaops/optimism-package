@@ -10,12 +10,12 @@ _chains = [
 def test_superchain_launcher_multiple_participants(plan):
     superchains_params = _input_parser.parse(
         {
-            "superchain-0": {},
-            "superchain-1": None,
-            "superchain-2": {
+            "superchain0": {},
+            "superchain1": None,
+            "superchain2": {
                 "participants": [2000],
             },
-            "superchain-3": {
+            "superchain3": {
                 "participants": [1000, 2000],
             },
         },
@@ -29,9 +29,9 @@ def test_superchain_launcher_multiple_participants(plan):
         ),
         struct(
             dependency_set=struct(
-                artifact="superchain-depset-superchain-0",
-                path="superchain-depset-superchain-0.json",
-                superchain="superchain-0",
+                artifact="superchain-depset-superchain0",
+                path="superchain-depset-superchain0.json",
+                superchain="superchain0",
             )
         ),
     )
@@ -43,9 +43,9 @@ def test_superchain_launcher_multiple_participants(plan):
         ),
         struct(
             dependency_set=struct(
-                artifact="superchain-depset-superchain-1",
-                path="superchain-depset-superchain-1.json",
-                superchain="superchain-1",
+                artifact="superchain-depset-superchain1",
+                path="superchain-depset-superchain1.json",
+                superchain="superchain1",
             )
         ),
     )
@@ -57,9 +57,9 @@ def test_superchain_launcher_multiple_participants(plan):
         ),
         struct(
             dependency_set=struct(
-                artifact="superchain-depset-superchain-2",
-                path="superchain-depset-superchain-2.json",
-                superchain="superchain-2",
+                artifact="superchain-depset-superchain2",
+                path="superchain-depset-superchain2.json",
+                superchain="superchain2",
             )
         ),
     )
@@ -71,9 +71,9 @@ def test_superchain_launcher_multiple_participants(plan):
         ),
         struct(
             dependency_set=struct(
-                artifact="superchain-depset-superchain-3",
-                path="superchain-depset-superchain-3.json",
-                superchain="superchain-3",
+                artifact="superchain-depset-superchain3",
+                path="superchain-depset-superchain3.json",
+                superchain="superchain3",
             )
         ),
     )

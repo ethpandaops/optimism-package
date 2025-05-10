@@ -4,9 +4,9 @@ _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
 _superchains = [
-    struct(participants=[1000, 2000], name="superchain-0"),
-    struct(participants=[3000], name="superchain-1"),
-    struct(participants=[1000, 4000], name="superchain-2"),
+    struct(participants=[1000, 2000], name="superchain0"),
+    struct(participants=[3000], name="superchain1"),
+    struct(participants=[1000, 4000], name="superchain2"),
 ]
 
 _default_supervisor = struct(
@@ -38,33 +38,33 @@ def test_supervisor_input_parser_empty(plan):
 def test_supervisor_input_parser_extra_attrbutes(plan):
     expect.fails(
         lambda: input_parser.parse(
-            {"supervisor-0": {"extra": None, "name": "x"}},
+            {"supervisor0": {"extra": None, "name": "x"}},
             _superchains,
             _default_registry,
         ),
-        "Invalid attributes in supervisor configuration for supervisor-0: extra,name",
+        "Invalid attributes in supervisor configuration for supervisor0: extra,name",
     )
 
 
 def test_supervisor_input_parser_missing_superchain_name(plan):
     expect.fails(
         lambda: input_parser.parse(
-            {"supervisor-0": {}},
+            {"supervisor0": {}},
             _superchains,
             _default_registry,
         ),
-        "Missing superchain name for supervisor supervisor-0",
+        "Missing superchain name for supervisor supervisor0",
     )
 
 
 def test_supervisor_input_parser_missing_superchain(plan):
     expect.fails(
         lambda: input_parser.parse(
-            {"supervisor-0": {"superchain": "superchain-hallucinated"}},
+            {"supervisor0": {"superchain": "superchain-hallucinated"}},
             _superchains,
             _default_registry,
         ),
-        "Missing superchain superchain-hallucinated for supervisor supervisor-0",
+        "Missing superchain superchain-hallucinated for supervisor supervisor0",
     )
 
 
@@ -72,11 +72,11 @@ def test_supervisor_input_parser_default_args(plan):
     expect.eq(
         input_parser.parse(
             {
-                "supervisor-0": {
+                "supervisor0": {
                     "enabled": None,
                     "image": None,
                     "extra_params": None,
-                    "superchain": "superchain-0",
+                    "superchain": "superchain0",
                 }
             },
             _superchains,
@@ -87,13 +87,13 @@ def test_supervisor_input_parser_default_args(plan):
                 enabled=True,
                 extra_params=[],
                 image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
-                name="supervisor-0",
+                name="supervisor0",
                 ports={
                     "rpc": _net.port(
                         number=8545,
                     )
                 },
-                service_name="op-supervisor-supervisor-0",
+                service_name="op-supervisor-supervisor0-superchain0",
                 superchain=_superchains[0],
             ),
         ],
@@ -103,8 +103,8 @@ def test_supervisor_input_parser_default_args(plan):
 def test_supervisor_input_parser_custom_params(plan):
     parsed = input_parser.parse(
         {
-            "supervisor-0": {
-                "superchain": "superchain-0",
+            "supervisor0": {
+                "superchain": "superchain0",
                 "image": "op-supervisor:smallest",
                 "extra_params": ["--hey"],
             },
@@ -122,7 +122,7 @@ def test_supervisor_input_parser_custom_registry(plan):
 
     parsed = input_parser.parse(
         {
-            "supervisor-0": {"superchain": "superchain-0"},
+            "supervisor0": {"superchain": "superchain0"},
         },
         _superchains,
         registry,
@@ -131,8 +131,8 @@ def test_supervisor_input_parser_custom_registry(plan):
 
     parsed = input_parser.parse(
         {
-            "supervisor-0": {
-                "superchain": "superchain-0",
+            "supervisor0": {
+                "superchain": "superchain0",
                 "image": "op-supervisor:oldest",
             },
         },

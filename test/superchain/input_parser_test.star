@@ -28,7 +28,7 @@ def test_superchain_input_parser_empty(plan):
 def test_superchain_input_parser_no_participants(plan):
     expect.eq(
         input_parser.parse(
-            {"superchain-0": {"participants": []}},
+            {"superchain0": {"participants": []}},
             _chains,
         ),
         [],
@@ -38,7 +38,7 @@ def test_superchain_input_parser_no_participants(plan):
 def test_superchain_input_parser_disabled(plan):
     expect.eq(
         input_parser.parse(
-            {"superchain-0": {"enabled": False}},
+            {"superchain0": {"enabled": False}},
             _chains,
         ),
         [],
@@ -48,17 +48,17 @@ def test_superchain_input_parser_disabled(plan):
 def test_superchain_input_parser_extra_attributes(plan):
     expect.fails(
         lambda: input_parser.parse(
-            {"superchain-0": {"extra": None, "name": "x"}},
+            {"superchain0": {"extra": None, "name": "x"}},
             _chains,
         ),
-        "Invalid attributes in superchain configuration for superchain-0: extra,name",
+        "Invalid attributes in superchain configuration for superchain0: extra,name",
     )
 
 
 def test_superchain_input_parser_default_args(plan):
     expected_params = struct(
         enabled=True,
-        name="superchain-0",
+        name="superchain0",
         participants=[1000, 2000],
         ports={
             "rpc-interop": _net.port(
@@ -67,8 +67,8 @@ def test_superchain_input_parser_default_args(plan):
             )
         },
         dependency_set=struct(
-            name="superchain-depset-superchain-0",
-            path="superchain-depset-superchain-0.json",
+            name="superchain-depset-superchain0",
+            path="superchain-depset-superchain0.json",
             value={
                 "dependencies": {
                     "1000": {
@@ -88,21 +88,21 @@ def test_superchain_input_parser_default_args(plan):
 
     expect.eq(
         input_parser.parse(
-            {"superchain-0": None},
+            {"superchain0": None},
             _chains,
         ),
         [expected_params],
     )
     expect.eq(
         input_parser.parse(
-            {"superchain-0": {}},
+            {"superchain0": {}},
             _chains,
         ),
         [expected_params],
     )
     expect.eq(
         input_parser.parse(
-            {"superchain-0": {"enabled": None, "participants": None}},
+            {"superchain0": {"enabled": None, "participants": None}},
             _chains,
         ),
         [expected_params],
