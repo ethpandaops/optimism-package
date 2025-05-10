@@ -26,10 +26,10 @@ def test_interop_op_supervisor_ports(plan):
                     ],
                 }
             ],
-            "superchains": {"superchain-0": {}},
+            "superchains": {"superchain0": {}},
             "supervisors": {
-                "supervisor-0": {
-                    "superchain": "superchain-0",
+                "supervisor0": {
+                    "superchain": "superchain0",
                 }
             },
         },
@@ -66,17 +66,17 @@ def test_interop_op_supervisor_ports(plan):
 
     expect.eq(
         supervisor_params.superchain.dependency_set.name,
-        "superchain-depset-superchain-0",
+        "superchain-depset-superchain0",
     )
     expect.eq(
         supervisor_params.superchain.dependency_set.path,
-        "superchain-depset-superchain-0.json",
+        "superchain-depset-superchain0.json",
     )
     expect.eq(
         service_config.env_vars["OP_SUPERVISOR_DEPENDENCY_SET"],
-        "/etc/op-supervisor/superchain-depset-superchain-0.json",
+        "/etc/op-supervisor/superchain-depset-superchain0.json",
     )
     expect.eq(
         service_config.files["/etc/op-supervisor"].artifact_names,
-        ["superchain-depset-superchain-0"],
+        ["superchain-depset-superchain0"],
     )

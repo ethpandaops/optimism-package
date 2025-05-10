@@ -278,8 +278,8 @@ def test_launch_with_superchains(plan):
                     ]
                 }
             ],
-            "superchains": {"superchain-0": {}},
-            "supervisors": {"supervisor-0": {"superchain": "superchain-0"}},
+            "superchains": {"superchain0": {}},
+            "supervisors": {"supervisor0": {"superchain": "superchain0"}},
         },
     )
 

@@ -1,5 +1,6 @@
 _filter = import_module("/src/util/filter.star")
 _net = import_module("/src/util/net.star")
+_id = import_module("/src/util/id.star")
 _registry = import_module("/src/package_io/registry.star")
 
 _DEFAULT_ARGS = {
@@ -31,6 +32,8 @@ def _parse_instance(supervisor_args, supervisor_name, superchains, registry):
         + ": {}",
     )
 
+    _id.assert_id(supervisor_name)
+
     supervisor_params = _DEFAULT_ARGS | _filter.remove_none(supervisor_args or {})
 
     if not supervisor_params["enabled"]:
@@ -57,7 +60,10 @@ def _parse_instance(supervisor_args, supervisor_name, superchains, registry):
 
     # We add name & service name
     supervisor_params["name"] = supervisor_name
-    supervisor_params["service_name"] = "op-supervisor-{}".format(supervisor_name)
+    supervisor_params["service_name"] = "op-supervisor-{}-{}".format(
+        supervisor_name,
+        superchain_name,
+    )
 
     # And default the image to the one in the registry
     supervisor_params["image"] = supervisor_params["image"] or registry.get(
