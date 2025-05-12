@@ -236,7 +236,9 @@ def input_parser(plan, input_args):
                 ),
                 batcher_params=struct(
                     image=result["batcher_params"]["image"],
-                    max_channel_duration=result["batcher_params"]["max_channel_duration"],
+                    max_channel_duration=result["batcher_params"][
+                        "max_channel_duration"
+                    ],
                     extra_params=result["batcher_params"].get("extra_params", []),
                 ),
                 proposer_params=struct(
