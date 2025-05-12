@@ -21,6 +21,7 @@ def launch_l2(
     global_tolerations,
     persistent,
     observability_helper,
+    observability_params,
     interop_params,
 ):
     network_params = l2_args.network_params
@@ -64,6 +65,7 @@ def launch_l2(
         persistent,
         l2_args.additional_services,
         observability_helper,
+        observability_params,
         interop_params,
         da_server_context,
     )

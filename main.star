@@ -122,6 +122,7 @@ def run(plan, args={}):
                 global_tolerations,
                 persistent,
                 observability_helper,
+                observability_params,
                 interop_params,
             )
         )
@@ -135,6 +136,7 @@ def run(plan, args={}):
             jwt_file,
             interop_params.supervisor_params,
             observability_helper,
+            observability_params,
         )
 
     # challenger must launch after supervisor because it depends on it for interop
@@ -159,11 +161,12 @@ def run(plan, args={}):
                 chain.challenger_params,
                 interop_params,
                 observability_helper,
+                observability_params,
             )
-
-    observability.launch(
-        plan, observability_helper, global_node_selectors, observability_params
-    )
+    if observability_params.enabled:
+        observability.launch(
+            plan, observability_helper, global_node_selectors, observability_params
+        )
 
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):

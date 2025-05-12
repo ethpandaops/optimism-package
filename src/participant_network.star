@@ -28,6 +28,7 @@ def launch_participant_network(
     persistent,
     additional_services,
     observability_helper,
+    observability_params,
     interop_params,
     da_server_context,
 ):
@@ -49,6 +50,7 @@ def launch_participant_network(
         persistent,
         additional_services,
         observability_helper,
+        observability_params,
         interop_params,
         da_server_context,
     )
@@ -92,6 +94,7 @@ def launch_participant_network(
         batcher_params,
         network_params,
         observability_helper,
+        observability_params,
         da_server_context,
     )
 
@@ -124,6 +127,7 @@ def launch_participant_network(
             proposer_params,
             network_params,
             observability_helper,
+            observability_params,
         )
 
     return struct(

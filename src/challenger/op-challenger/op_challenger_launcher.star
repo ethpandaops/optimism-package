@@ -36,6 +36,7 @@ def launch(
     challenger_params,
     interop_params,
     observability_helper,
+    observability_params,
 ):
     config = get_challenger_config(
         plan,
@@ -54,9 +55,10 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    observability.register_op_service_metrics_job(
-        observability_helper, service, network_params.network
-    )
+    if observability_params.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper, service, network_params.network
+        )
 
     return "op_challenger"
 

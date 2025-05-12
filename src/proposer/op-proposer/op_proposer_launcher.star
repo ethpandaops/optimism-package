@@ -46,6 +46,7 @@ def launch(
     proposer_params,
     network_params,
     observability_helper,
+    observability_params,
 ):
     proposer_service_name = "{0}".format(service_name)
 
@@ -64,9 +65,10 @@ def launch(
     service = plan.add_service(service_name, config)
     http_url = util.make_service_http_url(service)
 
-    observability.register_op_service_metrics_job(
-        observability_helper, service, network_params.network
-    )
+    if observability_params.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper, service, network_params.network
+        )
 
     return http_url
 

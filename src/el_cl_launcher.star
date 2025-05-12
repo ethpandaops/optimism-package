@@ -43,6 +43,7 @@ def launch(
     persistent,
     additional_services,
     observability_helper,
+    observability_params,
     interop_params,
     da_server_context,
 ):

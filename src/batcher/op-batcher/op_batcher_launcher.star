@@ -46,6 +46,7 @@ def launch(
     batcher_params,
     network_params,
     observability_helper,
+    observability_params,
     da_server_context,
 ):
     config = get_batcher_config(
@@ -64,9 +65,10 @@ def launch(
     service = plan.add_service(service_name, config)
     service_url = util.make_service_http_url(service)
 
-    observability.register_op_service_metrics_job(
-        observability_helper, service, network_params.network
-    )
+    if observability_params.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper, service, network_params.network
+        )
 
     return service_url
 
