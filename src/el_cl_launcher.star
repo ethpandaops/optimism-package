@@ -47,7 +47,7 @@ def launch(
     persistent,
     additional_services,
     observability_helper,
-    interop_params,
+    supervisors_params,
     da_server_context,
     registry=_registry.Registry(),
 ):
@@ -279,19 +279,19 @@ def launch(
         )
 
         el_context = el_launch_method(
-            plan,
-            el_launcher,
-            el_service_name,
-            participant,
-            global_log_level,
-            persistent,
-            el_tolerations,
-            node_selectors,
-            all_el_contexts,
-            sequencer_enabled,
-            sequencer_context,
-            observability_helper,
-            interop_params,
+            plan=plan,
+            launcher=el_launcher,
+            service_name=el_service_name,
+            participant=participant,
+            global_log_level=global_log_level,
+            persistent=persistent,
+            tolerations=el_tolerations,
+            node_selectors=node_selectors,
+            existing_el_clients=all_el_contexts,
+            sequencer_enabled=sequencer_enabled,
+            sequencer_context=sequencer_context,
+            observability_helper=observability_helper,
+            supervisors_params=supervisors_params,
         )
 
         all_el_contexts.append(el_context)
@@ -325,19 +325,19 @@ def launch(
                     all_el_contexts[0] if len(all_el_contexts) > 0 else None
                 )
                 el_builder_context = el_builder_launch_method(
-                    plan,
-                    el_builder_launcher,
-                    el_builder_service_name,
-                    participant,
-                    global_log_level,
-                    persistent,
-                    el_tolerations,
-                    node_selectors,
-                    all_el_contexts,
-                    False,  # sequencer_enabled
-                    sequencer_context,
-                    observability_helper,
-                    interop_params,
+                    plan=plan,
+                    launcher=el_builder_launcher,
+                    service_name=el_builder_service_name,
+                    participant=participant,
+                    global_log_level=global_log_level,
+                    persistent=persistent,
+                    tolerations=el_tolerations,
+                    node_selectors=node_selectors,
+                    existing_el_clients=all_el_contexts,
+                    sequencer_enabled=False,
+                    sequencer_context=sequencer_context,
+                    observability_helper=observability_helper,
+                    supervisors_params=supervisors_params,
                 )
                 for metrics_info in [
                     x for x in el_builder_context.el_metrics_info if x != None
@@ -365,23 +365,23 @@ def launch(
             sidecar_context = None
 
         cl_context = cl_launch_method(
-            plan,
-            cl_launcher,
-            cl_service_name,
-            participant,
-            global_log_level,
-            persistent,
-            cl_tolerations,
-            node_selectors,
-            sidecar_context
+            plan=plan,
+            launcher=cl_launcher,
+            service_name=cl_service_name,
+            participant=participant,
+            global_log_level=global_log_level,
+            persistent=persistent,
+            tolerations=cl_tolerations,
+            node_selectors=node_selectors,
+            el_context=sidecar_context
             if rollup_boost_enabled and sequencer_enabled
             else el_context,
-            all_cl_contexts,
-            l1_config_env_vars,
-            sequencer_enabled,
-            observability_helper,
-            interop_params,
-            da_server_context,
+            existing_cl_clients=all_cl_contexts,
+            l1_config_env_vars=l1_config_env_vars,
+            sequencer_enabled=sequencer_enabled,
+            observability_helper=observability_helper,
+            supervisors_params=supervisors_params,
+            da_server_context=da_server_context,
         )
 
         all_cl_contexts.append(cl_context)
@@ -401,21 +401,21 @@ def launch(
         # We don't deploy CL for external builder
         if rollup_boost_enabled and sequencer_enabled and not external_builder:
             cl_builder_context = cl_builder_launch_method(
-                plan,
-                cl_builder_launcher,
-                cl_builder_service_name,
-                participant,
-                global_log_level,
-                persistent,
-                cl_tolerations,
-                node_selectors,
-                el_builder_context,
-                all_cl_contexts,
-                l1_config_env_vars,
-                False,
-                observability_helper,
-                interop_params,
-                da_server_context,
+                plan=plan,
+                launcher=cl_builder_launcher,
+                service_name=cl_builder_service_name,
+                participant=participant,
+                global_log_level=global_log_level,
+                persistent=persistent,
+                tolerations=cl_tolerations,
+                node_selectors=node_selectors,
+                el_context=el_builder_context,
+                existing_cl_clients=all_cl_contexts,
+                l1_config_env_vars=l1_config_env_vars,
+                sequencer_enabled=False,
+                observability_helper=observability_helper,
+                supervisors_params=supervisors_params,
+                da_server_context=da_server_context,
             )
             for metrics_info in [
                 x for x in cl_builder_context.cl_nodes_metrics_info if x != None

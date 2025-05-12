@@ -31,7 +31,6 @@ ethereum_package_input_parser = import_module(
 constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 observability = import_module("../../observability/observability.star")
-interop_constants = import_module("../../interop/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 
@@ -87,7 +86,7 @@ def launch(
     l1_config_env_vars,
     sequencer_enabled,
     observability_helper,
-    interop_params,
+    supervisors_params,
     da_server_context,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
@@ -121,7 +120,7 @@ def launch(
         beacon_node_identity_recipe,
         sequencer_enabled,
         observability_helper,
-        interop_params,
+        supervisors_params,
         da_server_context,
     )
 
@@ -168,7 +167,7 @@ def get_beacon_config(
     beacon_node_identity_recipe,
     sequencer_enabled,
     observability_helper,
-    interop_params,
+    supervisors_params,
     da_server_context,
 ):
     ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))

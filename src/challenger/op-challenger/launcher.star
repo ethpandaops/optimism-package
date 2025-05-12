@@ -9,8 +9,10 @@ ethereum_package_constants = import_module(
 observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
+_filter = import_module("/src/util/filter.star")
+_net = import_module("/src/util/net.star")
+
 constants = import_module("../../package_io/constants.star")
-interop_constants = import_module("../../interop/constants.star")
 util = import_module("../../util.star")
 
 #
@@ -21,20 +23,25 @@ def launch(
     plan,
     params,
     l2s,
-    # TODO Once the multiple supervisors are in, this will need to change
-    supervisor,
+    supervisors_params,
     l1_config_env_vars,
     deployment_output,
     observability_helper,
 ):
     # We need to only grab the networks this challenger is connected to
     challenger_l2s = [l2 for l2 in l2s if l2.network_id in params.participants]
+    supervisor_params = _filter.first(
+        supervisors_params,
+        lambda s: any(
+            [l2.network_id in s.superchain.participants for l2 in challenger_l2s]
+        ),
+    )
 
     config = get_challenger_config(
         plan=plan,
         params=params,
         l2s=challenger_l2s,
-        supervisor=supervisor,
+        supervisor_params=supervisor_params,
         l1_config_env_vars=l1_config_env_vars,
         deployment_output=deployment_output,
         observability_helper=observability_helper,
@@ -58,7 +65,7 @@ def get_challenger_config(
     plan,
     params,
     l2s,
-    supervisor,
+    supervisor_params,
     l1_config_env_vars,
     deployment_output,
     observability_helper,
@@ -149,10 +156,14 @@ def get_challenger_config(
         )
 
     # Now plug a supervisor in
-    if supervisor:
+    if supervisor_params != None:
+        # We take the first supervisor since for now we don't have a better way of picking an exact one
         cmd.append(
             "--supervisor-rpc={}".format(
-                supervisor.service.ports[constants.RPC_PORT_ID].url
+                _net.service_url(
+                    supervisor_params.service_name,
+                    supervisor_params.ports[_net.RPC_PORT_NAME],
+                )
             )
         )
         # TraceTypeSupper{Cannon|Permissioned} needs --cannon-depset-config to be set

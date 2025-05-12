@@ -162,7 +162,9 @@ def deploy_contracts(
                 hardfork_schedule.append((index, fork_key, activation_timestamp))
 
     intent = {
-        "useInterop": optimism_args.interop.enabled,
+        # TODO At the moment, we assume that if there are any superchains defined, we'll need to deploy interop contracts
+        # We'll need to update the op-deployer logic to better suit the interop scenario
+        "useInterop": len(optimism_args.superchains) > 0,
         "l1ContractsLocator": l1_artifacts_locator,
         "l2ContractsLocator": l2_artifacts_locator,
         "superchainRoles": {

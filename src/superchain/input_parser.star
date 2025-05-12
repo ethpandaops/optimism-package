@@ -1,5 +1,7 @@
 _expansion = import_module("/src/util/expansion.star")
 _filter = import_module("/src/util/filter.star")
+_net = import_module("/src/util/net.star")
+_id = import_module("/src/util/id.star")
 
 _DEFAULT_ARGS = {
     "enabled": True,
@@ -26,6 +28,8 @@ def _parse_instance(superchain_args, superchain_name, chains):
         + ": {}",
     )
 
+    _id.assert_id(superchain_name)
+
     # We filter the None values so that we can merge dicts easily
     # and merge the config with the defaults
     superchain_params = _DEFAULT_ARGS | _filter.remove_none(superchain_args)
@@ -50,4 +54,35 @@ def _parse_instance(superchain_args, superchain_name, chains):
     # We add the name to the config
     superchain_params["name"] = superchain_name
 
+    # We add interop RPC port to the superchain config
+    #
+    # This is used for communication between supervisors and CL clients
+    # and since it's not a port exposed on on the supervisor but rather on the CL client,
+    # we put it here (at least temporarily)
+    #
+    # TODO Once the input parsers for CL clients are refactored, this will be moved there
+    superchain_params["ports"] = {
+        _net.INTEROP_RPC_PORT_NAME: _net.port(number=9645, application_protocol="ws"),
+    }
+
+    # We'll create a dependency set for the superchain based on all the participants
+    superchain_params["dependency_set"] = struct(
+        name="superchain-depset-{}".format(superchain_name),
+        path="superchain-depset-{}.json".format(superchain_name),
+        value=_create_dependency_set(superchain_params["participants"]),
+    )
+
     return struct(**superchain_params)
+
+
+def _create_dependency_set(network_ids):
+    return {
+        "dependencies": {
+            str(network_id): {
+                "chainIndex": str(network_id),
+                "activationTime": 0,
+                "historyMinTime": 0,
+            }
+            for network_id in network_ids
+        }
+    }

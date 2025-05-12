@@ -14,10 +14,12 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+_filter = import_module("/src/util/filter.star")
+_net = import_module("/src/util/net.star")
+
 constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 observability = import_module("../../observability/observability.star")
-interop_constants = import_module("../../interop/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 
@@ -71,7 +73,7 @@ def launch(
     l1_config_env_vars,
     sequencer_enabled,
     observability_helper,
-    interop_params,
+    supervisors_params,
     da_server_context,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
@@ -91,22 +93,22 @@ def launch(
     )
 
     config = get_beacon_config(
-        plan,
-        launcher,
-        service_name,
-        participant,
-        log_level,
-        persistent,
-        tolerations,
-        node_selectors,
-        el_context,
-        existing_cl_clients,
-        l1_config_env_vars,
-        beacon_node_identity_recipe,
-        sequencer_enabled,
-        observability_helper,
-        interop_params,
-        da_server_context,
+        plan=plan,
+        launcher=launcher,
+        service_name=service_name,
+        participant=participant,
+        log_level=log_level,
+        persistent=persistent,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        el_context=el_context,
+        existing_cl_clients=existing_cl_clients,
+        l1_config_env_vars=l1_config_env_vars,
+        beacon_node_identity_recipe=beacon_node_identity_recipe,
+        sequencer_enabled=sequencer_enabled,
+        observability_helper=observability_helper,
+        supervisors_params=supervisors_params,
+        da_server_context=da_server_context,
     )
 
     service = plan.add_service(service_name, config)
@@ -150,7 +152,7 @@ def get_beacon_config(
     beacon_node_identity_recipe,
     sequencer_enabled,
     observability_helper,
-    interop_params,
+    supervisors_params,
     da_server_context,
 ):
     ports = dict(get_used_ports(BEACON_DISCOVERY_PORT_NUM))
@@ -212,19 +214,17 @@ def get_beacon_config(
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
 
-    if interop_params.enabled:
-        ports[
-            interop_constants.INTEROP_WS_PORT_ID
-        ] = ethereum_package_shared_utils.new_port_spec(
-            interop_constants.INTEROP_WS_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-        )
+    supervisor_params = _filter.first(supervisors_params)
+    if supervisor_params:
+        interop_rpc_port = supervisor_params.superchain.ports[
+            _net.INTEROP_RPC_PORT_NAME
+        ]
+        ports[_net.INTEROP_RPC_PORT_NAME] = _net.port_to_port_spec(interop_rpc_port)
 
         env_vars.update(
             {
-                # "OP_NODE_INTEROP_SUPERVISOR": interop_constants.SUPERVISOR_ENDPOINT,
                 "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
-                "OP_NODE_INTEROP_RPC_PORT": str(interop_constants.INTEROP_WS_PORT_NUM),
+                "OP_NODE_INTEROP_RPC_PORT": str(interop_rpc_port.number),
                 "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
             }
         )
