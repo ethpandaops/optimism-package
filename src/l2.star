@@ -22,12 +22,12 @@ def launch_l2(
     global_tolerations,
     persistent,
     observability_helper,
-    interop_params,
+    supervisors_params,
+    registry=None,
 ):
     network_params = l2_args.network_params
     proxyd_params = l2_args.proxyd_params
     batcher_params = l2_args.batcher_params
-    challenger_params = l2_args.challenger_params
     proposer_params = l2_args.proposer_params
     mev_params = l2_args.mev_params
     tx_fuzzer_params = l2_args.tx_fuzzer_params
@@ -49,27 +49,27 @@ def launch_l2(
         plan.print("Successfully launched da-server")
 
     l2 = participant_network.launch_participant_network(
-        plan,
-        l2_args.participants,
-        jwt_file,
-        network_params,
-        proxyd_params,
-        batcher_params,
-        challenger_params,
-        proposer_params,
-        mev_params,
-        deployment_output,
-        l1_config,
-        l2_num,
-        l2_services_suffix,
-        global_log_level,
-        global_node_selectors,
-        global_tolerations,
-        persistent,
-        l2_args.additional_services,
-        observability_helper,
-        interop_params,
-        da_server_context,
+        plan=plan,
+        participants=l2_args.participants,
+        jwt_file=jwt_file,
+        network_params=network_params,
+        proxyd_params=proxyd_params,
+        batcher_params=batcher_params,
+        proposer_params=proposer_params,
+        mev_params=mev_params,
+        deployment_output=deployment_output,
+        l1_config_env_vars=l1_config,
+        l2_num=l2_num,
+        l2_services_suffix=l2_services_suffix,
+        global_log_level=global_log_level,
+        global_node_selectors=global_node_selectors,
+        global_tolerations=global_tolerations,
+        persistent=persistent,
+        additional_services=l2_args.additional_services,
+        observability_helper=observability_helper,
+        supervisors_params=supervisors_params,
+        da_server_context=da_server_context,
+        registry=registry,
     )
 
     all_el_contexts = []
@@ -83,7 +83,7 @@ def launch_l2(
         plan,
         deployment_output,
         "state",
-        '.opChainDeployments[] | select(.id=="{0}") | .l1StandardBridgeProxyAddress'.format(
+        '.opChainDeployments[] | select(.id=="{0}") | .L1StandardBridgeProxy'.format(
             network_id_as_hex
         ),
     )

@@ -1,6 +1,8 @@
 ROOT_PARAMS = [
     "observability",
-    "interop",
+    "challengers",
+    "superchains",
+    "supervisors",
     "altda_deploy_config",
     "chains",
     "op_contract_deployer_params",
@@ -58,17 +60,6 @@ GRAFANA_PARAMS = [
     "max_cpu",
     "min_mem",
     "max_mem",
-]
-
-INTEROP_PARAMS = [
-    "enabled",
-    "supervisor_params",
-]
-
-SUPERVISOR_PARAMS = [
-    "image",
-    "dependency_set",
-    "extra_params",
 ]
 
 ALTDA_DEPLOY_CONFIG_PARAMS = [
@@ -150,17 +141,9 @@ SUBCATEGORY_PARAMS = {
         "interop_time_offset",
         "fund_dev_accounts",
     ],
-    "proxyd_params": ["image", "tag", "extra_params"],
+    "proxyd_params": ["image", "extra_params"],
     "batcher_params": ["image", "extra_params"],
     "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
-    "challenger_params": [
-        "enabled",
-        "image",
-        "extra_params",
-        "cannon_prestate_path",
-        "cannon_prestates_url",
-        "cannon_trace_types",
-    ],
     "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
     "da_server_params": [
         "enabled",
@@ -177,10 +160,13 @@ OP_CONTRACT_DEPLOYER_PARAMS = [
     "image",
     "l1_artifacts_locator",
     "l2_artifacts_locator",
-    "global_deploy_overrides",
+    "overrides",
 ]
 
-OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES = ["faultGameAbsolutePrestate"]
+OP_CONTRACT_DEPLOYER_OVERRIDES = [
+    "faultGameAbsolutePrestate",
+    "vmType",
+]
 
 ADDITIONAL_SERVICES_PARAMS = ["blockscout", "rollup-boost", "da_server", "tx_fuzzer"]
 
@@ -273,22 +259,6 @@ def sanity_check(plan, optimism_config):
             FAUCET_PARAMS,
         )
 
-    if "interop" in optimism_config:
-        validate_params(
-            plan,
-            optimism_config,
-            "interop",
-            INTEROP_PARAMS,
-        )
-
-        if "supervisor_params" in optimism_config["interop"]:
-            validate_params(
-                plan,
-                optimism_config["interop"],
-                "supervisor_params",
-                SUPERVISOR_PARAMS,
-            )
-
     if "altda_deploy_config" in optimism_config:
         validate_params(
             plan,
@@ -330,7 +300,6 @@ def sanity_check(plan, optimism_config):
             )
             combined_root_params.append("additional_services")
             combined_root_params.append("op_contract_deployer_params")
-            combined_root_params.append("supervisor_params")
 
             if param not in combined_root_params:
                 fail(
@@ -351,8 +320,8 @@ def sanity_check(plan, optimism_config):
         validate_params(
             plan,
             optimism_config["op_contract_deployer_params"],
-            "global_deploy_overrides",
-            OP_CONTRACT_DEPLOYER_GLOBAL_DEPLOY_OVERRIDES,
+            "overrides",
+            OP_CONTRACT_DEPLOYER_OVERRIDES,
         )
 
     plan.print("Sanity check for OP package passed")

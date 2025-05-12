@@ -20,10 +20,12 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+_filter = import_module("/src/util/filter.star")
+_net = import_module("/src/util/net.star")
+
 constants = import_module("../../package_io/constants.star")
 observability = import_module("../../observability/observability.star")
 util = import_module("../../util.star")
-interop_constants = import_module("../../interop/constants.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -93,7 +95,7 @@ def launch(
     sequencer_enabled,
     sequencer_context,
     observability_helper,
-    interop_params,
+    supervisors_params,
 ):
     log_level = ethereum_package_input_parser.get_client_log_level_or_default(
         participant.el_builder_log_level, global_log_level, VERBOSITY_LEVELS
@@ -102,20 +104,20 @@ def launch(
     cl_client_name = service_name.split("-")[4]
 
     config = get_config(
-        plan,
-        launcher,
-        service_name,
-        participant,
-        log_level,
-        persistent,
-        tolerations,
-        node_selectors,
-        existing_el_clients,
-        cl_client_name,
-        sequencer_enabled,
-        sequencer_context,
-        observability_helper,
-        interop_params,
+        plan=plan,
+        launcher=launcher,
+        service_name=service_name,
+        participant=participant,
+        log_level=log_level,
+        persistent=persistent,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        existing_el_clients=existing_el_clients,
+        cl_client_name=cl_client_name,
+        sequencer_enabled=sequencer_enabled,
+        sequencer_context=sequencer_context,
+        observability_helper=observability_helper,
+        supervisors_params=supervisors_params,
     )
 
     service = plan.add_service(service_name, config)
@@ -157,7 +159,7 @@ def get_config(
     sequencer_enabled,
     sequencer_context,
     observability_helper,
-    interop_params,
+    supervisors_params,
 ):
     discovery_port = DISCOVERY_PORT_NUM
     ports = dict(get_used_ports(discovery_port))
@@ -241,9 +243,15 @@ def get_config(
     if builder_secret_key != "":
         cmd.append("--rollup.builder-secret-key={0}".format(builder_secret_key))
 
-    if interop_params.enabled:
+    supervisor_params = _filter.first(supervisors_params)
+    if supervisor_params:
         cmd.append(
-            "--rollup.supervisor-http={0}".format(interop_constants.SUPERVISOR_ENDPOINT)
+            "--rollup.supervisor-http={0}".format(
+                _net.service_url(
+                    supervisor_params.service_name,
+                    supervisor_params.ports[_net.RPC_PORT_NAME],
+                )
+            )
         )
 
     config_args = {
