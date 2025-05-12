@@ -77,6 +77,7 @@ def test_op_challenger_launch_with_defaults(plan):
         l1_config_env_vars=l1_config_env_vars,
         deployment_output=deployment_output,
         observability_helper=observability_helper,
+        observability_params=observability_params,
     )
 
     challenger_service_config = kurtosistest.get_service_config(

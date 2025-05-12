@@ -26,6 +26,7 @@ def launch(
     l1_config_env_vars,
     deployment_output,
     observability_helper,
+    observability_params,
 ):
     # We need to only grab the networks this challenger is connected to
     challenger_l2s = [l2 for l2 in l2s if l2.network_id in params.participants]
