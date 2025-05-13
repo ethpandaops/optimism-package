@@ -7,6 +7,7 @@ FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806
 FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
 utils = import_module("../util.star")
+_filter = import_module("../util/filter.star")
 
 ethereum_package_genesis_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
@@ -161,7 +162,9 @@ def deploy_contracts(
                 hardfork_schedule.append((index, fork_key, activation_timestamp))
 
     intent = {
-        "useInterop": optimism_args.interop.enabled,
+        # TODO At the moment, we assume that if there are any superchains defined, we'll need to deploy interop contracts
+        # We'll need to update the op-deployer logic to better suit the interop scenario
+        "useInterop": len(optimism_args.superchains) > 0,
         "l1ContractsLocator": l1_artifacts_locator,
         "l2ContractsLocator": l2_artifacts_locator,
         "superchainRoles": {
@@ -177,18 +180,20 @@ def deploy_contracts(
     }
 
     absolute_prestate = ""
-    if optimism_args.op_contract_deployer_params.global_deploy_overrides[
+    if (
         "faultGameAbsolutePrestate"
-    ]:
-        absolute_prestate = (
-            optimism_args.op_contract_deployer_params.global_deploy_overrides[
-                "faultGameAbsolutePrestate"
-            ]
-        )
+        in optimism_args.op_contract_deployer_params.overrides
+    ):
+        absolute_prestate = optimism_args.op_contract_deployer_params.overrides[
+            "faultGameAbsolutePrestate"
+        ]
         intent["globalDeployOverrides"] = {
             "dangerouslyAllowCustomDisputeParameters": True,
             "faultGameAbsolutePrestate": absolute_prestate,
         }
+
+    overrides = _filter.remove_none(optimism_args.op_contract_deployer_params.overrides)
+    vm_type = overrides.get("vmType", "CANNON")
 
     for i, chain in enumerate(optimism_args.chains):
         chain_id = str(chain.network_params.network_id)
@@ -226,7 +231,7 @@ def deploy_contracts(
                         "faultGameClockExtension": 10800,
                         "faultGameMaxClockDuration": 302400,
                         "dangerouslyAllowCustomDisputeParameters": True,
-                        "vmType": "CANNON",
+                        "vmType": vm_type,
                         "useCustomOracle": False,
                         "oracleMinProposalSize": 0,
                         "oracleChallengePeriodSeconds": 0,
@@ -281,7 +286,8 @@ def deploy_contracts(
     )
 
     apply_cmds = [
-        "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data --predeployed-file /network-data/allocs/predeployed_allocs.json",
+        # "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data --predeployed-file /network-data/allocs/predeployed_allocs.json",
+        "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data",
     ]
     for chain in optimism_args.chains:
         network_id = chain.network_params.network_id
@@ -296,7 +302,7 @@ def deploy_contracts(
             ]
         )
 
-    allocs_artifact = plan.get_files_artifact(name="predeployed_allocs.json")
+    # allocs_artifact = plan.get_files_artifact(name="predeployed_allocs.json")
     op_deployer_output = plan.run_sh(
         name="op-deployer-apply",
         description="Apply L2 contract deployments",
@@ -314,7 +320,7 @@ def deploy_contracts(
         ],
         files={
             "/network-data": op_deployer_configure.files_artifacts[0],
-            "/network-data/allocs": allocs_artifact,
+            # "/network-data/allocs": allocs_artifact,
         }
         | contracts_extra_files,
         run=" && ".join(apply_cmds),
