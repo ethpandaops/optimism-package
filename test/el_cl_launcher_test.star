@@ -75,13 +75,11 @@ def test_launch_with_defaults(plan):
         da_server_context=da_server_context,
     )
 
-    el_service_name = "op-el-2151908-1-op-reth-op-node-"
+    el_service_name = "op-el-1-op-reth-op-node-"
     el_service = plan.get_service(el_service_name)
     el_service_config = kurtosistest.get_service_config(el_service_name)
 
-    cl_service_config = kurtosistest.get_service_config(
-        "op-cl-2151908-1-op-node-op-reth-"
-    )
+    cl_service_config = kurtosistest.get_service_config("op-cl-1-op-node-op-reth-")
     expect.ne(cl_service_config, None)
     expect.eq(cl_service_config.image, "op-node:latest")
     expect.eq(cl_service_config.env_vars, {})
@@ -207,7 +205,7 @@ def test_launch_with_el_op_besu(plan):
         da_server_context=da_server_context,
     )
 
-    el_service_name = "op-el-2151908-1-op-besu-op-node-"
+    el_service_name = "op-el-1-op-besu-op-node-"
     el_service = plan.get_service(el_service_name)
     el_service_config = kurtosistest.get_service_config(el_service_name)
     expect.ne(el_service_config, None)
