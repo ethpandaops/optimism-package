@@ -58,7 +58,7 @@ def _parse(args, participant_name, network_id, registry, el_kind):
     # Draft of what the labels could look like
     el_params["labels"] = {
         "op.kind": el_kind,
-        "ep.network.id": network_id,
+        "op.network.id": network_id,
         "op.el.type": el_params["type"],
     }
 

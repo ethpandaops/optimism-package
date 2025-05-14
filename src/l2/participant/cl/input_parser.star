@@ -58,7 +58,7 @@ def _parse(args, participant_name, network_id, registry, cl_kind):
     # Draft of what the labels could look like
     cl_params["labels"] = {
         "op.kind": cl_kind,
-        "ep.network.id": network_id,
+        "op.network.id": network_id,
         "op.cl.type": cl_params["type"],
     }
 
