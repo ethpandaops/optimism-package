@@ -6,7 +6,7 @@ _id = import_module("/src/util/id.star")
 _el_input_parser = import_module("./el/input_parser.star")
 _cl_input_parser = import_module("./cl/input_parser.star")
 
-_DEFAULT_PARTICIPANT_ARGS = {
+_DEFAULT_ARGS = {
     "el": None,
     "el_builder": None,
     "cl": None,
@@ -28,8 +28,8 @@ def parse(args, network_id, registry):
 def _parse_instance(participant_args, participant_name, network_id, registry):
     # Any extra attributes will cause an error
     _filter.assert_keys(
-        participant_args,
-        _DEFAULT_PARTICIPANT_ARGS.keys(),
+        participant_args or {},
+        _DEFAULT_ARGS.keys(),
         "Invalid attributes in participant configuration for "
         + participant_name
         + " on network "
@@ -37,19 +37,23 @@ def _parse_instance(participant_args, participant_name, network_id, registry):
         + ": {}",
     )
 
+    # We filter the None values so that we can merge dicts easily
+    participant_params = _DEFAULT_ARGS | _filter.remove_none(participant_args or {})
+
     # We make sure the name adheres to our standards
     _id.assert_id(participant_name)
 
-    el_args = participant_args.get("el", {})
-    cl_args = participant_args.get("cl", {})
-
     return struct(
-        el=_el_input_parser.parse(el_args, participant_name, network_id, registry),
-        el_builder=_el_input_parser.parse_builder(
-            el_args, participant_name, network_id, registry
+        el=_el_input_parser.parse(
+            participant_params["el"], participant_name, network_id, registry
         ),
-        cl=_cl_input_parser.parse(cl_args, participant_name, network_id, registry),
+        el_builder=_el_input_parser.parse_builder(
+            participant_params["el_builder"], participant_name, network_id, registry
+        ),
+        cl=_cl_input_parser.parse(
+            participant_params["cl"], participant_name, network_id, registry
+        ),
         cl_builder=_cl_input_parser.parse_builder(
-            cl_args, participant_name, network_id, registry
+            participant_params["cl_builder"], participant_name, network_id, registry
         ),
     )

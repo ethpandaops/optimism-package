@@ -202,11 +202,32 @@ def test_l2_participant_input_parser_custom_registry(plan):
     parsed = input_parser.parse(
         {
             "node0": {"el": {"type": "op-geth"}, "cl": {"type": "op-node"}},
-            "node1": {"el": {"type": "op-reth"}, "cl": {"type": "hildr"}},
-            "node2": {"el": {"type": "op-besu"}, "cl": {"type": "kona-node"}},
-            "node3": {"el": {"type": "op-erigon"}},
-            "node4": {"el": {"type": "op-nethermind"}},
-            "node5": {"el": {"image": "op-geth:edge"}, "cl": {"image": "op-node:edge"}},
+            "node1": {
+                "el_builder": {"type": "op-geth"},
+                "cl_builder": {"type": "op-node"},
+            },
+            "node2": {"el": {"type": "op-reth"}, "cl": {"type": "hildr"}},
+            "node3": {
+                "el_builder": {"type": "op-reth"},
+                "cl_builder": {"type": "hildr"},
+            },
+            "node4": {"el": {"type": "op-besu"}, "cl": {"type": "kona-node"}},
+            "node5": {
+                "el_builder": {"type": "op-besu"},
+                "cl_builder": {"type": "kona-node"},
+            },
+            "node6": {"el": {"type": "op-erigon"}},
+            "node7": {"el_builder": {"type": "op-erigon"}},
+            "node8": {"el": {"type": "op-nethermind"}},
+            "node9": {"el_builder": {"type": "op-nethermind"}},
+            "node10": {
+                "el": {"image": "op-geth:edge"},
+                "cl": {"image": "op-node:edge"},
+            },
+            "node11": {
+                "el_builder": {"image": "op-geth:edge"},
+                "cl_builder": {"image": "op-node:edge"},
+            },
         },
         _default_network_id,
         registry,
@@ -215,37 +236,55 @@ def test_l2_participant_input_parser_custom_registry(plan):
     # node0
     node0 = parsed[0]
     expect.eq(node0.el.image, "op-geth:greatest")
-    expect.eq(node0.el_builder.image, "op-geth:greatest")
     expect.eq(node0.cl.image, "op-node:smallest")
-    expect.eq(node0.cl_builder.image, "op-node:smallest")
 
     # node1
     node1 = parsed[1]
-    expect.eq(node1.el.image, "op-reth:slightest")
-    expect.eq(node1.el_builder.image, "op-reth:slightest")
-    expect.eq(node1.cl.image, "hildr:shortest")
-    expect.eq(node1.cl_builder.image, "hildr:shortest")
+    expect.eq(node1.el_builder.image, "op-geth:greatest")
+    expect.eq(node1.cl_builder.image, "op-node:smallest")
 
     # node2
     node2 = parsed[2]
-    expect.eq(node2.el.image, "op-besu:roundest")
-    expect.eq(node2.el_builder.image, "op-besu:roundest")
-    expect.eq(node2.cl.image, "kona-node:widest")
-    expect.eq(node2.cl_builder.image, "kona-node:widest")
+    expect.eq(node2.el.image, "op-reth:slightest")
+    expect.eq(node2.cl.image, "hildr:shortest")
 
     # node3
     node3 = parsed[3]
-    expect.eq(node3.el.image, "op-erigon:longest")
-    expect.eq(node3.el_builder.image, "op-erigon:longest")
+    expect.eq(node3.el_builder.image, "op-reth:slightest")
+    expect.eq(node3.cl_builder.image, "hildr:shortest")
 
     # node4
     node4 = parsed[4]
-    expect.eq(node4.el.image, "op-nethermind:sunniest")
-    expect.eq(node4.el_builder.image, "op-nethermind:sunniest")
+    expect.eq(node4.el.image, "op-besu:roundest")
+    expect.eq(node4.cl.image, "kona-node:widest")
 
     # node5
     node5 = parsed[5]
-    expect.eq(node5.el.image, "op-geth:edge")
-    expect.eq(node5.el_builder.image, "op-geth:edge")
-    expect.eq(node5.cl.image, "op-node:edge")
-    expect.eq(node5.cl_builder.image, "op-node:edge")
+    expect.eq(node5.el_builder.image, "op-besu:roundest")
+    expect.eq(node5.cl_builder.image, "kona-node:widest")
+
+    # node6
+    node6 = parsed[6]
+    expect.eq(node6.el.image, "op-erigon:longest")
+
+    # node7
+    node7 = parsed[7]
+    expect.eq(node7.el_builder.image, "op-erigon:longest")
+
+    # node8
+    node8 = parsed[8]
+    expect.eq(node8.el.image, "op-nethermind:sunniest")
+
+    # node9
+    node9 = parsed[9]
+    expect.eq(node9.el_builder.image, "op-nethermind:sunniest")
+
+    # node10
+    node10 = parsed[10]
+    expect.eq(node10.el.image, "op-geth:edge")
+    expect.eq(node10.cl.image, "op-node:edge")
+
+    # node11
+    node11 = parsed[11]
+    expect.eq(node11.el_builder.image, "op-geth:edge")
+    expect.eq(node11.cl_builder.image, "op-node:edge")

@@ -30,7 +30,7 @@ def parse_builder(args, participant_name, network_id, registry):
 def _parse(args, participant_name, network_id, registry, el_kind):
     # Any extra attributes will cause an error
     _filter.assert_keys(
-        args,
+        args or {},
         _DEFAULT_ARGS.keys(),
         "Invalid attributes in EL configuration for "
         + participant_name
@@ -41,7 +41,7 @@ def _parse(args, participant_name, network_id, registry, el_kind):
 
     # We filter the None values so that we can merge dicts easily
     # and merge the config with the defaults
-    el_params = _DEFAULT_ARGS | _filter.remove_none(args)
+    el_params = _DEFAULT_ARGS | _filter.remove_none(args or {})
 
     # We default the image to the one in the registry
     #
