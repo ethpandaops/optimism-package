@@ -99,6 +99,7 @@ def get_config(
         "--l2-url={0}".format(L2_EXECUTION_ENGINE_ENDPOINT),
         "--builder-jwt-path=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--builder-url={0}".format(BUILDER_EXECUTION_ENGINE_ENDPOINT),
+        "--rpc-host=0.0.0.0",
         "--rpc-port={0}".format(RPC_PORT_NUM),
         "--log-level=debug",
     ]
