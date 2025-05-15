@@ -36,10 +36,11 @@ def launch(
 
     service = plan.add_service(params.service_name, config)
 
-    _observability.register_op_service_metrics_job(
-        observability_helper,
-        service,
-    )
+    if observability_helper.enabled:
+        _observability.register_op_service_metrics_job(
+            observability_helper,
+            service,
+        )
 
     return struct(service=service, l2s=supervisor_l2s)
 
