@@ -630,7 +630,7 @@ def default_ethereum_package_network_params():
         "participants": [
             {
                 "el_type": "geth",
-                "cl_type": "teku",
+                "cl_type": "lighthouse",
             }
         ],
         "network_params": {
