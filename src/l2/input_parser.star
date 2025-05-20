@@ -85,8 +85,8 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
     )
 
     # We add the proposer params
-    l2_params["proposer_params"] = _proposer_input_parser.parse(
-        l2_params["proposer_params"], l2_name, registry
+    l2_params["batcher_params"] = _batcher_input_parser.parse(
+        l2_params["batcher_params"], l2_params["network_params"], registry
     )
 
     return struct(
