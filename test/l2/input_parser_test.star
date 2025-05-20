@@ -1,5 +1,6 @@
 input_parser = import_module("/src/l2/input_parser.star")
-participant_input_parser = import_module("/src/l2/participant/input_parser.star")
+_participant_input_parser = import_module("/src/l2/participant/input_parser.star")
+_proposer_input_parser = import_module("/src/proposer/input_parser.star")
 
 _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
@@ -65,22 +66,36 @@ def test_l2_input_parser_defaults(plan):
         name="network1",
         seconds_per_slot=2,
     )
+
+    _default_proposer_params = struct(
+        extra_params=[],
+        game_type=1,
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
+        ports={
+            _net.HTTP_PORT_NAME: _net.port(number=8560),
+        },
+        proposal_interval="10m",
+        service_name="op-proposer-network1",
+    )
+
+    
     expect.eq(
         input_parser.parse({"network1": None}, _default_registry),
-        [struct(network_params=_default_network_params, participants=[])],
+        [struct(network_params=_default_network_params, participants=[], proposer_params=_default_proposer_params)],
     )
 
     participants = {"node0": {}, "node1": None}
-    parsed_participants = participant_input_parser.parse(
+    parsed_participants = _participant_input_parser.parse(
         participants, _default_network_params, _default_registry
     )
+
     expect.eq(
         input_parser.parse(
             {"network1": {"participants": participants}}, _default_registry
         ),
         [
             struct(
-                network_params=_default_network_params, participants=parsed_participants
+                network_params=_default_network_params, participants=parsed_participants, proposer_params=_default_proposer_params,
             )
         ],
     )
