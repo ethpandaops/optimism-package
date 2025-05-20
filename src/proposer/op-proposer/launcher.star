@@ -83,7 +83,7 @@ def get_proposer_config(
         observability.configure_op_service_metrics(cmd, ports)
 
     return ServiceConfig(
-        image=image,
+        image=params.image,
         ports=ports,
         cmd=cmd,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
