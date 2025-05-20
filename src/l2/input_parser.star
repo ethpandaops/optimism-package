@@ -2,6 +2,7 @@ _filter = import_module("/src/util/filter.star")
 _id = import_module("/src/util/id.star")
 
 _l2_participant_input_parser = import_module("./participant/input_parser.star")
+_batcher_input_parser = import_module("/src/batcher/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 
 _DEFAULT_NETWORK_PARAMS = {
@@ -80,6 +81,11 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
     # We add the proposer params
     l2_params["proposer_params"] = _proposer_input_parser.parse(
         l2_params["proposer_params"], l2_name, registry
+    )
+
+    # We add the proposer params
+    l2_params["batcher_params"] = _batcher_input_parser.parse(
+        l2_params["batcher_params"], l2_name, registry
     )
 
     return struct(

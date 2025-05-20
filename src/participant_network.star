@@ -86,17 +86,15 @@ def launch_participant_network(
         ".privateKey",
     )
     op_batcher_launcher.launch(
-        plan,
-        "op-batcher-{0}".format(l2_services_suffix),
-        batcher_params.image or registry.get(_registry.OP_BATCHER),
-        all_el_contexts[0],
-        all_cl_contexts[0],
-        l1_config_env_vars,
-        batcher_key,
-        batcher_params,
-        network_params,
-        observability_helper,
-        da_server_context,
+        plan=plan,
+        params=batcher_params,
+        el_context=all_el_contexts[0],
+        cl_context=all_cl_contexts[0],
+        l1_config_env_vars=l1_config_env_vars,
+        gs_batcher_private_key=batcher_key,
+        network_params=network_params,
+        observability_helper=observability_helper,
+        da_server_context=da_server_context,
     )
 
     # We'll grab the game factory address from the deployments
