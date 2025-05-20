@@ -78,10 +78,15 @@ def test_l2_input_parser_defaults(plan):
         service_name="op-proposer-network1",
     )
 
-    
     expect.eq(
         input_parser.parse({"network1": None}, _default_registry),
-        [struct(network_params=_default_network_params, participants=[], proposer_params=_default_proposer_params)],
+        [
+            struct(
+                network_params=_default_network_params,
+                participants=[],
+                proposer_params=_default_proposer_params,
+            )
+        ],
     )
 
     participants = {"node0": {}, "node1": None}
@@ -95,7 +100,9 @@ def test_l2_input_parser_defaults(plan):
         ),
         [
             struct(
-                network_params=_default_network_params, participants=parsed_participants, proposer_params=_default_proposer_params,
+                network_params=_default_network_params,
+                participants=parsed_participants,
+                proposer_params=_default_proposer_params,
             )
         ],
     )

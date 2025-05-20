@@ -19,7 +19,7 @@ _DEFAULT_NETWORK_PARAMS = {
 _DEFAULT_ARGS = {
     "participants": {},
     "network_params": _DEFAULT_NETWORK_PARAMS,
-    "proposer_params": None
+    "proposer_params": None,
 }
 
 
