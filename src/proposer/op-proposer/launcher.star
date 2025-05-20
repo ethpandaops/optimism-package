@@ -19,8 +19,6 @@ _net = import_module("/src/util/net.star")
 # The Docker container runs as the "op-proposer" user so we can't write to root
 DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-proposer/op-proposer-data"
 
-ENTRYPOINT_ARGS = ["sh", "-c"]
-
 
 def launch(
     plan,
