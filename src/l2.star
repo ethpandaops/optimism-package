@@ -9,7 +9,6 @@ tx_fuzzer = import_module("./transaction_fuzzer/transaction_fuzzer.star")
 
 def launch_l2(
     plan,
-    l2_num,
     l2_services_suffix,
     l2_args,
     jwt_file,
@@ -59,7 +58,6 @@ def launch_l2(
         mev_params=mev_params,
         deployment_output=deployment_output,
         l1_config_env_vars=l1_config,
-        l2_num=l2_num,
         l2_services_suffix=l2_services_suffix,
         global_log_level=global_log_level,
         global_node_selectors=global_node_selectors,

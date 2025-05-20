@@ -4,6 +4,7 @@ ethereum_package_input_parser = import_module(
 
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
 _superchain_input_parser = import_module("/src/superchain/input_parser.star")
+_proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _supervisor_input_parser = import_module("/src/supervisor/input_parser.star")
 
 constants = import_module("../package_io/constants.star")
@@ -189,12 +190,7 @@ def input_parser(
                     image=result["batcher_params"]["image"],
                     extra_params=result["batcher_params"]["extra_params"],
                 ),
-                proposer_params=struct(
-                    image=result["proposer_params"]["image"],
-                    extra_params=result["proposer_params"]["extra_params"],
-                    game_type=result["proposer_params"]["game_type"],
-                    proposal_interval=result["proposer_params"]["proposal_interval"],
-                ),
+                proposer_params=result["proposer_params"],
                 mev_params=struct(
                     rollup_boost_image=result["mev_params"]["rollup_boost_image"],
                     builder_host=result["mev_params"]["builder_host"],
@@ -281,22 +277,23 @@ def parse_network_params(plan, registry, input_args):
         network_params = default_network_params()
         network_params.update(chain.get("network_params", {}))
 
+        network_name = network_params["name"]
+        network_id = network_params["network_id"]
+
         proxyd_params = _default_proxyd_params(registry)
         proxyd_params.update(chain.get("proxyd_params", {}))
 
         batcher_params = _default_batcher_params(registry)
         batcher_params.update(chain.get("batcher_params", {}))
 
-        proposer_params = _default_proposer_params(registry)
-        proposer_params.update(chain.get("proposer_params", {}))
+        proposer_params = _proposer_input_parser.parse(
+            chain.get("proposer_params", {}), network_name, registry
+        )
 
         mev_params = default_mev_params()
         mev_params.update(chain.get("mev_params", {}))
         da_server_params = default_da_server_params(registry)
         da_server_params.update(chain.get("da_server_params", {}))
-
-        network_name = network_params["name"]
-        network_id = network_params["network_id"]
 
         if network_name in seen_names:
             fail("Network name {0} is duplicated".format(network_name))
