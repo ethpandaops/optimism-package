@@ -3,7 +3,7 @@ participant_module = import_module("./participant.star")
 input_parser = import_module("./package_io/input_parser.star")
 _op_batcher_launcher = import_module("./batcher/op-batcher/launcher.star")
 _op_proposer_launcher = import_module("./proposer/op-proposer/launcher.star")
-proxyd_launcher = import_module("./proxyd/proxyd_launcher.star")
+_proxyd_launcher = import_module("./proxyd/launcher.star")
 util = import_module("./util.star")
 _registry = import_module("./package_io/registry.star")
 
@@ -71,12 +71,12 @@ def launch_participant_network(
 
         all_participants.append(participant_entry)
 
-    proxyd_launcher.launch(
-        plan,
-        proxyd_params,
-        network_params,
-        all_el_contexts,
-        observability_helper,
+    _proxyd_launcher.launch(
+        plan=plan,
+        params=proxyd_params,
+        network_params=network_params,
+        el_contexts=all_el_contexts,
+        observability_helper=observability_helper,
     )
 
     batcher_key = util.read_network_config_value(
