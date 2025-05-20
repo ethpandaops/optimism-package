@@ -38,7 +38,11 @@ def _assert_unique_l2_ids(l2s_params):
     l2_ids = [l2_params.network_params.network_id for l2_params in l2s_params]
     duplicated_l2_ids = _filter.get_duplicates(l2_ids)
     if duplicated_l2_ids:
-        fail("L2 IDs must be unique, got duplicates: {}".format(",".join([str(id) for id in duplicated_l2_ids])))
+        fail(
+            "L2 IDs must be unique, got duplicates: {}".format(
+                ",".join([str(id) for id in duplicated_l2_ids])
+            )
+        )
 
     return l2s_params
 

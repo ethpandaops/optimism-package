@@ -120,11 +120,14 @@ def test_l2_input_parser_auto_network_id(plan):
     expect.eq(parsed[1].network_params.network_id, 7)
     expect.eq(parsed[2].network_params.network_id, 2151909)
 
-    expect.fails(lambda: input_parser.parse(
-        {
-            "network0": None,
-            "network1": {"network_params": {"network_id": 2151908}},
-            "network2": None,
-        },
-        _default_registry,
-    ), "L2 IDs must be unique, got duplicates: 2151908")
+    expect.fails(
+        lambda: input_parser.parse(
+            {
+                "network0": None,
+                "network1": {"network_params": {"network_id": 2151908}},
+                "network2": None,
+            },
+            _default_registry,
+        ),
+        "L2 IDs must be unique, got duplicates: 2151908",
+    )
