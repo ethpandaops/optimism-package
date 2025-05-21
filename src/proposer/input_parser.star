@@ -10,7 +10,7 @@ _DEFAULT_ARGS = {
 }
 
 
-def parse(proposer_args, l2_name, registry):
+def parse(proposer_args, network_params, registry):
     # Any extra attributes will cause an error
     _filter.assert_keys(
         proposer_args or {},
@@ -27,7 +27,7 @@ def parse(proposer_args, l2_name, registry):
     )
 
     # Add the service name
-    proposer_params["service_name"] = "op-proposer-{}".format(l2_name)
+    proposer_params["service_name"] = "op-proposer-{}-{}".format(network_params.network_id, network_params.name)
 
     # Add ports
     proposer_params["ports"] = {
