@@ -121,10 +121,41 @@ def provision_dashboards(plan, service_url, dashboard_sources):
     def grr_push(dir):
         return 'grr push "{0}" -e --disable-reporting'.format(dir)
 
-    def grr_push_dashboards(name):
-        return [
-            grr_push("{0}/folders".format(name)),
+    def grr_compat(name):
+        """
+        Checks if the dashboards are already compatible with grizzly, by checking if the `apiVersion` is set within all
+        of the dashboard json files. If not, re-export them with grizzly.
+        """
+
+        compat_cmds = [
+            # Check if the dashboard is compatible with grizzly
+            "find {0}/dashboards -name '*.json' -exec grep -i 'grizzly.grafana.com' {{}} \\+".format(name),
+            # If it is, upload it.
+            grr_push("{0}/dashboards".format(name))
+        ]
+        compat_fix_cmds = [
+            # Remove all files that aren't JSON files before exporting
+            "find {0}/dashboards -type f ! -name '*.json' -delete".format(name),
+            # Re-export the dashboards with grizzly to a temporary directory.
+            "grr export {0}/dashboards {0}/grr-dashboards -o json".format(name),
+            # Replace `dashboards` with `grr-dashboards`
+            "rm -rf {0}/dashboards && mv {0}/grr-dashboards {0}/dashboards".format(name),
+            # Replace Grafana's prometheus datasource placeholder with Prometheus
+            "find {0}/dashboards -name '*.json' -exec sed -i 's/${{DS_PROMETHEUS}}/Prometheus/g' {{}} \\+".format(name),
+            # Push the dashboard
             grr_push("{0}/dashboards".format(name)),
+        ]
+
+        # Force compatibility or push existing folders + dashboards
+        return [
+            "(({0} && {1}) || echo 'No folders to push') && (({2}) || ({3}))".format(
+                # Upload folders, if they exist
+                "ls {0}/folders".format(name),
+                grr_push("{0}/folders".format(name)),
+                # Upload the dashboards after
+                util.join_cmds(compat_cmds),
+                util.join_cmds(compat_fix_cmds)
+            )
         ]
 
     grr_commands = [
@@ -137,7 +168,7 @@ def provision_dashboards(plan, service_url, dashboard_sources):
         dashboard_artifact_name = plan.upload_files(dashboard_src, name=dashboard_name)
 
         files["/" + dashboard_name] = dashboard_artifact_name
-        grr_commands += grr_push_dashboards(dashboard_name)
+        grr_commands += grr_compat(dashboard_name)
 
     plan.run_sh(
         description="upload dashboards",

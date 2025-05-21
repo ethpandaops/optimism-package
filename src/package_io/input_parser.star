@@ -457,7 +457,9 @@ def default_grafana_params(registry):
     return {
         "image": registry.get(_registry.GRAFANA),
         "dashboard_sources": [
-            "github.com/ethereum-optimism/grafana-dashboards-public/resources"
+            "github.com/ethereum-optimism/grafana-dashboards-public/resources",
+            "github.com/op-rs/kona/docker/recipes/kona-node/grafana",
+            "github.com/paradigmxyz/reth/etc/grafana"
         ],
         "min_cpu": 10,
         "max_cpu": 1000,
