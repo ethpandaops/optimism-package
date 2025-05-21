@@ -112,3 +112,13 @@ def test_filter_first(plan):
 
     # With custom default
     expect.eq(filter.first([False], default=4), 4)
+
+
+def test_filter_get_duplicates(plan):
+    expect.eq(filter.get_duplicates([]), [])
+    expect.eq(filter.get_duplicates([1]), [])
+    expect.eq(filter.get_duplicates([1, 2]), [])
+    expect.eq(filter.get_duplicates([1, 2, 1]), [1])
+    expect.eq(filter.get_duplicates([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]), [])
+    expect.eq(filter.get_duplicates([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0]), [0])
+    expect.eq(filter.get_duplicates([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 2]), [0, 2])
