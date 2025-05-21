@@ -14,18 +14,21 @@ _DEFAULT_ARGS = {
 }
 
 
-def parse(args, network_id, registry):
+def parse(args, network_params, registry):
     return _filter.remove_none(
         [
             _parse_instance(
-                participant_args or {}, participant_name, network_id, registry
+                participant_args or {}, participant_name, network_params, registry
             )
             for participant_name, participant_args in (args or {}).items()
         ]
     )
 
 
-def _parse_instance(participant_args, participant_name, network_id, registry):
+def _parse_instance(participant_args, participant_name, network_params, registry):
+    network_id = network_params.network_id
+    network_name = network_params.name
+
     # Any extra attributes will cause an error
     _filter.assert_keys(
         participant_args or {},
@@ -33,7 +36,7 @@ def _parse_instance(participant_args, participant_name, network_id, registry):
         "Invalid attributes in participant configuration for "
         + participant_name
         + " on network "
-        + str(network_id)
+        + network_name
         + ": {}",
     )
 

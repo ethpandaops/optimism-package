@@ -67,7 +67,7 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
     )
 
     l2_params["participants"] = _l2_participant_input_parser.parse(
-        l2_params["participants"], l2_params["network_params"].network_id, registry
+        l2_params["participants"], l2_params["network_params"], registry
     )
 
     return struct(

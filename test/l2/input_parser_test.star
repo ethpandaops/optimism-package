@@ -72,7 +72,7 @@ def test_l2_input_parser_defaults(plan):
 
     participants = {"node0": {}, "node1": None}
     parsed_participants = participant_input_parser.parse(
-        participants, 2151908, _default_registry
+        participants, _default_network_params, _default_registry
     )
     expect.eq(
         input_parser.parse(
