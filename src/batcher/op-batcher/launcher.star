@@ -12,6 +12,8 @@ util = import_module("../../util.star")
 observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
+_net = import_module("/src/util/net.star")
+
 #
 #  ---------------------------------- Batcher client -------------------------------------
 # The Docker container runs as the "op-batcher" user so we can't write to root
