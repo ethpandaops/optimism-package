@@ -18,6 +18,12 @@ _DEFAULT_ARGS = {
     "max_mem": 0,
 }
 
+_IMAGE_IDS = {
+    "op-node": _registry.OP_NODE,
+    "kona-node": _registry.KONA_NODE,
+    "hildr": _registry.HILDR,
+}
+
 
 def parse(args, participant_name, network_id, registry):
     return _parse(args, participant_name, network_id, registry, "cl")
@@ -71,11 +77,7 @@ def _parse(args, participant_name, network_id, registry, cl_kind):
 
 
 def _default_image(participant_type, registry):
-    if participant_type == "op-node":
-        return registry.get(_registry.OP_NODE)
-    elif participant_type == "kona-node":
-        return registry.get(_registry.KONA_NODE)
-    elif participant_type == "hildr":
-        return registry.get(_registry.HILDR)
+    if participant_type in _IMAGE_IDS:
+        return registry.get(_IMAGE_IDS[participant_type])
     else:
         fail("Invalid CL type: {}".format(participant_type))

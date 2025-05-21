@@ -18,6 +18,16 @@ _DEFAULT_ARGS = {
     "max_mem": 0,
 }
 
+# EL clients have a type property that maps to an image
+_IMAGE_IDS = {
+    "op-geth": _registry.OP_GETH,
+    "op-reth": _registry.OP_RETH,
+    "op-erigon": _registry.OP_ERIGON,
+    "op-nethermind": _registry.OP_NETHERMIND,
+    "op-besu": _registry.OP_BESU,
+    "op-rbuilder": _registry.OP_RBUILDER,
+}
+
 
 def parse(args, participant_name, network_id, registry):
     return _parse(args, participant_name, network_id, registry, "el")
@@ -71,17 +81,7 @@ def _parse(args, participant_name, network_id, registry, el_kind):
 
 
 def _default_image(participant_type, registry):
-    if participant_type == "op-geth":
-        return registry.get(_registry.OP_GETH)
-    elif participant_type == "op-reth":
-        return registry.get(_registry.OP_RETH)
-    elif participant_type == "op-erigon":
-        return registry.get(_registry.OP_ERIGON)
-    elif participant_type == "op-nethermind":
-        return registry.get(_registry.OP_NETHERMIND)
-    elif participant_type == "op-besu":
-        return registry.get(_registry.OP_BESU)
-    elif participant_type == "op-rbuilder":
-        return registry.get(_registry.OP_RBUILDER)
+    if participant_type in _IMAGE_IDS:
+        return registry.get(_IMAGE_IDS[participant_type])
     else:
         fail("Invalid EL type: {}".format(participant_type))
