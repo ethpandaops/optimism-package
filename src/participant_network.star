@@ -1,7 +1,7 @@
 el_cl_client_launcher = import_module("./el_cl_launcher.star")
 participant_module = import_module("./participant.star")
 input_parser = import_module("./package_io/input_parser.star")
-op_batcher_launcher = import_module("./batcher/op-batcher/op_batcher_launcher.star")
+_op_batcher_launcher = import_module("./batcher/op-batcher/launcher.star")
 _op_proposer_launcher = import_module("./proposer/op-proposer/launcher.star")
 proxyd_launcher = import_module("./proxyd/proxyd_launcher.star")
 util = import_module("./util.star")
@@ -85,7 +85,7 @@ def launch_participant_network(
         "batcher-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    op_batcher_launcher.launch(
+    _op_batcher_launcher.launch(
         plan=plan,
         params=batcher_params,
         el_context=all_el_contexts[0],
