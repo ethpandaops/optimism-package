@@ -104,4 +104,7 @@ def _parse_network_params(network_args, l2_name, l2_id_generator):
         else l2_id_generator()
     )
 
+    # We add the network name to params
+    network_params["name"] = l2_name
+
     return struct(**network_params)

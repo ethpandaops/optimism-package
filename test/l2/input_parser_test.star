@@ -62,6 +62,7 @@ def test_l2_input_parser_defaults(plan):
         isthmus_time_offset=None,
         network="kurtosis",
         network_id=2151908,
+        name="network1",
         seconds_per_slot=2,
     )
     expect.eq(
