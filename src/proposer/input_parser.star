@@ -11,11 +11,14 @@ _DEFAULT_ARGS = {
 
 
 def parse(proposer_args, network_params, registry):
+    network_id = network_params.network_id
+    network_name = network_params.name
+
     # Any extra attributes will cause an error
     _filter.assert_keys(
         proposer_args or {},
         _DEFAULT_ARGS.keys(),
-        "Invalid attributes in proposer configuration for " + l2_name + ": {}",
+        "Invalid attributes in proposer configuration for " + network_name + ": {}",
     )
 
     # We filter the None values so that we can merge dicts easily
@@ -27,7 +30,9 @@ def parse(proposer_args, network_params, registry):
     )
 
     # Add the service name
-    proposer_params["service_name"] = "op-proposer-{}-{}".format(network_params.network_id, network_params.name)
+    proposer_params["service_name"] = "op-proposer-{}-{}".format(
+        network_id, network_name
+    )
 
     # Add ports
     proposer_params["ports"] = {
