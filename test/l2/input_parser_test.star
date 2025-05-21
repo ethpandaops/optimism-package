@@ -7,19 +7,6 @@ _registry = import_module("/src/package_io/registry.star")
 _default_network_id = 1000
 _default_registry = _registry.Registry()
 
-_shared_defaults = {
-    "extra_env_vars": {},
-    "extra_labels": {},
-    "extra_params": [],
-    "log_level": None,
-    "max_cpu": 0,
-    "max_mem": 0,
-    "min_cpu": 0,
-    "min_mem": 0,
-    "tolerations": [],
-    "volume_size": 0,
-}
-
 
 def test_l2_input_parser_empty(plan):
     expect.eq(
