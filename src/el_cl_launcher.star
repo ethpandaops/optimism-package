@@ -22,11 +22,12 @@ kona_node = import_module("./cl/kona-node/kona_node_launcher.star")
 hildr = import_module("./cl/hildr/hildr_launcher.star")
 
 # MEV
-rollup_boost = import_module("./mev/rollup-boost/rollup_boost_launcher.star")
+_rollup_boost_launcher = import_module("./mev/rollup-boost/launcher.star")
 op_geth_builder = import_module("./builder/op-geth/op_geth_launcher.star")
 op_reth_builder = import_module("./builder/op-reth/op_reth_launcher.star")
 op_rbuilder_builder = import_module("./builder/op-rbuilder/op_rbuilder_launcher.star")
 op_node_builder = import_module("./cl/op-node/op_node_builder_launcher.star")
+
 
 _registry = import_module("./package_io/registry.star")
 
@@ -159,24 +160,12 @@ def launch(
         },
     }
 
-    sidecar_launchers = {
-        "rollup-boost": {
-            "launcher": rollup_boost.new_rollup_boost_launcher(
-                deployment_output,
-                jwt_file,
-                network_params.network,
-                network_params.network_id,
-            ),
-            "launch_method": rollup_boost.launch,
-        }
-    }
-
     all_cl_contexts = []
     all_el_contexts = []
     sequencer_enabled = True
     sequencer_context = None
     rollup_boost_enabled = "rollup-boost" in additional_services
-    external_builder = mev_params.builder_host != "" and mev_params.builder_port != ""
+    external_builder = mev_params.builder_host and mev_params.builder_port
 
     for index, participant in enumerate(participants):
         cl_type = participant.cl_type
@@ -242,11 +231,6 @@ def launch(
         cl_builder_launcher, cl_builder_launch_method = (
             cl_builder_launchers[cl_builder_type]["launcher"],
             cl_builder_launchers[cl_builder_type]["launch_method"],
-        )
-
-        sidecar_launcher, sidecar_launch_method = (
-            sidecar_launchers["rollup-boost"]["launcher"],
-            sidecar_launchers["rollup-boost"]["launch_method"],
         )
 
         # Zero-pad the index using the calculated zfill value
@@ -350,14 +334,12 @@ def launch(
                         metrics_info,
                     )
 
-            sidecar_context = sidecar_launch_method(
-                plan,
-                sidecar_launcher,
-                sidecar_service_name,
-                mev_params.rollup_boost_image or registry.get(_registry.ROLLUP_BOOST),
-                all_el_contexts,
-                el_context,
-                el_builder_context,
+            sidecar_context = _launch_sidecar(
+                plan=plan,
+                params=params,
+                network_params=network_params,
+                sequencer_context=el_context,
+                builder_context=el_builder_context,
             )
 
             all_el_contexts.append(el_builder_context)
@@ -438,3 +420,16 @@ def launch(
 
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
     return all_el_contexts, all_cl_contexts
+
+
+def _launch_sidecar(plan, params, network_params, sequencer_context, builder_context):
+    if params.type == "rollup-boost":
+        return _rollup_boost_launcher.launch(
+            plan=plan,
+            params=params,
+            network_params=network_params,
+            sequencer_context=sequencer_context,
+            builder_context=builder_context,
+        )
+    else:
+        fail("Invalid MEV type: {}".format(params.type))
