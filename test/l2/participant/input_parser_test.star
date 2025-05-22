@@ -3,7 +3,10 @@ input_parser = import_module("/src/l2/participant/input_parser.star")
 _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
-_default_network_id = 1000
+_default_network_params = struct(
+    network_id=1000,
+    name="my-l2",
+)
 _default_registry = _registry.Registry()
 
 _shared_defaults = {
@@ -22,11 +25,11 @@ _shared_defaults = {
 
 def test_l2_participant_input_parser_empty(plan):
     expect.eq(
-        input_parser.parse(None, _default_network_id, _default_registry),
+        input_parser.parse(None, _default_network_params, _default_registry),
         [],
     )
     expect.eq(
-        input_parser.parse({}, _default_network_id, _default_registry),
+        input_parser.parse({}, _default_network_params, _default_registry),
         [],
     )
 
@@ -35,17 +38,17 @@ def test_l2_participant_input_parser_extra_attributes(plan):
     expect.fails(
         lambda: input_parser.parse(
             {"node0": {"name": "peter", "extra": None}},
-            _default_network_id,
+            _default_network_params,
             _default_registry,
         ),
-        "Invalid attributes in participant configuration for node0 on network 1000: name,extra",
+        "Invalid attributes in participant configuration for node0 on network my-l2: name,extra",
     )
 
 
 def test_l2_participant_input_parser_invalid_name(plan):
     expect.fails(
         lambda: input_parser.parse(
-            {"node-0": None}, _default_network_id, _default_registry
+            {"node-0": None}, _default_network_params, _default_registry
         ),
         "ID cannot contain '-': node-0",
     )
@@ -54,7 +57,7 @@ def test_l2_participant_input_parser_invalid_name(plan):
 def test_l2_participant_input_parser_defaults(plan):
     expect.eq(
         input_parser.parse(
-            {"node0": None, "node1": {}}, _default_network_id, _default_registry
+            {"node0": None, "node1": {}}, _default_network_params, _default_registry
         ),
         [
             struct(
@@ -229,7 +232,7 @@ def test_l2_participant_input_parser_custom_registry(plan):
                 "cl_builder": {"image": "op-node:edge"},
             },
         },
-        _default_network_id,
+        _default_network_params,
         registry,
     )
 
