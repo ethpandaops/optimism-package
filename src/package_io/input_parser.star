@@ -4,6 +4,7 @@ ethereum_package_input_parser = import_module(
 
 _batcher_input_parser = import_module("/src/batcher/input_parser.star")
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
+_mev_input_parser = import_module("/src/mev/input_parser.star")
 _superchain_input_parser = import_module("/src/superchain/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
