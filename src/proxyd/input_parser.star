@@ -8,12 +8,15 @@ _DEFAULT_ARGS = {
 }
 
 
-def parse(proxyd_args, l2_name, registry):
+def parse(proxyd_args, network_params, registry):
+    network_id = network_params.network_id
+    network_name = network_params.name
+
     # Any extra attributes will cause an error
     _filter.assert_keys(
         proxyd_args or {},
         _DEFAULT_ARGS.keys(),
-        "Invalid attributes in proxyd configuration for " + l2_name + ": {}",
+        "Invalid attributes in proxyd configuration for " + network_name + ": {}",
     )
 
     # We filter the None values so that we can merge dicts easily
@@ -23,11 +26,17 @@ def parse(proxyd_args, l2_name, registry):
     proxyd_params["image"] = proxyd_params["image"] or registry.get(_registry.PROXYD)
 
     # Add the service name
-    proxyd_params["service_name"] = "proxyd-{}".format(l2_name)
+    proxyd_params["service_name"] = "proxyd-{}-{}".format(network_id, network_name)
 
     # Add ports
     proxyd_params["ports"] = {
         _net.HTTP_PORT_NAME: _net.port(number=8080),
+    }
+
+    # Add labels
+    proxyd_params["labels"] = {
+        "op.kind": "proxyd",
+        "op.network.id": network_id,
     }
 
     return struct(**proxyd_params)

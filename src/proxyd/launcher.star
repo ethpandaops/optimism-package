@@ -2,6 +2,7 @@ _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
+_net = import_module("/src/util/net.star")
 _observability = import_module("../observability/observability.star")
 
 # Port nums
@@ -107,4 +108,5 @@ def get_service_config(
             _CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
         },
         private_ip_address_placeholder=_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        labels=params.labels,
     )
