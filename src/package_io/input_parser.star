@@ -277,7 +277,10 @@ def parse_network_params(plan, registry, input_args):
         network_id = network_params["network_id"]
 
         proxyd_params = _proxyd_input_parser.parse(
-            chain.get("proxyd_params", {}), network_name, registry
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("proxyd_params", {}),
+            struct(**network_params),
+            registry,
         )
 
         batcher_params = _batcher_input_parser.parse(
