@@ -73,7 +73,11 @@ def test_l2_input_parser_defaults(plan):
         ports={
             _net.HTTP_PORT_NAME: _net.port(number=8548),
         },
-        service_name="op-batcher-network1",
+        service_name="op-batcher-2151908-network1",
+        labels={
+            "op.kind": "batcher",
+            "op.network.id": 2151908,
+        },
     )
 
     _default_proposer_params = struct(

@@ -8,12 +8,15 @@ _DEFAULT_ARGS = {
 }
 
 
-def parse(batcher_args, l2_name, registry):
+def parse(batcher_args, network_params, registry):
+    network_id = network_params.network_id
+    network_name = network_params.name
+
     # Any extra attributes will cause an error
     _filter.assert_keys(
         batcher_args or {},
         _DEFAULT_ARGS.keys(),
-        "Invalid attributes in batcher configuration for " + l2_name + ": {}",
+        "Invalid attributes in batcher configuration for " + network_name + ": {}",
     )
 
     # We filter the None values so that we can merge dicts easily
@@ -25,11 +28,17 @@ def parse(batcher_args, l2_name, registry):
     )
 
     # Add the service name
-    batcher_params["service_name"] = "op-batcher-{}".format(l2_name)
+    batcher_params["service_name"] = "op-batcher-{}-{}".format(network_id, network_name)
 
     # Add ports
     batcher_params["ports"] = {
         _net.HTTP_PORT_NAME: _net.port(number=8548),
+    }
+
+    # Add labels
+    batcher_params["labels"] = {
+        "op.kind": "batcher",
+        "op.network.id": network_id,
     }
 
     return struct(**batcher_params)
