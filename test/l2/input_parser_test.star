@@ -75,7 +75,7 @@ def test_l2_input_parser_defaults(plan):
             _net.HTTP_PORT_NAME: _net.port(number=8560),
         },
         proposal_interval="10m",
-        service_name="op-proposer-network1",
+        service_name="op-proposer-2151908-network1",
     )
 
     expect.eq(

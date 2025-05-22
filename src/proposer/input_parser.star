@@ -39,4 +39,10 @@ def parse(proposer_args, network_params, registry):
         _net.HTTP_PORT_NAME: _net.port(number=8560),
     }
 
+    # Add labels
+    proposer_params["labels"] = {
+        "op.kind": "proposer",
+        "op.network.id": network_id,
+    }
+
     return struct(**proposer_params)

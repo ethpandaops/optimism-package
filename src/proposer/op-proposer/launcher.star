@@ -84,5 +84,6 @@ def get_proposer_config(
         image=params.image,
         ports=ports,
         cmd=cmd,
+        labels=params.labels,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

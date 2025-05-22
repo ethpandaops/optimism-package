@@ -287,7 +287,10 @@ def parse_network_params(plan, registry, input_args):
         batcher_params.update(chain.get("batcher_params", {}))
 
         proposer_params = _proposer_input_parser.parse(
-            chain.get("proposer_params", {}), network_name, registry
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("proposer_params", {}),
+            struct(**network_params),
+            registry,
         )
 
         mev_params = default_mev_params()
