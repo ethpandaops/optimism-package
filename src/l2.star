@@ -22,6 +22,7 @@ def launch_l2(
     persistent,
     observability_helper,
     supervisors_params,
+    custom_launchers,
     registry=None,
 ):
     network_params = l2_args.network_params
@@ -67,6 +68,7 @@ def launch_l2(
         observability_helper=observability_helper,
         supervisors_params=supervisors_params,
         da_server_context=da_server_context,
+        custom_launchers=custom_launchers,
         registry=registry,
     )
 

@@ -18,7 +18,7 @@ ethereum_package_static_files = import_module(
 _registry = import_module("./src/package_io/registry.star")
 
 
-def run(plan, args={}):
+def run(plan, args={}, custom_launchers=None):
     """Deploy Optimism L2s on an Ethereum L1.
 
     Args:
@@ -134,6 +134,7 @@ def run(plan, args={}):
                 persistent=persistent,
                 observability_helper=observability_helper,
                 supervisors_params=l2_supervisors_params,
+                custom_launchers=custom_launchers,
                 registry=registry,
             )
         )

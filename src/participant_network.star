@@ -28,6 +28,7 @@ def launch_participant_network(
     observability_helper,
     supervisors_params,
     da_server_context,
+    custom_launchers,
     registry=_registry.Registry(),
 ):
     num_participants = len(participants)
@@ -51,6 +52,7 @@ def launch_participant_network(
         observability_helper=observability_helper,
         supervisors_params=supervisors_params,
         da_server_context=da_server_context,
+        custom_launchers=custom_launchers,
         registry=registry,
     )
 
