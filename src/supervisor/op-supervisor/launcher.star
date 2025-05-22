@@ -32,6 +32,7 @@ def launch(
         l1_config_env_vars=l1_config_env_vars,
         l2s=supervisor_l2s,
         jwt_file=jwt_file,
+        deployment_output=deployment_output,
         observability_helper=observability_helper,
     )
 
@@ -51,6 +52,7 @@ def _get_config(
     l1_config_env_vars,
     l2s,
     jwt_file,
+    deployment_output,
     observability_helper,
 ):
     ports = _net.ports_to_port_specs(params.ports)
