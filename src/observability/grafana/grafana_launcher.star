@@ -129,9 +129,11 @@ def provision_dashboards(plan, service_url, dashboard_sources):
 
         compat_cmds = [
             # Check if the dashboard is compatible with grizzly
-            "find {0}/dashboards -name '*.json' -exec grep -i 'grizzly.grafana.com' {{}} \\+".format(name),
+            "find {0}/dashboards -name '*.json' -exec grep -i 'grizzly.grafana.com' {{}} \\+".format(
+                name
+            ),
             # If it is, upload it.
-            grr_push("{0}/dashboards".format(name))
+            grr_push("{0}/dashboards".format(name)),
         ]
         compat_fix_cmds = [
             # Remove all files that aren't JSON files before exporting
@@ -139,9 +141,13 @@ def provision_dashboards(plan, service_url, dashboard_sources):
             # Re-export the dashboards with grizzly to a temporary directory.
             "grr export {0}/dashboards {0}/grr-dashboards -o json".format(name),
             # Replace `dashboards` with `grr-dashboards`
-            "rm -rf {0}/dashboards && mv {0}/grr-dashboards {0}/dashboards".format(name),
+            "rm -rf {0}/dashboards && mv {0}/grr-dashboards {0}/dashboards".format(
+                name
+            ),
             # Replace Grafana's prometheus datasource placeholder with Prometheus
-            "find {0}/dashboards -name '*.json' -exec sed -i 's/${{DS_PROMETHEUS}}/Prometheus/g' {{}} \\+".format(name),
+            "find {0}/dashboards -name '*.json' -exec sed -i 's/${{DS_PROMETHEUS}}/Prometheus/g' {{}} \\+".format(
+                name
+            ),
             # Push the dashboard
             grr_push("{0}/dashboards".format(name)),
         ]
@@ -154,7 +160,7 @@ def provision_dashboards(plan, service_url, dashboard_sources):
                 grr_push("{0}/folders".format(name)),
                 # Upload the dashboards after
                 util.join_cmds(compat_cmds),
-                util.join_cmds(compat_fix_cmds)
+                util.join_cmds(compat_fix_cmds),
             )
         ]
 
