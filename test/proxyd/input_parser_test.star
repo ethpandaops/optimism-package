@@ -32,7 +32,7 @@ def test_proxyd_input_parser_default_args(plan):
         labels={
             "op.kind": "proxyd",
             "op.network.id": network_id,
-        }
+        },
     )
 
     expect.eq(
@@ -88,7 +88,7 @@ def test_proxyd_input_parser_custom_params(plan):
             labels={
                 "op.kind": "proxyd",
                 "op.network.id": network_id,
-            }
+            },
         ),
     )
 
