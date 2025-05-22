@@ -122,6 +122,8 @@ optimism_package:
       dashboard_sources:
         # Default public Optimism dashboards
         - github.com/ethereum-optimism/grafana-dashboards-public/resources
+        - github.com/op-rs/kona/docker/recipes/kona-node/grafana
+        - github.com/paradigmxyz/reth/etc/grafana
       # Resource management for grafana container
       # CPU is milicores
       # RAM is in MB
