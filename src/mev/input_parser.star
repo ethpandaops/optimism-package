@@ -17,7 +17,7 @@ _IMAGE_IDS = {
 
 def parse(mev_args, network_params, registry):
     network_id = network_params.network_id
-    network_name = network_params.network_name
+    network_name = network_params.name
 
     # Any extra attributes will cause an error
     _filter.assert_keys(
