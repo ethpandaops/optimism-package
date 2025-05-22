@@ -187,11 +187,7 @@ def input_parser(
                 proxyd_params=result["proxyd_params"],
                 batcher_params=result["batcher_params"],
                 proposer_params=result["proposer_params"],
-                mev_params=struct(
-                    rollup_boost_image=result["mev_params"]["rollup_boost_image"],
-                    builder_host=result["mev_params"]["builder_host"],
-                    builder_port=result["mev_params"]["builder_port"],
-                ),
+                mev_params=result["mev_params"],
                 da_server_params=struct(
                     enabled=result["da_server_params"]["enabled"],
                     image=result["da_server_params"]["image"],
@@ -297,8 +293,13 @@ def parse_network_params(plan, registry, input_args):
             registry,
         )
 
-        mev_params = default_mev_params()
-        mev_params.update(chain.get("mev_params", {}))
+        mev_params = _mev_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("mev_params", {}),
+            struct(**network_params),
+            registry,
+        )
+
         da_server_params = default_da_server_params(registry)
         da_server_params.update(chain.get("da_server_params", {}))
 
