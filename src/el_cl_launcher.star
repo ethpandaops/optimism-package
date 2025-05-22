@@ -340,6 +340,7 @@ def launch(
                 network_params=network_params,
                 sequencer_context=el_context,
                 builder_context=el_builder_context,
+                jwt_file=jwt_file,
             )
 
             all_el_contexts.append(el_builder_context)
