@@ -336,7 +336,7 @@ def launch(
 
             sidecar_context = _launch_sidecar(
                 plan=plan,
-                params=params,
+                params=mev_params,
                 network_params=network_params,
                 sequencer_context=el_context,
                 builder_context=el_builder_context,
