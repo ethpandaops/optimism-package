@@ -6,6 +6,7 @@ _batcher_input_parser = import_module("/src/batcher/input_parser.star")
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
 _superchain_input_parser = import_module("/src/superchain/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
+_proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
 _supervisor_input_parser = import_module("/src/supervisor/input_parser.star")
 
 constants = import_module("../package_io/constants.star")
@@ -183,10 +184,7 @@ def input_parser(
                     interop_time_offset=result["network_params"]["interop_time_offset"],
                     fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
                 ),
-                proxyd_params=struct(
-                    image=result["proxyd_params"]["image"],
-                    extra_params=result["proxyd_params"]["extra_params"],
-                ),
+                proxyd_params=result["proxyd_params"],
                 batcher_params=result["batcher_params"],
                 proposer_params=result["proposer_params"],
                 mev_params=struct(
@@ -278,8 +276,12 @@ def parse_network_params(plan, registry, input_args):
         network_name = network_params["name"]
         network_id = network_params["network_id"]
 
-        proxyd_params = _default_proxyd_params(registry)
-        proxyd_params.update(chain.get("proxyd_params", {}))
+        proxyd_params = _proxyd_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("proxyd_params", {}),
+            struct(**network_params),
+            registry,
+        )
 
         batcher_params = _batcher_input_parser.parse(
             # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
