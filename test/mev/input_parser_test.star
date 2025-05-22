@@ -18,6 +18,26 @@ def test_mev_input_parser_extra_attributes(plan):
     )
 
 
+def test_mev_input_parser_invalid_builder_params(plan):
+    expect.fails(
+        lambda: _input_parser.parse(
+            {"builder_port": "7"},
+            _default_network_params,
+            _default_registry,
+        ),
+        "Missing builder_host in mev configuration for my-l2",
+    )
+
+    expect.fails(
+        lambda: _input_parser.parse(
+            {"builder_host": "localhost"},
+            _default_network_params,
+            _default_registry,
+        ),
+        "Missing builder_port in mev configuration for my-l2",
+    )
+
+
 def test_mev_input_parser_default_args(plan):
     _default_params = struct(
         image="flashbots/rollup-boost:latest",

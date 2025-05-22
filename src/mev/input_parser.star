@@ -29,6 +29,12 @@ def parse(mev_args, network_params, registry):
     # We filter the None values so that we can merge dicts easily
     mev_params = _DEFAULT_ARGS | _filter.remove_none(mev_args or {})
 
+    # Now we check that we either have none or both of builder_host & builder_port
+    if mev_params["builder_host"] and not mev_params["builder_port"]:
+        fail("Missing builder_port in mev configuration for {}".format(network_name))
+    elif not mev_params["builder_host"] and mev_params["builder_port"]:
+        fail("Missing builder_host in mev configuration for {}".format(network_name))
+
     # And default the image to the one in the registry
     mev_params["image"] = mev_params["image"] or _default_image(
         mev_params["type"], registry
