@@ -1,7 +1,7 @@
 el_cl_client_launcher = import_module("./el_cl_launcher.star")
 participant_module = import_module("./participant.star")
 input_parser = import_module("./package_io/input_parser.star")
-op_batcher_launcher = import_module("./batcher/op-batcher/op_batcher_launcher.star")
+_op_batcher_launcher = import_module("./batcher/op-batcher/launcher.star")
 _op_proposer_launcher = import_module("./proposer/op-proposer/launcher.star")
 proxyd_launcher = import_module("./proxyd/proxyd_launcher.star")
 util = import_module("./util.star")
@@ -85,18 +85,16 @@ def launch_participant_network(
         "batcher-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    op_batcher_launcher.launch(
-        plan,
-        "op-batcher-{0}".format(l2_services_suffix),
-        batcher_params.image or registry.get(_registry.OP_BATCHER),
-        all_el_contexts[0],
-        all_cl_contexts[0],
-        l1_config_env_vars,
-        batcher_key,
-        batcher_params,
-        network_params,
-        observability_helper,
-        da_server_context,
+    _op_batcher_launcher.launch(
+        plan=plan,
+        params=batcher_params,
+        el_context=all_el_contexts[0],
+        cl_context=all_cl_contexts[0],
+        l1_config_env_vars=l1_config_env_vars,
+        gs_batcher_private_key=batcher_key,
+        network_params=network_params,
+        observability_helper=observability_helper,
+        da_server_context=da_server_context,
     )
 
     # We'll grab the game factory address from the deployments
