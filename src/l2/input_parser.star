@@ -2,6 +2,7 @@ _filter = import_module("/src/util/filter.star")
 _id = import_module("/src/util/id.star")
 
 _l2_participant_input_parser = import_module("./participant/input_parser.star")
+_proposer_input_parser = import_module("/src/proposer/input_parser.star")
 
 _DEFAULT_NETWORK_PARAMS = {
     "network": "kurtosis",
@@ -18,6 +19,7 @@ _DEFAULT_NETWORK_PARAMS = {
 _DEFAULT_ARGS = {
     "participants": {},
     "network_params": _DEFAULT_NETWORK_PARAMS,
+    "proposer_params": None,
 }
 
 
@@ -68,6 +70,11 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
 
     l2_params["participants"] = _l2_participant_input_parser.parse(
         l2_params["participants"], l2_params["network_params"], registry
+    )
+
+    # We add the proposer params
+    l2_params["proposer_params"] = _proposer_input_parser.parse(
+        l2_params["proposer_params"], l2_params["network_params"], registry
     )
 
     return struct(

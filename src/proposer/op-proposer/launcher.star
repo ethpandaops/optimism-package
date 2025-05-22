@@ -12,102 +12,78 @@ util = import_module("../../util.star")
 observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
+_net = import_module("/src/util/net.star")
+
 #
 #  ---------------------------------- Batcher client -------------------------------------
 # The Docker container runs as the "op-proposer" user so we can't write to root
 DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-proposer/op-proposer-data"
 
-# Port nums
-HTTP_PORT_NUM = 8560
-
-
-def get_used_ports():
-    used_ports = {
-        constants.HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            HTTP_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
-        ),
-    }
-    return used_ports
-
-
-ENTRYPOINT_ARGS = ["sh", "-c"]
-
 
 def launch(
     plan,
-    service_name,
-    image,
+    params,
     cl_context,
     l1_config_env_vars,
     gs_proposer_private_key,
     game_factory_address,
-    proposer_params,
     network_params,
     observability_helper,
 ):
-    proposer_service_name = "{0}".format(service_name)
-
     config = get_proposer_config(
-        plan,
-        image,
-        service_name,
-        cl_context,
-        l1_config_env_vars,
-        gs_proposer_private_key,
-        game_factory_address,
-        proposer_params,
-        observability_helper,
+        plan=plan,
+        params=params,
+        cl_context=cl_context,
+        l1_config_env_vars=l1_config_env_vars,
+        gs_proposer_private_key=gs_proposer_private_key,
+        game_factory_address=game_factory_address,
+        observability_helper=observability_helper,
     )
 
-    service = plan.add_service(service_name, config)
-    http_url = util.make_service_http_url(service)
+    service = plan.add_service(params.service_name, config)
 
     observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
     )
 
-    return http_url
+    return struct(service=service)
 
 
 def get_proposer_config(
     plan,
-    image,
-    service_name,
+    params,
+    # TODO Replace with predefined service names & ports from the parsed network params
     cl_context,
     l1_config_env_vars,
     gs_proposer_private_key,
     game_factory_address,
-    proposer_params,
     observability_helper,
 ):
-    ports = dict(get_used_ports())
+    ports = _net.ports_to_port_specs(params.ports)
 
     cmd = [
         "op-proposer",
         "--poll-interval=12s",
-        "--rpc.port=" + str(HTTP_PORT_NUM),
-        "--rollup-rpc=" + cl_context.beacon_http_url,
-        "--game-factory-address=" + str(game_factory_address),
-        "--private-key=" + gs_proposer_private_key,
-        "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
+        "--rpc.port={}".format(params.ports[_net.HTTP_PORT_NAME].number),
+        "--rollup-rpc={}".format(cl_context.beacon_http_url),
+        "--game-factory-address={}".format(game_factory_address),
+        "--private-key={}".format(gs_proposer_private_key),
+        "--l1-eth-rpc={}".format(l1_config_env_vars["L1_RPC_URL"]),
         "--allow-non-finalized=true",
-        "--game-type={0}".format(proposer_params.game_type),
-        "--proposal-interval=" + proposer_params.proposal_interval,
+        "--game-type={0}".format(params.game_type),
+        "--proposal-interval={}".format(params.proposal_interval),
         "--wait-node-sync=true",
-    ]
+    ] + params.extra_params
 
     # apply customizations
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
 
-    cmd += proposer_params.extra_params
-
     return ServiceConfig(
-        image=image,
+        image=params.image,
         ports=ports,
         cmd=cmd,
+        labels=params.labels,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
