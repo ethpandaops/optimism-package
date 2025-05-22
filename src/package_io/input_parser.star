@@ -2,6 +2,7 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+_batcher_input_parser = import_module("/src/batcher/input_parser.star")
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
 _superchain_input_parser = import_module("/src/superchain/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
@@ -186,10 +187,7 @@ def input_parser(
                     image=result["proxyd_params"]["image"],
                     extra_params=result["proxyd_params"]["extra_params"],
                 ),
-                batcher_params=struct(
-                    image=result["batcher_params"]["image"],
-                    extra_params=result["batcher_params"]["extra_params"],
-                ),
+                batcher_params=result["batcher_params"],
                 proposer_params=result["proposer_params"],
                 mev_params=struct(
                     rollup_boost_image=result["mev_params"]["rollup_boost_image"],
@@ -283,8 +281,12 @@ def parse_network_params(plan, registry, input_args):
         proxyd_params = _default_proxyd_params(registry)
         proxyd_params.update(chain.get("proxyd_params", {}))
 
-        batcher_params = _default_batcher_params(registry)
-        batcher_params.update(chain.get("batcher_params", {}))
+        batcher_params = _batcher_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("batcher_params", {}),
+            struct(**network_params),
+            registry,
+        )
 
         proposer_params = _proposer_input_parser.parse(
             # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct

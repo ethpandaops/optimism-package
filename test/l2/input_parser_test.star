@@ -67,6 +67,19 @@ def test_l2_input_parser_defaults(plan):
         seconds_per_slot=2,
     )
 
+    _default_batcher_params = struct(
+        extra_params=[],
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
+        ports={
+            _net.HTTP_PORT_NAME: _net.port(number=8548),
+        },
+        service_name="op-batcher-2151908-network1",
+        labels={
+            "op.kind": "batcher",
+            "op.network.id": 2151908,
+        },
+    )
+
     _default_proposer_params = struct(
         extra_params=[],
         game_type=1,
@@ -88,6 +101,7 @@ def test_l2_input_parser_defaults(plan):
             struct(
                 network_params=_default_network_params,
                 participants=[],
+                batcher_params=_default_batcher_params,
                 proposer_params=_default_proposer_params,
             )
         ],
@@ -106,6 +120,7 @@ def test_l2_input_parser_defaults(plan):
             struct(
                 network_params=_default_network_params,
                 participants=parsed_participants,
+                batcher_params=_default_batcher_params,
                 proposer_params=_default_proposer_params,
             )
         ],
