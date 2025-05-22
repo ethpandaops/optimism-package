@@ -31,7 +31,7 @@ def test_proxyd_input_parser_default_args(plan):
         service_name="proxyd-1000-my-l2",
         labels={
             "op.kind": "proxyd",
-            "op.network.id": network_id,
+            "op.network.id": 1000,
         },
     )
 
@@ -87,7 +87,7 @@ def test_proxyd_input_parser_custom_params(plan):
             service_name="proxyd-1000-my-l2",
             labels={
                 "op.kind": "proxyd",
-                "op.network.id": network_id,
+                "op.network.id": 1000,
             },
         ),
     )
