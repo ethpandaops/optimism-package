@@ -19,6 +19,7 @@ def launch(
     l1_config_env_vars,
     l2s,
     jwt_file,
+    deployment_output,
     observability_helper,
 ):
     supervisor_l2s = [
@@ -54,7 +55,10 @@ def _get_config(
 ):
     ports = _net.ports_to_port_specs(params.ports)
 
-    cmd = ["op-supervisor"] + params.extra_params
+    cmd = [
+        "op-supervisor",
+        "--rollup-config-paths={0}/{1}".format(DATA_DIR, "rollup-*.json"),
+    ] + params.extra_params
 
     # apply customizations
 
@@ -65,7 +69,9 @@ def _get_config(
         image=params.image,
         ports=ports,
         files={
-            DATA_DIR: params.superchain.dependency_set.name,
+            DATA_DIR: Directory(
+                [params.superchain.dependency_set.name, deployment_output]
+            ),
             _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         env_vars={
