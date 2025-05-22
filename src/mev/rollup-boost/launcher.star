@@ -69,4 +69,5 @@ def get_service_config(
             _constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         private_ip_address_placeholder=_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        labels=params.labels,
     )
