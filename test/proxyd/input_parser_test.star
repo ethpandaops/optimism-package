@@ -10,7 +10,7 @@ _default_network_params = struct(
 _default_registry = _registry.Registry()
 
 
-def test_proxyd_input_parser_extra_attrbutes(plan):
+def test_proxyd_input_parser_extra_attributes(plan):
     expect.fails(
         lambda: _input_parser.parse(
             {"extra": None, "name": "x"},
