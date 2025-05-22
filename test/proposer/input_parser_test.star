@@ -31,6 +31,10 @@ def test_proposer_input_parser_default_args(plan):
         },
         proposal_interval="10m",
         service_name="op-proposer-1000-my-l2",
+        labels={
+            "op.kind": "proposer",
+            "op.network.id": 1000,
+        },
     )
 
     expect.eq(
