@@ -93,6 +93,10 @@ def test_proposer_input_parser_custom_params(plan):
             },
             proposal_interval="3h",
             service_name="op-proposer-1000-my-l2",
+            labels={
+                "op.kind": "proposer",
+                "op.network.id": 1000,
+            },
         ),
     )
 
