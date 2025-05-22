@@ -95,6 +95,19 @@ def test_l2_input_parser_defaults(plan):
         },
     )
 
+    _default_proxyd_params = struct(
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.2",
+        extra_params=[],
+        ports={
+            _net.HTTP_PORT_NAME: _net.port(number=8080),
+        },
+        service_name="proxyd-2151908-network1",
+        labels={
+            "op.kind": "proxyd",
+            "op.network.id": 2151908,
+        },
+    )
+
     expect.eq(
         input_parser.parse({"network1": None}, _default_registry),
         [
@@ -103,6 +116,7 @@ def test_l2_input_parser_defaults(plan):
                 participants=[],
                 batcher_params=_default_batcher_params,
                 proposer_params=_default_proposer_params,
+                proxyd_params=_default_proxyd_params,
             )
         ],
     )
@@ -122,6 +136,7 @@ def test_l2_input_parser_defaults(plan):
                 participants=parsed_participants,
                 batcher_params=_default_batcher_params,
                 proposer_params=_default_proposer_params,
+                proxyd_params=_default_proxyd_params,
             )
         ],
     )
