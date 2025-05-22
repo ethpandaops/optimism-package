@@ -1,6 +1,6 @@
 participants:
   - el_type: geth
-    cl_type: teku
+    cl_type: lighthouse
 network_params:
   preset: minimal
   genesis_delay: 5

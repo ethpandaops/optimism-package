@@ -2,7 +2,7 @@
 
 # Core dependencies
 just = "1.40.0"
-"ubi:ethereum-optimism/kurtosis-test" = "0.0.3"
+"ubi:ethereum-optimism/kurtosis-test" = "0.0.5"
 "ubi:kurtosis-tech/kurtosis-cli-release-artifacts[exe=kurtosis]" = "1.6.0"
 "yq" = "v4.44.3"
 

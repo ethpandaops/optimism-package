@@ -1,7 +1,7 @@
 external_l1_network_params:
   network_id: "3151908"
   rpc_kind: standard
-  el_rpc_url: http://el-1-geth-teku:8545
-  el_ws_url: ws://el-1-geth-teku:8546
-  cl_rpc_url: http://cl-1-teku-geth:4000
+  el_rpc_url: http://el-1-geth-lighthouse:8545
+  el_ws_url: ws://el-1-geth-lighthouse:8546
+  cl_rpc_url: http://cl-1-lighthouse-geth:4000
   priv_key: "0xbcdf20249abf0ed6d944c0288fad489e33f66b3960d9e6229c1cd214ed3bbe31"
