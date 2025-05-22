@@ -17,6 +17,7 @@ def launch(
     network_params,
     sequencer_context,
     builder_context,
+    jwt_file,
 ):
     config = get_service_config(
         plan=plan,

@@ -423,7 +423,9 @@ def launch(
     return all_el_contexts, all_cl_contexts
 
 
-def _launch_sidecar(plan, params, network_params, sequencer_context, builder_context):
+def _launch_sidecar(
+    plan, params, network_params, sequencer_context, builder_context, jwt_file
+):
     if params.type == "rollup-boost":
         return _rollup_boost_launcher.launch(
             plan=plan,
@@ -431,6 +433,7 @@ def _launch_sidecar(plan, params, network_params, sequencer_context, builder_con
             network_params=network_params,
             sequencer_context=sequencer_context,
             builder_context=builder_context,
+            jwt_file=jwt_file,
         )
     else:
         fail("Invalid MEV type: {}".format(params.type))
