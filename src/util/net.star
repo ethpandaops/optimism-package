@@ -1,4 +1,6 @@
+HTTP_PORT_NAME = "http"
 RPC_PORT_NAME = "rpc"
+BEACON_PORT_NAME = "beacon"
 INTEROP_RPC_PORT_NAME = "rpc-interop"
 
 

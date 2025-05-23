@@ -49,6 +49,7 @@ def test_interop_op_supervisor_ports(plan):
         l2s=[],
         jwt_file="/jwt_file",
         params=supervisor_params,
+        deployment_output="/deployment_output",
         observability_helper=observability_helper,
     )
 

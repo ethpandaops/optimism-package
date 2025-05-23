@@ -40,3 +40,23 @@ def first(p, predicate=lambda v: v, default=None):
         if predicate(item):
             return item
     return default
+
+
+def get_duplicates(p):
+    # Just a quick sanity check
+    if type(p) != "list":
+        fail("Argument to get_duplicates must be a list, got {}".format(p))
+
+    # Unfortunately, kurtosis starlark does not support sets
+    # so we have to resort to less efficient lists
+    # to keep track of duplicates
+    seen = []
+    duplicates = []
+    for item in p:
+        if item in seen:
+            if item not in duplicates:
+                duplicates.append(item)
+        else:
+            seen.append(item)
+
+    return duplicates

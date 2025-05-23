@@ -109,7 +109,7 @@ def run(plan, args={}):
     )
 
     l2s = []
-    for l2_num, chain in enumerate(optimism_args.chains):
+    for chain in optimism_args.chains:
         # We filter out the supervisors applicable to this network
         l2_supervisors_params = [
             supervisor_params
@@ -121,7 +121,6 @@ def run(plan, args={}):
         l2s.append(
             l2_launcher.launch_l2(
                 plan=plan,
-                l2_num=l2_num,
                 l2_services_suffix=chain.network_params.name,
                 l2_args=chain,
                 jwt_file=jwt_file,
@@ -152,6 +151,7 @@ def run(plan, args={}):
             l1_config_env_vars=l1_config_env_vars,
             l2s=l2s,
             jwt_file=jwt_file,
+            deployment_output=deployment_output,
             observability_helper=observability_helper,
         )
 
