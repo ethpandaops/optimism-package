@@ -38,6 +38,7 @@ def launch(
             enode=None,
             ip_addr=service.ip_address,
             rpc_port_num=rpc_port.number,
+            ws_port_num=None,
             engine_rpc_port_num=rpc_port.number,
             rpc_http_url=_net.service_url(service.ip_address, rpc_port),
             service_name=params.service_name,
