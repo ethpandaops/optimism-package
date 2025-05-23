@@ -29,7 +29,20 @@ def launch(
 
     service = plan.add_service(params.service_name, config)
 
-    return struct(service=service)
+    rpc_port = params.ports[_net.RPC_PORT_NAME]
+
+    return struct(
+        service=service,
+        context=_el_context.new_el_context(
+            client_name=params.type,
+            enode=None,
+            ip_addr=service.ip_address,
+            rpc_port_num=rpc_port.number,
+            engine_rpc_port_num=rpc_port.number,
+            rpc_http_url=_net.service_url(service.ip_address, rpc_port),
+            service_name=service_name,
+        ),
+    )
 
 
 def get_service_config(
