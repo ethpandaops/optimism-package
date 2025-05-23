@@ -507,7 +507,8 @@ def default_altda_deploy_config():
 
 def default_mev_params():
     return {
-        "rollup_boost_image": "",
+        "image": "",
+        "type": "rollup-boost",
         "builder_host": "",
         "builder_port": "",
     }
