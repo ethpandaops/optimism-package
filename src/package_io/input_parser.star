@@ -4,6 +4,7 @@ ethereum_package_input_parser = import_module(
 
 _batcher_input_parser = import_module("/src/batcher/input_parser.star")
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
+_mev_input_parser = import_module("/src/mev/input_parser.star")
 _superchain_input_parser = import_module("/src/superchain/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
@@ -187,11 +188,7 @@ def input_parser(
                 proxyd_params=result["proxyd_params"],
                 batcher_params=result["batcher_params"],
                 proposer_params=result["proposer_params"],
-                mev_params=struct(
-                    rollup_boost_image=result["mev_params"]["rollup_boost_image"],
-                    builder_host=result["mev_params"]["builder_host"],
-                    builder_port=result["mev_params"]["builder_port"],
-                ),
+                mev_params=result["mev_params"],
                 da_server_params=struct(
                     enabled=result["da_server_params"]["enabled"],
                     image=result["da_server_params"]["image"],
@@ -297,8 +294,13 @@ def parse_network_params(plan, registry, input_args):
             registry,
         )
 
-        mev_params = default_mev_params()
-        mev_params.update(chain.get("mev_params", {}))
+        mev_params = _mev_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("mev_params", {}),
+            struct(**network_params),
+            registry,
+        )
+
         da_server_params = default_da_server_params(registry)
         da_server_params.update(chain.get("da_server_params", {}))
 
@@ -505,7 +507,8 @@ def default_altda_deploy_config():
 
 def default_mev_params():
     return {
-        "rollup_boost_image": "",
+        "image": "",
+        "type": "rollup-boost",
         "builder_host": "",
         "builder_port": "",
     }
