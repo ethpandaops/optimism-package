@@ -144,7 +144,7 @@ SUBCATEGORY_PARAMS = {
     "proxyd_params": ["image", "extra_params"],
     "batcher_params": ["image", "extra_params"],
     "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
-    "mev_params": ["rollup_boost_image", "builder_host", "builder_port"],
+    "mev_params": ["image", "type", "builder_host", "builder_port"],
     "da_server_params": [
         "enabled",
         "image",

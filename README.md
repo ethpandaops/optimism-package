@@ -447,7 +447,10 @@ optimism_package:
       mev_params:
         # The Docker image that should be used for rollup boost; leave blank to use the default rollup-boost image
         # Defaults to "flashbots/rollup-boost:latest"
-        rollup_boost_image: ""
+        image: ""
+
+        # We currently only support rollup-boost, which is also the default value
+        type: "rollup-boost"
 
         # The host of an external builder
         builder_host: ""
