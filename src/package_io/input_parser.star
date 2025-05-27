@@ -2,8 +2,12 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+_batcher_input_parser = import_module("/src/batcher/input_parser.star")
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
+_mev_input_parser = import_module("/src/mev/input_parser.star")
 _superchain_input_parser = import_module("/src/superchain/input_parser.star")
+_proposer_input_parser = import_module("/src/proposer/input_parser.star")
+_proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
 _supervisor_input_parser = import_module("/src/supervisor/input_parser.star")
 
 constants = import_module("../package_io/constants.star")
@@ -181,25 +185,10 @@ def input_parser(
                     interop_time_offset=result["network_params"]["interop_time_offset"],
                     fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
                 ),
-                proxyd_params=struct(
-                    image=result["proxyd_params"]["image"],
-                    extra_params=result["proxyd_params"]["extra_params"],
-                ),
-                batcher_params=struct(
-                    image=result["batcher_params"]["image"],
-                    extra_params=result["batcher_params"]["extra_params"],
-                ),
-                proposer_params=struct(
-                    image=result["proposer_params"]["image"],
-                    extra_params=result["proposer_params"]["extra_params"],
-                    game_type=result["proposer_params"]["game_type"],
-                    proposal_interval=result["proposer_params"]["proposal_interval"],
-                ),
-                mev_params=struct(
-                    rollup_boost_image=result["mev_params"]["rollup_boost_image"],
-                    builder_host=result["mev_params"]["builder_host"],
-                    builder_port=result["mev_params"]["builder_port"],
-                ),
+                proxyd_params=result["proxyd_params"],
+                batcher_params=result["batcher_params"],
+                proposer_params=result["proposer_params"],
+                mev_params=result["mev_params"],
                 da_server_params=struct(
                     enabled=result["da_server_params"]["enabled"],
                     image=result["da_server_params"]["image"],
@@ -281,22 +270,39 @@ def parse_network_params(plan, registry, input_args):
         network_params = default_network_params()
         network_params.update(chain.get("network_params", {}))
 
-        proxyd_params = _default_proxyd_params(registry)
-        proxyd_params.update(chain.get("proxyd_params", {}))
-
-        batcher_params = _default_batcher_params(registry)
-        batcher_params.update(chain.get("batcher_params", {}))
-
-        proposer_params = _default_proposer_params(registry)
-        proposer_params.update(chain.get("proposer_params", {}))
-
-        mev_params = default_mev_params()
-        mev_params.update(chain.get("mev_params", {}))
-        da_server_params = default_da_server_params(registry)
-        da_server_params.update(chain.get("da_server_params", {}))
-
         network_name = network_params["name"]
         network_id = network_params["network_id"]
+
+        proxyd_params = _proxyd_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("proxyd_params", {}),
+            struct(**network_params),
+            registry,
+        )
+
+        batcher_params = _batcher_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("batcher_params", {}),
+            struct(**network_params),
+            registry,
+        )
+
+        proposer_params = _proposer_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("proposer_params", {}),
+            struct(**network_params),
+            registry,
+        )
+
+        mev_params = _mev_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("mev_params", {}),
+            struct(**network_params),
+            registry,
+        )
+
+        da_server_params = default_da_server_params(registry)
+        da_server_params.update(chain.get("da_server_params", {}))
 
         if network_name in seen_names:
             fail("Network name {0} is duplicated".format(network_name))
@@ -457,7 +463,9 @@ def default_grafana_params(registry):
     return {
         "image": registry.get(_registry.GRAFANA),
         "dashboard_sources": [
-            "github.com/ethereum-optimism/grafana-dashboards-public/resources"
+            "github.com/ethereum-optimism/grafana-dashboards-public/resources",
+            "github.com/op-rs/kona/docker/recipes/kona-node/grafana",
+            "github.com/paradigmxyz/reth/etc/grafana",
         ],
         "min_cpu": 10,
         "max_cpu": 1000,
@@ -499,7 +507,8 @@ def default_altda_deploy_config():
 
 def default_mev_params():
     return {
-        "rollup_boost_image": "",
+        "image": "",
+        "type": "rollup-boost",
         "builder_host": "",
         "builder_port": "",
     }

@@ -122,6 +122,8 @@ optimism_package:
       dashboard_sources:
         # Default public Optimism dashboards
         - github.com/ethereum-optimism/grafana-dashboards-public/resources
+        - github.com/op-rs/kona/docker/recipes/kona-node/grafana
+        - github.com/paradigmxyz/reth/etc/grafana
       # Resource management for grafana container
       # CPU is milicores
       # RAM is in MB
@@ -445,7 +447,10 @@ optimism_package:
       mev_params:
         # The Docker image that should be used for rollup boost; leave blank to use the default rollup-boost image
         # Defaults to "flashbots/rollup-boost:latest"
-        rollup_boost_image: ""
+        image: ""
+
+        # We currently only support rollup-boost, which is also the default value
+        type: "rollup-boost"
 
         # The host of an external builder
         builder_host: ""

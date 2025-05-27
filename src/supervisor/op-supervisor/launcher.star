@@ -19,6 +19,7 @@ def launch(
     l1_config_env_vars,
     l2s,
     jwt_file,
+    deployment_output,
     observability_helper,
 ):
     supervisor_l2s = [
@@ -31,6 +32,7 @@ def launch(
         l1_config_env_vars=l1_config_env_vars,
         l2s=supervisor_l2s,
         jwt_file=jwt_file,
+        deployment_output=deployment_output,
         observability_helper=observability_helper,
     )
 
@@ -50,6 +52,7 @@ def _get_config(
     l1_config_env_vars,
     l2s,
     jwt_file,
+    deployment_output,
     observability_helper,
 ):
     ports = _net.ports_to_port_specs(params.ports)
@@ -66,6 +69,7 @@ def _get_config(
         ports=ports,
         files={
             DATA_DIR: params.superchain.dependency_set.name,
+            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
             _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         env_vars={
@@ -73,6 +77,8 @@ def _get_config(
             "OP_SUPERVISOR_DEPENDENCY_SET": "{0}/{1}".format(
                 DATA_DIR, params.superchain.dependency_set.path
             ),
+            "OP_SUPERVISOR_ROLLUP_CONFIG_PATHS": _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+            + "/rollup-*.json",
             "OP_SUPERVISOR_L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "OP_SUPERVISOR_L2_CONSENSUS_NODES": ",".join(
                 [
