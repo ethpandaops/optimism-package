@@ -110,7 +110,7 @@ def run(plan, args={}):
 
     # TODO We need to create the dependency sets before we launch the chains since
     # e.g. op-node now depends on the artifacts to be present
-    # 
+    #
     # This can easily turn into another dependency cycle which means we might have to introduce yet another layer
     # of execution whose sole purpose is to create required artifacts
     for superchain_params in optimism_args.superchains:
