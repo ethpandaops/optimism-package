@@ -192,15 +192,15 @@ def get_beacon_config(
 
     # configure files
 
-    genesis_files = launcher.deployment_output
-    if supervisor_params:
-        genesis_files = Directory(
-            launcher.deployment_output,
-            supervisor_params.superchain.dependency_set.name,
-        )
-
     files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: genesis_files,
+        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: Directory(
+            artifact_names=[
+                launcher.deployment_output,
+                supervisor_params.superchain.dependency_set.name,
+            ]
+        )
+        if supervisor_params
+        else launcher.deployment_output,
         ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
