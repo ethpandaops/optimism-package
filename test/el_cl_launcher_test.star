@@ -328,6 +328,7 @@ def test_launch_with_superchains(plan):
             "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
             "OP_NODE_INTEROP_RPC_PORT": "9645",
             "OP_NODE_INTEROP_JWT_SECRET": "/jwt/jwtsecret",
+            "OP_NODE_INTEROP_DEPENDENCY_SET": "/network-configs/superchain-depset-superchain0.json",
         },
     )
     expect.eq(
