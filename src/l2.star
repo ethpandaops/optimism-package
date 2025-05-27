@@ -88,7 +88,7 @@ def launch_l2(
     if l2_args.tx_fuzzer_params:
         plan.print("Launching transaction fuzzer")
 
-        tx_fuzzer.launch(
+        _tx_fuzzer_launcher.launch(
             plan=plan,
             params=l2.args,
             el_context=all_el_contexts[0],
