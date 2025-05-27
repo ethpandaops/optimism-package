@@ -20,10 +20,7 @@ l1_config_env_vars = {
     "CL_RPC_URL": "CL_RPC_URL",
 }
 
-da_server_context = struct(
-    enabled=False,
-    http_url="da_server_http_url",
-)
+da_server_context = None
 
 
 def test_launch_with_defaults(plan):
@@ -113,8 +110,8 @@ def test_launch_with_defaults(plan):
             "--p2p.listen.tcp=9003",
             "--p2p.listen.udp=9003",
             "--safedb.path=/data/op-node/op-node-beacon-data",
-            "--altda.enabled={0}".format(da_server_context.enabled),
-            "--altda.da-server={0}".format(da_server_context.http_url),
+            "--altda.enabled={0}".format("false"),
+            "--altda.da-server={0}".format(""),
             "--metrics.enabled=true",
             "--metrics.addr=0.0.0.0",
             "--metrics.port=9001",
@@ -359,8 +356,8 @@ def test_launch_with_superchains(plan):
             "--p2p.listen.tcp=9003",
             "--p2p.listen.udp=9003",
             "--safedb.path=/data/op-node/op-node-beacon-data",
-            "--altda.enabled={0}".format(da_server_context.enabled),
-            "--altda.da-server={0}".format(da_server_context.http_url),
+            "--altda.enabled={0}".format("false"),
+            "--altda.da-server={0}".format(""),
             "--metrics.enabled=true",
             "--metrics.addr=0.0.0.0",
             "--metrics.port=9001",
