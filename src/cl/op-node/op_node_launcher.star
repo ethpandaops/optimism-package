@@ -188,10 +188,19 @@ def get_beacon_config(
         "--altda.da-server=" + da_server_context.http_url,
     ]
 
+    supervisor_params = _filter.first(supervisors_params)
+
     # configure files
 
     files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: Directory(
+            artifact_names=[
+                launcher.deployment_output,
+                supervisor_params.superchain.dependency_set.name,
+            ]
+        )
+        if supervisor_params
+        else launcher.deployment_output,
         ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
@@ -220,7 +229,6 @@ def get_beacon_config(
 
         observability.expose_metrics_port(ports)
 
-    supervisor_params = _filter.first(supervisors_params)
     if supervisor_params:
         interop_rpc_port = supervisor_params.superchain.ports[
             _net.INTEROP_RPC_PORT_NAME
@@ -232,6 +240,10 @@ def get_beacon_config(
                 "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
                 "OP_NODE_INTEROP_RPC_PORT": str(interop_rpc_port.number),
                 "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+                "OP_NODE_INTEROP_DEPENDENCY_SET": "{0}/{1}".format(
+                    ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+                    supervisor_params.superchain.dependency_set.path,
+                ),
             }
         )
 
