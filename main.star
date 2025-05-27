@@ -108,6 +108,17 @@ def run(plan, args={}):
         name="op_jwt_file",
     )
 
+    # TODO We need to create the dependency sets before we launch the chains since
+    # e.g. op-node now depends on the artifacts to be present
+    # 
+    # This can easily turn into another dependency cycle which means we might have to introduce yet another layer
+    # of execution whose sole purpose is to create required artifacts
+    for superchain_params in optimism_args.superchains:
+        superchain_launcher.launch(
+            plan=plan,
+            params=superchain_params,
+        )
+
     l2s = []
     for chain in optimism_args.chains:
         # We filter out the supervisors applicable to this network
@@ -136,12 +147,6 @@ def run(plan, args={}):
                 supervisors_params=l2_supervisors_params,
                 registry=registry,
             )
-        )
-
-    for superchain_params in optimism_args.superchains:
-        superchain_launcher.launch(
-            plan=plan,
-            params=superchain_params,
         )
 
     for supervisor_params in optimism_args.supervisors:
