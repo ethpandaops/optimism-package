@@ -469,6 +469,8 @@ optimism_package:
       # Configuration for da-server - https://specs.optimism.io/experimental/alt-da.html#da-server
       # TODO: each op-node and op-batcher should potentially have their own da-server, instead of sharing one like we currently do. For eg batcher needs to write via its da-server, whereas op-nodes don't.
       da_params:
+        # DA is disabled by default
+        enabled: false
         image: us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest
         # Command to pass to the container.
         # This is kept maximally generic to allow for any possible configuration, given that different
