@@ -1,10 +1,10 @@
 participant_network = import_module("./participant_network.star")
 blockscout = import_module("./blockscout/blockscout_launcher.star")
 _da_server_launcher = import_module("./da/da-server/launcher.star")
+_tx_fuzzer_launcher = import_module("./tx-fuzzer/launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
 input_parser = import_module("./package_io/input_parser.star")
 util = import_module("./util.star")
-tx_fuzzer = import_module("./transaction_fuzzer/transaction_fuzzer.star")
 
 
 def launch_l2(
@@ -85,6 +85,18 @@ def launch_l2(
         ),
     )
 
+    if l2_args.tx_fuzzer_params:
+        plan.print("Launching transaction fuzzer")
+
+        tx_fuzzer.launch(
+            plan=plan,
+            params=l2.args,
+            el_context=all_el_contexts[0],
+            node_selectors=global_node_selectors,
+        )
+
+        plan.print("Successfully launched transaction fuzzer")
+
     for additional_service in l2_args.additional_services:
         if additional_service == "blockscout":
             plan.print("Launching op-blockscout")
@@ -98,20 +110,6 @@ def launch_l2(
                 network_params.network_id,
             )
             plan.print("Successfully launched op-blockscout")
-        elif additional_service == "tx_fuzzer":
-            plan.print("Launching transaction spammer")
-            fuzz_target = "http://{0}:{1}".format(
-                all_el_contexts[0].ip_addr,
-                all_el_contexts[0].rpc_port_num,
-            )
-            tx_fuzzer.launch(
-                plan,
-                "op-transaction-fuzzer-{0}".format(network_params.name),
-                fuzz_target,
-                tx_fuzzer_params,
-                global_node_selectors,
-            )
-            plan.print("Successfully launched transaction spammer")
 
     plan.print(l2.participants)
     plan.print(

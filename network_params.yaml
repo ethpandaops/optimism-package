@@ -40,7 +40,7 @@ optimism_package:
         extra_params: []
       additional_services: ["rollup-boost"]
       tx_fuzzer_params:
-        tx_fuzzer_extra_args: []
+        enabled: true
       da_params:
         enabled: true
   op_contract_deployer_params:

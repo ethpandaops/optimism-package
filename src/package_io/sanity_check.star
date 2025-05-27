@@ -152,8 +152,9 @@ SUBCATEGORY_PARAMS = {
         "type",
     ],
     "tx_fuzzer_params": [
+        "enabled",
         "image",
-        "tx_fuzzer_extra_args",
+        "extra_params",
     ],
 }
 
@@ -169,7 +170,7 @@ OP_CONTRACT_DEPLOYER_OVERRIDES = [
     "vmType",
 ]
 
-ADDITIONAL_SERVICES_PARAMS = ["blockscout", "rollup-boost", "tx_fuzzer"]
+ADDITIONAL_SERVICES_PARAMS = ["blockscout", "rollup-boost"]
 
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",
