@@ -1,5 +1,6 @@
 _filter = import_module("/src/util/filter.star")
 _id = import_module("/src/util/id.star")
+_sequence = import_module("/src/util/sequence.star")
 
 _l2_participant_input_parser = import_module("./participant/input_parser.star")
 _batcher_input_parser = import_module("/src/batcher/input_parser.star")
@@ -28,7 +29,7 @@ _DEFAULT_ARGS = {
 
 
 def parse(args, registry):
-    l2_id_generator = _id.autoincrement(2151908)
+    l2_id_generator = _sequence.autoincrement(2151908)
 
     return _assert_unique_l2_ids(
         _filter.remove_none(
