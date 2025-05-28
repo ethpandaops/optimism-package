@@ -249,7 +249,7 @@ def test_l2_participant_input_parser_invalid_sequencers(plan):
             _default_network_params,
             _default_registry,
         ),
-        " Invalid participants configuration on network my-l2: sequencers explicitly defined for nodes node0,node1 but left implicit for node2,node3.",
+        "Invalid participants configuration on network my-l2: sequencers explicitly defined for nodes node0,node1 but left implicit for node2,node3.",
     )
 
 
@@ -285,7 +285,7 @@ def test_l2_participant_input_parser_explicit_sequencers(plan):
     expect.eq(
         parsed_sequencers,
         {
-            "node0": True,
+            "node0": "node0",
             "node1": "node0",
             "node2": "node0",
             "node3": "node0",
@@ -315,9 +315,9 @@ def test_l2_participant_input_parser_explicit_sequencers(plan):
     expect.eq(
         parsed_sequencers,
         {
-            "node0": True,
-            "node1": True,
-            "node2": True,
+            "node0": "node0",
+            "node1": "node1",
+            "node2": "node2",
             "node3": "node0",
             "node4": "node0",
             "node5": "node2",
@@ -350,9 +350,9 @@ def test_l2_participant_input_parser_explicit_sequencers(plan):
     expect.eq(
         parsed_sequencers,
         {
-            "node0": True,
-            "node1": True,
-            "node2": True,
+            "node0": "node0",
+            "node1": "node1",
+            "node2": "node2",
             "node3": "node0",
             "node4": "node0",
             "node5": "node2",

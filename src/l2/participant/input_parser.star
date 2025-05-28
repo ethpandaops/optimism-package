@@ -133,7 +133,7 @@ def _apply_sequencers(participants_params, network_params):
         )
 
     # Since copying structs is not super slick in starlark, we keep an array of just the sequencer values since we want to modify them
-    sequencers = _selectors.get_sequencers_params(participants_params)
+    sequencers = [p.name for p in _selectors.get_sequencers_params(participants_params)]
 
     if len(sequencers) == 0:
         # If there are no participants marked as sequencers, we mark the first available one as a sequencer
@@ -181,7 +181,7 @@ def _apply_sequencers(participants_params, network_params):
             cl=p.cl,
             cl_builder=p.cl_builder,
             name=p.name,
-            sequencer=True
+            sequencer=p.name
             # We set the value to true (i.e. this is a sequencer) if this node is in the list of sequencers
             #
             # We don't just check whether the p.sequencer is True since it might have been null
