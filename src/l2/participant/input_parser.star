@@ -182,7 +182,7 @@ def _apply_sequencers(participants_params, network_params):
             cl_builder=p.cl_builder,
             name=p.name,
             sequencer=p.name
-            # We set the value to true (i.e. this is a sequencer) if this node is in the list of sequencers
+            # We set the value to the name of node itself (i.e. this is a sequencer) if this node is in the list of sequencers
             #
             # We don't just check whether the p.sequencer is True since it might have been null
             # and we just selected a default sequencer
