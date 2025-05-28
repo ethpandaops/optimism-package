@@ -155,6 +155,10 @@ SUBCATEGORY_PARAMS = {
         "enabled",
         "image",
         "extra_params",
+        "min_cpu",
+        "max_cpu",
+        "min_memory",
+        "max_memory",
     ],
 }
 

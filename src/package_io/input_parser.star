@@ -670,6 +670,11 @@ def default_da_server_params(registry):
 
 def default_tx_fuzzer_params(registry):
     return {
+        "enabled": False,
         "image": registry.get(_registry.TX_FUZZER),
-        "tx_fuzzer_extra_args": [],
+        "extra_params": [],
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_memory": 20,
+        "max_memory": 300,
     }
