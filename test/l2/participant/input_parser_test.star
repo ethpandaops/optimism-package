@@ -63,7 +63,7 @@ def test_l2_participant_input_parser_defaults(plan):
         [
             struct(
                 name="node0",
-                sequencer=True,
+                sequencer="node0",
                 cl=struct(
                     type="op-node",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
