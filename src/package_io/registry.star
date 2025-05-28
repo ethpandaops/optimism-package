@@ -50,8 +50,10 @@ _DEFAULT_IMAGES = {
     OP_BATCHER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
     # Challenger
     OP_CHALLENGER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
-    # Supervisor
+    # op-supervisor
     OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+    # kona-supervisor
+    KONA_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
     # Proposer
     OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
     # Conductor
