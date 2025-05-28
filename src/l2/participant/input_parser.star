@@ -2,6 +2,7 @@ _registry = import_module("/src/package_io/registry.star")
 _filter = import_module("/src/util/filter.star")
 _net = import_module("/src/util/net.star")
 _id = import_module("/src/util/id.star")
+_selectors = import_module("/src/l2/selectors.star")
 
 _el_input_parser = import_module("./el/input_parser.star")
 _cl_input_parser = import_module("./cl/input_parser.star")
@@ -127,9 +128,7 @@ def _apply_sequencers(participants_params, network_params):
         )
 
     # Since copying structs is not super slick in starlark, we keep an array of just the sequencer values since we want to modify them
-    #
-    # TODO In the next PR a set of helper functions will be introduced to isolate the p.sequencer == p.name condition
-    sequencers = [p.name for p in participants_params if p.sequencer == p.name]
+    sequencers = [p.name for p in participants_params if _selectors.is_sequencer(p)]
 
     if len(sequencers) == 0:
         # If there are no participants marked as sequencers, we mark the first available one as a sequencer
