@@ -17,15 +17,24 @@ _DEFAULT_ARGS = {
 
 
 def parse(args, network_params, registry):
+    participants_params = _filter.remove_none(
+        [
+            _parse_instance(
+                participant_args or {}, participant_name, network_params, registry
+            )
+            for participant_name, participant_args in (args or {}).items()
+        ]
+    )
+
+    if len(participants_params) == 0:
+        fail(
+            "Invalid participants configuration for network {}: at least one participant must be defined".format(
+                network_params.name
+            )
+        )
+
     return _apply_sequencers(
-        participants_params=_filter.remove_none(
-            [
-                _parse_instance(
-                    participant_args or {}, participant_name, network_params, registry
-                )
-                for participant_name, participant_args in (args or {}).items()
-            ]
-        ),
+        participants_params=participants_params,
         network_params=network_params,
     )
 
@@ -103,10 +112,6 @@ def _parse_instance(participant_args, participant_name, network_params, registry
 # This can only happen once all the participants have been resolved
 # so it's kept in a separate function that can be chained with the top-level parsing logic
 def _apply_sequencers(participants_params, network_params):
-    # To avoid any null pointer references, we return early if there are no participants
-    if len(participants_params) == 0:
-        return participants_params
-
     # Now we make sure that if we specify anything explicitly, we specify everything explicitly
     #
     # No half-assed configs around here okay

@@ -24,13 +24,14 @@ _shared_defaults = {
 
 
 def test_l2_participant_input_parser_empty(plan):
-    expect.eq(
-        input_parser.parse(None, _default_network_params, _default_registry),
-        [],
+    expect.fails(
+        lambda: input_parser.parse(None, _default_network_params, _default_registry),
+        "Invalid participants configuration for network my-l2: at least one participant must be defined",
     )
-    expect.eq(
-        input_parser.parse({}, _default_network_params, _default_registry),
-        [],
+
+    expect.fails(
+        lambda: input_parser.parse({}, _default_network_params, _default_registry),
+        "Invalid participants configuration for network my-l2: at least one participant must be defined",
     )
 
 
