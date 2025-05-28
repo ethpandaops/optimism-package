@@ -90,7 +90,7 @@ def launch_l2(
 
         _tx_fuzzer_launcher.launch(
             plan=plan,
-            params=l2.args,
+            params=l2_args.tx_fuzzer_params,
             el_context=all_el_contexts[0],
             node_selectors=global_node_selectors,
         )
