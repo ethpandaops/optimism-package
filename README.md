@@ -173,8 +173,8 @@ optimism_package:
   # To setup an altda cluster, make sure to
   # 1. Set altda_deploy_config.use_altda to true (and da_commitment_type to KeccakCommitment, see TODO below)
   # 2. For each chain,
-  #    - Add "da_server" to the additional_services list if it should use alt-da
-  #    - For altda chains, set da_server_params to use an image and cmd of your choice (one could use da-server, another eigenda-proxy, another celestia proxy, etc). If unset, op's default da-server image will be used.
+  #    - Set da_params.enabled to true in your kurtosis argument file
+  #    - For altda chains, set da_params to use an image and cmd of your choice (one could use da-server, another eigenda-proxy, another celestia proxy, etc). If unset, op's default da-server image will be used.
   altda_deploy_config:
     use_altda: false
     # TODO: Is this field redundant? Afaiu setting it to GenericCommitment will not deploy the
@@ -468,7 +468,9 @@ optimism_package:
 
       # Configuration for da-server - https://specs.optimism.io/experimental/alt-da.html#da-server
       # TODO: each op-node and op-batcher should potentially have their own da-server, instead of sharing one like we currently do. For eg batcher needs to write via its da-server, whereas op-nodes don't.
-      da_server_params:
+      da_params:
+        # DA is disabled by default
+        enabled: false
         image: us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest
         # Command to pass to the container.
         # This is kept maximally generic to allow for any possible configuration, given that different

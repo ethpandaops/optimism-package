@@ -145,10 +145,11 @@ SUBCATEGORY_PARAMS = {
     "batcher_params": ["image", "extra_params"],
     "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
     "mev_params": ["image", "type", "builder_host", "builder_port"],
-    "da_server_params": [
+    "da_params": [
         "enabled",
         "image",
-        "cmd",
+        "extra_params",
+        "type",
     ],
     "tx_fuzzer_params": [
         "image",
@@ -168,7 +169,7 @@ OP_CONTRACT_DEPLOYER_OVERRIDES = [
     "vmType",
 ]
 
-ADDITIONAL_SERVICES_PARAMS = ["blockscout", "rollup-boost", "da_server", "tx_fuzzer"]
+ADDITIONAL_SERVICES_PARAMS = ["blockscout", "rollup-boost", "tx_fuzzer"]
 
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",

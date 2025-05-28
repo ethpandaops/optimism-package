@@ -3,6 +3,7 @@ ethereum_package_input_parser = import_module(
 )
 
 _batcher_input_parser = import_module("/src/batcher/input_parser.star")
+_da_input_parser = import_module("/src/da/input_parser.star")
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
 _mev_input_parser = import_module("/src/mev/input_parser.star")
 _superchain_input_parser = import_module("/src/superchain/input_parser.star")
@@ -189,11 +190,7 @@ def input_parser(
                 batcher_params=result["batcher_params"],
                 proposer_params=result["proposer_params"],
                 mev_params=result["mev_params"],
-                da_server_params=struct(
-                    enabled=result["da_server_params"]["enabled"],
-                    image=result["da_server_params"]["image"],
-                    cmd=result["da_server_params"]["cmd"],
-                ),
+                da_params=result["da_params"],
                 additional_services=result["additional_services"],
                 tx_fuzzer_params=struct(
                     image=result["tx_fuzzer_params"]["image"],
@@ -301,8 +298,12 @@ def parse_network_params(plan, registry, input_args):
             registry,
         )
 
-        da_server_params = default_da_server_params(registry)
-        da_server_params.update(chain.get("da_server_params", {}))
+        da_params = _da_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("da_params", {}),
+            struct(**network_params),
+            registry,
+        )
 
         if network_name in seen_names:
             fail("Network name {0} is duplicated".format(network_name))
@@ -379,7 +380,7 @@ def parse_network_params(plan, registry, input_args):
             "batcher_params": batcher_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
-            "da_server_params": da_server_params,
+            "da_params": da_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES
             ),
@@ -523,7 +524,7 @@ def default_chains(registry):
             "batcher_params": _default_batcher_params(registry),
             "proposer_params": _default_proposer_params(registry),
             "mev_params": default_mev_params(),
-            "da_server_params": default_da_server_params(registry),
+            "da_params": default_da_server_params(registry),
             "additional_services": DEFAULT_ADDITIONAL_SERVICES,
             "tx_fuzzer_params": default_tx_fuzzer_params(registry),
         }
@@ -664,7 +665,6 @@ def default_da_server_params(registry):
     return {
         "enabled": False,
         "image": registry.get(_registry.DA_SERVER),
-        "cmd": DEFAULT_DA_SERVER_PARAMS["cmd"],
     }
 
 

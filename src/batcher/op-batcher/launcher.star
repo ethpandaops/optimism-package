@@ -81,10 +81,12 @@ def get_batcher_config(
         "--private-key={}".format(gs_batcher_private_key),
         # da commitments currently have to be sent as calldata to the batcher inbox
         "--data-availability-type={}".format(
-            "calldata" if da_server_context.enabled else "blobs"
+            "calldata" if da_server_context else "blobs"
         ),
-        "--altda.enabled={}".format(str(da_server_context.enabled)),
-        "--altda.da-server={}".format(da_server_context.http_url),
+        "--altda.enabled={}".format("true" if da_server_context else "false"),
+        "--altda.da-server={}".format(
+            da_server_context.http_url if da_server_context else ""
+        ),
         # This flag is very badly named, but is needed in order to let the da-server compute the commitment.
         # This leads to sending POST requests to /put instead of /put/<keccak256(data)>
         "--altda.da-service",
