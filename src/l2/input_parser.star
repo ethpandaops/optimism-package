@@ -33,7 +33,18 @@ def parse(args, registry):
     return _assert_unique_l2_ids(
         _filter.remove_none(
             [
-                _parse_instance(l2_args or {}, l2_name, l2_id_generator, registry)
+                _parse_instance(
+                    l2_args
+                    or {
+                        # If we get empty L2 args, we supply some defaults so that we get at least one participant
+                        "participants": {
+                            "node0": None,
+                        }
+                    },
+                    l2_name,
+                    l2_id_generator,
+                    registry,
+                )
                 for l2_name, l2_args in (args or {}).items()
             ]
         )

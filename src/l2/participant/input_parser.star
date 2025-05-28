@@ -2,6 +2,7 @@ _registry = import_module("/src/package_io/registry.star")
 _filter = import_module("/src/util/filter.star")
 _net = import_module("/src/util/net.star")
 _id = import_module("/src/util/id.star")
+_selectors = import_module("/src/l2/selectors.star")
 
 _el_input_parser = import_module("./el/input_parser.star")
 _cl_input_parser = import_module("./cl/input_parser.star")
@@ -16,15 +17,24 @@ _DEFAULT_ARGS = {
 
 
 def parse(args, network_params, registry):
+    participants_params = _filter.remove_none(
+        [
+            _parse_instance(
+                participant_args or {}, participant_name, network_params, registry
+            )
+            for participant_name, participant_args in (args or {}).items()
+        ]
+    )
+
+    if len(participants_params) == 0:
+        fail(
+            "Invalid participants configuration for network {}: at least one participant must be defined".format(
+                network_params.name
+            )
+        )
+
     return _apply_sequencers(
-        participants_params=_filter.remove_none(
-            [
-                _parse_instance(
-                    participant_args or {}, participant_name, network_params, registry
-                )
-                for participant_name, participant_args in (args or {}).items()
-            ]
-        ),
+        participants_params=participants_params,
         network_params=network_params,
     )
 
@@ -102,10 +112,6 @@ def _parse_instance(participant_args, participant_name, network_params, registry
 # This can only happen once all the participants have been resolved
 # so it's kept in a separate function that can be chained with the top-level parsing logic
 def _apply_sequencers(participants_params, network_params):
-    # To avoid any null pointer references, we return early if there are no participants
-    if len(participants_params) == 0:
-        return participants_params
-
     # Now we make sure that if we specify anything explicitly, we specify everything explicitly
     #
     # No half-assed configs around here okay
@@ -127,9 +133,7 @@ def _apply_sequencers(participants_params, network_params):
         )
 
     # Since copying structs is not super slick in starlark, we keep an array of just the sequencer values since we want to modify them
-    #
-    # TODO In the next PR a set of helper functions will be introduced to isolate the p.sequencer == p.name condition
-    sequencers = [p.name for p in participants_params if p.sequencer == p.name]
+    sequencers = [p.name for p in _selectors.get_sequencers_params(participants_params)]
 
     if len(sequencers) == 0:
         # If there are no participants marked as sequencers, we mark the first available one as a sequencer
@@ -177,8 +181,8 @@ def _apply_sequencers(participants_params, network_params):
             cl=p.cl,
             cl_builder=p.cl_builder,
             name=p.name,
-            sequencer=True
-            # We set the value to true (i.e. this is a sequencer) if this node is in the list of sequencers
+            sequencer=p.name
+            # We set the value to the name of node itself (i.e. this is a sequencer) if this node is in the list of sequencers
             #
             # We don't just check whether the p.sequencer is True since it might have been null
             # and we just selected a default sequencer
