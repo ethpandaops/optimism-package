@@ -150,6 +150,7 @@ SUBCATEGORY_PARAMS = {
         "image",
         "extra_params",
         "type",
+        "cmd",
     ],
     "tx_fuzzer_params": [
         "enabled",
