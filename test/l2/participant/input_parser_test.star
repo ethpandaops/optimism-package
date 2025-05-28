@@ -61,6 +61,8 @@ def test_l2_participant_input_parser_defaults(plan):
         ),
         [
             struct(
+                name="node0",
+                sequencer=True,
                 cl=struct(
                     type="op-node",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
@@ -123,6 +125,8 @@ def test_l2_participant_input_parser_defaults(plan):
                 ),
             ),
             struct(
+                name="node1",
+                sequencer="node0",
                 cl=struct(
                     name="node1",
                     type="op-node",
@@ -185,6 +189,132 @@ def test_l2_participant_input_parser_defaults(plan):
                 ),
             ),
         ],
+    )
+
+
+def test_l2_participant_input_parser_invalid_sequencers(plan):
+    expect.fails(
+        lambda: input_parser.parse(
+            {
+                "node0": {"sequencer": "node0"},
+            },
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid sequencer value for participant node0 on network my-l2: cannot use self as a sequencer reference",
+    )
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"sequencer": "nodeNada"}, "node1": {}},
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid sequencer value for participant node0 on network my-l2: participant nodeNada does not exist",
+    )
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"sequencer": 7}}, _default_network_params, _default_registry
+        ),
+        "Invalid sequencer value for participant node0 on network my-l2: expected string or bool, got int 7",
+    )
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"sequencer": False}}, _default_network_params, _default_registry
+        ),
+        "Invalid sequencer configuration for network my-l2: could not find at least one sequencer",
+    )
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {
+                "node0": {},
+                "node1": {
+                    "sequencer": False,
+                },
+                "node2": {"sequencer": "node1"},
+            },
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid sequencer value for participant node2 on network my-l2: participant node1 is not a sequencer",
+    )
+
+
+def test_l2_participant_input_parser_explicit_sequencers(plan):
+    parsed = input_parser.parse(
+        {
+            "node0": {
+                # The first node is a sequencer explicitly
+                "sequencer": True
+            },
+            "node1": {
+                # The second node is not a sequencer explicitly
+                "sequencer": False
+            },
+            "node2": {
+                # The third node is not a sequencer implicitly
+                "sequencer": None
+            },
+            "node3": {
+                # The fourth node is not a sequencer implicitly
+            },
+            "node4": {
+                # The fifth node refers to a sequencer explicitly
+                "sequencer": "node0"
+            },
+        },
+        _default_network_params,
+        _default_registry,
+    )
+
+    parsed_sequencers = {p.name: p.sequencer for p in parsed}
+    expect.eq(
+        parsed_sequencers,
+        {
+            "node0": True,
+            "node1": "node0",
+            "node2": "node0",
+            "node3": "node0",
+            "node4": "node0",
+        },
+    )
+
+    # Now we test with multiple sequencers to see whether the assignment works
+    parsed = input_parser.parse(
+        {
+            "node0": {"sequencer": True},
+            "node1": {"sequencer": True},
+            "node2": {"sequencer": True},
+            "node3": {"sequencer": None},
+            "node4": {},
+            "node5": {"sequencer": "node2"},
+            "node6": {},
+            "node7": {},
+            "node8": {},
+            "node9": {},
+        },
+        _default_network_params,
+        _default_registry,
+    )
+
+    parsed_sequencers = {p.name: p.sequencer for p in parsed}
+    expect.eq(
+        parsed_sequencers,
+        {
+            "node0": True,
+            "node1": True,
+            "node2": True,
+            "node3": "node0",
+            "node4": "node0",
+            "node5": "node2",
+            "node6": "node0",
+            "node7": "node0",
+            "node8": "node0",
+            "node9": "node0",
+        },
     )
 
 
