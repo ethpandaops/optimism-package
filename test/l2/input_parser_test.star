@@ -185,3 +185,27 @@ def test_l2_input_parser_auto_network_id(plan):
         ),
         "L2 IDs must be unique, got duplicates: 2151908",
     )
+
+
+def test_l2_input_parser_defaults_implicit_default_sequencer(plan):
+    parsed = input_parser.parse(
+        {"network0": {
+            "participants": {
+                "node0": None,
+                "node1": None,
+            }
+        }, "network1": {
+            "participants": {
+                "node0": {
+                    "sequencer": False
+                },
+                "node1": {
+                    "sequencer": True
+                }
+            }
+        }, "network2": None}, _default_registry
+    )
+
+    expect.eq(parsed[0].default_sequencer, "node0")
+    expect.eq(parsed[1].default_sequencer, "node1")
+    expect.eq(parsed[2].default_sequencer, "node0")

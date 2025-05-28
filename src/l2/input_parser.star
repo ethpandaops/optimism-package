@@ -5,6 +5,7 @@ _l2_participant_input_parser = import_module("./participant/input_parser.star")
 _batcher_input_parser = import_module("/src/batcher/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
+_selectors = import_module("./selectors.star")
 
 _DEFAULT_NETWORK_PARAMS = {
     "network": "kurtosis",
@@ -24,6 +25,7 @@ _DEFAULT_ARGS = {
     "proposer_params": None,
     "batcher_params": None,
     "proxyd_params": None,
+    "default_sequencer": None,
 }
 
 
@@ -86,6 +88,33 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
     l2_params["participants"] = _l2_participant_input_parser.parse(
         l2_params["participants"], l2_params["network_params"], registry
     )
+
+    # We assign the default sequencer if not explicitly set
+    l2_params["default_sequencer"] = l2_params["default_sequencer"] or _filter.first(
+        _selectors.get_sequencers_params(l2_params["participants"])
+    ).name
+
+    # And we check that the sequencer exists
+    #
+    # We first find the node with the matching name
+    default_sequencer_params = _filter.first(
+        l2_params["participants"], lambda p: p.name == l2_params["default_sequencer"]
+    )
+
+    # If no such node exists, we yell
+    if not default_sequencer_params:
+        fail(
+            "Invalid default_sequencer value for network {}: missing node {}".format(
+                l2_params["network_params"].name, l2_params["default_sequencer"]
+            ),
+        )
+
+    if not _selectors.is_sequencer(default_sequencer_params):
+        fail(
+            "Invalid default_sequencer value for network {}: node {} is not a sequencer".format(
+                l2_params["network_params"].name, l2_params["default_sequencer"]
+            ),
+        )
 
     # We add the proposer params
     l2_params["proposer_params"] = _proposer_input_parser.parse(
