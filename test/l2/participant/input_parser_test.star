@@ -195,18 +195,7 @@ def test_l2_participant_input_parser_defaults(plan):
 def test_l2_participant_input_parser_invalid_sequencers(plan):
     expect.fails(
         lambda: input_parser.parse(
-            {
-                "node0": {"sequencer": "node0"},
-            },
-            _default_network_params,
-            _default_registry,
-        ),
-        "Invalid sequencer value for participant node0 on network my-l2: cannot use self as a sequencer reference",
-    )
-
-    expect.fails(
-        lambda: input_parser.parse(
-            {"node0": {"sequencer": "nodeNada"}, "node1": {}},
+            {"node0": {"sequencer": "nodeNada"}, "node1": {"sequencer": True}},
             _default_network_params,
             _default_registry,
         ),
@@ -230,7 +219,9 @@ def test_l2_participant_input_parser_invalid_sequencers(plan):
     expect.fails(
         lambda: input_parser.parse(
             {
-                "node0": {},
+                "node0": {
+                    "sequencer": True,
+                },
                 "node1": {
                     "sequencer": False,
                 },
@@ -240,6 +231,24 @@ def test_l2_participant_input_parser_invalid_sequencers(plan):
             _default_registry,
         ),
         "Invalid sequencer value for participant node2 on network my-l2: participant node1 is not a sequencer",
+    )
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {
+                "node0": {
+                    "sequencer": True,
+                },
+                "node1": {
+                    "sequencer": False,
+                },
+                "node2": {"sequencer": None},
+                "node3": {},
+            },
+            _default_network_params,
+            _default_registry,
+        ),
+        " Invalid participants configuration on network my-l2: sequencers explicitly defined for nodes node0,node1 but left implicit for node2,node3.",
     )
 
 
@@ -255,11 +264,12 @@ def test_l2_participant_input_parser_explicit_sequencers(plan):
                 "sequencer": False
             },
             "node2": {
-                # The third node is not a sequencer implicitly
-                "sequencer": None
+                # The third node is not a sequencer explicitly
+                "sequencer": False
             },
             "node3": {
-                # The fourth node is not a sequencer implicitly
+                # The fourth node is not a sequencer explicitly
+                "sequencer": False
             },
             "node4": {
                 # The fifth node refers to a sequencer explicitly
@@ -288,13 +298,48 @@ def test_l2_participant_input_parser_explicit_sequencers(plan):
             "node0": {"sequencer": True},
             "node1": {"sequencer": True},
             "node2": {"sequencer": True},
-            "node3": {"sequencer": None},
-            "node4": {},
+            "node3": {"sequencer": False},
+            "node4": {"sequencer": False},
             "node5": {"sequencer": "node2"},
-            "node6": {},
-            "node7": {},
-            "node8": {},
-            "node9": {},
+            "node6": {"sequencer": False},
+            "node7": {"sequencer": False},
+            "node8": {"sequencer": False},
+            "node9": {"sequencer": False},
+        },
+        _default_network_params,
+        _default_registry,
+    )
+
+    parsed_sequencers = {p.name: p.sequencer for p in parsed}
+    expect.eq(
+        parsed_sequencers,
+        {
+            "node0": True,
+            "node1": True,
+            "node2": True,
+            "node3": "node0",
+            "node4": "node0",
+            "node5": "node2",
+            "node6": "node0",
+            "node7": "node0",
+            "node8": "node0",
+            "node9": "node0",
+        },
+    )
+
+    # Now we test with sequencer value pointing to self
+    parsed = input_parser.parse(
+        {
+            "node0": {"sequencer": "node0"},
+            "node1": {"sequencer": "node1"},
+            "node2": {"sequencer": "node2"},
+            "node3": {"sequencer": False},
+            "node4": {"sequencer": False},
+            "node5": {"sequencer": "node2"},
+            "node6": {"sequencer": False},
+            "node7": {"sequencer": False},
+            "node8": {"sequencer": False},
+            "node9": {"sequencer": False},
         },
         _default_network_params,
         _default_registry,
