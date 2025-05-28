@@ -60,7 +60,7 @@ _DEFAULT_IMAGES = {
     # For now, we'll need users to pass the image explicitly
     OP_FAUCET: "",
     # Proxyd
-    PROXYD: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.2",
+    PROXYD: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.5",
     # Sidecar
     ROLLUP_BOOST: "flashbots/rollup-boost:latest",
     # DA Server
