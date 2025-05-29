@@ -11,7 +11,6 @@ def launch(
     tolerations,
     node_selectors,
     existing_el_clients,
-    sequencer_context,
     observability_helper,
     supervisors_params,
 ):
@@ -27,7 +26,6 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             existing_el_clients=existing_el_clients,
-            sequencer_context=sequencer_context,
             observability_helper=observability_helper,
             supervisors_params=supervisors_params,
         )
