@@ -170,7 +170,9 @@ def parse_network_params(plan, registry, input_args):
 
     # configure chains
 
-    results["chains"] = _l2_input_parser.parse(args=input_args.get("chains"), registry=registry)
+    results["chains"] = _l2_input_parser.parse(
+        args=input_args.get("chains"), registry=registry
+    )
 
     # configure superchains
 

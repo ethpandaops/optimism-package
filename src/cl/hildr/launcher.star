@@ -128,8 +128,8 @@ def launch(
             http_port=util.get_service_http_port_num(service),
             beacon_http_url=service_url,
             cl_nodes_metrics_info=[metrics_info],
-            beacon_service_name=service_name,
-        )
+            beacon_service_name=params.service_name,
+        ),
     )
 
 
@@ -183,7 +183,7 @@ def get_beacon_config(
     }
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
+            persistent_key="data-{0}".format(params.service_name),
             size=int(params.cl_volume_size)
             if int(params.cl_volume_size) > 0
             else constants.VOLUME_SIZE[network_params.network][
@@ -217,7 +217,7 @@ def get_beacon_config(
             )
         )
 
-    cmd += participant.extra_params
+    cmd += params.extra_params
 
     config_args = {
         "image": params.image,
@@ -233,13 +233,13 @@ def get_beacon_config(
 
     # configure resources
 
-    if participant.min_cpu > 0:
-        config_args["min_cpu"] = participant.min_cpu
-    if participant.max_cpu > 0:
-        config_args["max_cpu"] = participant.max_cpu
-    if participant.min_mem > 0:
-        config_args["min_memory"] = participant.min_mem
-    if participant.max_mem > 0:
-        config_args["max_memory"] = participant.max_mem
+    if params.min_cpu > 0:
+        config_args["min_cpu"] = params.min_cpu
+    if params.max_cpu > 0:
+        config_args["max_cpu"] = params.max_cpu
+    if params.min_mem > 0:
+        config_args["min_memory"] = params.min_mem
+    if params.max_mem > 0:
+        config_args["max_memory"] = params.max_mem
 
     return ServiceConfig(**config_args)

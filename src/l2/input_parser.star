@@ -29,7 +29,7 @@ _DEFAULT_ARGS = {
     "proxyd_params": None,
     "tx_fuzzer_params": None,
     # FIXME
-    "additional_services": []
+    "additional_services": [],
 }
 
 
@@ -51,7 +51,10 @@ def parse(args, registry):
                     l2_id_generator,
                     registry,
                 )
-                for l2_name, l2_args in (args or {}).items()
+                for l2_name, l2_args in (args or {
+                    # We supply a default network if none was provided
+                    "opkurtosis": None
+                }).items()
             ]
         )
     )

@@ -6,7 +6,6 @@ BEACON_UDP_DISCOVERY_PORT_NAME = "udp-discovery"
 INTEROP_RPC_PORT_NAME = "rpc-interop"
 
 
-
 # Creates a struct representing a service port configuration
 #
 # This is useful especially for testing purposes since the assertion library does not work great with PortSpec

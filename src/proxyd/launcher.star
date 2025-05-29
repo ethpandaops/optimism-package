@@ -66,7 +66,9 @@ def create_config_artifact(
             "port": _METRICS_PORT_NUM,
         },
         "Replicas": {
-            participant.name: _net.service_url(participant.el.service_name, participant.el.ports[_net.RPC_PORT_NAME])
+            participant.name: _net.service_url(
+                participant.el.service_name, participant.el.ports[_net.RPC_PORT_NAME]
+            )
             for participant in participants
         },
     }

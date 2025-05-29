@@ -48,7 +48,11 @@ def run(plan, args={}):
     )
 
     for l2_params in optimism_args.chains:
-        plan.print("L2 params for {}: {}".format(l2_params.network_params.name, l2_params.network_params))
+        plan.print(
+            "L2 params for {}: {}".format(
+                l2_params.network_params.name, l2_params.network_params
+            )
+        )
 
     global_tolerations = optimism_args.global_tolerations
     global_node_selectors = optimism_args.global_node_selectors

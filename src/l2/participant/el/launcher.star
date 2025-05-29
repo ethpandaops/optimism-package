@@ -1,0 +1,33 @@
+_op_geth_launcher = import_module("/src/el/op-geth/launcher.star")
+
+
+def launch(
+    plan,
+    params,
+    network_params,
+    global_log_level,
+    persistent,
+    tolerations,
+    node_selectors,
+    existing_el_clients,
+    sequencer_enabled,
+    sequencer_context,
+    observability_helper,
+    supervisors_params,
+):
+    service = None
+
+    if params.type == "op-geth":
+        return _op_geth_launcher.launch(
+            plan=plan,
+            params=params,
+            global_log_level=global_log_level,
+            persistent=persistent,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            existing_el_clients=existing_el_clients,
+            sequencer_enabled=sequencer_enabled,
+            sequencer_context=sequencer_context,
+            observability_helper=observability_helper,
+            supervisors_params=supervisors_params,
+        )
