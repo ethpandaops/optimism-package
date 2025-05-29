@@ -37,7 +37,19 @@ def launch(
         plan.print("{}: Launching participant {}".format(log_prefix, participant.name))
 
         # Launch an EL client
-        _el_launcher.launch(plan=plan, params=participant.el)
+        _el_launcher.launch(
+            plan=plan, 
+            params=participant.el, 
+            network_params=network_params, 
+            global_log_level, 
+            persistent, 
+            tolerations, 
+            node_selectors, 
+            existing_el_clients, 
+            sequencer_enabled, 
+            sequencer_context, 
+            observability_helper, 
+            supervisors_params)
 
         # Launch a CL client
 
