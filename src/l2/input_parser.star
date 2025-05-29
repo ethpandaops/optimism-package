@@ -51,10 +51,13 @@ def parse(args, registry):
                     l2_id_generator,
                     registry,
                 )
-                for l2_name, l2_args in (args or {
-                    # We supply a default network if none was provided
-                    "opkurtosis": None
-                }).items()
+                for l2_name, l2_args in (
+                    args
+                    or {
+                        # We supply a default network if none was provided
+                        "opkurtosis": None
+                    }
+                ).items()
             ]
         )
     )

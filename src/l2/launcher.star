@@ -44,18 +44,19 @@ def launch(
 
         # Launch an EL client
         _el_launcher.launch(
-            plan=plan, 
-            params=participant.el, 
-            network_params=network_params, 
+            plan=plan,
+            params=participant.el,
+            network_params=network_params,
             participants=params.participants,
-            log_level=log_level, 
-            persistent=persistent, 
-            tolerations=tolerations, 
-            node_selectors=node_selectors, 
-            existing_el_clients=el_clients, 
-            observability_helper=observability_helper, 
+            log_level=log_level,
+            persistent=persistent,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            existing_el_clients=el_clients,
+            observability_helper=observability_helper,
             # FIXME
-            supervisors_params=[])
+            supervisors_params=[],
+        )
 
         # Launch a CL client
 
