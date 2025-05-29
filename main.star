@@ -47,6 +47,7 @@ def run(plan, args={}):
         registry=registry,
     )
 
+    # FIXME For debugging only
     for l2_params in optimism_args.chains:
         plan.print(
             "L2 params for {}: {}".format(
@@ -153,7 +154,6 @@ def run(plan, args={}):
                 tolerations=global_tolerations,
                 persistent=persistent,
                 # supervisors_params=l2_supervisors_params,
-                registry=registry,
             )
         )
 
