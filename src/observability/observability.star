@@ -56,6 +56,10 @@ def configure_op_service_metrics(cmd, ports):
 
     expose_metrics_port(ports)
 
+# configures the CLI flags and ports for a service using the standard kona-service setup
+def configure_kona_service_metrics(cmd, ports):
+    configure_op_service_metrics(cmd, ports)
+
 
 def make_helper(observability_params):
     return struct(
@@ -92,6 +96,9 @@ def register_op_service_metrics_job(helper, service, network_name=None):
         network_name=network_name,
         endpoint=util.make_service_url_authority(service, METRICS_PORT_ID),
     )
+
+def register_kona_service_metrics_job(helper, service, network_name=None):
+    register_op_service_metrics_job(helper, service, network_name)
 
 
 def register_service_metrics_job(

@@ -4,6 +4,7 @@ _id = import_module("/src/util/id.star")
 _registry = import_module("/src/package_io/registry.star")
 
 _DEFAULT_ARGS = {
+    "type": "op-supervisor",
     "enabled": True,
     "superchain": None,
     "image": None,
@@ -58,16 +59,21 @@ def _parse_instance(supervisor_args, supervisor_name, superchains, registry):
     # in the parsed config, but this is a tradeoff that we are willing to make
     supervisor_params["superchain"] = superchain
 
+    # Rust or Go supervisor implementation, i.e. kona-supervisor or op-supervisor.
+    # Default is op-supervisor (Go).
+    supervisor_type = supervisor_params["type"]
+
     # We add name & service name
     supervisor_params["name"] = supervisor_name
-    supervisor_params["service_name"] = "op-supervisor-{}-{}".format(
+    supervisor_params["service_name"] = "{}-{}-{}".format(
+        supervisor_type,
         supervisor_name,
         superchain_name,
     )
 
     # And default the image to the one in the registry
     supervisor_params["image"] = supervisor_params["image"] or registry.get(
-        _registry.OP_SUPERVISOR
+        supervisor_type, ""
     )
 
     # We'll also define the ports that this supervisor will expose
