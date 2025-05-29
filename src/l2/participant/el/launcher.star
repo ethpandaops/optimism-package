@@ -4,6 +4,7 @@ _op_geth_launcher = import_module("/src/el/op-geth/launcher.star")
 def launch(
     plan,
     params,
+    participants,
     network_params,
     global_log_level,
     persistent,
@@ -20,6 +21,7 @@ def launch(
         return _op_geth_launcher.launch(
             plan=plan,
             params=params,
+            participants=participants,
             global_log_level=global_log_level,
             persistent=persistent,
             tolerations=tolerations,

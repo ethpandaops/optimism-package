@@ -149,12 +149,11 @@ def run(plan, args={}):
                 # # l2_args=chain,
                 # l1_priv_key=l1_priv_key,
                 # l1_rpc_url=l1_rpc_url,
-                # global_log_level=global_log_level,
-                # global_node_selectors=global_node_selectors,
-                # global_tolerations=global_tolerations,
-                # persistent=persistent,
+                log_level=global_log_level,
+                tolerations=global_tolerations,
+                persistent=persistent,
                 # supervisors_params=l2_supervisors_params,
-                # registry=registry,
+                registry=registry,
             )
         )
 

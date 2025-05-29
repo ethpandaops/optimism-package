@@ -13,6 +13,9 @@ def launch(
     jwt_file,
     deployment_output,
     l1_config_env_vars,
+    log_level,
+    persistent,
+    tolerations,
     node_selectors,
     observability_helper,
 ):
@@ -33,6 +36,9 @@ def launch(
     # Launch CL & EL clients
     #
 
+    cl_clients = []
+    el_clients = []
+
     for participant in params.participants:
         plan.print("{}: Launching participant {}".format(log_prefix, participant.name))
 
@@ -41,15 +47,15 @@ def launch(
             plan=plan, 
             params=participant.el, 
             network_params=network_params, 
-            global_log_level, 
-            persistent, 
-            tolerations, 
-            node_selectors, 
-            existing_el_clients, 
-            sequencer_enabled, 
-            sequencer_context, 
-            observability_helper, 
-            supervisors_params)
+            participants=params.participants,
+            log_level=log_level, 
+            persistent=persistent, 
+            tolerations=tolerations, 
+            node_selectors=node_selectors, 
+            existing_el_clients=el_clients, 
+            observability_helper=observability_helper, 
+            # FIXME
+            supervisors_params=[])
 
         # Launch a CL client
 

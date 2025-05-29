@@ -90,15 +90,11 @@ def launch(
     network_params,
     jwt_file,
     deployment_output,
-    # launcher,
-    # service_name,
-    # participant,
     global_log_level,
     persistent,
     tolerations,
     node_selectors,
     existing_el_clients,
-    sequencer_context,
     observability_helper,
     supervisors_params,
 ):
@@ -106,10 +102,7 @@ def launch(
         params.log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    # FIXME
-    cl_client_name = params.service_name.split("-")[4]
-
-    config = get_config(
+    config = get_service_config(
         plan=plan,
         params=params,
         network_params=network_params,
@@ -120,8 +113,6 @@ def launch(
         tolerations=tolerations,
         node_selectors=node_selectors,
         existing_el_clients=existing_el_clients,
-        cl_client_name=cl_client_name,
-        sequencer_context=sequencer_context,
         observability_helper=observability_helper,
         supervisors_params=supervisors_params,
     )
@@ -152,9 +143,10 @@ def launch(
     )
 
 
-def get_config(
+def get_service_config(
     plan,
     params,
+    participants,
     network_params,
     jwt_file,
     deployment_output,
@@ -163,8 +155,6 @@ def get_config(
     tolerations,
     node_selectors,
     existing_el_clients,
-    cl_client_name,
-    sequencer_context,
     observability_helper,
     supervisors_params,
 ):
