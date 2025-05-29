@@ -96,7 +96,7 @@ def test_l2_input_parser_defaults(plan):
     )
 
     _default_proxyd_params = struct(
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.2",
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.5",
         extra_params=[],
         ports={
             _net.HTTP_PORT_NAME: _net.port(number=8080),
@@ -108,12 +108,16 @@ def test_l2_input_parser_defaults(plan):
         },
     )
 
+    _default_participants = _participant_input_parser.parse(
+        {"node0": None}, _default_network_params, _default_registry
+    )
+
     expect.eq(
         input_parser.parse({"network1": None}, _default_registry),
         [
             struct(
                 network_params=_default_network_params,
-                participants=[],
+                participants=_default_participants,
                 batcher_params=_default_batcher_params,
                 proposer_params=_default_proposer_params,
                 proxyd_params=_default_proxyd_params,
@@ -154,7 +158,10 @@ def test_l2_input_parser_auto_network_id(plan):
     parsed = input_parser.parse(
         {
             "network0": None,
-            "network1": {"network_params": {"network_id": 7}},
+            "network1": {
+                "network_params": {"network_id": 7},
+                "participants": {"node0": None},
+            },
             "network2": None,
         },
         _default_registry,
@@ -168,7 +175,10 @@ def test_l2_input_parser_auto_network_id(plan):
         lambda: input_parser.parse(
             {
                 "network0": None,
-                "network1": {"network_params": {"network_id": 2151908}},
+                "network1": {
+                    "network_params": {"network_id": 2151908},
+                    "participants": {"node0": None},
+                },
                 "network2": None,
             },
             _default_registry,

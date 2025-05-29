@@ -10,6 +10,7 @@ _superchain_input_parser = import_module("/src/superchain/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
 _supervisor_input_parser = import_module("/src/supervisor/input_parser.star")
+_tx_fuzzer_parser = import_module("/src/tx-fuzzer/input_parser.star")
 
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
@@ -191,13 +192,8 @@ def input_parser(
                 proposer_params=result["proposer_params"],
                 mev_params=result["mev_params"],
                 da_params=result["da_params"],
+                tx_fuzzer_params=result["tx_fuzzer_params"],
                 additional_services=result["additional_services"],
-                tx_fuzzer_params=struct(
-                    image=result["tx_fuzzer_params"]["image"],
-                    tx_fuzzer_extra_args=result["tx_fuzzer_params"][
-                        "tx_fuzzer_extra_args"
-                    ],
-                ),
             )
             for result in results["chains"]
         ],
@@ -305,6 +301,13 @@ def parse_network_params(plan, registry, input_args):
             registry,
         )
 
+        tx_fuzzer_params = _tx_fuzzer_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            chain.get("tx_fuzzer_params", {}),
+            struct(**network_params),
+            registry,
+        )
+
         if network_name in seen_names:
             fail("Network name {0} is duplicated".format(network_name))
 
@@ -369,9 +372,6 @@ def parse_network_params(plan, registry, input_args):
                     participant
                 )
                 participants.append(participant_copy)
-
-        tx_fuzzer_params = default_tx_fuzzer_params(registry)
-        tx_fuzzer_params.update(chain.get("tx_fuzzer_params", {}))
 
         result = {
             "participants": participants,
@@ -670,6 +670,11 @@ def default_da_server_params(registry):
 
 def default_tx_fuzzer_params(registry):
     return {
+        "enabled": False,
         "image": registry.get(_registry.TX_FUZZER),
-        "tx_fuzzer_extra_args": [],
+        "extra_params": [],
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_memory": 20,
+        "max_memory": 300,
     }
