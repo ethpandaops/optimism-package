@@ -36,29 +36,30 @@ def launch(
     # Launch CL & EL clients
     #
 
-    cl_clients = []
-    el_clients = []
+    participants = []
 
     for participant in params.participants:
         plan.print("{}: Launching participant {}".format(log_prefix, participant.name))
 
         # Launch an EL client
-        _el_launcher.launch(
+        el = _el_launcher.launch(
             plan=plan,
             params=participant.el,
             network_params=network_params,
-            participants=params.participants,
             log_level=log_level,
             persistent=persistent,
             tolerations=tolerations,
             node_selectors=node_selectors,
-            existing_el_clients=el_clients,
+            bootnode_contexts=[c.el.context for c in participants],
             observability_helper=observability_helper,
             # FIXME
             supervisors_params=[],
         )
 
-        # Launch a CL client
+        # TODO Launch a CL client
+
+        # Add the pair to the list of launched participants
+        participants.append(struct(el=el, cl=None))
 
     _launch_proxyd_maybe(
         plan=plan,
