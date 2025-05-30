@@ -36,7 +36,7 @@ def parse(proxyd_args, network_params, registry):
     # Add labels
     proxyd_params["labels"] = {
         "op.kind": "proxyd",
-        "op.network.id": network_id,
+        "op.network.id": str(network_id),
     }
 
     return struct(**proxyd_params)

@@ -43,7 +43,7 @@ def parse(da_args, network_params, registry):
     # Add a bunch of labels
     da_params["labels"] = {
         "op.kind": "da",
-        "op.network.id": network_id,
+        "op.network.id": str(network_id),
         "op.da.type": _DA_TYPE,
     }
 

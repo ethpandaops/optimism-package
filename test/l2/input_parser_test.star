@@ -76,7 +76,7 @@ def test_l2_input_parser_defaults(plan):
         service_name="op-batcher-2151908-network1",
         labels={
             "op.kind": "batcher",
-            "op.network.id": 2151908,
+            "op.network.id": "2151908",
         },
     )
 
@@ -91,7 +91,7 @@ def test_l2_input_parser_defaults(plan):
         service_name="op-proposer-2151908-network1",
         labels={
             "op.kind": "proposer",
-            "op.network.id": 2151908,
+            "op.network.id": "2151908",
         },
     )
 
@@ -104,7 +104,7 @@ def test_l2_input_parser_defaults(plan):
         service_name="proxyd-2151908-network1",
         labels={
             "op.kind": "proxyd",
-            "op.network.id": 2151908,
+            "op.network.id": "2151908",
         },
     )
 

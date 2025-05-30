@@ -71,7 +71,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-cl-1000-node0-op-node",
                     labels={
                         "op.kind": "cl",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.cl.type": "op-node",
                     },
                     ports={
@@ -86,7 +86,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-cl-1000-node0-op-node",
                     labels={
                         "op.kind": "cl_builder",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.cl.type": "op-node",
                     },
                     ports={
@@ -101,7 +101,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
                     labels={
                         "op.kind": "el",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.el.type": "op-geth",
                     },
                     ports={
@@ -116,7 +116,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-el-1000-node0-op-geth",
                     labels={
                         "op.kind": "el_builder",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.el.type": "op-geth",
                     },
                     ports={
@@ -135,7 +135,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-cl-1000-node1-op-node",
                     labels={
                         "op.kind": "cl",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.cl.type": "op-node",
                     },
                     ports={
@@ -150,7 +150,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-cl-1000-node1-op-node",
                     labels={
                         "op.kind": "cl_builder",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.cl.type": "op-node",
                     },
                     ports={
@@ -165,7 +165,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-el-1000-node1-op-geth",
                     labels={
                         "op.kind": "el",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.el.type": "op-geth",
                     },
                     ports={
@@ -180,7 +180,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-el-1000-node1-op-geth",
                     labels={
                         "op.kind": "el_builder",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.el.type": "op-geth",
                     },
                     ports={

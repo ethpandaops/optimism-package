@@ -48,7 +48,7 @@ def parse(mev_args, network_params, registry):
     # Add a bunch of labels
     mev_params["labels"] = {
         "op.kind": "mev",
-        "op.network.id": network_id,
+        "op.network.id": str(network_id),
         "op.mev.type": mev_params["type"],
     }
 
