@@ -72,19 +72,18 @@ def launch(
     network_params,
     jwt_file,
     deployment_output,
-    global_log_level,
+    log_level,
     persistent,
     tolerations,
     node_selectors,
     el_context,
     existing_cl_clients,
     l1_config_env_vars,
-    sequencer_enabled,
     observability_helper,
     supervisors_params,
 ):
-    log_level = ethereum_package_input_parser.get_client_log_level_or_default(
-        params.log_level, global_log_level, VERBOSITY_LEVELS
+    cl_log_level = ethereum_package_input_parser.get_client_log_level_or_default(
+        params.log_level, log_level, VERBOSITY_LEVELS
     )
 
     config = get_beacon_config(
@@ -93,7 +92,7 @@ def launch(
         network_params=network_params,
         jwt_file=jwt_file,
         deployment_output=deployment_output,
-        log_level=log_level,
+        log_level=cl_log_level,
         persistent=persistent,
         tolerations=tolerations,
         node_selectors=node_selectors,

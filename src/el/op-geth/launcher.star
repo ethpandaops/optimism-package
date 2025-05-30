@@ -146,7 +146,6 @@ def launch(
 def get_service_config(
     plan,
     params,
-    participants,
     network_params,
     jwt_file,
     deployment_output,
