@@ -94,7 +94,7 @@ def launch(
     persistent,
     tolerations,
     node_selectors,
-    existing_el_clients,
+    bootnode_contexts,
     observability_helper,
     supervisors_params,
 ):
@@ -112,7 +112,7 @@ def launch(
         persistent=persistent,
         tolerations=tolerations,
         node_selectors=node_selectors,
-        existing_el_clients=existing_el_clients,
+        bootnode_contexts=bootnode_contexts,
         observability_helper=observability_helper,
         supervisors_params=supervisors_params,
     )
@@ -154,7 +154,7 @@ def get_service_config(
     persistent,
     tolerations,
     node_selectors,
-    existing_el_clients,
+    bootnode_contexts,
     observability_helper,
     supervisors_params,
 ):
@@ -252,13 +252,13 @@ def get_service_config(
 
         plan.print("NO SEQUENCER")
 
-    if len(existing_el_clients) > 0:
+    if len(bootnode_contexts) > 0:
         cmd.append(
             "--bootnodes="
             + ",".join(
                 [
                     ctx.enode
-                    for ctx in existing_el_clients[
+                    for ctx in bootnode_contexts[
                         : ethereum_package_constants.MAX_ENODE_ENTRIES
                     ]
                 ]

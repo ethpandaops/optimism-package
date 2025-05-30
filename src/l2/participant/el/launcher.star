@@ -10,7 +10,7 @@ def launch(
     persistent,
     tolerations,
     node_selectors,
-    existing_el_clients,
+    bootnode_contexts,
     observability_helper,
     supervisors_params,
 ):
@@ -20,12 +20,11 @@ def launch(
         return _op_geth_launcher.launch(
             plan=plan,
             params=params,
-            participants=participants,
             log_level=log_level,
             persistent=persistent,
             tolerations=tolerations,
             node_selectors=node_selectors,
-            existing_el_clients=existing_el_clients,
+            bootnode_contexts=bootnode_contexts,
             observability_helper=observability_helper,
             supervisors_params=supervisors_params,
         )
