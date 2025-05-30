@@ -70,7 +70,7 @@ def _parse(args, participant_name, network_id, registry, cl_kind):
 
     # We register the CL ports
     cl_params["ports"] = {
-        _net.HTTP_PORT_NAME: _net.port(number=8547),
+        _net.RPC_PORT_NAME: _net.port(number=8547),
         _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=9003),
         _net.UDP_DISCOVERY_PORT_NAME: _net.port(number=9003, transport_protocol="UDP"),
     }

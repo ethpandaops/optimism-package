@@ -75,7 +75,7 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "http": _net.port(number=8547),
+                        "rpc": _net.port(number=8547),
                         "tcp-discovery": _net.port(number=9003),
                         "udp-discovery": _net.port(
                             number=9003, transport_protocol="UDP"
@@ -94,7 +94,7 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "http": _net.port(number=8547),
+                        "rpc": _net.port(number=8547),
                         "tcp-discovery": _net.port(number=9003),
                         "udp-discovery": _net.port(
                             number=9003, transport_protocol="UDP"
@@ -163,7 +163,7 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "http": _net.port(number=8547),
+                        "rpc": _net.port(number=8547),
                         "tcp-discovery": _net.port(number=9003),
                         "udp-discovery": _net.port(
                             number=9003, transport_protocol="UDP"
@@ -182,7 +182,7 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "http": _net.port(number=8547),
+                        "rpc": _net.port(number=8547),
                         "tcp-discovery": _net.port(number=9003),
                         "udp-discovery": _net.port(
                             number=9003, transport_protocol="UDP"
