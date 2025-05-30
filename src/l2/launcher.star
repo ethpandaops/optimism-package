@@ -40,15 +40,16 @@ def launch(
 
     participants = []
 
+    get_sequencer_params_for = _selectors.create_get_sequencer_params_for(params.participants)
+
     for participant in params.participants:
         plan.print("{}: Launching participant {}".format(log_prefix, participant.name))
 
+        # 
         sequencer_params = (
             None
             if _selectors.is_sequencer(participant)
-            else _selectors.get_sequencer_params_for(
-                participants_params=params.participants, participant_params=participant
-            )
+            else get_sequencer_params_for(participant)
         )
 
         # Launch an EL client
@@ -72,21 +73,21 @@ def launch(
         # TODO Launch a CL client
 
         # Add the pair to the list of launched participants
-        # participants.append(struct(el=el, cl=None))
+        participants.append(struct(el=el, cl=None))
 
-    # _launch_proxyd_maybe(
-    #     plan=plan,
-    #     proxyd_params=params.proxyd_params,
-    #     participants=params.participants,
-    #     network_params=network_params,
-    #     observability_helper=observability_helper,
-    # )
-    # _launch_tx_fuzzer_maybe(
-    #     plan=plan,
-    #     tx_fuzzer_params=params.tx_fuzzer_params,
-    #     participants=params.participants,
-    #     node_selectors=node_selectors,
-    # )
+    _launch_proxyd_maybe(
+        plan=plan,
+        proxyd_params=params.proxyd_params,
+        participants=params.participants,
+        network_params=network_params,
+        observability_helper=observability_helper,
+    )
+    _launch_tx_fuzzer_maybe(
+        plan=plan,
+        tx_fuzzer_params=params.tx_fuzzer_params,
+        participants=params.participants,
+        node_selectors=node_selectors,
+    )
 
 
 def _launch_da_maybe(plan, da_params):
