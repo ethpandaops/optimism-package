@@ -5,6 +5,8 @@ def launch(
     plan,
     params,
     network_params,
+    jwt_file,
+    deployment_output,
     log_level,
     persistent,
     tolerations,
@@ -19,6 +21,9 @@ def launch(
         return _op_geth_launcher.launch(
             plan=plan,
             params=params,
+            network_params=network_params,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
             log_level=log_level,
             persistent=persistent,
             tolerations=tolerations,

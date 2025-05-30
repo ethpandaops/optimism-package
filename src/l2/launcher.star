@@ -46,6 +46,8 @@ def launch(
             plan=plan,
             params=participant.el,
             network_params=network_params,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
             log_level=log_level,
             persistent=persistent,
             tolerations=tolerations,
