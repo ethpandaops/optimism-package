@@ -31,9 +31,9 @@ def launch(
         )
     )
 
-    plan.print("Network params: {}".format(network_params))
-
-    # _launch_da_maybe(plan=plan, da_params=params.da_params)
+    _launch_da_maybe(
+        plan=plan, da_params=params.da_params, log_prefix=network_log_prefix
+    )
 
     #
     # Launch CL & EL clients
@@ -120,32 +120,34 @@ def launch(
         participants=params.participants,
         network_params=network_params,
         observability_helper=observability_helper,
+        log_prefix=network_log_prefix,
     )
     _launch_tx_fuzzer_maybe(
         plan=plan,
         tx_fuzzer_params=params.tx_fuzzer_params,
         participants=params.participants,
         node_selectors=node_selectors,
+        log_prefix=network_log_prefix,
     )
 
 
-def _launch_da_maybe(plan, da_params):
+def _launch_da_maybe(plan, da_params, log_prefix):
     if da_params:
-        plan.print("Launching DA")
+        plan.print("{}: Launching DA".format(log_prefix))
 
         _da_server_launcher.launch(
             plan=plan,
             params=da_params,
         ).context
 
-        plan.print("Successfully launched DA")
+        plan.print("{}: Successfully launched DA".format(log_prefix))
 
 
 def _launch_proxyd_maybe(
-    plan, proxyd_params, participants, network_params, observability_helper
+    plan, proxyd_params, participants, network_params, observability_helper, log_prefix
 ):
     if proxyd_params:
-        plan.print("Launching proxyd")
+        plan.print("{}: Launching proxyd".format(log_prefix))
 
         _proxyd_launcher.launch(
             plan=plan,
@@ -155,12 +157,14 @@ def _launch_proxyd_maybe(
             observability_helper=observability_helper,
         )
 
-        plan.print("Successfully launched proxyd")
+        plan.print("{}: Successfully launched proxyd".format(log_prefix))
 
 
-def _launch_tx_fuzzer_maybe(plan, tx_fuzzer_params, participants, node_selectors):
+def _launch_tx_fuzzer_maybe(
+    plan, tx_fuzzer_params, participants, node_selectors, log_prefix
+):
     if tx_fuzzer_params:
-        plan.print("Launching tx fuzzer")
+        plan.print("{}: Launching tx fuzzer".format(log_prefix))
 
         _tx_fuzzer_launcher.launch(
             plan=plan,
@@ -170,4 +174,4 @@ def _launch_tx_fuzzer_maybe(plan, tx_fuzzer_params, participants, node_selectors
             node_selectors=node_selectors,
         )
 
-        plan.print("Successfully launched tx fuzzer")
+        plan.print("{}: Successfully launched tx fuzzer".format(log_prefix))
