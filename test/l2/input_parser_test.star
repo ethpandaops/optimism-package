@@ -121,6 +121,7 @@ def test_l2_input_parser_defaults(plan):
                 batcher_params=_default_batcher_params,
                 proposer_params=_default_proposer_params,
                 proxyd_params=_default_proxyd_params,
+                additional_services=[],
             )
         ],
     )
@@ -141,6 +142,7 @@ def test_l2_input_parser_defaults(plan):
                 batcher_params=_default_batcher_params,
                 proposer_params=_default_proposer_params,
                 proxyd_params=_default_proxyd_params,
+                additional_services=[],
             )
         ],
     )

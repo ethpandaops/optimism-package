@@ -28,7 +28,7 @@ _DEFAULT_ARGS = {
     "batcher_params": None,
     "proxyd_params": None,
     "tx_fuzzer_params": None,
-    # FIXME
+    # FIXME Make blockscout use the "enabled" pattern
     "additional_services": [],
 }
 
