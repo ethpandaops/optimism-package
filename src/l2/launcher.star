@@ -52,22 +52,22 @@ def launch(
         )
 
         # Launch an EL client
-        # el = _el_launcher.launch(
-        #     plan=plan,
-        #     params=participant.el,
-        #     network_params=network_params,
-        #     sequencer_params=sequencer_params,
-        #     jwt_file=jwt_file,
-        #     deployment_output=deployment_output,
-        #     log_level=log_level,
-        #     persistent=persistent,
-        #     tolerations=tolerations,
-        #     node_selectors=node_selectors,
-        #     bootnode_contexts=[c.el.context for c in participants],
-        #     observability_helper=observability_helper,
-        #     # FIXME
-        #     supervisors_params=[],
-        # )
+        el = _el_launcher.launch(
+            plan=plan,
+            params=participant.el,
+            network_params=network_params,
+            sequencer_params=sequencer_params,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
+            log_level=log_level,
+            persistent=persistent,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            bootnode_contexts=[c.el.context for c in participants],
+            observability_helper=observability_helper,
+            # FIXME
+            supervisors_params=[],
+        )
 
         # TODO Launch a CL client
 
