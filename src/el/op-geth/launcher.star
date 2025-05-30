@@ -107,6 +107,7 @@ def launch(
         plan=plan,
         params=params,
         network_params=network_params,
+        sequencer_params=sequencer_params,
         jwt_file=jwt_file,
         deployment_output=deployment_output,
         log_level=el_log_level,
