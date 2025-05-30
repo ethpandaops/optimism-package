@@ -204,6 +204,22 @@ def test_l2_participant_input_parser_defaults(plan):
                     },
                     **_shared_defaults,
                 ),
+                mev_params=struct(
+                    builder_host=None,
+                    builder_port=None,
+                    image="flashbots/rollup-boost:latest",
+                    labels={
+                        "op.kind": "mev",
+                        "op.network.id": 1000,
+                        "op.network.participant.name": "node1",
+                        "op.mev.type": "rollup-boost",
+                    },
+                    ports={
+                        "rpc": _net.port(number=8541),
+                    },
+                    service_name="op-mev-rollup-boost-1000-my-l2-node1",
+                    type="rollup-boost",
+                ),
             ),
         ],
     )
