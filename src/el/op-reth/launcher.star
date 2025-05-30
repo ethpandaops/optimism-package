@@ -24,6 +24,8 @@ constants = import_module("../../package_io/constants.star")
 util = import_module("../../util.star")
 observability = import_module("../../observability/observability.star")
 
+_net = import_module("/src/util/net.star")
+
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
@@ -207,8 +209,15 @@ def get_service_config(
 
         observability.expose_metrics_port(ports)
 
-    if not sequencer_enabled:
-        cmd.append("--rollup.sequencer-http={0}".format(sequencer_context.rpc_http_url))
+    if sequencer_params:
+        cmd.append(
+            "--rollup.sequencer-http={0}".format(
+                _net.service_url(
+                    sequencer_params.service_name,
+                    sequencer_params.ports[_net.RPC_PORT_NAME],
+                )
+            )
+        )
 
     if len(bootnode_contexts) > 0:
         cmd.append(
