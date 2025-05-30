@@ -32,7 +32,7 @@ def launch(
 
     plan.print("Network params: {}".format(network_params))
 
-    _launch_da_maybe(plan=plan, da_params=params.da_params)
+    # _launch_da_maybe(plan=plan, da_params=params.da_params)
 
     #
     # Launch CL & EL clients
@@ -52,41 +52,41 @@ def launch(
         )
 
         # Launch an EL client
-        el = _el_launcher.launch(
-            plan=plan,
-            params=participant.el,
-            network_params=network_params,
-            sequencer_params=sequencer_params,
-            jwt_file=jwt_file,
-            deployment_output=deployment_output,
-            log_level=log_level,
-            persistent=persistent,
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            bootnode_contexts=[c.el.context for c in participants],
-            observability_helper=observability_helper,
-            # FIXME
-            supervisors_params=[],
-        )
+        # el = _el_launcher.launch(
+        #     plan=plan,
+        #     params=participant.el,
+        #     network_params=network_params,
+        #     sequencer_params=sequencer_params,
+        #     jwt_file=jwt_file,
+        #     deployment_output=deployment_output,
+        #     log_level=log_level,
+        #     persistent=persistent,
+        #     tolerations=tolerations,
+        #     node_selectors=node_selectors,
+        #     bootnode_contexts=[c.el.context for c in participants],
+        #     observability_helper=observability_helper,
+        #     # FIXME
+        #     supervisors_params=[],
+        # )
 
         # TODO Launch a CL client
 
         # Add the pair to the list of launched participants
-        participants.append(struct(el=el, cl=None))
+        # participants.append(struct(el=el, cl=None))
 
-    _launch_proxyd_maybe(
-        plan=plan,
-        proxyd_params=params.proxyd_params,
-        participants=params.participants,
-        network_params=network_params,
-        observability_helper=observability_helper,
-    )
-    _launch_tx_fuzzer_maybe(
-        plan=plan,
-        tx_fuzzer_params=params.tx_fuzzer_params,
-        participants=params.participants,
-        node_selectors=node_selectors,
-    )
+    # _launch_proxyd_maybe(
+    #     plan=plan,
+    #     proxyd_params=params.proxyd_params,
+    #     participants=params.participants,
+    #     network_params=network_params,
+    #     observability_helper=observability_helper,
+    # )
+    # _launch_tx_fuzzer_maybe(
+    #     plan=plan,
+    #     tx_fuzzer_params=params.tx_fuzzer_params,
+    #     participants=params.participants,
+    #     node_selectors=node_selectors,
+    # )
 
 
 def _launch_da_maybe(plan, da_params):
