@@ -80,7 +80,6 @@ def launch(
     existing_cl_clients,
     l1_config_env_vars,
     observability_helper,
-    supervisors_params,
 ):
     cl_log_level = ethereum_package_input_parser.get_client_log_level_or_default(
         params.log_level, log_level, VERBOSITY_LEVELS

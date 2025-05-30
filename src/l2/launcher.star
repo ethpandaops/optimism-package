@@ -23,11 +23,12 @@ def launch(
 ):
     network_params = params.network_params
     network_name = network_params.name
-
-    log_prefix = "L2 network {}".format(network_name)
+    network_log_prefix = "L2 network {}".format(network_name)
 
     plan.print(
-        "{}: Launching (network ID {})".format(log_prefix, network_params.network_id)
+        "{}: Launching (network ID {})".format(
+            network_log_prefix, network_params.network_id
+        )
     )
 
     plan.print("Network params: {}".format(network_params))
@@ -40,22 +41,41 @@ def launch(
 
     participants = []
 
-    get_sequencer_params_for = _selectors.create_get_sequencer_params_for(params.participants)
+    get_sequencer_params_for = _selectors.create_get_sequencer_params_for(
+        params.participants
+    )
 
-    for participant in params.participants:
-        plan.print("{}: Launching participant {}".format(log_prefix, participant.name))
+    for participant_params in params.participants:
+        participant_name = participant_params.name
+        participant_log_prefix = "{}: Participant {}".format(
+            network_log_prefix, participant_name
+        )
 
-        # 
+        plan.print("{}: Launching".format(participant_log_prefix))
+
+        is_sequencer = _selectors.is_sequencer(participant_params)
+        if is_sequencer:
+            plan.print("{}: Participant is a sequencer".format(participant_log_prefix))
+
+        # Now we get the sequencer params
+        #
+        # If the node itself is a sequencer, we don't want it to refer to itself as a sequencer
+        # so we pass None instead
         sequencer_params = (
-            None
-            if _selectors.is_sequencer(participant)
-            else get_sequencer_params_for(participant)
+            None if is_sequencer else get_sequencer_params_for(participant_params)
+        )
+
+        el_params = participant_params.el
+        bootnode_contexts = [p.el.context for p in participants]
+
+        plan.print(
+            "{}: Launching EL ({})".format(participant_log_prefix, el_params.type)
         )
 
         # Launch an EL client
         el = _el_launcher.launch(
             plan=plan,
-            params=participant.el,
+            params=el_params,
             network_params=network_params,
             sequencer_params=sequencer_params,
             jwt_file=jwt_file,
@@ -64,16 +84,34 @@ def launch(
             persistent=persistent,
             tolerations=tolerations,
             node_selectors=node_selectors,
-            bootnode_contexts=[c.el.context for c in participants],
+            bootnode_contexts=bootnode_contexts,
             observability_helper=observability_helper,
             # FIXME
             supervisors_params=[],
         )
 
-        # TODO Launch a CL client
+        cl_params = participant_params.cl
+
+        plan.print(
+            "{}: Launching CL ({})".format(participant_log_prefix, cl_params.type)
+        )
+
+        cl = _cl_launcher.launch(
+            plan=plan,
+            params=cl_params,
+            network_params=network_params,
+            el_context=el.context,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
+            log_level=log_level,
+            persistent=persistent,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            observability_helper=observability_helper,
+        )
 
         # Add the pair to the list of launched participants
-        participants.append(struct(el=el, cl=None))
+        participants.append(struct(el=el, cl=cl, name=participant.name))
 
     _launch_proxyd_maybe(
         plan=plan,
