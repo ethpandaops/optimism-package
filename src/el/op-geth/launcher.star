@@ -149,6 +149,7 @@ def get_service_config(
     plan,
     params,
     network_params,
+    sequencer_params,
     jwt_file,
     deployment_output,
     log_level,
