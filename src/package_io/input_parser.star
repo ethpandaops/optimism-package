@@ -287,11 +287,16 @@ def parse_network_params(plan, registry, input_args):
             registry,
         )
 
+        # FIXME MEV configuration will move under a participant configuration with multiple sequencers functionality
+        # and will require participant params (of the sequencer) to be passed in
         mev_params = _mev_input_parser.parse(
             # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
-            chain.get("mev_params", {}),
-            struct(**network_params),
-            registry,
+            mev_args=chain.get("mev_params", {}),
+            network_params=struct(**network_params),
+            # FIXME At the moment the "name" of the sequencer is just its index in the array
+            # so we pass 0 as the name
+            participant_name="0",
+            registry=registry,
         )
 
         da_params = _da_input_parser.parse(
