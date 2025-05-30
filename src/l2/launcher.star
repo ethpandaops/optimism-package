@@ -111,7 +111,7 @@ def launch(
         )
 
         # Add the pair to the list of launched participants
-        participants.append(struct(el=el, cl=cl, name=participant.name))
+        participants.append(struct(el=el, cl=cl, name=participant_name))
 
     _launch_proxyd_maybe(
         plan=plan,

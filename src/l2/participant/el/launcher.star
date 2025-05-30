@@ -1,4 +1,7 @@
+_observability = import_module("/src/observability/observability.star")
 _op_geth_launcher = import_module("/src/el/op-geth/launcher.star")
+
+_filter = import_module("/src/util/filter.star")
 
 
 def launch(
@@ -16,10 +19,10 @@ def launch(
     observability_helper,
     supervisors_params,
 ):
-    service = None
+    el = None
 
     if params.type == "op-geth":
-        return _op_geth_launcher.launch(
+        el = _op_geth_launcher.launch(
             plan=plan,
             params=params,
             network_params=network_params,
@@ -33,4 +36,13 @@ def launch(
             bootnode_contexts=bootnode_contexts,
             observability_helper=observability_helper,
             supervisors_params=supervisors_params,
+        )
+
+    for metrics_info in _filter.remove_none(el.context.el_metrics_info):
+        _observability.register_node_metrics_job(
+            observability_helper,
+            params.type,
+            "execution",
+            network_params.network,
+            metrics_info,
         )
