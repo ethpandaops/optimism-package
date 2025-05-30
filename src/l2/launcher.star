@@ -53,6 +53,7 @@ def launch(
 
         plan.print("{}: Launching".format(participant_log_prefix))
 
+        # We let the user know if this node is a sequencer
         is_sequencer = _selectors.is_sequencer(participant_params)
         if is_sequencer:
             plan.print("{}: Participant is a sequencer".format(participant_log_prefix))
@@ -65,6 +66,10 @@ def launch(
             None if is_sequencer else get_sequencer_params_for(participant_params)
         )
 
+        #
+        # Launch the EL client
+        #
+
         el_params = participant_params.el
         bootnode_contexts = [p.el.context for p in participants]
 
@@ -72,7 +77,6 @@ def launch(
             "{}: Launching EL ({})".format(participant_log_prefix, el_params.type)
         )
 
-        # Launch an EL client
         el = _el_launcher.launch(
             plan=plan,
             params=el_params,
@@ -89,6 +93,10 @@ def launch(
             # FIXME
             supervisors_params=[],
         )
+
+        #
+        # Launch the CL client
+        #
 
         cl_params = participant_params.cl
 
@@ -111,7 +119,7 @@ def launch(
             observability_helper=observability_helper,
         )
 
-        # Add the pair to the list of launched participants
+        # Add the EL/CL pair to the list of launched participants
         participants.append(struct(el=el, cl=cl, name=participant_name))
 
     _launch_proxyd_maybe(
