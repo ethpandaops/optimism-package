@@ -103,6 +103,7 @@ def launch(
             el_context=el.context,
             jwt_file=jwt_file,
             deployment_output=deployment_output,
+            l1_config_env_vars=l1_config_env_vars,
             log_level=log_level,
             persistent=persistent,
             tolerations=tolerations,

@@ -43,6 +43,7 @@ def launch(
         # or resort to implicit knowledge
         fail("Unknown EL type: {}".format(params.type))
 
+    # Register metrics
     for metrics_info in _filter.remove_none(el.context.el_metrics_info):
         _observability.register_node_metrics_job(
             observability_helper,
