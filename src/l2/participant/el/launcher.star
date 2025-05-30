@@ -37,6 +37,11 @@ def launch(
             observability_helper=observability_helper,
             supervisors_params=supervisors_params,
         )
+    else:
+        # This should never happen since we asserted that the type is valid in the input parser
+        # but in untyped/imperfectly typed languages we are doomed to repreat ourselves
+        # or resort to implicit knowledge
+        fail("Unknown EL type: {}".format(params.type))
 
     for metrics_info in _filter.remove_none(el.context.el_metrics_info):
         _observability.register_node_metrics_job(
@@ -46,3 +51,5 @@ def launch(
             network_params.network,
             metrics_info,
         )
+
+    return el
