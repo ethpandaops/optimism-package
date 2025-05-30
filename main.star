@@ -1,6 +1,6 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
-l2_launcher = import_module("./src/l2.star")
+_l2_launcher = import_module("./src/l2/launcher.star")
 superchain_launcher = import_module("./src/superchain/launcher.star")
 op_supervisor_launcher = import_module("./src/supervisor/op-supervisor/launcher.star")
 op_challenger_launcher = import_module("./src/challenger/op-challenger/launcher.star")
@@ -46,6 +46,14 @@ def run(plan, args={}):
         input_args=args.get("optimism_package", {}),
         registry=registry,
     )
+
+    # FIXME For debugging only
+    for l2_params in optimism_args.chains:
+        plan.print(
+            "L2 params for {}: {}".format(
+                l2_params.network_params.name, l2_params.network_params
+            )
+        )
 
     global_tolerations = optimism_args.global_tolerations
     global_node_selectors = optimism_args.global_node_selectors
@@ -120,56 +128,56 @@ def run(plan, args={}):
         )
 
     l2s = []
-    for chain in optimism_args.chains:
+    for l2_params in optimism_args.chains:
         # We filter out the supervisors applicable to this network
         l2_supervisors_params = [
             supervisor_params
             for supervisor_params in optimism_args.supervisors
-            if chain.network_params.network_id
+            if l2_params.network_params.network_id
             in supervisor_params.superchain.participants
         ]
 
         l2s.append(
-            l2_launcher.launch_l2(
+            _l2_launcher.launch(
                 plan=plan,
-                l2_services_suffix=chain.network_params.name,
-                l2_args=chain,
+                params=l2_params,
                 jwt_file=jwt_file,
+                l1_config_env_vars=l1_config_env_vars,
                 deployment_output=deployment_output,
-                l1_config=l1_config_env_vars,
-                l1_priv_key=l1_priv_key,
-                l1_rpc_url=l1_rpc_url,
-                global_log_level=global_log_level,
-                global_node_selectors=global_node_selectors,
-                global_tolerations=global_tolerations,
-                persistent=persistent,
+                node_selectors=global_node_selectors,
                 observability_helper=observability_helper,
-                supervisors_params=l2_supervisors_params,
-                registry=registry,
+                # # l2_services_suffix=chain.network_params.name,
+                # # l2_args=chain,
+                # l1_priv_key=l1_priv_key,
+                # l1_rpc_url=l1_rpc_url,
+                log_level=global_log_level,
+                tolerations=global_tolerations,
+                persistent=persistent,
+                # supervisors_params=l2_supervisors_params,
             )
         )
 
-    for supervisor_params in optimism_args.supervisors:
-        op_supervisor_launcher.launch(
-            plan=plan,
-            params=supervisor_params,
-            l1_config_env_vars=l1_config_env_vars,
-            l2s=l2s,
-            jwt_file=jwt_file,
-            deployment_output=deployment_output,
-            observability_helper=observability_helper,
-        )
+    # for supervisor_params in optimism_args.supervisors:
+    #     op_supervisor_launcher.launch(
+    #         plan=plan,
+    #         params=supervisor_params,
+    #         l1_config_env_vars=l1_config_env_vars,
+    #         l2s=l2s,
+    #         jwt_file=jwt_file,
+    #         deployment_output=deployment_output,
+    #         observability_helper=observability_helper,
+    #     )
 
-    for challenger_params in optimism_args.challengers:
-        op_challenger_launcher.launch(
-            plan=plan,
-            params=challenger_params,
-            l2s=l2s,
-            supervisors_params=optimism_args.supervisors,
-            l1_config_env_vars=l1_config_env_vars,
-            deployment_output=deployment_output,
-            observability_helper=observability_helper,
-        )
+    # for challenger_params in optimism_args.challengers:
+    #     op_challenger_launcher.launch(
+    #         plan=plan,
+    #         params=challenger_params,
+    #         l2s=l2s,
+    #         supervisors_params=optimism_args.supervisors,
+    #         l1_config_env_vars=l1_config_env_vars,
+    #         deployment_output=deployment_output,
+    #         observability_helper=observability_helper,
+    #     )
 
     if optimism_args.faucet.enabled:
         _install_faucet(

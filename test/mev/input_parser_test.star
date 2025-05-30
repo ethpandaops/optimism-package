@@ -47,7 +47,7 @@ def test_mev_input_parser_default_args(plan):
         service_name="op-mev-rollup-boost-1000-my-l2",
         labels={
             "op.kind": "mev",
-            "op.network.id": 1000,
+            "op.network.id": "1000",
             "op.mev.type": "rollup-boost",
         },
         ports={
@@ -109,7 +109,7 @@ def test_mev_input_parser_custom_params(plan):
             service_name="op-mev-rollup-boost-1000-my-l2",
             labels={
                 "op.kind": "mev",
-                "op.network.id": 1000,
+                "op.network.id": "1000",
                 "op.mev.type": "rollup-boost",
             },
             ports={
