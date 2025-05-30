@@ -252,6 +252,7 @@ def deploy_contracts(
         intent["chains"].append(intent_chain)
 
     intent_json = json.encode(intent)
+    plan.print("WEEEEEE " + intent_json)
     intent_json_artifact = utils.write_to_file(plan, intent_json, "/tmp", "intent.json")
 
     op_deployer_configure = plan.run_sh(
