@@ -6,6 +6,8 @@ _op_proposer_launcher = import_module("/src/proposer/op-proposer/launcher.star")
 _proxyd_launcher = import_module("/src/proxyd/launcher.star")
 _tx_fuzzer_launcher = import_module("/src/tx-fuzzer/launcher.star")
 
+_selectors = import_module("./selectors.star")
+
 
 def launch(
     plan,
@@ -41,11 +43,20 @@ def launch(
     for participant in params.participants:
         plan.print("{}: Launching participant {}".format(log_prefix, participant.name))
 
+        sequencer_params = (
+            None
+            if _selectors.is_sequencer(participant)
+            else _selectors.get_sequencer_params_for(
+                participants_params=params.participants, participant_params=participant
+            )
+        )
+
         # Launch an EL client
         el = _el_launcher.launch(
             plan=plan,
             params=participant.el,
             network_params=network_params,
+            sequencer_params=sequencer_params,
             jwt_file=jwt_file,
             deployment_output=deployment_output,
             log_level=log_level,

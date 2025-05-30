@@ -87,6 +87,7 @@ SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
 def launch(
     plan,
     params,
+    sequencer_params,
     network_params,
     jwt_file,
     deployment_output,
@@ -245,11 +246,15 @@ def get_service_config(
             )
         )
 
-    if not _selectors.is_sequencer(params):
-        # FIXME Get the linked sequencer URL
-        # cmd.append("--rollup.sequencerhttp={0}".format(sequencer_context.rpc_http_url))
-
-        plan.print("NO SEQUENCER")
+    if sequencer_params:
+        cmd.append(
+            "--rollup.sequencerhttp={}".format(
+                _net.service_url(
+                    sequencer_params.el.service_name,
+                    sequencer_params.el.ports[_net.RPC_PORT_NAME],
+                )
+            )
+        )
 
     if len(bootnode_contexts) > 0:
         cmd.append(
