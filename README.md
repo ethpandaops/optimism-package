@@ -261,7 +261,7 @@ optimism_package:
 
         # The Docker image that should be used for the CL client; leave blank to use the default for the client type
         # Defaults by client:
-        # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop
+        # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
         # - hildr: ghcr.io/optimism-java/hildr:latest
         cl_image: ""
 
@@ -334,7 +334,7 @@ optimism_package:
 
         # The Docker image that should be used for the builder CL client; leave blank to use the default for the client type
         # Defaults by client:
-        # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop
+        # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
         # - hildr: ghcr.io/optimism-java/hildr:latest
         cl_builder_image: ""
 
