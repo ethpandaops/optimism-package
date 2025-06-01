@@ -71,7 +71,7 @@ def test_da_input_parser_enabled_default_args(plan):
         service_name="op-da-da-server-1000-my-l2",
         labels={
             "op.kind": "da",
-            "op.network.id": 1000,
+            "op.network.id": "1000",
             "op.da.type": "da-server",
         },
     )
@@ -124,7 +124,7 @@ def test_da_input_parser_custom_params(plan):
             service_name="op-da-da-server-1000-my-l2",
             labels={
                 "op.kind": "da",
-                "op.network.id": 1000,
+                "op.network.id": "1000",
                 "op.da.type": "da-server",
             },
         ),

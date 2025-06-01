@@ -31,7 +31,7 @@ def test_batcher_input_parser_default_args(plan):
         service_name="op-batcher-1000-my-l2",
         labels={
             "op.kind": "batcher",
-            "op.network.id": 1000,
+            "op.network.id": "1000",
         },
     )
 
@@ -87,7 +87,7 @@ def test_batcher_input_parser_custom_params(plan):
             service_name="op-batcher-1000-my-l2",
             labels={
                 "op.kind": "batcher",
-                "op.network.id": 1000,
+                "op.network.id": "1000",
             },
         ),
     )
