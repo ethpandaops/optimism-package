@@ -98,6 +98,7 @@ def launch(
         launcher=launcher,
         service_name=service_name,
         participant=participant,
+        conductor_params=conductor_params,
         log_level=log_level,
         persistent=persistent,
         tolerations=tolerations,
