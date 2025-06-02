@@ -62,7 +62,7 @@ def create_config_artifact(
             "enabled": observability_helper.enabled,
             "port": _METRICS_PORT_NUM,
         },
-        "Replicas": params["replicas"],
+        "Replicas": params.replicas,
     }
 
     return plan.render_templates(
