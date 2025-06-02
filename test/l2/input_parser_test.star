@@ -1,6 +1,6 @@
 input_parser = import_module("/src/l2/input_parser.star")
 _participant_input_parser = import_module("/src/l2/participant/input_parser.star")
-_proxyd_input_parser = import_module("/src/l2/proxyd/input_parser.star")
+_proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 
 _net = import_module("/src/util/net.star")
