@@ -144,6 +144,7 @@ def get_beacon_config(
     launcher,
     service_name,
     participant,
+    conductor_params,
     log_level,
     persistent,
     tolerations,
