@@ -1,5 +1,6 @@
 input_parser = import_module("/src/l2/input_parser.star")
 _participant_input_parser = import_module("/src/l2/participant/input_parser.star")
+_proxyd_input_parser = import_module("/src/l2/proxyd/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 
 _net = import_module("/src/util/net.star")
@@ -131,6 +132,13 @@ def test_l2_input_parser_defaults(plan):
         participants, _default_network_params, _default_registry
     )
 
+    parsed_proxyd_params = _proxyd_input_parser.parse(
+        proxyd_args=None,
+        network_params=_default_network_params,
+        participants_params=parsed_participants,
+        registry=_default_registry,
+    )
+
     expect.eq(
         input_parser.parse(
             {"network1": {"participants": participants}}, _default_registry
@@ -141,7 +149,7 @@ def test_l2_input_parser_defaults(plan):
                 participants=parsed_participants,
                 batcher_params=_default_batcher_params,
                 proposer_params=_default_proposer_params,
-                proxyd_params=_default_proxyd_params,
+                proxyd_params=parsed_proxyd_params,
             )
         ],
     )
