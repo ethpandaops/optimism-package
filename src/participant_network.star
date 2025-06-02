@@ -102,8 +102,6 @@ def launch_participant_network(
                 conductor_params=None,
             )
         ],
-        el_context=all_el_contexts[0],
-        cl_context=all_cl_contexts[0],
         l1_config_env_vars=l1_config_env_vars,
         gs_batcher_private_key=batcher_key,
         network_params=network_params,
