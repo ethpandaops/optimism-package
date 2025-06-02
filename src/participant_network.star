@@ -92,11 +92,11 @@ def launch_participant_network(
         sequencers_params=[
             struct(
                 el=struct(
-                    service_name=all_el_contexts[0].ip_address,
+                    service_name=all_el_contexts[0].ip_addr,
                     ports={_net.RPC_PORT_NAME: all_el_contexts[0].rpc_port_num},
                 ),
                 cl=struct(
-                    service_name=all_cl_contexts[0].ip_address,
+                    service_name=all_cl_contexts[0].ip_addr,
                     ports={_net.RPC_PORT_NAME: all_cl_contexts[0].http_port_num},
                 ),
                 # Conductor params are not being parsed yet
