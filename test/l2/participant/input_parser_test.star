@@ -262,8 +262,8 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
                 "op.conductor.type": "op-conductor",
             },
             ports={
-                _net.RPC_PORT_NAME: _net.port(number=8548),
-                _net.CONSENSUS_PORT_NAME: _net.port(number=8549),
+                _net.RPC_PORT_NAME: _net.port(number=8547),
+                _net.CONSENSUS_PORT_NAME: _net.port(number=50050),
             },
             service_name="op-conductor-1000-my-l2-node0",
         ),
