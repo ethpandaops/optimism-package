@@ -13,7 +13,7 @@ _default_participants_params = [
         el=struct(
             service_name="op-el-node0",
             ports={_net.RPC_PORT_NAME: _net.port(number=8888)},
-        )
+        ),
     )
 ]
 _default_registry = _registry.Registry()

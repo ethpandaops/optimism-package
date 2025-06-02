@@ -399,7 +399,7 @@ def parse_network_params(plan, registry, input_args):
                         ports={
                             _net.RPC_PORT_NAME: _net.port(number=8545),
                         },
-                    )
+                    ),
                 )
                 for index, p in enumerate(participants)
             ],
