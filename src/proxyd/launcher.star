@@ -28,7 +28,6 @@ def launch(
         plan=plan,
         params=params,
         network_params=network_params,
-        participants_params=participants_params,
         observability_helper=observability_helper,
     )
 
