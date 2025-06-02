@@ -16,7 +16,6 @@ _observability = import_module("../../observability/observability.star")
 _util = import_module("../../util.star")
 
 _net = import_module("/src/util/net.star")
-_selectors = import_module("/src/l2/selectors.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 
@@ -41,12 +40,13 @@ def launch(
     network_params,
     jwt_file,
     deployment_output,
+    is_sequencer,
     log_level,
     persistent,
     tolerations,
     node_selectors,
     el_context,
-    existing_cl_clients,
+    cl_contexts,
     l1_config_env_vars,
     observability_helper,
 ):
@@ -60,18 +60,21 @@ def launch(
         network_params=network_params,
         jwt_file=jwt_file,
         deployment_output=deployment_output,
+        is_sequencer=is_sequencer,
         log_level=cl_log_level,
         persistent=persistent,
         tolerations=tolerations,
         node_selectors=node_selectors,
         el_context=el_context,
-        existing_cl_clients=existing_cl_clients,
+        cl_contexts=cl_contexts,
         l1_config_env_vars=l1_config_env_vars,
         observability_helper=observability_helper,
     )
 
     service = plan.add_service(params.service_name, config)
-    service_url = _util.make_service_http_url(service)
+
+    rpc_port = params.ports[_net.RPC_PORT_NAME]
+    service_url = _net.service_url(params.service_name, rpc_port)
 
     metrics_info = _observability.new_metrics_info(
         observability_helper, service, METRICS_PATH
@@ -84,7 +87,7 @@ def launch(
             client_name="hildr",
             enr="",  # beacon_node_enr,
             ip_addr=service.ip_address,
-            http_port=_util.get_service_http_port_num(service),
+            http_port=rpc_port.number,
             beacon_http_url=service_url,
             cl_nodes_metrics_info=[metrics_info],
             beacon_service_name=params.service_name,
@@ -97,13 +100,14 @@ def get_service_config(
     params,
     network_params,
     deployment_output,
+    is_sequencer,
     jwt_file,
     log_level,
     persistent,
     tolerations,
     node_selectors,
     el_context,
-    existing_cl_clients,
+    cl_contexts,
     l1_config_env_vars,
     observability_helper,
 ):
@@ -122,7 +126,7 @@ def get_service_config(
         "--l2-engine-url={0}".format(EXECUTION_ENGINE_ENDPOINT),
         "--l2-rpc-url={0}".format(EXECUTION_RPC_ENDPOINT),
         "--rpc-addr=0.0.0.0",
-        "--rpc-port={0}".format(params.ports[_net.BEACON_PORT_NAME].number),
+        "--rpc-port={0}".format(params.ports[_net.RPC_PORT_NAME].number),
         "--sync-mode=full",
         "--network="
         + "{0}/rollup-{1}.json".format(
@@ -143,8 +147,8 @@ def get_service_config(
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(params.service_name),
-            size=int(params.cl_volume_size)
-            if int(params.cl_volume_size) > 0
+            size=int(params.volume_size)
+            if int(params.volume_size) > 0
             else _constants.VOLUME_SIZE[network_params.network][
                 _constants.CL_TYPE.hildr + "_volume_size"
             ],
@@ -160,16 +164,16 @@ def get_service_config(
 
         _observability.expose_metrics_port(ports)
 
-    if _selectors.is_sequencer(params):
+    if is_sequencer:
         cmd.append("--sequencer-enable")
 
-    if len(existing_cl_clients) == 1:
+    if len(cl_contexts) > 0:
         cmd.append(
             "--disc-boot-nodes="
             + ",".join(
                 [
                     ctx.enr
-                    for ctx in existing_cl_clients[
+                    for ctx in cl_contexts[
                         : _ethereum_package_constants.MAX_ENR_ENTRIES
                     ]
                 ]

@@ -1,3 +1,17 @@
+## Kona-node launcher
+# Kona is an OP L2 Consensus client written in rust.
+#
+# Note: currently kona-nodes lack support for some features from the op-node such as:
+# - interop syncing
+# - interactions with an external sequencer
+# - interactions with an op-batcher
+# - external bootnode list
+#
+# To be able to properly spin out an L2 network containing kona consensus nodes, one must make sure to
+# deploy at least one `op-node` (L2 consensus node) *before* any `kona-node` - this will allow the `op-batcher` to properly boot-up.
+# Please make sure to define at least one `op-geth`/`op-node` L1/L2 couple in your network configuration before
+# defining your kona-nodes.
+
 _ethereum_package_cl_context = import_module(
     "github.com/ethpandaops/ethereum-package/src/cl/cl_context.star"
 )
@@ -12,6 +26,7 @@ _ethereum_package_input_parser = import_module(
 
 _filter = import_module("/src/util/filter.star")
 _net = import_module("/src/util/net.star")
+_selectors = import_module("/src/l2/selectors.star")
 
 _constants = import_module("../../package_io/constants.star")
 _util = import_module("../../util.star")
@@ -22,13 +37,12 @@ _observability = import_module("../../observability/observability.star")
 # The Docker container runs as the "op-node" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-node/op-node-beacon-data"
 
-# TODO This block seems repetitive, at least for all OP services
 VERBOSITY_LEVELS = {
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "ERROR",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "WARN",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "INFO",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "v",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "vv",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "vvv",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "vvvv",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "vvvvv",
 }
 
 
@@ -36,11 +50,9 @@ def launch(
     plan,
     params,
     network_params,
-    da_params,
-    supervisors_params,
-    is_sequencer,
     jwt_file,
     deployment_output,
+    is_sequencer,
     log_level,
     persistent,
     tolerations,
@@ -70,11 +82,9 @@ def launch(
         plan=plan,
         params=params,
         network_params=network_params,
-        da_params=da_params,
-        supervisors_params=supervisors_params,
-        is_sequencer=is_sequencer,
         jwt_file=jwt_file,
         deployment_output=deployment_output,
+        is_sequencer=is_sequencer,
         beacon_node_identity_recipe=beacon_node_identity_recipe,
         log_level=cl_log_level,
         persistent=persistent,
@@ -104,7 +114,7 @@ def launch(
     return struct(
         service=service,
         context=_ethereum_package_cl_context.new_cl_context(
-            client_name="op-node",
+            client_name="kona-node",
             enr=beacon_node_enr,
             ip_addr=service.ip_address,
             http_port=rpc_port.number,
@@ -121,8 +131,6 @@ def get_service_config(
     plan,
     params,
     network_params,
-    da_params,
-    supervisors_params,
     jwt_file,
     deployment_output,
     is_sequencer,
@@ -145,54 +153,55 @@ def get_service_config(
     udp_discovery_port_number = params.ports[_net.UDP_DISCOVERY_PORT_NAME].number
 
     cmd = [
-        "op-node",
-        "--log.level=" + log_level,
-        "--l2={0}".format(EXECUTION_ENGINE_ENDPOINT),
-        "--l2.jwt-secret=" + _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--verifier.l1-confs=1",
-        "--rollup.config="
-        + "{0}/rollup-{1}.json".format(
+        "--l2-chain-id",
+        str(network_params.network_id),
+        "-{0}".format(log_level),
+    ]
+
+    if observability_helper.enabled:
+        _observability.configure_op_service_metrics(cmd, ports)
+
+    # Add the node command config
+    cmd += [
+        "node",
+        "--l1-eth-rpc",
+        l1_config_env_vars["L1_RPC_URL"],
+        "--l1-beacon",
+        l1_config_env_vars["CL_RPC_URL"],
+        "--l2-engine-rpc",
+        EXECUTION_ENGINE_ENDPOINT,
+        "--l2-engine-jwt-secret",
+        _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--l2-provider-rpc",
+        EXECUTION_ENGINE_ENDPOINT,
+        "--l2-config-file",
+        "{0}/rollup-{1}.json".format(
             _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
             network_params.network_id,
         ),
-        "--rpc.addr=0.0.0.0",
-        "--rpc.port={0}".format(rpc_port_number),
+        "--p2p.advertise.ip",
+        _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--p2p.advertise.tcp",
+        "{0}".format(tcp_discovery_port_number),
+        "--p2p.advertise.udp",
+        "{0}".format(udp_discovery_port_number),
+        "--p2p.listen.ip",
+        "0.0.0.0",
+        "--p2p.listen.tcp",
+        "{0}".format(tcp_discovery_port_number),
+        "--p2p.listen.udp",
+        "{0}".format(udp_discovery_port_number),
+        "--rpc.addr",
+        "0.0.0.0",
+        "--rpc.port",
+        "{0}".format(rpc_port_number),
         "--rpc.enable-admin",
-        "--l1={0}".format(l1_config_env_vars["L1_RPC_URL"]),
-        "--l1.rpckind={0}".format(l1_config_env_vars["L1_RPC_KIND"]),
-        "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
-        "--p2p.advertise.ip={0}".format(
-            _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
-        ),
-        "--p2p.advertise.tcp={0}".format(tcp_discovery_port_number),
-        "--p2p.advertise.udp={0}".format(udp_discovery_port_number),
-        "--p2p.listen.ip=0.0.0.0",
-        "--p2p.listen.tcp={0}".format(tcp_discovery_port_number),
-        "--p2p.listen.udp={0}".format(udp_discovery_port_number),
-        "--safedb.path={0}".format(BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER),
-        "--altda.enabled={}".format("true" if da_params else "false"),
-        "--altda.da-server={}".format(
-            _net.service_url(
-                da_params.service_name, da_params.ports[_net.HTTP_PORT_NAME]
-            )
-            if da_params
-            else ""
-        ),
     ]
-
-    supervisor_params = _filter.first(supervisors_params)
 
     # configure files
 
     files = {
-        _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: Directory(
-            artifact_names=[
-                deployment_output,
-                supervisor_params.superchain.dependency_set.name,
-            ]
-        )
-        if supervisor_params
-        else deployment_output,
+        _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
         _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
@@ -202,7 +211,7 @@ def get_service_config(
             size=int(params.volume_size)
             if int(params.volume_size) > 0
             else _constants.VOLUME_SIZE[network_params.network][
-                _constants.CL_TYPE.op_node + "_volume_size"
+                _constants.CL_TYPE.kona_node + "_volume_size"
             ],
         )
 
@@ -221,24 +230,6 @@ def get_service_config(
 
         _observability.expose_metrics_port(ports)
 
-    if supervisor_params:
-        interop_rpc_port = supervisor_params.superchain.ports[
-            _net.INTEROP_RPC_PORT_NAME
-        ]
-        ports[_net.INTEROP_RPC_PORT_NAME] = _net.port_to_port_spec(interop_rpc_port)
-
-        env_vars.update(
-            {
-                "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
-                "OP_NODE_INTEROP_RPC_PORT": str(interop_rpc_port.number),
-                "OP_NODE_INTEROP_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
-                "OP_NODE_INTEROP_DEPENDENCY_SET": "{0}/{1}".format(
-                    _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-                    supervisor_params.superchain.dependency_set.path,
-                ),
-            }
-        )
-
     if is_sequencer:
         sequencer_private_key = _util.read_network_config_value(
             plan,
@@ -254,17 +245,17 @@ def get_service_config(
         ]
 
     if len(cl_contexts) > 0:
-        cmd.append(
-            "--p2p.bootnodes="
-            + ",".join(
+        cmd += [
+            "--p2p.bootnodes",
+            ",".join(
                 [
                     ctx.enr
                     for ctx in cl_contexts[
                         : _ethereum_package_constants.MAX_ENR_ENTRIES
                     ]
                 ]
-            )
-        )
+            ),
+        ]
 
     cmd += params.extra_params
 
