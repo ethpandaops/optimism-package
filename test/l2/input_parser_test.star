@@ -110,39 +110,6 @@ def test_l2_input_parser_defaults(plan):
         replicas={"node0": "http://op-el-2151908-node0-op-geth:8545"},
     )
 
-    _default_da_params = struct(
-        enabled=True,
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
-        cmd=[
-            "da-server",
-            "--file.path=/home",
-            "--addr=0.0.0.0",
-            "--port={}".format(3100),
-            "--log.level=debug",
-        ],
-        ports={
-            _net.HTTP_PORT_NAME: _net.port(number=3100),
-        },
-        service_name="op-da-da-server-2151908-network1",
-        labels={
-            "op.kind": "da",
-            "op.network.id": "2151908",
-            "op.da.type": "da-server",
-        },
-    )
-
-    _default_tx_fuzzer_params = struct(
-        enabled=True,
-        extra_params=[],
-        image="ethpandaops/tx-fuzz:master",
-        labels={"op.kind": "tx-fuzzer", "op.network.id": "2151908"},
-        max_cpu=1000,
-        max_memory=300,
-        min_cpu=100,
-        min_memory=20,
-        service_name="op-tx-fuzzer-2151908-network1",
-    )
-
     _default_participants = _participant_input_parser.parse(
         {"node0": None}, _default_network_params, _default_registry
     )
@@ -156,8 +123,10 @@ def test_l2_input_parser_defaults(plan):
                 batcher_params=_default_batcher_params,
                 proposer_params=_default_proposer_params,
                 proxyd_params=_default_proxyd_params,
-                da_params=_default_da_params,
-                tx_fuzzer_params=_default_tx_fuzzer_params,
+                # DA is disabled by default
+                da_params=None,
+                # tx fuzzer is disabled by default
+                tx_fuzzer_params=None,
                 additional_services=[],
             )
         ],
@@ -186,12 +155,68 @@ def test_l2_input_parser_defaults(plan):
                 batcher_params=_default_batcher_params,
                 proposer_params=_default_proposer_params,
                 proxyd_params=parsed_proxyd_params,
-                da_params=_default_da_params,
-                tx_fuzzer_params=_default_tx_fuzzer_params,
+                # DA is disabled by default
+                da_params=None,
+                # tx fuzzer is disabled by default
+                tx_fuzzer_params=None,
                 additional_services=[],
             )
         ],
     )
+
+
+def test_l2_input_parser_da_defaults(plan):
+    _default_da_params = struct(
+        enabled=True,
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
+        cmd=[
+            "da-server",
+            "--file.path=/home",
+            "--addr=0.0.0.0",
+            "--port={}".format(3100),
+            "--log.level=debug",
+        ],
+        ports={
+            _net.HTTP_PORT_NAME: _net.port(number=3100),
+        },
+        service_name="op-da-da-server-2151908-network1",
+        labels={
+            "op.kind": "da",
+            "op.network.id": "2151908",
+            "op.da.type": "da-server",
+        },
+    )
+
+    parsed = input_parser.parse(
+        {"network1": {"participants": {"node0": {}}, "da_params": {"enabled": True}}},
+        _default_registry,
+    )
+    expect.eq(parsed[0].da_params, _default_da_params)
+
+
+def test_l2_input_parser_tz_fuzzer_defaults(plan):
+    _default_tx_fuzzer_params = struct(
+        enabled=True,
+        extra_params=[],
+        image="ethpandaops/tx-fuzz:master",
+        labels={"op.kind": "tx-fuzzer", "op.network.id": "2151908"},
+        max_cpu=1000,
+        max_memory=300,
+        min_cpu=100,
+        min_memory=20,
+        service_name="op-tx-fuzzer-2151908-network1",
+    )
+
+    parsed = input_parser.parse(
+        {
+            "network1": {
+                "participants": {"node0": {}},
+                "tx_fuzzer_params": {"enabled": True},
+            }
+        },
+        _default_registry,
+    )
+    expect.eq(parsed[0].tx_fuzzer_params, _default_tx_fuzzer_params)
 
 
 def test_l2_input_parser_auto_network_id(plan):
