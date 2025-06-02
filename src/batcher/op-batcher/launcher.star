@@ -23,19 +23,17 @@ BATCHER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-batcher/op-batcher-data"
 def launch(
     plan,
     params,
-    el_context,
-    cl_context,
+    sequencers_params,
     l1_config_env_vars,
     gs_batcher_private_key,
     network_params,
     observability_helper,
     da_server_context,
 ):
-    config = get_batcher_config(
+    config = get_service_config(
         plan=plan,
         params=params,
-        el_context=el_context,
-        cl_context=cl_context,
+        sequencers_params=sequencers_params,
         l1_config_env_vars=l1_config_env_vars,
         gs_batcher_private_key=gs_batcher_private_key,
         observability_helper=observability_helper,
@@ -51,11 +49,10 @@ def launch(
     return struct(service=service)
 
 
-def get_batcher_config(
+def get_service_config(
     plan,
     params,
-    el_context,
-    cl_context,
+    sequencers_params,
     l1_config_env_vars,
     gs_batcher_private_key,
     observability_helper,
@@ -65,8 +62,36 @@ def get_batcher_config(
 
     cmd = [
         "op-batcher",
-        "--l2-eth-rpc={}".format(el_context.rpc_http_url),
-        "--rollup-rpc={}".format(cl_context.beacon_http_url),
+        "--l2-eth-rpc={}".format(
+            ",".join(
+                [
+                    _net.service_url(
+                        s.conductor_params.service_name,
+                        s.conductor_params.ports[_net.RPC_PORT_NAME],
+                    )
+                    if s.conductor_params
+                    else _net.service_url(
+                        s.el.service_name, s.el.ports[_net.RPC_PORT_NAME]
+                    )
+                    for s in sequencers_params
+                ]
+            )
+        ),
+        "--rollup-rpc={}".format(
+            ",".join(
+                [
+                    _net.service_url(
+                        s.conductor_params.service_name,
+                        s.conductor_params.ports[_net.RPC_PORT_NAME],
+                    )
+                    if s.conductor_params
+                    else _net.service_url(
+                        s.cl.service_name, s.cl.ports[_net.RPC_PORT_NAME]
+                    )
+                    for s in sequencers_params
+                ]
+            )
+        ),
         "--poll-interval=1s",
         "--sub-safety-margin=6",
         "--num-confirmations=1",

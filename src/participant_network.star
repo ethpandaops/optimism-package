@@ -87,6 +87,21 @@ def launch_participant_network(
     _op_batcher_launcher.launch(
         plan=plan,
         params=batcher_params,
+        # FIXME We need to plumb the legacy args into the new format so that we make our lives easier when we're switching
+        sequencers_params=[
+            struct(
+                el=struct(
+                    service_name=all_el_contexts[0].ip_address,
+                    ports={_net.RPC_PORT_NAME: all_el_contexts[0].rpc_port_num},
+                ),
+                cl=struct(
+                    service_name=all_cl_contexts[0].ip_address,
+                    ports={_net.RPC_PORT_NAME: all_cl_contexts[0].http_port_num},
+                ),
+                # Conductor params are not being parsed yet
+                conductor_params=None,
+            )
+        ],
         el_context=all_el_contexts[0],
         cl_context=all_cl_contexts[0],
         l1_config_env_vars=l1_config_env_vars,
