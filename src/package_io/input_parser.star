@@ -390,8 +390,8 @@ def parse_network_params(plan, registry, input_args):
                             _ethereum_package_shared_utils.zfill_custom(
                                 index + 1, len(str(len(participants)))
                             ),
-                            p.el_type,
-                            p.cl_type,
+                            p["el_type"],
+                            p.["cl_type"],
                             network_name,
                         ),
                         ports={
