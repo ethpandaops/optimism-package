@@ -5,6 +5,7 @@ _op_batcher_launcher = import_module("./batcher/op-batcher/launcher.star")
 _op_proposer_launcher = import_module("./proposer/op-proposer/launcher.star")
 _proxyd_launcher = import_module("./proxyd/launcher.star")
 util = import_module("./util.star")
+_net = import_module("/src/util/net.star")
 _registry = import_module("./package_io/registry.star")
 
 
