@@ -75,7 +75,6 @@ def launch_participant_network(
         plan=plan,
         params=proxyd_params,
         network_params=network_params,
-        el_contexts=all_el_contexts,
         observability_helper=observability_helper,
     )
 

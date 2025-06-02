@@ -2,6 +2,10 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+_ethereum_package_shared_utils = import_module(
+    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+)
+
 _batcher_input_parser = import_module("/src/batcher/input_parser.star")
 _da_input_parser = import_module("/src/da/input_parser.star")
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
@@ -15,6 +19,8 @@ _tx_fuzzer_parser = import_module("/src/tx-fuzzer/input_parser.star")
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
 _registry = import_module("./registry.star")
+
+_net = import_module("/src/util/net.star")
 
 
 DEFAULT_DA_SERVER_PARAMS = {
@@ -266,13 +272,6 @@ def parse_network_params(plan, registry, input_args):
         network_name = network_params["name"]
         network_id = network_params["network_id"]
 
-        proxyd_params = _proxyd_input_parser.parse(
-            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
-            chain.get("proxyd_params", {}),
-            struct(**network_params),
-            registry,
-        )
-
         batcher_params = _batcher_input_parser.parse(
             # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
             chain.get("batcher_params", {}),
@@ -377,6 +376,35 @@ def parse_network_params(plan, registry, input_args):
                     participant
                 )
                 participants.append(participant_copy)
+
+        proxyd_params = _proxyd_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            proxyd_args=chain.get("proxyd_params", {}),
+            network_params=struct(**network_params),
+            # FIXME The participants params will come from the new L2 parser once that's in. Until then we need to convert the old ones to the new format
+            participants_params=[
+                struct(
+                    # Name is something we don't have in the legacy params, we only have array indices
+                    name=str(index),
+                    el=struct(
+                        service_name="op-el-{0}-{1}-{2}-{3}-{4}".format(
+                            network_id,
+                            _ethereum_package_shared_utils.zfill_custom(
+                                index + 1, len(str(len(participants)))
+                            ),
+                            p["el_type"],
+                            p["cl_type"],
+                            network_name,
+                        ),
+                        ports={
+                            _net.RPC_PORT_NAME: _net.port(number=8545),
+                        },
+                    ),
+                )
+                for index, p in enumerate(participants)
+            ],
+            registry=registry,
+        )
 
         result = {
             "participants": participants,

@@ -7,17 +7,27 @@ _default_network_params = struct(
     network_id=1000,
     name="my-l2",
 )
+_default_participants_params = [
+    struct(
+        name="node0",
+        el=struct(
+            service_name="op-el-node0",
+            ports={_net.RPC_PORT_NAME: _net.port(number=8888)},
+        ),
+    )
+]
 _default_registry = _registry.Registry()
 
 
 def test_proxyd_input_parser_extra_attributes(plan):
     expect.fails(
         lambda: _input_parser.parse(
-            {"extra": None, "name": "x"},
-            _default_network_params,
-            _default_registry,
+            proxyd_args={"extra": None, "name": "x"},
+            network_params=_default_network_params,
+            participants_params=_default_participants_params,
+            registry=_default_registry,
         ),
-        " Invalid attributes in proxyd configuration for my-l2: extra,name",
+        "Invalid attributes in proxyd configuration for my-l2: extra,name",
     )
 
 
@@ -33,34 +43,38 @@ def test_proxyd_input_parser_default_args(plan):
             "op.kind": "proxyd",
             "op.network.id": "1000",
         },
+        replicas={"node0": "http://op-el-node0:8888"},
     )
 
     expect.eq(
         _input_parser.parse(
-            None,
-            _default_network_params,
-            _default_registry,
+            proxyd_args=None,
+            network_params=_default_network_params,
+            participants_params=_default_participants_params,
+            registry=_default_registry,
         ),
         _default_params,
     )
 
     expect.eq(
         _input_parser.parse(
-            {},
-            _default_network_params,
-            _default_registry,
+            proxyd_args={},
+            network_params=_default_network_params,
+            participants_params=_default_participants_params,
+            registry=_default_registry,
         ),
         _default_params,
     )
 
     expect.eq(
         _input_parser.parse(
-            {
+            proxyd_args={
                 "image": None,
                 "extra_params": None,
             },
-            _default_network_params,
-            _default_registry,
+            network_params=_default_network_params,
+            participants_params=_default_participants_params,
+            registry=_default_registry,
         ),
         _default_params,
     )
@@ -68,12 +82,13 @@ def test_proxyd_input_parser_default_args(plan):
 
 def test_proxyd_input_parser_custom_params(plan):
     parsed = _input_parser.parse(
-        {
+        proxyd_args={
             "image": "proxyd:brightest",
             "extra_params": ["--hola"],
         },
-        _default_network_params,
-        _default_registry,
+        network_params=_default_network_params,
+        participants_params=_default_participants_params,
+        registry=_default_registry,
     )
 
     expect.eq(
@@ -89,6 +104,7 @@ def test_proxyd_input_parser_custom_params(plan):
                 "op.kind": "proxyd",
                 "op.network.id": "1000",
             },
+            replicas={"node0": "http://op-el-node0:8888"},
         ),
     )
 
@@ -97,15 +113,17 @@ def test_proxyd_input_parser_custom_registry(plan):
     registry = _registry.Registry({_registry.PROXYD: "proxyd:greatest"})
 
     parsed = _input_parser.parse(
-        {},
-        _default_network_params,
-        registry,
+        proxyd_args={},
+        network_params=_default_network_params,
+        participants_params=_default_participants_params,
+        registry=registry,
     )
     expect.eq(parsed.image, "proxyd:greatest")
 
     parsed = _input_parser.parse(
-        {"image": "proxyd:oldest"},
-        _default_network_params,
-        registry,
+        proxyd_args={"image": "proxyd:oldest"},
+        network_params=_default_network_params,
+        participants_params=_default_participants_params,
+        registry=registry,
     )
     expect.eq(parsed.image, "proxyd:oldest")

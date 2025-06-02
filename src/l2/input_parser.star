@@ -99,7 +99,10 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
 
     # We add the proxyd params
     l2_params["proxyd_params"] = _proxyd_input_parser.parse(
-        l2_params["proxyd_params"], l2_params["network_params"], registry
+        proxyd_args=l2_params["proxyd_params"],
+        network_params=l2_params["network_params"],
+        participants_params=l2_params["participants"],
+        registry=registry,
     )
 
     return struct(
