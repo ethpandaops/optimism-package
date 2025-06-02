@@ -266,6 +266,9 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
                 _net.CONSENSUS_PORT_NAME: _net.port(number=50050),
             },
             service_name="op-conductor-1000-my-l2-node0",
+            admin=True,
+            proxy=True,
+            paused=False,
         ),
     )
 
