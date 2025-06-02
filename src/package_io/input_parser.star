@@ -377,8 +377,6 @@ def parse_network_params(plan, registry, input_args):
                 )
                 participants.append(participant_copy)
 
-        participants_params_new = [struct(el)]
-
         proxyd_params = _proxyd_input_parser.parse(
             # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
             proxyd_args=chain.get("proxyd_params", {}),
