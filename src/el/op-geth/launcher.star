@@ -25,9 +25,9 @@ _observability = import_module("../../observability/observability.star")
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
 
-ENTRYPOINT_ARGS = ["sh", "-c"]
+_ENTRYPOINT_ARGS = ["sh", "-c"]
 
-VERBOSITY_LEVELS = {
+_VERBOSITY_LEVELS = {
     _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "1",
     _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "2",
     _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "3",
@@ -52,7 +52,7 @@ def launch(
     supervisors_params,
 ):
     el_log_level = _ethereum_package_input_parser.get_client_log_level_or_default(
-        params.log_level, log_level, VERBOSITY_LEVELS
+        params.log_level, log_level, _VERBOSITY_LEVELS
     )
 
     config = get_service_config(
@@ -241,7 +241,7 @@ def get_service_config(
         "ports": ports,
         "cmd": [command_str],
         "files": files,
-        "entrypoint": ENTRYPOINT_ARGS,
+        "entrypoint": _ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": params.labels,

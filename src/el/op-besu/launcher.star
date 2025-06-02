@@ -22,12 +22,9 @@ _constants = import_module("../../package_io/constants.star")
 _observability = import_module("../../observability/observability.star")
 
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
+_EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
-
-ENTRYPOINT_ARGS = ["sh", "-c"]
-
-VERBOSITY_LEVELS = {
+_VERBOSITY_LEVELS = {
     _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "1",
     _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "2",
     _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "3",
@@ -52,7 +49,7 @@ def launch(
     supervisors_params,
 ):
     el_log_level = _ethereum_package_input_parser.get_client_log_level_or_default(
-        params.log_level, log_level, VERBOSITY_LEVELS
+        params.log_level, log_level, _VERBOSITY_LEVELS
     )
 
     config = get_service_config(
@@ -128,7 +125,7 @@ def get_service_config(
             network_params.network_id,
         ),
         "--network-id={0}".format(network_params.network_id),
-        "--data-path={}".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
+        "--data-path={}".format(_EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
         "--host-allowlist=*",
         "--rpc-http-enabled=true",
         "--rpc-http-host=0.0.0.0",
@@ -164,7 +161,7 @@ def get_service_config(
     }
 
     if persistent:
-        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+        files[_EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(params.service_name),
             size=int(params.volume_size)
             if int(params.volume_size) > 0

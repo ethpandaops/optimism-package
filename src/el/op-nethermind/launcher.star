@@ -25,7 +25,7 @@ _observability = import_module("../../observability/observability.star")
 _EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nethermind/execution-data"
 
 
-VERBOSITY_LEVELS = {
+_VERBOSITY_LEVELS = {
     _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "1",
     _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "2",
     _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "3",
@@ -50,7 +50,7 @@ def launch(
     supervisors_params,
 ):
     el_log_level = _ethereum_package_input_parser.get_client_log_level_or_default(
-        params.log_level, log_level, VERBOSITY_LEVELS
+        params.log_level, log_level, _VERBOSITY_LEVELS
     )
 
     config = get_service_config(
