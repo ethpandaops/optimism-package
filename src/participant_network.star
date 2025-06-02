@@ -82,7 +82,7 @@ def launch_participant_network(
         observability_helper=observability_helper,
     )
 
-    if conductor_params:
+    conductor_context = (
         _op_conductor_launcher.launch(
             plan=plan,
             params=conductor_params,
@@ -105,7 +105,10 @@ def launch_participant_network(
                 },
             ),
             observability_helper=observability_helper,
-        )
+        ).context
+        if conductor_params
+        else None
+    )
 
     batcher_key = util.read_network_config_value(
         plan,
