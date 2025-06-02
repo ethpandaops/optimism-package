@@ -12,9 +12,11 @@ OP_NODE = "op-node"
 KONA_NODE = "kona-node"
 HILDR = "hildr"
 
+OP_SUPERVISOR = "op-supervisor"
+KONA_SUPERVISOR = "kona-supervisor"
+
 OP_BATCHER = "op-batcher"
 OP_CHALLENGER = "op-challenger"
-OP_SUPERVISOR = "op-supervisor"
 OP_PROPOSER = "op-proposer"
 OP_CONDUCTOR = "op-conductor"
 OP_DEPLOYER = "op-deployer"
