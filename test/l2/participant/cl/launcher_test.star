@@ -35,7 +35,7 @@ def test_l2_participant_cl_launcher_hildr(plan):
     )
     observability_helper = _observability.make_helper(legacy_params.observability)
 
-    l2_params = _l2_input_parser.parse(
+    l2s_params = _l2_input_parser.parse(
         {
             "network0": {
                 "participants": {
@@ -50,6 +50,7 @@ def test_l2_participant_cl_launcher_hildr(plan):
         registry=_default_registry,
     )
 
+    l2_params = l2s_params[0]
     participant_params = l2_params.participants[0]
     cl_params = participant_params.cl
 
@@ -118,13 +119,13 @@ def test_l2_participant_cl_launcher_kona_node(plan):
     )
     observability_helper = _observability.make_helper(legacy_params.observability)
 
-    l2_params = _l2_input_parser.parse(
+    l2s_params = _l2_input_parser.parse(
         {
             "network0": {
                 "participants": {
                     "node0": {
                         "cl": {
-                            "type": "hildr",
+                            "type": "kona-node",
                         }
                     }
                 }
@@ -133,6 +134,7 @@ def test_l2_participant_cl_launcher_kona_node(plan):
         registry=_default_registry,
     )
 
+    l2_params = l2s_params[0]
     participant_params = l2_params.participants[0]
     cl_params = participant_params.cl
 
@@ -234,13 +236,13 @@ def test_l2_participant_cl_launcher_op_node(plan):
     )
     observability_helper = _observability.make_helper(legacy_params.observability)
 
-    l2_params = _l2_input_parser.parse(
+    l2s_params = _l2_input_parser.parse(
         {
             "network0": {
                 "participants": {
                     "node0": {
                         "cl": {
-                            "type": "hildr",
+                            "type": "op-node",
                         }
                     }
                 }
@@ -249,6 +251,7 @@ def test_l2_participant_cl_launcher_op_node(plan):
         registry=_default_registry,
     )
 
+    l2_params = l2s_params[0]
     participant_params = l2_params.participants[0]
     cl_params = participant_params.cl
 
