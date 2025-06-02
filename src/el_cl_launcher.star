@@ -390,6 +390,7 @@ def launch(
                 launcher=cl_builder_launcher,
                 service_name=cl_builder_service_name,
                 participant=participant,
+                conductor_params=conductor_params,
                 global_log_level=global_log_level,
                 persistent=persistent,
                 tolerations=cl_tolerations,
