@@ -1,12 +1,9 @@
 input_parser = import_module("../package_io/input_parser.star")
 observability = import_module("../observability/observability.star")
-ethereum_package_constants = import_module(
+_ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 constants = import_module("../package_io/constants.star")
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
-)
 util = import_module("../util.star")
 
 _net = import_module("/src/util/net.star")
@@ -14,28 +11,11 @@ _net = import_module("/src/util/net.star")
 #
 #  ---------------------------------- Op Conductor client -------------------------------------
 
-RPC_PORT_NUM = 8547
-CONSENSUS_PORT_NUM = 50050
 _METRICS_PORT_NUM = "9090"
-
 _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-conductor/op-conductor"
 
-CONDUCTOR_RAFT_CONFIG_VERSION = 0
-CONDUCTOR_RAFT_SERVER_ID = "1234"
-CONDUCTOR_HEALTH_CHECK_INTERVAL = 2
-CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT = 1
-CONDUCTOR_HEALTH_CHECK_UNSAFE_INTERVAL = 300
-
-
-def get_conductor_ip_address(index_str):
-    if index_str == "0":
-        return "172.16.0.23"
-    elif index_str == "1":
-        return "172.16.0.27"
-    elif index_str == "2":
-        return "172.16.0.31"
-    else:
-        return ""
+_CONDUCTOR_HEALTH_CHECK_INTERVAL = 2
+_CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT = 1
 
 
 def launch(
@@ -43,8 +23,8 @@ def launch(
     params,
     network_params,
     deployment_output,
-    el_context,
-    cl_context,
+    el_params,
+    cl_params,
     observability_helper,
 ):
     config = get_service_config(
@@ -52,56 +32,49 @@ def launch(
         params=params,
         network_params=network_params,
         deployment_output=deployment_output,
-        el_context=el_context,
-        cl_context=cl_context,
+        el_params=el_params,
+        cl_params=cl_params,
         observability_helper=observability_helper,
     )
-
-    execution_rpc = util.make_http_url(
-        el_context.ip_addr,
-        el_context.rpc_port_num,
-    )
-
-    consensus_rpc = util.make_http_url(cl_context.ip_addr, cl_context.http_port)
-
-    service_config.env_vars["OP_CONDUCTOR_EXECUTION_RPC"] = execution_rpc
-    service_config.env_vars["OP_CONDUCTOR_NODE_RPC"] = consensus_rpc
 
     service = plan.add_service(
         params.service_name,
         service_config,
     )
 
-    http_url = "http://{0}:{1}".format(
-        service.ip_address,
-        RPC_PORT_NUM,
-    )
+    rpc_port = params.ports[_net.RPC_PORT_NAME]
+    rpc_url = _net.service_url(service.ip_address, rpc_port)
+    
+    consensus_port = params.ports[_net.CONSENSUS_PORT_NAME]
+    consensus_url = _net.service_url(service.ip_address, consensus_port)
 
     consensus_addr = "{0}:{1}".format(
         service.ip_address,
-        CONSENSUS_PORT_NUM,
+        consensus_port.number,
     )
 
     return struct(
-        service_name=service_name,
-        service_ip_address=service.ip_address,
-        conductor_rpc_port=RPC_PORT_NUM,
-        conductor_rpc_url=http_url,
-        conductor_consensus_addr=consensus_addr,
-        conductor_raft_server_id=CONDUCTOR_RAFT_SERVER_ID + index_str,
-        conductor_raft_config_version=str(CONDUCTOR_RAFT_CONFIG_VERSION),
+        service=service,
+        context=struct(
+            service_name=params.service_name,
+            service_ip_address=service.ip_address,
+            conductor_rpc_port=rpc_port.number,
+            conductor_rpc_url=rpc_url,
+            conductor_consensus_port=consensus_port.number,
+            conductor_consensus_url=consensus_url,
+            conductor_raft_server_id=params.service_name,
+        )
     )
 
 
 def get_service_config(
     plan,
-    observability_helper,
-    deployment_output,
+    params,
     network_params,
-    conductor_bootstrapped,
-    conductor_paused,
-    index_str,
-    image,
+    deployment_output,
+    el_params,
+    cl_params,
+    observability_helper,
 ):
     ports = _net.ports_to_port_specs(params.ports)
 
@@ -116,16 +89,19 @@ def get_service_config(
 
     env_vars = {
         "OP_CONDUCTOR_CONSENSUS_ADDR": "0.0.0.0",
-        "OP_CONDUCTOR_CONSENSUS_PORT": str(consensus_port.number),
         "OP_CONDUCTOR_CONSENSUS_ADVERTISED": "0.0.0.0",
-        "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(CONDUCTOR_HEALTH_CHECK_INTERVAL),
-        # TODO Set based on the peer count
+        "OP_CONDUCTOR_CONSENSUS_PORT": str(consensus_port.number),
+        "OP_CONDUCTOR_EXECUTION_RPC": _net.service_url(el_params.service_name, el_params.ports[_net.RPC_PORT_NAME]),
+        "OP_CONDUCTOR_NODE_RPC": _net.service_url(cl_params.service_name, cl_params.ports[_net.RPC_PORT_NAME]),
+        # This might also become a parameter
+        "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(_CONDUCTOR_HEALTH_CHECK_INTERVAL),
+        # This might also become a parameter
         "OP_CONDUCTOR_HEALTHCHECK_MIN_PEER_COUNT": str(
-            CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT
+            _CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT
         ),
         # docs recommend a 2-3x multiple of your network block time to account for temporary performance issues
         # 
-        # This might be later added as a multiplier parameter if needed
+        # TODO This might be later added as a multiplier parameter if needed
         "OP_CONDUCTOR_HEALTHCHECK_UNSAFE_INTERVAL": str(
             network_params.seconds_per_slot * 3
         ),  
@@ -135,14 +111,12 @@ def get_service_config(
             ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
             network_params.network_id,
         ),
-        "OP_CONDUCTOR_RAFT_BOOTSTRAP": "{0}".format(
-            conductor_bootstrapped,
-        ),
         "OP_CONDUCTOR_PAUSED": "true" if params.paused else "false",
+        # TODO Plug metrics in
         "OP_CONDUCTOR_METRICS_ADDR": "0.0.0.0",
         "OP_CONDUCTOR_METRICS_ENABLED": "true",
         "OP_CONDUCTOR_METRICS_PORT": _METRICS_PORT_NUM,
-        "OP_CONDUCTOR_RAFT_SERVER_ID": CONDUCTOR_RAFT_SERVER_ID + index_str,
+        "OP_CONDUCTOR_RAFT_SERVER_ID": params.service_name,
         "OP_CONDUCTOR_RAFT_STORAGE_DIR": _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "OP_CONDUCTOR_RPC_ADDR": "0.0.0.0",
         "OP_CONDUCTOR_RPC_PORT": str(rpc_port.number),
@@ -156,5 +130,5 @@ def get_service_config(
         env_vars=env_vars,
         files=files,
         labels=params.labels,
-        private_ip_address_placeholder=get_conductor_ip_address(index_str),
+        private_ip_address_placeholder=_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
