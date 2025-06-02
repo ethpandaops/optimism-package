@@ -44,7 +44,7 @@ def launch(
 
     rpc_port = params.ports[_net.RPC_PORT_NAME]
     rpc_url = _net.service_url(service.ip_address, rpc_port)
-    
+
     consensus_port = params.ports[_net.CONSENSUS_PORT_NAME]
     consensus_url = _net.service_url(service.ip_address, consensus_port)
 
@@ -63,7 +63,7 @@ def launch(
             conductor_consensus_port=consensus_port.number,
             conductor_consensus_url=consensus_url,
             conductor_raft_server_id=params.service_name,
-        )
+        ),
     )
 
 
@@ -81,7 +81,9 @@ def get_service_config(
     # configure files
     files = {
         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
-        _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER: Directory(persistent_key="datadir")
+        _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER: Directory(
+            persistent_key="datadir"
+        ),
     }
 
     rpc_port = params.ports[_net.RPC_PORT_NAME]
@@ -91,8 +93,12 @@ def get_service_config(
         "OP_CONDUCTOR_CONSENSUS_ADDR": "0.0.0.0",
         "OP_CONDUCTOR_CONSENSUS_ADVERTISED": "0.0.0.0",
         "OP_CONDUCTOR_CONSENSUS_PORT": str(consensus_port.number),
-        "OP_CONDUCTOR_EXECUTION_RPC": _net.service_url(el_params.service_name, el_params.ports[_net.RPC_PORT_NAME]),
-        "OP_CONDUCTOR_NODE_RPC": _net.service_url(cl_params.service_name, cl_params.ports[_net.RPC_PORT_NAME]),
+        "OP_CONDUCTOR_EXECUTION_RPC": _net.service_url(
+            el_params.service_name, el_params.ports[_net.RPC_PORT_NAME]
+        ),
+        "OP_CONDUCTOR_NODE_RPC": _net.service_url(
+            cl_params.service_name, cl_params.ports[_net.RPC_PORT_NAME]
+        ),
         # This might also become a parameter
         "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(_CONDUCTOR_HEALTH_CHECK_INTERVAL),
         # This might also become a parameter
@@ -100,11 +106,11 @@ def get_service_config(
             _CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT
         ),
         # docs recommend a 2-3x multiple of your network block time to account for temporary performance issues
-        # 
+        #
         # TODO This might be later added as a multiplier parameter if needed
         "OP_CONDUCTOR_HEALTHCHECK_UNSAFE_INTERVAL": str(
             network_params.seconds_per_slot * 3
-        ),  
+        ),
         "OP_CONDUCTOR_LOG_FORMAT": "logfmt",
         "OP_CONDUCTOR_LOG_LEVEL": "info",
         "OP_CONDUCTOR_ROLLUP_CONFIG": "{0}/rollup-{1}.json".format(
