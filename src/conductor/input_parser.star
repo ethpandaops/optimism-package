@@ -6,6 +6,8 @@ _DEFAULT_ARGS = {
     "enabled": False,
     "image": None,
     "extra_params": [],
+    "admin": True,
+    "proxy": True,
 }
 
 
@@ -43,8 +45,8 @@ def parse(conductor_args, network_params, participant_name, registry):
 
     # Add ports
     conductor_params["ports"] = {
-        _net.RPC_PORT_NAME: _net.port(number=8548),
-        _net.ADMIN_RPC_PORT_NAME: _net.port(number=8549),
+        _net.RPC_PORT_NAME: _net.port(number=8547),
+        _net.CONSENSUS_PORT_NAME: _net.port(number=50050),
     }
 
     # Add labels

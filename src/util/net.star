@@ -1,6 +1,6 @@
 HTTP_PORT_NAME = "http"
 RPC_PORT_NAME = "rpc"
-ADMIN_RPC_PORT_NAME = "rpc-admin"
+CONSENSUS_PORT_NAME = "consensus"
 INTEROP_RPC_PORT_NAME = "rpc-interop"
 TCP_DISCOVERY_PORT_NAME = "tcp-discovery"
 UDP_DISCOVERY_PORT_NAME = "udp-discovery"

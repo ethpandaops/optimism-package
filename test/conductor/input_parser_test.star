@@ -54,10 +54,12 @@ def test_conductor_input_parser_default_args_enabled(plan):
             "op.conductor.type": "op-conductor",
         },
         ports={
-            _net.RPC_PORT_NAME: _net.port(number=8548),
-            _net.ADMIN_RPC_PORT_NAME: _net.port(number=8549),
+            _net.RPC_PORT_NAME: _net.port(number=8547),
+            _net.CONSENSUS_PORT_NAME: _net.port(number=50050),
         },
         service_name="op-conductor-1000-my-l2-node0",
+        admin=True,
+        proxy=True,
     )
 
     expect.eq(
@@ -99,10 +101,12 @@ def test_conductor_input_parser_custom_params(plan):
                 "op.conductor.type": "op-conductor",
             },
             ports={
-                _net.RPC_PORT_NAME: _net.port(number=8548),
-                _net.ADMIN_RPC_PORT_NAME: _net.port(number=8549),
+                _net.RPC_PORT_NAME: _net.port(number=8547),
+                _net.CONSENSUS_PORT_NAME: _net.port(number=50050),
             },
             service_name="op-conductor-1000-my-l2-node0",
+            admin=True,
+            proxy=True,
         ),
     )
 
