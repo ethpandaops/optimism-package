@@ -263,7 +263,7 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
             },
             ports={
                 _net.RPC_PORT_NAME: _net.port(number=8548),
-                _net.ADMIN_RPC_PORT_NAME: _net.port(number=8549),
+                _net.CONSENSUS_PORT_NAME: _net.port(number=8549),
             },
             service_name="op-conductor-1000-my-l2-node0",
         ),
