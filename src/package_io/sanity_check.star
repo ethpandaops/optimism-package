@@ -145,6 +145,14 @@ SUBCATEGORY_PARAMS = {
     "batcher_params": ["image", "extra_params"],
     "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
     "mev_params": ["image", "type", "builder_host", "builder_port"],
+    "conductor_params": [
+        "enabled",
+        "image",
+        "extra_params",
+        "admin",
+        "proxy",
+        "paused",
+    ],
     "da_params": [
         "enabled",
         "image",

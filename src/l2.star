@@ -29,6 +29,7 @@ def launch_l2(
     batcher_params = l2_args.batcher_params
     proposer_params = l2_args.proposer_params
     mev_params = l2_args.mev_params
+    conductor_params = l2_args.conductor_params
     tx_fuzzer_params = l2_args.tx_fuzzer_params
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))
@@ -55,6 +56,7 @@ def launch_l2(
         batcher_params=batcher_params,
         proposer_params=proposer_params,
         mev_params=mev_params,
+        conductor_params=conductor_params,
         deployment_output=deployment_output,
         l1_config_env_vars=l1_config,
         l2_services_suffix=l2_services_suffix,
