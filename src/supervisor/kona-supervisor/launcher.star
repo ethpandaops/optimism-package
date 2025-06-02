@@ -38,7 +38,7 @@ def launch(
 
     service = plan.add_service(params.service_name, config)
 
-    _observability.register_kona_service_metrics_job(
+    _observability.register_op_service_metrics_job(
         observability_helper,
         service,
     )
@@ -63,7 +63,7 @@ def _get_config(
     # apply customizations
 
     if observability_helper.enabled:
-        _observability.configure_kona_service_metrics(cmd, ports)
+        _observability.configure_op_service_metrics(cmd, ports)
 
     return ServiceConfig(
         image=params.image,

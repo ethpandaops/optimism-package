@@ -46,7 +46,8 @@ def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NU
     )
 
 
-# configures the CLI flags and ports for a service using the standard op-service setup
+# configures the CLI flags and ports for a service using the standard op-service setup.
+# Note: kona services use identical metrics args.
 def configure_op_service_metrics(cmd, ports):
     cmd += [
         "--metrics.enabled",
@@ -55,11 +56,6 @@ def configure_op_service_metrics(cmd, ports):
     ]
 
     expose_metrics_port(ports)
-
-# configures the CLI flags and ports for a service using the standard kona-service setup
-def configure_kona_service_metrics(cmd, ports):
-    configure_op_service_metrics(cmd, ports)
-
 
 def make_helper(observability_params):
     return struct(
@@ -88,7 +84,7 @@ def new_metrics_job(
         "ScrapeInterval": scrape_interval,
     }
 
-
+# Note: kona services use identical metrics registration.
 def register_op_service_metrics_job(helper, service, network_name=None):
     register_service_metrics_job(
         helper,
@@ -96,10 +92,6 @@ def register_op_service_metrics_job(helper, service, network_name=None):
         network_name=network_name,
         endpoint=util.make_service_url_authority(service, METRICS_PORT_ID),
     )
-
-def register_kona_service_metrics_job(helper, service, network_name=None):
-    register_op_service_metrics_job(helper, service, network_name)
-
 
 def register_service_metrics_job(
     helper,
