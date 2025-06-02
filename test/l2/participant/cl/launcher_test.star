@@ -2,6 +2,7 @@ _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 _input_parser = import_module("/src/package_io/input_parser.star")
+_l2_input_parser = import_module("/src/l2/input_parser.star")
 _observability = import_module("/src/observability/observability.star")
 _registry = import_module("/src/package_io/registry.star")
 _util = import_module("/src/util.star")
@@ -27,34 +28,36 @@ _default_cl_contexts = [struct(enr="enr.001"), struct(enr="enr.002")]
 
 
 def test_l2_participant_cl_launcher_hildr(plan):
-    params = _input_parser.input_parser(
+    # We'll need the observability params from the legacy parser
+    legacy_params = _input_parser.input_parser(
         plan=plan,
-        input_args={
-            "chains": {
-                "network0": {
-                    "participants": {
-                        "node0": {
-                            "cl": {
-                                "type": "hildr",
-                            }
+        input_args={},
+    )
+    observability_helper = _observability.make_helper(legacy_params.observability)
+
+    l2_params = _l2_input_parser.parse(
+        {
+            "network0": {
+                "participants": {
+                    "node0": {
+                        "cl": {
+                            "type": "hildr",
                         }
                     }
                 }
             }
         },
+        registry=_default_registry,
     )
 
-    l2_params = params.chains[0]
     participant_params = l2_params.participants[0]
     cl_params = participant_params.cl
-
-    observability_helper = _observability.make_helper(params.observability)
 
     result = _cl_launcher.launch(
         plan=plan,
         params=cl_params,
         network_params=l2_params.network_params,
-        supervisors_params=params.supervisors,
+        supervisors_params=[],
         da_params=l2_params.da_params,
         is_sequencer=True,
         jwt_file=_default_jwt_file,
@@ -108,28 +111,30 @@ def test_l2_participant_cl_launcher_hildr(plan):
 
 
 def test_l2_participant_cl_launcher_kona_node(plan):
-    params = _input_parser.input_parser(
+    # We'll need the observability params from the legacy parser
+    legacy_params = _input_parser.input_parser(
         plan=plan,
-        input_args={
-            "chains": {
-                "network0": {
-                    "participants": {
-                        "node0": {
-                            "cl": {
-                                "type": "kona-node",
-                            }
+        input_args={},
+    )
+    observability_helper = _observability.make_helper(legacy_params.observability)
+
+    l2_params = _l2_input_parser.parse(
+        {
+            "network0": {
+                "participants": {
+                    "node0": {
+                        "cl": {
+                            "type": "hildr",
                         }
                     }
                 }
             }
         },
+        registry=_default_registry,
     )
 
-    l2_params = params.chains[0]
     participant_params = l2_params.participants[0]
     cl_params = participant_params.cl
-
-    observability_helper = _observability.make_helper(params.observability)
 
     sequencer_private_key_mock = "sequencer_private_key"
     kurtosistest.mock(_util, "read_network_config_value").mock_return_value(
@@ -140,7 +145,7 @@ def test_l2_participant_cl_launcher_kona_node(plan):
         plan=plan,
         params=cl_params,
         network_params=l2_params.network_params,
-        supervisors_params=params.supervisors,
+        supervisors_params=[],
         da_params=l2_params.da_params,
         is_sequencer=True,
         jwt_file=_default_jwt_file,
@@ -222,28 +227,30 @@ def test_l2_participant_cl_launcher_kona_node(plan):
 
 
 def test_l2_participant_cl_launcher_op_node(plan):
-    params = _input_parser.input_parser(
+    # We'll need the observability params from the legacy parser
+    legacy_params = _input_parser.input_parser(
         plan=plan,
-        input_args={
-            "chains": {
-                "network0": {
-                    "participants": {
-                        "node0": {
-                            "cl": {
-                                "type": "op-node",
-                            }
+        input_args={},
+    )
+    observability_helper = _observability.make_helper(legacy_params.observability)
+
+    l2_params = _l2_input_parser.parse(
+        {
+            "network0": {
+                "participants": {
+                    "node0": {
+                        "cl": {
+                            "type": "hildr",
                         }
                     }
                 }
             }
         },
+        registry=_default_registry,
     )
 
-    l2_params = params.chains[0]
     participant_params = l2_params.participants[0]
     cl_params = participant_params.cl
-
-    observability_helper = _observability.make_helper(params.observability)
 
     sequencer_private_key_mock = "sequencer_private_key"
     kurtosistest.mock(_util, "read_network_config_value").mock_return_value(
@@ -254,7 +261,7 @@ def test_l2_participant_cl_launcher_op_node(plan):
         plan=plan,
         params=cl_params,
         network_params=l2_params.network_params,
-        supervisors_params=params.supervisors,
+        supervisors_params=[],
         da_params=l2_params.da_params,
         is_sequencer=True,
         jwt_file=_default_jwt_file,
