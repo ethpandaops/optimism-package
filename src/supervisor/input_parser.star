@@ -11,6 +11,10 @@ _DEFAULT_ARGS = {
     "extra_params": [],
 }
 
+_IMAGE_IDS = {
+    "op-supervisor": _registry.OP_SUPERVISOR,
+    "kona-supervisor": _registry.KONA_SUPERVISOR,
+}
 
 def parse(args, superchains, registry):
     return _filter.remove_none(
@@ -63,17 +67,17 @@ def _parse_instance(supervisor_args, supervisor_name, superchains, registry):
     # Default is op-supervisor (Go).
     supervisor_type = supervisor_params["type"]
 
+    # And default the image to the one in the registry
+    supervisor_params["image"] = supervisor_params["image"] or _default_image(
+        supervisor_type, registry
+    )
+
     # We add name & service name
     supervisor_params["name"] = supervisor_name
     supervisor_params["service_name"] = "{}-{}-{}".format(
         supervisor_type,
         supervisor_name,
         superchain_name,
-    )
-
-    # And default the image to the one in the registry
-    supervisor_params["image"] = supervisor_params["image"] or registry.get(
-        supervisor_type, ""
     )
 
     # We'll also define the ports that this supervisor will expose
@@ -86,3 +90,9 @@ def _parse_instance(supervisor_args, supervisor_name, superchains, registry):
     }
 
     return struct(**supervisor_params)
+
+def _default_image(participant_type, registry):
+    if participant_type in _IMAGE_IDS:
+        return registry.get(_IMAGE_IDS[participant_type])
+    else:
+        fail("Invalid supervisor type: {}".format(participant_type))
