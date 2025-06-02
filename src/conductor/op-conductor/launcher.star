@@ -1,4 +1,4 @@
-_observability = import_module("../observability/observability.star")
+_observability = import_module("/src/observability/observability.star")
 _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
@@ -126,7 +126,7 @@ def get_service_config(
             "OP_CONDUCTOR_METRICS_PORT": _observability.METRICS_PORT_NUM,
         }
 
-        observability.expose_metrics_port(ports)
+        _observability.expose_metrics_port(ports)
 
     return ServiceConfig(
         image=params.image,
