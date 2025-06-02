@@ -148,6 +148,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-mev-rollup-boost-1000-my-l2-node0",
                     type="rollup-boost",
                 ),
+                conductor_params=None,
             ),
             struct(
                 name="node1",
@@ -236,8 +237,39 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-mev-rollup-boost-1000-my-l2-node1",
                     type="rollup-boost",
                 ),
+                conductor_params=None,
             ),
         ],
+    )
+
+
+def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
+    parsed = input_parser.parse(
+        {"node0": {"conductor_params": {"enabled": True}}},
+        _default_network_params,
+        _default_registry,
+    )
+    expect.eq(
+        parsed[0].conductor_params,
+        struct(
+            enabled=True,
+            extra_params=[],
+            image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:develop",
+            labels={
+                "op.kind": "conductor",
+                "op.network.id": "1000",
+                "op.network.participant.name": "node0",
+                "op.conductor.type": "op-conductor",
+            },
+            ports={
+                _net.RPC_PORT_NAME: _net.port(number=8547),
+                _net.CONSENSUS_PORT_NAME: _net.port(number=50050),
+            },
+            service_name="op-conductor-1000-my-l2-node0",
+            admin=True,
+            proxy=True,
+            paused=False,
+        ),
     )
 
 

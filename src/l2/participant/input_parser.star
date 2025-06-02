@@ -7,6 +7,7 @@ _selectors = import_module("/src/l2/selectors.star")
 _el_input_parser = import_module("./el/input_parser.star")
 _cl_input_parser = import_module("./cl/input_parser.star")
 _mev_input_parser = import_module("/src/mev/input_parser.star")
+_conductor_input_parser = import_module("/src/conductor/input_parser.star")
 
 _DEFAULT_ARGS = {
     "el": None,
@@ -15,6 +16,7 @@ _DEFAULT_ARGS = {
     "cl_builder": None,
     "sequencer": None,
     "mev_params": None,
+    "conductor_params": None,
 }
 
 
@@ -102,6 +104,17 @@ def _parse_instance(participant_args, participant_name, network_params, registry
         registry=registry,
     )
 
+    # We add the conductor
+    #
+    # TODO Conductor only makes sense for the sequencer node so we should decide how to handle this,
+    # whether to log & ignore or fail
+    conductor_params = _conductor_input_parser.parse(
+        conductor_args=participant_params["conductor_params"],
+        network_params=network_params,
+        participant_name=participant_name,
+        registry=registry,
+    )
+
     return struct(
         el=_el_input_parser.parse(
             participant_params["el"], participant_name, network_id, registry
@@ -118,6 +131,7 @@ def _parse_instance(participant_args, participant_name, network_params, registry
         name=participant_name,
         sequencer=sequencer,
         mev_params=mev_params,
+        conductor_params=conductor_params,
     )
 
 
@@ -204,6 +218,7 @@ def _apply_sequencers(participants_params, network_params):
             # We set the value to either an explicitly set sequencer or the default one otherwise
             else p.sequencer or default_sequencer,
             mev_params=p.mev_params,
+            conductor_params=p.conductor_params,
         )
         for p in participants_params
     ]
