@@ -32,10 +32,7 @@ def launch(
         observability_helper=observability_helper,
     )
 
-    service = plan.add_service(
-        params.service_name,
-        service_config,
-    )
+    service = plan.add_service(params.service_name, config)
 
     rpc_port = params.ports[_net.RPC_PORT_NAME]
     rpc_url = _net.service_url(service.ip_address, rpc_port)
@@ -73,7 +70,7 @@ def get_service_config(
 
     # configure files
     files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
+        _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
         _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER: Directory(
             persistent_key="datadir"
         ),
@@ -107,7 +104,7 @@ def get_service_config(
         "OP_CONDUCTOR_LOG_FORMAT": "logfmt",
         "OP_CONDUCTOR_LOG_LEVEL": "info",
         "OP_CONDUCTOR_ROLLUP_CONFIG": "{0}/rollup-{1}.json".format(
-            ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
             network_params.network_id,
         ),
         "OP_CONDUCTOR_PAUSED": "true" if params.paused else "false",
