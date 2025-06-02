@@ -88,8 +88,9 @@ def launch_participant_network(
             params=conductor_params,
             network_params=network_params,
             deployment_output=deployment_output,
+            # FIXME We need to plumb the legacy args into the new format so that we make our lives easier when we're switching
             el_params=struct(
-                service_name=all_el_contexts[0].ip_address,
+                service_name=all_el_contexts[0].ip_addr,
                 ports={
                     _net.RPC_PORT_NAME: _net.port(
                         number=all_el_contexts[0].rpc_port_num
@@ -97,7 +98,7 @@ def launch_participant_network(
                 },
             ),
             cl_params=struct(
-                service_name=all_cl_contexts[0].ip_address,
+                service_name=all_cl_contexts[0].ip_addr,
                 ports={
                     _net.HTTP_PORT_NAME: _net.port(
                         number=all_cl_contexts[0].rpc_port_num
