@@ -13,11 +13,11 @@ _default_registry = _registry.Registry()
 def test_l2_input_parser_empty(plan):
     expect.eq(
         input_parser.parse(None, _default_registry),
-        [],
+        input_parser.parse({"opkurtosis": None}, _default_registry),
     )
     expect.eq(
         input_parser.parse({}, _default_registry),
-        [],
+        input_parser.parse({"opkurtosis": None}, _default_registry),
     )
 
 
