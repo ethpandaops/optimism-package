@@ -113,12 +113,16 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
 
     # We add the tx-fuzzer params
     l2_params["tx_fuzzer_params"] = _tx_fuzzer_input_parser.parse(
-        tx_fuzzer_args=l2_params["tx_fuzzer_params"], network_params=l2_params["network_params"], registry=registry
+        tx_fuzzer_args=l2_params["tx_fuzzer_params"],
+        network_params=l2_params["network_params"],
+        registry=registry,
     )
 
     # We add the DA params
     l2_params["da_params"] = _da_input_parser.parse(
-        da_args=l2_params["da_params"], network_params=l2_params["network_params"], registry=registry
+        da_args=l2_params["da_params"],
+        network_params=l2_params["network_params"],
+        registry=registry,
     )
 
     return struct(
