@@ -8,6 +8,7 @@ _DEFAULT_ARGS = {
     "extra_params": [],
     "admin": True,
     "proxy": True,
+    "paused": False,
 }
 
 
