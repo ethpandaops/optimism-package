@@ -1,17 +1,12 @@
-input_parser = import_module("../package_io/input_parser.star")
-observability = import_module("../observability/observability.star")
+_observability = import_module("../observability/observability.star")
 _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
-constants = import_module("../package_io/constants.star")
-util = import_module("../util.star")
-
 _net = import_module("/src/util/net.star")
 
 #
 #  ---------------------------------- Op Conductor client -------------------------------------
 
-_METRICS_PORT_NUM = "9090"
 _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-conductor/op-conductor"
 
 _CONDUCTOR_HEALTH_CHECK_INTERVAL = 2
@@ -48,10 +43,7 @@ def launch(
     consensus_port = params.ports[_net.CONSENSUS_PORT_NAME]
     consensus_url = _net.service_url(service.ip_address, consensus_port)
 
-    consensus_addr = "{0}:{1}".format(
-        service.ip_address,
-        consensus_port.number,
-    )
+    metrics_info = _observability.new_metrics_info(observability_helper, service)
 
     return struct(
         service=service,
@@ -63,6 +55,7 @@ def launch(
             conductor_consensus_port=consensus_port.number,
             conductor_consensus_url=consensus_url,
             conductor_raft_server_id=params.service_name,
+            conductor_metrics_info=[metrics_info],
         ),
     )
 
@@ -118,10 +111,6 @@ def get_service_config(
             network_params.network_id,
         ),
         "OP_CONDUCTOR_PAUSED": "true" if params.paused else "false",
-        # TODO Plug metrics in
-        "OP_CONDUCTOR_METRICS_ADDR": "0.0.0.0",
-        "OP_CONDUCTOR_METRICS_ENABLED": "true",
-        "OP_CONDUCTOR_METRICS_PORT": _METRICS_PORT_NUM,
         "OP_CONDUCTOR_RAFT_SERVER_ID": params.service_name,
         "OP_CONDUCTOR_RAFT_STORAGE_DIR": _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "OP_CONDUCTOR_RPC_ADDR": "0.0.0.0",
@@ -129,6 +118,15 @@ def get_service_config(
         "OP_CONDUCTOR_RPC_ENABLE_ADMIN": "true" if params.admin else "false",
         "OP_CONDUCTOR_RPC_ENABLE_PROXY": "true" if params.proxy else "false",
     }
+
+    if observability_helper.enabled:
+        env_vars |= {
+            "OP_CONDUCTOR_METRICS_ADDR": "0.0.0.0",
+            "OP_CONDUCTOR_METRICS_ENABLED": "true",
+            "OP_CONDUCTOR_METRICS_PORT": _observability.METRICS_PORT_NUM,
+        }
+
+        observability.expose_metrics_port(ports)
 
     return ServiceConfig(
         image=params.image,
