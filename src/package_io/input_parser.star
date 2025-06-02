@@ -399,7 +399,7 @@ def parse_network_params(plan, registry, input_args):
                         },
                     )
                 )
-                for index, p in participants
+                for index, p in enumerate(participants)
             ],
             registry=registry,
         )
