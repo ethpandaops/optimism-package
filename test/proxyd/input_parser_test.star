@@ -9,8 +9,8 @@ _default_network_params = struct(
 )
 _default_participants_params = [
     struct(
+        name="node0",
         el=struct(
-            name="node0",
             service_name="op-el-node0",
             ports={_net.RPC_PORT_NAME: _net.port(number=8888)},
         )
