@@ -100,9 +100,7 @@ def launch_participant_network(
             cl_params=struct(
                 service_name=all_cl_contexts[0].ip_addr,
                 ports={
-                    _net.HTTP_PORT_NAME: _net.port(
-                        number=all_cl_contexts[0].http_port
-                    )
+                    _net.HTTP_PORT_NAME: _net.port(number=all_cl_contexts[0].http_port)
                 },
             ),
             observability_helper=observability_helper,
