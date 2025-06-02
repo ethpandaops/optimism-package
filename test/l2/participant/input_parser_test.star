@@ -75,7 +75,11 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        "rpc": _net.port(number=8547),
+                        "tcp-discovery": _net.port(number=9003),
+                        "udp-discovery": _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
@@ -90,7 +94,11 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        "rpc": _net.port(number=8547),
+                        "tcp-discovery": _net.port(number=9003),
+                        "udp-discovery": _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
@@ -155,7 +163,11 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        "rpc": _net.port(number=8547),
+                        "tcp-discovery": _net.port(number=9003),
+                        "udp-discovery": _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
@@ -170,7 +182,11 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        "rpc": _net.port(number=8547),
+                        "tcp-discovery": _net.port(number=9003),
+                        "udp-discovery": _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
