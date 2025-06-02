@@ -75,9 +75,9 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "rpc": _net.port(number=8547),
-                        "tcp-discovery": _net.port(number=9003),
-                        "udp-discovery": _net.port(
+                        _net.RPC_PORT_NAME: _net.port(number=8547),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=9003),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=9003, transport_protocol="UDP"
                         ),
                     },
@@ -94,9 +94,9 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "rpc": _net.port(number=8547),
-                        "tcp-discovery": _net.port(number=9003),
-                        "udp-discovery": _net.port(
+                        _net.RPC_PORT_NAME: _net.port(number=8547),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=9003),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=9003, transport_protocol="UDP"
                         ),
                     },
@@ -113,7 +113,13 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.el.type": "op-geth",
                     },
                     ports={
-                        "rpc": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8545),
+                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=30303, transport_protocol="UDP"
+                        ),
+                        _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
                     **_shared_defaults,
                 ),
@@ -128,7 +134,13 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.el.type": "op-geth",
                     },
                     ports={
-                        "rpc": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8545),
+                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=30303, transport_protocol="UDP"
+                        ),
+                        _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
                     **_shared_defaults,
                 ),
@@ -143,7 +155,7 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.mev.type": "rollup-boost",
                     },
                     ports={
-                        "rpc": _net.port(number=8541),
+                        _net.RPC_PORT_NAME: _net.port(number=8541),
                     },
                     service_name="op-mev-rollup-boost-1000-my-l2-node0",
                     type="rollup-boost",
@@ -164,9 +176,9 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "rpc": _net.port(number=8547),
-                        "tcp-discovery": _net.port(number=9003),
-                        "udp-discovery": _net.port(
+                        _net.RPC_PORT_NAME: _net.port(number=8547),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=9003),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=9003, transport_protocol="UDP"
                         ),
                     },
@@ -183,9 +195,9 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "rpc": _net.port(number=8547),
-                        "tcp-discovery": _net.port(number=9003),
-                        "udp-discovery": _net.port(
+                        _net.RPC_PORT_NAME: _net.port(number=8547),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=9003),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=9003, transport_protocol="UDP"
                         ),
                     },
@@ -202,7 +214,13 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.el.type": "op-geth",
                     },
                     ports={
-                        "rpc": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8545),
+                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=30303, transport_protocol="UDP"
+                        ),
+                        _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
                     **_shared_defaults,
                 ),
@@ -217,7 +235,13 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.el.type": "op-geth",
                     },
                     ports={
-                        "rpc": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8545),
+                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=30303, transport_protocol="UDP"
+                        ),
+                        _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
                     **_shared_defaults,
                 ),
@@ -232,7 +256,7 @@ def test_l2_participant_input_parser_defaults(plan):
                         "op.mev.type": "rollup-boost",
                     },
                     ports={
-                        "rpc": _net.port(number=8541),
+                        _net.RPC_PORT_NAME: _net.port(number=8541),
                     },
                     service_name="op-mev-rollup-boost-1000-my-l2-node1",
                     type="rollup-boost",
