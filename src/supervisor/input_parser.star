@@ -63,19 +63,15 @@ def _parse_instance(supervisor_args, supervisor_name, superchains, registry):
     # in the parsed config, but this is a tradeoff that we are willing to make
     supervisor_params["superchain"] = superchain
 
-    # Rust or Go supervisor implementation, i.e. kona-supervisor or op-supervisor.
-    # Default is op-supervisor (Go).
-    supervisor_type = supervisor_params["type"]
-
     # And default the image to the one in the registry
     supervisor_params["image"] = supervisor_params["image"] or _default_image(
-        supervisor_type, registry
+        supervisor_params["type"], registry
     )
 
     # We add name & service name
     supervisor_params["name"] = supervisor_name
     supervisor_params["service_name"] = "{}-{}-{}".format(
-        supervisor_type,
+        supervisor_params["type"],
         supervisor_name,
         superchain_name,
     )
