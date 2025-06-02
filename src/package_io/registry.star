@@ -53,7 +53,7 @@ _DEFAULT_IMAGES = {
     # op-supervisor
     OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
     # kona-supervisor
-    KONA_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+    KONA_SUPERVISOR: "ghcr.io/op-rs/kona/kona-supervisor:latest",
     # Proposer
     OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
     # Conductor

@@ -87,6 +87,7 @@ def _parse_instance(supervisor_args, supervisor_name, superchains, registry):
 
     return struct(**supervisor_params)
 
+
 def _default_image(participant_type, registry):
     if participant_type in _IMAGE_IDS:
         return registry.get(_IMAGE_IDS[participant_type])
