@@ -198,6 +198,7 @@ def input_parser(
                 batcher_params=result["batcher_params"],
                 proposer_params=result["proposer_params"],
                 mev_params=result["mev_params"],
+                conductor_params=result["conductor_params"],
                 da_params=result["da_params"],
                 tx_fuzzer_params=result["tx_fuzzer_params"],
                 additional_services=result["additional_services"],
