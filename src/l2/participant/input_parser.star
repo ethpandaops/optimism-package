@@ -6,6 +6,7 @@ _selectors = import_module("/src/l2/selectors.star")
 
 _el_input_parser = import_module("./el/input_parser.star")
 _cl_input_parser = import_module("./cl/input_parser.star")
+_mev_input_parser = import_module("/src/mev/input_parser.star")
 
 _DEFAULT_ARGS = {
     "el": None,
@@ -13,6 +14,7 @@ _DEFAULT_ARGS = {
     "cl": None,
     "cl_builder": None,
     "sequencer": None,
+    "mev_params": None,
 }
 
 
@@ -89,6 +91,17 @@ def _parse_instance(participant_args, participant_name, network_params, registry
                 )
             )
 
+    # We add the MEV
+    #
+    # TODO MEV only makes sense for the sequencer node so we should decide how to handle this,
+    # whether to log & ignore or fail
+    mev_params = _mev_input_parser.parse(
+        mev_args=participant_params["mev_params"],
+        network_params=network_params,
+        participant_name=participant_name,
+        registry=registry,
+    )
+
     return struct(
         el=_el_input_parser.parse(
             participant_params["el"], participant_name, network_id, registry
@@ -104,6 +117,7 @@ def _parse_instance(participant_args, participant_name, network_params, registry
         ),
         name=participant_name,
         sequencer=sequencer,
+        mev_params=mev_params,
     )
 
 
@@ -189,6 +203,7 @@ def _apply_sequencers(participants_params, network_params):
             if p.name in sequencers
             # We set the value to either an explicitly set sequencer or the default one otherwise
             else p.sequencer or default_sequencer,
+            mev_params=p.mev_params,
         )
         for p in participants_params
     ]

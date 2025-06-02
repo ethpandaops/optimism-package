@@ -33,7 +33,7 @@ def test_proposer_input_parser_default_args(plan):
         service_name="op-proposer-1000-my-l2",
         labels={
             "op.kind": "proposer",
-            "op.network.id": 1000,
+            "op.network.id": "1000",
         },
     )
 
@@ -95,7 +95,7 @@ def test_proposer_input_parser_custom_params(plan):
             service_name="op-proposer-1000-my-l2",
             labels={
                 "op.kind": "proposer",
-                "op.network.id": 1000,
+                "op.network.id": "1000",
             },
         ),
     )

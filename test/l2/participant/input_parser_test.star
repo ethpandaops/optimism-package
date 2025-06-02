@@ -66,31 +66,39 @@ def test_l2_participant_input_parser_defaults(plan):
                 sequencer="node0",
                 cl=struct(
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
                     name="node0",
                     service_name="op-cl-1000-node0-op-node",
                     labels={
                         "op.kind": "cl",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        "rpc": _net.port(number=8547),
+                        "tcp-discovery": _net.port(number=9003),
+                        "udp-discovery": _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
                 cl_builder=struct(
                     name="node0",
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
                     service_name="op-cl-1000-node0-op-node",
                     labels={
                         "op.kind": "cl_builder",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        "rpc": _net.port(number=8547),
+                        "tcp-discovery": _net.port(number=9003),
+                        "udp-discovery": _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
@@ -101,7 +109,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
                     labels={
                         "op.kind": "el",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.el.type": "op-geth",
                     },
                     ports={
@@ -116,13 +124,29 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-el-1000-node0-op-geth",
                     labels={
                         "op.kind": "el_builder",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.el.type": "op-geth",
                     },
                     ports={
                         "rpc": _net.port(number=8545),
                     },
                     **_shared_defaults,
+                ),
+                mev_params=struct(
+                    builder_host=None,
+                    builder_port=None,
+                    image="flashbots/rollup-boost:latest",
+                    labels={
+                        "op.kind": "mev",
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node0",
+                        "op.mev.type": "rollup-boost",
+                    },
+                    ports={
+                        "rpc": _net.port(number=8541),
+                    },
+                    service_name="op-mev-rollup-boost-1000-my-l2-node0",
+                    type="rollup-boost",
                 ),
             ),
             struct(
@@ -131,30 +155,38 @@ def test_l2_participant_input_parser_defaults(plan):
                 cl=struct(
                     name="node1",
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
                     service_name="op-cl-1000-node1-op-node",
                     labels={
                         "op.kind": "cl",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        "rpc": _net.port(number=8547),
+                        "tcp-discovery": _net.port(number=9003),
+                        "udp-discovery": _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
                 cl_builder=struct(
                     name="node1",
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
                     service_name="op-cl-1000-node1-op-node",
                     labels={
                         "op.kind": "cl_builder",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        "rpc": _net.port(number=8547),
+                        "tcp-discovery": _net.port(number=9003),
+                        "udp-discovery": _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
@@ -165,7 +197,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-el-1000-node1-op-geth",
                     labels={
                         "op.kind": "el",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.el.type": "op-geth",
                     },
                     ports={
@@ -180,13 +212,29 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-el-1000-node1-op-geth",
                     labels={
                         "op.kind": "el_builder",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
                         "op.el.type": "op-geth",
                     },
                     ports={
                         "rpc": _net.port(number=8545),
                     },
                     **_shared_defaults,
+                ),
+                mev_params=struct(
+                    builder_host=None,
+                    builder_port=None,
+                    image="flashbots/rollup-boost:latest",
+                    labels={
+                        "op.kind": "mev",
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node1",
+                        "op.mev.type": "rollup-boost",
+                    },
+                    ports={
+                        "rpc": _net.port(number=8541),
+                    },
+                    service_name="op-mev-rollup-boost-1000-my-l2-node1",
+                    type="rollup-boost",
                 ),
             ),
         ],

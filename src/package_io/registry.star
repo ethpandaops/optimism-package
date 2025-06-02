@@ -16,6 +16,7 @@ OP_BATCHER = "op-batcher"
 OP_CHALLENGER = "op-challenger"
 OP_SUPERVISOR = "op-supervisor"
 OP_PROPOSER = "op-proposer"
+OP_CONDUCTOR = "op-conductor"
 OP_DEPLOYER = "op-deployer"
 OP_FAUCET = "op-faucet"
 
@@ -42,7 +43,7 @@ _DEFAULT_IMAGES = {
     OP_BESU: "ghcr.io/optimism-java/op-besu:latest",
     OP_RBUILDER: "ghcr.io/flashbots/op-rbuilder:latest",
     # CL images
-    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
     KONA_NODE: "ghcr.io/op-rs/kona/kona-node:latest",
     HILDR: "ghcr.io/optimism-java/hildr:latest",
     # Batching
@@ -53,6 +54,8 @@ _DEFAULT_IMAGES = {
     OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
     # Proposer
     OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
+    # Conductor
+    OP_CONDUCTOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:develop",
     # deployer
     OP_DEPLOYER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2",
     # Faucet
