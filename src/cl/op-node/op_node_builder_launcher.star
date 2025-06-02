@@ -248,19 +248,6 @@ def get_beacon_config(
             "--sequencer.l1-confs=2",
         ]
 
-    if conductor_params:
-        cmd += [
-            "--conductor.enabled={0}".format("true"),
-            "--conductor.rpc={0}".format(
-                _net.service_url(
-                    conductor_params.service_name,
-                    conductor_params.ports[_net.RPC_PORT_NAME],
-                )
-            ),
-        ]
-
-        # env_vars.update({"OP_NODE_SEQUENCER_STOPPED": "true"})
-
     if len(existing_cl_clients) > 0:
         cmd.append(
             "--p2p.bootnodes="

@@ -277,8 +277,6 @@ def get_beacon_config(
             ),
         ]
 
-        # env_vars.update({"OP_NODE_SEQUENCER_STOPPED": "true"})
-
     if len(existing_cl_clients) > 0:
         cmd.append(
             "--p2p.bootnodes="
