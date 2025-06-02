@@ -28,11 +28,11 @@ CLIENT_TYPES = struct(
 )
 VOLUME_SIZE = {
     "kurtosis": {
-        "op_geth_volume_size": 5000,  # 5GB
-        "op_erigon_volume_size": 3000,  # 3GB
-        "op_nethermind_volume_size": 3000,  # 3GB
-        "op_besu_volume_size": 3000,  # 3GB
-        "op_reth_volume_size": 3000,  # 3GB
+        "op-geth_volume_size": 5000,  # 5GB
+        "op-erigon_volume_size": 3000,  # 3GB
+        "op-nethermind_volume_size": 3000,  # 3GB
+        "op-besu_volume_size": 3000,  # 3GB
+        "op-reth_volume_size": 3000,  # 3GB
         "op-node_volume_size": 1000,  # 1GB
         "hildr_volume_size": 1000,  # 1GB
         "kona-node_volume_size": 1000,  # 1GB
