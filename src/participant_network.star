@@ -101,7 +101,7 @@ def launch_participant_network(
                 service_name=all_cl_contexts[0].ip_addr,
                 ports={
                     _net.HTTP_PORT_NAME: _net.port(
-                        number=all_cl_contexts[0].rpc_port_num
+                        number=all_cl_contexts[0].http_port
                     )
                 },
             ),
