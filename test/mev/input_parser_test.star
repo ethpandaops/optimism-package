@@ -4,6 +4,7 @@ _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
 _default_network_params = struct(network_id=1000, name="my-l2")
+_default_participant_name = "node0"
 _default_registry = _registry.Registry()
 
 
@@ -12,9 +13,10 @@ def test_mev_input_parser_extra_attributes(plan):
         lambda: _input_parser.parse(
             {"extra": None, "name": "x"},
             _default_network_params,
+            _default_participant_name,
             _default_registry,
         ),
-        "Invalid attributes in mev configuration for my-l2: extra,name",
+        "Invalid attributes in MEV configuration for node0 on network my-l2: extra,name",
     )
 
 
@@ -23,18 +25,20 @@ def test_mev_input_parser_invalid_builder_params(plan):
         lambda: _input_parser.parse(
             {"builder_port": "7"},
             _default_network_params,
+            _default_participant_name,
             _default_registry,
         ),
-        "Missing builder_host in mev configuration for my-l2",
+        "Missing builder_host in MEV configuration for node0 on network my-l2",
     )
 
     expect.fails(
         lambda: _input_parser.parse(
             {"builder_host": "localhost"},
             _default_network_params,
+            _default_participant_name,
             _default_registry,
         ),
-        "Missing builder_port in mev configuration for my-l2",
+        "Missing builder_port in MEV configuration for node0 on network my-l2",
     )
 
 
@@ -44,10 +48,11 @@ def test_mev_input_parser_default_args(plan):
         type="rollup-boost",
         builder_host=None,
         builder_port=None,
-        service_name="op-mev-rollup-boost-1000-my-l2",
+        service_name="op-mev-rollup-boost-1000-my-l2-node0",
         labels={
             "op.kind": "mev",
             "op.network.id": 1000,
+            "op.network.participant.name": "node0",
             "op.mev.type": "rollup-boost",
         },
         ports={
@@ -59,6 +64,7 @@ def test_mev_input_parser_default_args(plan):
         _input_parser.parse(
             None,
             _default_network_params,
+            _default_participant_name,
             _default_registry,
         ),
         _default_params,
@@ -68,6 +74,7 @@ def test_mev_input_parser_default_args(plan):
         _input_parser.parse(
             {},
             _default_network_params,
+            _default_participant_name,
             _default_registry,
         ),
         _default_params,
@@ -82,6 +89,7 @@ def test_mev_input_parser_default_args(plan):
                 "builder_port": None,
             },
             _default_network_params,
+            _default_participant_name,
             _default_registry,
         ),
         _default_params,
@@ -96,6 +104,7 @@ def test_mev_input_parser_custom_params(plan):
             "builder_port": 8080,
         },
         _default_network_params,
+        _default_participant_name,
         _default_registry,
     )
 
@@ -106,10 +115,11 @@ def test_mev_input_parser_custom_params(plan):
             type="rollup-boost",
             builder_host="localhost",
             builder_port=8080,
-            service_name="op-mev-rollup-boost-1000-my-l2",
+            service_name="op-mev-rollup-boost-1000-my-l2-node0",
             labels={
                 "op.kind": "mev",
                 "op.network.id": 1000,
+                "op.network.participant.name": "node0",
                 "op.mev.type": "rollup-boost",
             },
             ports={
@@ -125,6 +135,7 @@ def test_mev_input_parser_custom_registry(plan):
     parsed = _input_parser.parse(
         {},
         _default_network_params,
+        _default_participant_name,
         registry,
     )
     expect.eq(parsed.image, "rollup-boost:greatest")
@@ -132,6 +143,7 @@ def test_mev_input_parser_custom_registry(plan):
     parsed = _input_parser.parse(
         {"image": "rollup-boost:oldest"},
         _default_network_params,
+        _default_participant_name,
         registry,
     )
     expect.eq(parsed.image, "rollup-boost:oldest")
