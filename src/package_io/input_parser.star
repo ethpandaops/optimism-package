@@ -385,6 +385,8 @@ def parse_network_params(plan, registry, input_args):
             participants_params=[
                 struct(
                     el=struct(
+                        # Name is something we don't have in the legacy params, we only have aray indices
+                        name=str(index),
                         service_name="op-el-{0}-{1}-{2}-{3}-{4}".format(
                             network_id,
                             _ethereum_package_shared_utils.zfill_custom(
