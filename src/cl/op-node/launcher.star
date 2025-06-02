@@ -153,7 +153,9 @@ def get_service_config(
         "--l1={0}".format(l1_config_env_vars["L1_RPC_URL"]),
         "--l1.rpckind={0}".format(l1_config_env_vars["L1_RPC_KIND"]),
         "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
-        "--p2p.advertise.ip={0}".format(_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER),
+        "--p2p.advertise.ip={0}".format(
+            _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
+        ),
         "--p2p.advertise.tcp={0}".format(tcp_discovery_port_number),
         "--p2p.advertise.udp={0}".format(udp_discovery_port_number),
         "--p2p.listen.ip=0.0.0.0",
