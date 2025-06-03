@@ -13,6 +13,7 @@ EL_TYPE = struct(
     op_erigon="op-erigon",
     op_nethermind="op-nethermind",
     op_besu="op-besu",
+    op_rbuilder="op-rbuilder",
     op_reth="op-reth",
 )
 
@@ -32,6 +33,7 @@ VOLUME_SIZE = {
         "op-erigon_volume_size": 3000,  # 3GB
         "op-nethermind_volume_size": 3000,  # 3GB
         "op-besu_volume_size": 3000,  # 3GB
+        "op-rbuilder_volume_size": 3000,  # 3GB
         "op-reth_volume_size": 3000,  # 3GB
         "op-node_volume_size": 1000,  # 1GB
         "hildr_volume_size": 1000,  # 1GB

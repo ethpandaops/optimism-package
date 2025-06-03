@@ -117,16 +117,16 @@ def _parse_instance(participant_args, participant_name, network_params, registry
 
     return struct(
         el=_el_input_parser.parse(
-            participant_params["el"], participant_name, network_id, registry
+            participant_params["el"], participant_name, network_params, registry
         ),
         el_builder=_el_input_parser.parse_builder(
-            participant_params["el_builder"], participant_name, network_id, registry
+            participant_params["el_builder"], participant_name, network_params, registry
         ),
         cl=_cl_input_parser.parse(
-            participant_params["cl"], participant_name, network_id, registry
+            participant_params["cl"], participant_name, network_params, registry
         ),
         cl_builder=_cl_input_parser.parse_builder(
-            participant_params["cl_builder"], participant_name, network_id, registry
+            participant_params["cl_builder"], participant_name, network_params, registry
         ),
         name=participant_name,
         sequencer=sequencer,

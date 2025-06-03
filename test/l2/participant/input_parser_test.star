@@ -146,6 +146,7 @@ def test_l2_participant_input_parser_defaults(plan):
                         ),
                         _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
+                    key=None,
                     **_shared_defaults,
                 ),
                 mev_params=struct(
@@ -251,6 +252,7 @@ def test_l2_participant_input_parser_defaults(plan):
                         ),
                         _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
+                    key=None,
                     **_shared_defaults,
                 ),
                 mev_params=struct(
@@ -272,6 +274,25 @@ def test_l2_participant_input_parser_defaults(plan):
                 conductor_params=None,
             ),
         ],
+    )
+
+
+def test_l2_participant_input_parser_el_builder_key(plan):
+    parsed = input_parser.parse(
+        {"node0": {"el_builder": {"key": "secret key"}}},
+        _default_network_params,
+        _default_registry,
+    )
+
+    expect.eq(parsed[0].el_builder.key, "secret key")
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"el": {"key": "secret key"}}},
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid attributes in EL configuration for node0 on network my-l2: key",
     )
 
 

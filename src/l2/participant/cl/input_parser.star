@@ -25,15 +25,18 @@ _IMAGE_IDS = {
 }
 
 
-def parse(args, participant_name, network_id, registry):
-    return _parse(args, participant_name, network_id, registry, "cl")
+def parse(args, participant_name, network_params, registry):
+    return _parse(args, participant_name, network_params, registry, "cl")
 
 
-def parse_builder(args, participant_name, network_id, registry):
-    return _parse(args, participant_name, network_id, registry, "cl_builder")
+def parse_builder(args, participant_name, network_params, registry):
+    return _parse(args, participant_name, network_params, registry, "cl_builder")
 
 
-def _parse(args, participant_name, network_id, registry, cl_kind):
+def _parse(args, participant_name, network_params, registry, cl_kind):
+    network_id = network_params.network_id
+    network_name = network_params.name
+
     # Any extra attributes will cause an error
     _filter.assert_keys(
         args or {},
@@ -41,7 +44,7 @@ def _parse(args, participant_name, network_id, registry, cl_kind):
         "Invalid attributes in CL configuration for "
         + participant_name
         + " on network "
-        + str(network_id)
+        + network_name
         + ": {}",
     )
 

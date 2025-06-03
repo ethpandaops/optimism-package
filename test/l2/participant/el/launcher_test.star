@@ -373,6 +373,103 @@ def test_l2_participant_el_launcher_op_nethermind(plan):
     )
 
 
+def test_l2_participant_el_launcher_op_rbuilder(plan):
+    # We'll need the observability params from the legacy parser
+    legacy_params = _input_parser.input_parser(
+        plan=plan,
+        input_args={},
+    )
+    observability_helper = _observability.make_helper(legacy_params.observability)
+
+    l2s_params = _l2_input_parser.parse(
+        {
+            "network0": {
+                "participants": {
+                    "node0": {
+                        "el_builder": {"type": "op-rbuilder", "key": "secret key"}
+                    }
+                }
+            }
+        },
+        registry=_default_registry,
+    )
+
+    l2_params = l2s_params[0]
+    participant_params = l2_params.participants[0]
+    el_params = participant_params.el_builder
+
+    sequencer_private_key_mock = "sequencer_private_key"
+    kurtosistest.mock(_util, "read_network_config_value").mock_return_value(
+        sequencer_private_key_mock
+    )
+
+    result = _el_launcher.launch(
+        plan=plan,
+        params=el_params,
+        network_params=l2_params.network_params,
+        supervisors_params=[],
+        sequencer_params=None,
+        jwt_file=_default_jwt_file,
+        deployment_output=_default_deployment_output,
+        bootnode_contexts=_default_bootnode_contexts,
+        log_level=_default_log_level,
+        persistent=True,
+        tolerations=[],
+        node_selectors={},
+        observability_helper=observability_helper,
+    )
+
+    service = plan.get_service(el_params.service_name)
+    service_config = kurtosistest.get_service_config(el_params.service_name)
+
+    expect.eq(
+        service_config.cmd,
+        [
+            "node",
+            "-vvv",
+            "--datadir=/data/op-reth/execution-data",
+            "--chain=/network-configs/genesis-2151908.json",
+            "--http",
+            "--http.port=8545",
+            "--http.addr=0.0.0.0",
+            "--http.corsdomain=*",
+            "--http.api=admin,net,eth,web3,debug,trace",
+            "--ws",
+            "--ws.addr=0.0.0.0",
+            "--ws.port=8546",
+            "--ws.api=net,eth",
+            "--ws.origins=*",
+            "--nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER",
+            "--authrpc.port=8551",
+            "--authrpc.jwtsecret=/jwt/jwtsecret",
+            "--authrpc.addr=0.0.0.0",
+            "--discovery.port=30303",
+            "--port=30303",
+            "--rpc.eth-proof-window=302400",
+            "--metrics=0.0.0.0:9001",
+            "--bootnodes=enode:001",
+            "--rollup.builder-secret-key=secret key",
+        ],
+    )
+    expect.eq(
+        service_config.labels,
+        {
+            "op.kind": "el_builder",
+            "op.network.id": "2151908",
+            "op.network.participant.name": "node0",
+            "op.el.type": "op-rbuilder",
+        },
+    )
+    expect.eq(
+        service_config.files["/network-configs"].artifact_names,
+        [_default_deployment_output],
+    )
+    expect.eq(
+        service_config.files["/jwt"].artifact_names,
+        [_default_jwt_file],
+    )
+
+
 def test_l2_participant_el_launcher_op_reth(plan):
     # We'll need the observability params from the legacy parser
     legacy_params = _input_parser.input_parser(
@@ -427,7 +524,29 @@ def test_l2_participant_el_launcher_op_reth(plan):
     expect.eq(
         service_config.cmd,
         [
-            "geth init --datadir=/data/geth/execution-data --state.scheme=hash /network-configs/genesis-2151908.json && geth --networkid=2151908 --datadir=/data/geth/execution-data --gcmode=archive --state.scheme=hash --http --http.addr=0.0.0.0 --http.vhosts=* --http.corsdomain=* --http.api=admin,engine,net,eth,web3,debug,miner --ws --ws.addr=0.0.0.0 --ws.port=8546 --ws.api=admin,engine,net,eth,web3,debug,miner --ws.origins=* --allow-insecure-unlock --authrpc.port=8551 --authrpc.addr=0.0.0.0 --authrpc.vhosts=* --authrpc.jwtsecret=/jwt/jwtsecret --syncmode=full --nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER --rpc.allow-unprotected-txs --discovery.port=30303 --port=30303 --metrics --metrics.addr=0.0.0.0 --metrics.port=9001 --bootnodes=enode:001"
+            "node",
+            "-vvv",
+            "--datadir=/data/op-reth/execution-data",
+            "--chain=/network-configs/genesis-2151908.json",
+            "--http",
+            "--http.port=8545",
+            "--http.addr=0.0.0.0",
+            "--http.corsdomain=*",
+            "--http.api=admin,net,eth,web3,debug,trace",
+            "--ws",
+            "--ws.addr=0.0.0.0",
+            "--ws.port=8546",
+            "--ws.api=net,eth",
+            "--ws.origins=*",
+            "--nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER",
+            "--authrpc.port=8551",
+            "--authrpc.jwtsecret=/jwt/jwtsecret",
+            "--authrpc.addr=0.0.0.0",
+            "--discovery.port=30303",
+            "--port=30303",
+            "--rpc.eth-proof-window=302400",
+            "--metrics=0.0.0.0:9001",
+            "--bootnodes=enode:001",
         ],
     )
     expect.eq(
