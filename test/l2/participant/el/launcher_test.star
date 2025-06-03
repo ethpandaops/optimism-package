@@ -386,10 +386,7 @@ def test_l2_participant_el_launcher_op_rbuilder(plan):
             "network0": {
                 "participants": {
                     "node0": {
-                        "el_builder": {
-                            "type": "op-rbuilder",
-                            "key": "secret key"
-                        }
+                        "el_builder": {"type": "op-rbuilder", "key": "secret key"}
                     }
                 }
             }
@@ -427,11 +424,41 @@ def test_l2_participant_el_launcher_op_rbuilder(plan):
 
     expect.eq(
         service_config.cmd,
-        ["node", "-vvv", "--datadir=/data/op-reth/execution-data", "--chain=/network-configs/genesis-2151908.json", "--http", "--http.port=8545", "--http.addr=0.0.0.0", "--http.corsdomain=*", "--http.api=admin,net,eth,web3,debug,trace", "--ws", "--ws.addr=0.0.0.0", "--ws.port=8546", "--ws.api=net,eth", "--ws.origins=*", "--nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER", "--authrpc.port=8551", "--authrpc.jwtsecret=/jwt/jwtsecret", "--authrpc.addr=0.0.0.0", "--discovery.port=30303", "--port=30303", "--rpc.eth-proof-window=302400", "--metrics=0.0.0.0:9001", "--bootnodes=enode:001", "--rollup.builder-secret-key=secret key"],
+        [
+            "node",
+            "-vvv",
+            "--datadir=/data/op-reth/execution-data",
+            "--chain=/network-configs/genesis-2151908.json",
+            "--http",
+            "--http.port=8545",
+            "--http.addr=0.0.0.0",
+            "--http.corsdomain=*",
+            "--http.api=admin,net,eth,web3,debug,trace",
+            "--ws",
+            "--ws.addr=0.0.0.0",
+            "--ws.port=8546",
+            "--ws.api=net,eth",
+            "--ws.origins=*",
+            "--nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER",
+            "--authrpc.port=8551",
+            "--authrpc.jwtsecret=/jwt/jwtsecret",
+            "--authrpc.addr=0.0.0.0",
+            "--discovery.port=30303",
+            "--port=30303",
+            "--rpc.eth-proof-window=302400",
+            "--metrics=0.0.0.0:9001",
+            "--bootnodes=enode:001",
+            "--rollup.builder-secret-key=secret key",
+        ],
     )
     expect.eq(
         service_config.labels,
-        {"op.kind": "el_builder", "op.network.id": "2151908", "op.network.participant.name": "node0","op.el.type": "op-rbuilder"},
+        {
+            "op.kind": "el_builder",
+            "op.network.id": "2151908",
+            "op.network.participant.name": "node0",
+            "op.el.type": "op-rbuilder",
+        },
     )
     expect.eq(
         service_config.files["/network-configs"].artifact_names,
@@ -441,7 +468,6 @@ def test_l2_participant_el_launcher_op_rbuilder(plan):
         service_config.files["/jwt"].artifact_names,
         [_default_jwt_file],
     )
-
 
 
 def test_l2_participant_el_launcher_op_reth(plan):
