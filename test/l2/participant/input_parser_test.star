@@ -146,6 +146,7 @@ def test_l2_participant_input_parser_defaults(plan):
                         ),
                         _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
+                    key=None,
                     **_shared_defaults,
                 ),
                 mev_params=struct(
@@ -251,6 +252,7 @@ def test_l2_participant_input_parser_defaults(plan):
                         ),
                         _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
+                    key=None,
                     **_shared_defaults,
                 ),
                 mev_params=struct(

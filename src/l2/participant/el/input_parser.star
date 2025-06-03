@@ -70,7 +70,7 @@ def _parse(el_args, default_args, participant_name, network_params, registry, el
 
     # We filter the None values so that we can merge dicts easily
     # and merge the config with the defaults
-    el_params = _DEFAULT_ARGS | _filter.remove_none(el_args or {})
+    el_params = default_args | _filter.remove_none(el_args or {})
 
     # We default the image to the one in the registry
     #
