@@ -30,7 +30,7 @@ def parse(args, participant_name, network_params, registry):
 
 
 def parse_builder(args, participant_name, network_params, registry):
-    return _parse(args, participant_name, network_params, registry, "cl_builder")
+    return _parse(args, participant_name, network_params, registry, "clbuilder")
 
 
 def _parse(args, participant_name, network_params, registry, cl_kind):
@@ -60,8 +60,8 @@ def _parse(args, participant_name, network_params, registry, cl_kind):
     )
 
     cl_params["name"] = participant_name
-    cl_params["service_name"] = "op-cl-{}-{}-{}".format(
-        network_id, participant_name, cl_params["type"]
+    cl_params["service_name"] = "op-{}-{}-{}-{}".format(
+        cl_kind, network_id, participant_name, cl_params["type"]
     )
 
     # Draft of what the labels could look like

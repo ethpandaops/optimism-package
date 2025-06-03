@@ -49,7 +49,7 @@ def parse_builder(el_args, participant_name, network_params, registry):
         participant_name=participant_name,
         network_params=network_params,
         registry=registry,
-        el_kind="el_builder",
+        el_kind="elbuilder",
     )
 
 
@@ -80,8 +80,8 @@ def _parse(el_args, default_args, participant_name, network_params, registry, el
     )
 
     el_params["name"] = participant_name
-    el_params["service_name"] = "op-el-{}-{}-{}".format(
-        network_id, participant_name, el_params["type"]
+    el_params["service_name"] = "op-{}-{}-{}-{}".format(
+        el_kind, network_id, participant_name, el_params["type"]
     )
 
     # Draft of what the labels could look like
