@@ -57,6 +57,7 @@ def configure_op_service_metrics(cmd, ports):
 
     expose_metrics_port(ports)
 
+
 def make_helper(observability_params):
     return struct(
         params=observability_params,
@@ -84,6 +85,7 @@ def new_metrics_job(
         "ScrapeInterval": scrape_interval,
     }
 
+
 # Note: kona services use identical metrics registration.
 def register_op_service_metrics_job(helper, service, network_name=None):
     register_service_metrics_job(
@@ -92,6 +94,7 @@ def register_op_service_metrics_job(helper, service, network_name=None):
         network_name=network_name,
         endpoint=util.make_service_url_authority(service, METRICS_PORT_ID),
     )
+
 
 def register_service_metrics_job(
     helper,

@@ -16,6 +16,7 @@ _IMAGE_IDS = {
     "kona-supervisor": _registry.KONA_SUPERVISOR,
 }
 
+
 def parse(args, superchains, registry):
     return _filter.remove_none(
         [

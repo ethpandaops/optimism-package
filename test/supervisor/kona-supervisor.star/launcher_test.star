@@ -1,4 +1,6 @@
-_kona_supervisor_launcher = import_module("/src/supervisor/kona-supervisor/launcher.star")
+_kona_supervisor_launcher = import_module(
+    "/src/supervisor/kona-supervisor/launcher.star"
+)
 
 _input_parser = import_module("/src/package_io/input_parser.star")
 _observability = import_module("/src/observability/observability.star")
