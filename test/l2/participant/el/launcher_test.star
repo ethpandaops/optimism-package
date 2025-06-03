@@ -109,7 +109,12 @@ def test_l2_participant_el_launcher_op_besu(plan):
     )
     expect.eq(
         service_config.labels,
-        {"op.kind": "el", "op.network.id": "2151908", "op.el.type": "op-besu"},
+        {
+            "op.kind": "el",
+            "op.network.id": "2151908",
+            "op.network.participant.name": "node0",
+            "op.el.type": "op-besu",
+        },
     )
     expect.eq(
         service_config.files["/network-configs"].artifact_names,
@@ -180,7 +185,12 @@ def test_l2_participant_el_launcher_op_erigon(plan):
     )
     expect.eq(
         service_config.labels,
-        {"op.kind": "el", "op.network.id": "2151908", "op.el.type": "op-erigon"},
+        {
+            "op.kind": "el",
+            "op.network.id": "2151908",
+            "op.network.participant.name": "node0",
+            "op.el.type": "op-erigon",
+        },
     )
     expect.eq(
         service_config.files["/network-configs"].artifact_names,
