@@ -5,6 +5,7 @@ _op_batcher_launcher = import_module("./batcher/op-batcher/launcher.star")
 _op_proposer_launcher = import_module("./proposer/op-proposer/launcher.star")
 _proxyd_launcher = import_module("./proxyd/launcher.star")
 util = import_module("./util.star")
+_net = import_module("/src/util/net.star")
 _registry = import_module("./package_io/registry.star")
 
 
@@ -87,8 +88,29 @@ def launch_participant_network(
     _op_batcher_launcher.launch(
         plan=plan,
         params=batcher_params,
-        el_context=all_el_contexts[0],
-        cl_context=all_cl_contexts[0],
+        # FIXME We need to plumb the legacy args into the new format so that we make our lives easier when we're switching
+        sequencers_params=[
+            struct(
+                el=struct(
+                    service_name=all_el_contexts[0].ip_addr,
+                    ports={
+                        _net.RPC_PORT_NAME: _net.port(
+                            number=all_el_contexts[0].rpc_port_num
+                        )
+                    },
+                ),
+                cl=struct(
+                    service_name=all_cl_contexts[0].ip_addr,
+                    ports={
+                        _net.RPC_PORT_NAME: _net.port(
+                            number=all_cl_contexts[0].http_port
+                        )
+                    },
+                ),
+                # Conductor params are not being parsed yet
+                conductor_params=None,
+            )
+        ],
         l1_config_env_vars=l1_config_env_vars,
         gs_batcher_private_key=batcher_key,
         network_params=network_params,
