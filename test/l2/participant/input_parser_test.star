@@ -72,6 +72,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "cl",
                         "op.network.id": "1000",
+                        "op.network.participant.name": "node0",
                         "op.cl.type": "op-node",
                     },
                     ports={
@@ -91,6 +92,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "cl_builder",
                         "op.network.id": "1000",
+                        "op.network.participant.name": "node0",
                         "op.cl.type": "op-node",
                     },
                     ports={
@@ -110,6 +112,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "el",
                         "op.network.id": "1000",
+                        "op.network.participant.name": "node0",
                         "op.el.type": "op-geth",
                     },
                     ports={
@@ -131,6 +134,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "el_builder",
                         "op.network.id": "1000",
+                        "op.network.participant.name": "node0",
                         "op.el.type": "op-geth",
                     },
                     ports={
@@ -173,6 +177,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "cl",
                         "op.network.id": "1000",
+                        "op.network.participant.name": "node1",
                         "op.cl.type": "op-node",
                     },
                     ports={
@@ -192,6 +197,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "cl_builder",
                         "op.network.id": "1000",
+                        "op.network.participant.name": "node1",
                         "op.cl.type": "op-node",
                     },
                     ports={
@@ -211,6 +217,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "el",
                         "op.network.id": "1000",
+                        "op.network.participant.name": "node1",
                         "op.el.type": "op-geth",
                     },
                     ports={
@@ -232,6 +239,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "el_builder",
                         "op.network.id": "1000",
+                        "op.network.participant.name": "node1",
                         "op.el.type": "op-geth",
                     },
                     ports={

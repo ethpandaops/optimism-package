@@ -99,7 +99,12 @@ def test_l2_participant_cl_launcher_hildr(plan):
     )
     expect.eq(
         service_config.labels,
-        {"op.kind": "cl", "op.network.id": "2151908", "op.cl.type": "hildr"},
+        {
+            "op.kind": "cl",
+            "op.network.id": "2151908",
+            "op.network.participant.name": "node0",
+            "op.cl.type": "hildr",
+        },
     )
     expect.eq(
         service_config.files["/network-configs"].artifact_names,
@@ -216,7 +221,12 @@ def test_l2_participant_cl_launcher_kona_node(plan):
     )
     expect.eq(
         service_config.labels,
-        {"op.kind": "cl", "op.network.id": "2151908", "op.cl.type": "kona-node"},
+        {
+            "op.kind": "cl",
+            "op.network.id": "2151908",
+            "op.network.participant.name": "node0",
+            "op.cl.type": "kona-node",
+        },
     )
     expect.eq(
         service_config.files["/network-configs"].artifact_names,
@@ -317,7 +327,12 @@ def test_l2_participant_cl_launcher_op_node(plan):
     )
     expect.eq(
         service_config.labels,
-        {"op.kind": "cl", "op.network.id": "2151908", "op.cl.type": "op-node"},
+        {
+            "op.kind": "cl",
+            "op.network.id": "2151908",
+            "op.network.participant.name": "node0",
+            "op.cl.type": "op-node",
+        },
     )
     expect.eq(
         service_config.files["/network-configs"].artifact_names,
