@@ -9,6 +9,7 @@ _ethereum_package_shared_utils = import_module(
 _batcher_input_parser = import_module("/src/batcher/input_parser.star")
 _da_input_parser = import_module("/src/da/input_parser.star")
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
+_conductor_input_parser = import_module("/src/conductor/input_parser.star")
 _mev_input_parser = import_module("/src/mev/input_parser.star")
 _superchain_input_parser = import_module("/src/superchain/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
@@ -197,6 +198,7 @@ def input_parser(
                 batcher_params=result["batcher_params"],
                 proposer_params=result["proposer_params"],
                 mev_params=result["mev_params"],
+                conductor_params=result["conductor_params"],
                 da_params=result["da_params"],
                 tx_fuzzer_params=result["tx_fuzzer_params"],
                 additional_services=result["additional_services"],
@@ -291,6 +293,18 @@ def parse_network_params(plan, registry, input_args):
         mev_params = _mev_input_parser.parse(
             # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
             mev_args=chain.get("mev_params", {}),
+            network_params=struct(**network_params),
+            # FIXME At the moment the "name" of the sequencer is just its index in the array
+            # so we pass 0 as the name
+            participant_name="0",
+            registry=registry,
+        )
+
+        # FIXME Conductor configuration will move under a participant configuration with multiple sequencers functionality
+        # and will require participant params (of the sequencer) to be passed in
+        conductor_params = _conductor_input_parser.parse(
+            conductor_args=chain.get("conductor_params", {}),
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
             network_params=struct(**network_params),
             # FIXME At the moment the "name" of the sequencer is just its index in the array
             # so we pass 0 as the name
@@ -413,6 +427,7 @@ def parse_network_params(plan, registry, input_args):
             "batcher_params": batcher_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
+            "conductor_params": conductor_params,
             "da_params": da_params,
             "additional_services": chain.get(
                 "additional_services", DEFAULT_ADDITIONAL_SERVICES

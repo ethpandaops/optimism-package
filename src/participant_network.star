@@ -2,6 +2,7 @@ el_cl_client_launcher = import_module("./el_cl_launcher.star")
 participant_module = import_module("./participant.star")
 input_parser = import_module("./package_io/input_parser.star")
 _op_batcher_launcher = import_module("./batcher/op-batcher/launcher.star")
+_op_conductor_launcher = import_module("./conductor/op-conductor/launcher.star")
 _op_proposer_launcher = import_module("./proposer/op-proposer/launcher.star")
 _proxyd_launcher = import_module("./proxyd/launcher.star")
 util = import_module("./util.star")
@@ -18,6 +19,7 @@ def launch_participant_network(
     batcher_params,
     proposer_params,
     mev_params,
+    conductor_params,
     deployment_output,
     l1_config_env_vars,
     l2_services_suffix,
@@ -39,6 +41,7 @@ def launch_participant_network(
         jwt_file=jwt_file,
         network_params=network_params,
         mev_params=mev_params,
+        conductor_params=conductor_params,
         deployment_output=deployment_output,
         participants=participants,
         num_participants=num_participants,
@@ -77,6 +80,33 @@ def launch_participant_network(
         params=proxyd_params,
         network_params=network_params,
         observability_helper=observability_helper,
+    )
+
+    conductor_context = (
+        _op_conductor_launcher.launch(
+            plan=plan,
+            params=conductor_params,
+            network_params=network_params,
+            deployment_output=deployment_output,
+            # FIXME We need to plumb the legacy args into the new format so that we make our lives easier when we're switching
+            el_params=struct(
+                service_name=all_el_contexts[0].ip_addr,
+                ports={
+                    _net.RPC_PORT_NAME: _net.port(
+                        number=all_el_contexts[0].rpc_port_num
+                    )
+                },
+            ),
+            cl_params=struct(
+                service_name=all_cl_contexts[0].ip_addr,
+                ports={
+                    _net.RPC_PORT_NAME: _net.port(number=all_cl_contexts[0].http_port)
+                },
+            ),
+            observability_helper=observability_helper,
+        ).context
+        if conductor_params
+        else None
     )
 
     batcher_key = util.read_network_config_value(

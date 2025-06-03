@@ -67,6 +67,7 @@ def launch(
     launcher,
     service_name,
     participant,
+    conductor_params,
     global_log_level,
     persistent,
     tolerations,

@@ -81,7 +81,10 @@ def get_service_config(
 
     env_vars = {
         "OP_CONDUCTOR_CONSENSUS_ADDR": "0.0.0.0",
-        "OP_CONDUCTOR_CONSENSUS_ADVERTISED": "0.0.0.0",
+        "OP_CONDUCTOR_CONSENSUS_ADVERTISED": "{}:{}".format(
+            _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+            consensus_port.number,
+        ),
         "OP_CONDUCTOR_CONSENSUS_PORT": str(consensus_port.number),
         "OP_CONDUCTOR_EXECUTION_RPC": _net.service_url(
             el_params.service_name, el_params.ports[_net.RPC_PORT_NAME]
@@ -120,7 +123,7 @@ def get_service_config(
         env_vars |= {
             "OP_CONDUCTOR_METRICS_ADDR": "0.0.0.0",
             "OP_CONDUCTOR_METRICS_ENABLED": "true",
-            "OP_CONDUCTOR_METRICS_PORT": _observability.METRICS_PORT_NUM,
+            "OP_CONDUCTOR_METRICS_PORT": str(_observability.METRICS_PORT_NUM),
         }
 
         _observability.expose_metrics_port(ports)
