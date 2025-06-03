@@ -524,7 +524,29 @@ def test_l2_participant_el_launcher_op_reth(plan):
     expect.eq(
         service_config.cmd,
         [
-            "geth init --datadir=/data/geth/execution-data --state.scheme=hash /network-configs/genesis-2151908.json && geth --networkid=2151908 --datadir=/data/geth/execution-data --gcmode=archive --state.scheme=hash --http --http.addr=0.0.0.0 --http.vhosts=* --http.corsdomain=* --http.api=admin,engine,net,eth,web3,debug,miner --ws --ws.addr=0.0.0.0 --ws.port=8546 --ws.api=admin,engine,net,eth,web3,debug,miner --ws.origins=* --allow-insecure-unlock --authrpc.port=8551 --authrpc.addr=0.0.0.0 --authrpc.vhosts=* --authrpc.jwtsecret=/jwt/jwtsecret --syncmode=full --nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER --rpc.allow-unprotected-txs --discovery.port=30303 --port=30303 --metrics --metrics.addr=0.0.0.0 --metrics.port=9001 --bootnodes=enode:001"
+            "node",
+            "-vvv",
+            "--datadir=/data/op-reth/execution-data",
+            "--chain=/network-configs/genesis-2151908.json",
+            "--http",
+            "--http.port=8545",
+            "--http.addr=0.0.0.0",
+            "--http.corsdomain=*",
+            "--http.api=admin,net,eth,web3,debug,trace",
+            "--ws",
+            "--ws.addr=0.0.0.0",
+            "--ws.port=8546",
+            "--ws.api=net,eth",
+            "--ws.origins=*",
+            "--nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER",
+            "--authrpc.port=8551",
+            "--authrpc.jwtsecret=/jwt/jwtsecret",
+            "--authrpc.addr=0.0.0.0",
+            "--discovery.port=30303",
+            "--port=30303",
+            "--rpc.eth-proof-window=302400",
+            "--metrics=0.0.0.0:9001",
+            "--bootnodes=enode:001",
         ],
     )
     expect.eq(
