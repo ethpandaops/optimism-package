@@ -251,7 +251,12 @@ def test_l2_participant_el_launcher_op_geth(plan):
     )
     expect.eq(
         service_config.labels,
-        {"op.kind": "el", "op.network.id": "2151908", "op.el.type": "op-geth"},
+        {
+            "op.kind": "el",
+            "op.network.id": "2151908",
+            "op.network.participant.name": "node0",
+            "op.el.type": "op-geth",
+        },
     )
     expect.eq(
         service_config.files["/network-configs"].artifact_names,
@@ -341,7 +346,12 @@ def test_l2_participant_el_launcher_op_nethermind(plan):
     )
     expect.eq(
         service_config.labels,
-        {"op.kind": "el", "op.network.id": "2151908", "op.el.type": "op-nethermind"},
+        {
+            "op.kind": "el",
+            "op.network.id": "2151908",
+            "op.network.participant.name": "node0",
+            "op.el.type": "op-nethermind",
+        },
     )
     expect.eq(
         service_config.files["/network-configs"].artifact_names,
@@ -412,7 +422,12 @@ def test_l2_participant_el_launcher_op_reth(plan):
     )
     expect.eq(
         service_config.labels,
-        {"op.kind": "el", "op.network.id": "2151908", "op.el.type": "op-reth"},
+        {
+            "op.kind": "el",
+            "op.network.id": "2151908",
+            "op.network.participant.name": "node0",
+            "op.el.type": "op-reth",
+        },
     )
     expect.eq(
         service_config.files["/network-configs"].artifact_names,
