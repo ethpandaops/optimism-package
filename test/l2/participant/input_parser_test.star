@@ -275,6 +275,25 @@ def test_l2_participant_input_parser_defaults(plan):
     )
 
 
+def test_l2_participant_input_parser_el_builder_key(plan):
+    parsed = input_parser.parse(
+        {"node0": {"el_builder": {"key": "secret key"}}},
+        _default_network_params,
+        _default_registry,
+    )
+
+    expect.eq(parsed[0].el_builder.key, "secret key")
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"el": {"key": "secret key"}}},
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid attributes in EL configuration for node0 on network my-l2: key",
+    )
+
+
 def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
     parsed = input_parser.parse(
         {"node0": {"conductor_params": {"enabled": True}}},

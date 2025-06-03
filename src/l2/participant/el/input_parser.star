@@ -18,6 +18,8 @@ _DEFAULT_ARGS = {
     "max_mem": 0,
 }
 
+_DEFAULT_BUILDER_ARGS = _DEFAULT_ARGS | {"key": None}
+
 # EL clients have a type property that maps to an image
 _IMAGE_IDS = {
     "op-geth": _registry.OP_GETH,
@@ -29,29 +31,46 @@ _IMAGE_IDS = {
 }
 
 
-def parse(args, participant_name, network_id, registry):
-    return _parse(args, participant_name, network_id, registry, "el")
+def parse(el_args, participant_name, network_params, registry):
+    return _parse(
+        el_args=el_args,
+        default_args=_DEFAULT_ARGS,
+        participant_name=participant_name,
+        network_params=network_params,
+        registry=registry,
+        el_kind="el",
+    )
 
 
-def parse_builder(args, participant_name, network_id, registry):
-    return _parse(args, participant_name, network_id, registry, "el_builder")
+def parse_builder(el_args, participant_name, network_params, registry):
+    return _parse(
+        el_args=el_args,
+        default_args=_DEFAULT_BUILDER_ARGS,
+        participant_name=participant_name,
+        network_params=network_params,
+        registry=registry,
+        el_kind="el_builder",
+    )
 
 
-def _parse(args, participant_name, network_id, registry, el_kind):
+def _parse(el_args, default_args, participant_name, network_params, registry, el_kind):
+    network_id = network_params.network_id
+    network_name = network_params.name
+
     # Any extra attributes will cause an error
     _filter.assert_keys(
-        args or {},
-        _DEFAULT_ARGS.keys(),
+        el_args or {},
+        default_args.keys(),
         "Invalid attributes in EL configuration for "
         + participant_name
         + " on network "
-        + str(network_id)
+        + network_name
         + ": {}",
     )
 
     # We filter the None values so that we can merge dicts easily
     # and merge the config with the defaults
-    el_params = _DEFAULT_ARGS | _filter.remove_none(args or {})
+    el_params = _DEFAULT_ARGS | _filter.remove_none(el_args or {})
 
     # We default the image to the one in the registry
     #
