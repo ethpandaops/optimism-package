@@ -192,8 +192,8 @@ def get_service_config(
         cmd.append(
             "--rollup.sequencerhttp={0}".format(
                 _net.service_url(
-                    sequencer_params.service_name,
-                    sequencer_params.ports[_net.RPC_PORT_NAME],
+                    sequencer_params.el.service_name,
+                    sequencer_params.el.ports[_net.RPC_PORT_NAME],
                 )
             )
         )
