@@ -267,9 +267,6 @@ def get_service_config(
             ),
         ]
 
-        # FIXME Do we need this?
-        env_vars.update({"OP_NODE_SEQUENCER_STOPPED": "true"})
-
     if len(cl_contexts) > 0:
         cmd.append(
             "--p2p.bootnodes="
