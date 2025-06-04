@@ -163,11 +163,16 @@ def clique:
 
     # OP forks
     "rip7212TransitionTimestamp": .config.fjordTime|to_hex,
-    "opGraniteTransitionTimestamp": .config.graniteTime|to_hex,
-    "opHoloceneTransitionTimestamp": .config.holoceneTime|to_hex,
-    "opIsthmusTransitionTimestamp": .config.isthmusTime|to_hex,
 
-    #Prague
+    # Prague
+    "eip2537TransitionTimestamp": .config.pragueTime|to_hex,
+    "eip2935TransitionTimestamp": .config.pragueTime|to_hex,
+    "eip6110TransitionTimestamp": .config.pragueTime|to_hex,
+    "eip7002TransitionTimestamp": .config.pragueTime|to_hex,
+    "eip7251TransitionTimestamp": .config.pragueTime|to_hex,
+    "eip7702TransitionTimestamp": .config.pragueTime|to_hex,
+    "eip7623TransitionTimestamp": .config.pragueTime|to_hex,
+    "depositContractAddress": .config.depositContractAddress,
 
     # Fee collector
     "feeCollector":  (if .config.optimism != null then "0x4200000000000000000000000000000000000019" elif .config.taiko != null then "0x\(.config.chainId)0000000000000000000000000000010001" else null end),
