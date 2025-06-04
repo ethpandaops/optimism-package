@@ -96,7 +96,6 @@ def get_service_config(
         "OP_CONDUCTOR_NODE_RPC": _net.service_url(
             cl_params.service_name, cl_params.ports[_net.RPC_PORT_NAME]
         ),
-        "OP_CONDUCTOR_NETWORK": network_params.network,
         # This might also become a parameter
         "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(_CONDUCTOR_HEALTH_CHECK_INTERVAL),
         # This might also become a parameter
