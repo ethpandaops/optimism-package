@@ -454,7 +454,7 @@ def test_l2_participant_el_launcher_op_rbuilder(plan):
     expect.eq(
         service_config.labels,
         {
-            "op.kind": "el_builder",
+            "op.kind": "elbuilder",
             "op.network.id": "2151908",
             "op.network.participant.name": "node0",
             "op.el.type": "op-rbuilder",
