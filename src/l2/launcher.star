@@ -207,6 +207,7 @@ def launch(
         l1_config_env_vars=l1_config_env_vars,
         da_server_context=da.context if da else None,
         observability_helper=observability_helper,
+        log_prefix=network_log_prefix,
     )
 
     _launch_proposer(
