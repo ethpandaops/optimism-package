@@ -9,16 +9,16 @@ _DEFAULT_ARGS = {
 }
 
 
-def parse(args, chains):
+def parse(args, l2s_params):
     return _filter.remove_none(
         [
-            _parse_instance(superchain_args or {}, superchain_name, chains)
+            _parse_instance(superchain_args or {}, superchain_name, l2s_params)
             for superchain_name, superchain_args in (args or {}).items()
         ]
     )
 
 
-def _parse_instance(superchain_args, superchain_name, chains):
+def _parse_instance(superchain_args, superchain_name, l2s_params):
     # Any extra attributes will cause an error
     _filter.assert_keys(
         superchain_args,
@@ -39,7 +39,7 @@ def _parse_instance(superchain_args, superchain_name, chains):
         return None
 
     # We expand the list of participants since we support a special "*" value to include all networks
-    network_ids = [c["network_params"]["network_id"] for c in chains]
+    network_ids = [c.network_params.network_id for c in l2s_params]
     superchain_params["participants"] = _expansion.expand_asterisc(
         superchain_params["participants"],
         network_ids,

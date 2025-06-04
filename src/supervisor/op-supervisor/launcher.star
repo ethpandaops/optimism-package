@@ -17,20 +17,22 @@ def launch(
     plan,
     params,
     l1_config_env_vars,
-    l2s,
+    l2s_params,
     jwt_file,
     deployment_output,
     observability_helper,
 ):
-    supervisor_l2s = [
-        l2 for l2 in l2s if l2.network_id in params.superchain.participants
+    supervisor_l2s_params = [
+        l2_params
+        for l2_params in l2s_params
+        if l2_params.network_params.network_id in params.superchain.participants
     ]
 
     config = _get_config(
         plan=plan,
         params=params,
         l1_config_env_vars=l1_config_env_vars,
-        l2s=supervisor_l2s,
+        l2s_params=supervisor_l2s_params,
         jwt_file=jwt_file,
         deployment_output=deployment_output,
         observability_helper=observability_helper,
@@ -43,14 +45,14 @@ def launch(
         service,
     )
 
-    return struct(service=service, l2s=supervisor_l2s)
+    return struct(service=service, l2s=supervisor_l2s_params)
 
 
 def _get_config(
     plan,
     params,
     l1_config_env_vars,
-    l2s,
+    l2s_params,
     jwt_file,
     deployment_output,
     observability_helper,
@@ -83,11 +85,11 @@ def _get_config(
             "OP_SUPERVISOR_L2_CONSENSUS_NODES": ",".join(
                 [
                     _net.service_url(
-                        participant.cl_context.ip_addr,
+                        participant.cl.service_name,
                         params.superchain.ports[_net.INTEROP_RPC_PORT_NAME],
                     )
-                    for l2 in l2s
-                    for participant in l2.participants
+                    for l2_params in l2s_params
+                    for participant in l2_params.participants
                 ]
             ),
             "OP_SUPERVISOR_L2_CONSENSUS_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,

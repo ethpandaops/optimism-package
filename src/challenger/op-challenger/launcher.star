@@ -127,7 +127,7 @@ def get_challenger_config(
             ",".join(
                 [
                     # TODO: we need to handle multiple participants better
-                    l2.participants[0].el_context.rpc_http_url
+                    l2.participants[0].el.context.rpc_http_url
                     for l2 in l2s
                 ]
             )
@@ -137,7 +137,7 @@ def get_challenger_config(
             ",".join(
                 [
                     # TODO: we need to handle multiple participants better
-                    l2.participants[0].cl_context.beacon_http_url
+                    l2.participants[0].cl.context.beacon_http_url
                     for l2 in l2s
                 ]
             )

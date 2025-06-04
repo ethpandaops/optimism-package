@@ -42,15 +42,16 @@ VERIF_USED_PORTS = {
 }
 
 
-def launch_blockscout(
+def launch(
     plan,
-    l2_services_suffix,
+    network_params,
+    l2_rpc_url,
     l1_rpc_url,
-    l2_el_context,
-    l2_network_name,
     deployment_output,
-    network_id,
 ):
+    network_id = network_params.network_id
+    network_name = network_params.name
+
     rollup_filename = "rollup-{0}".format(network_id)
     portal_address = util.read_network_config_value(
         plan, deployment_output, rollup_filename, ".deposit_contract_address"
@@ -61,17 +62,13 @@ def launch_blockscout(
 
     postgres_output = postgres.run(
         plan,
-        service_name="{0}-postgres{1}".format(
-            SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
-        ),
+        service_name="{0}-postgres-{1}".format(SERVICE_NAME_BLOCKSCOUT, network_id),
         database="blockscout",
         extra_configs=["max_connections=1000"],
     )
 
     config_verif = get_config_verif()
-    verif_service_name = "{0}-verif{1}".format(
-        SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
-    )
+    verif_service_name = "{0}-verif-{1}".format(SERVICE_NAME_BLOCKSCOUT, network_id)
     verif_service = plan.add_service(verif_service_name, config_verif)
     verif_url = "http://{}:{}".format(
         verif_service.hostname, verif_service.ports["http"].number
@@ -80,9 +77,9 @@ def launch_blockscout(
     config_backend = get_config_backend(
         postgres_output,
         l1_rpc_url,
-        l2_el_context,
+        l2_rpc_url,
         verif_url,
-        l2_network_name,
+        network_name,
         {
             "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": portal_address,
             "INDEXER_OPTIMISM_L1_DEPOSITS_START_BLOCK": l1_deposit_start_block,
@@ -93,7 +90,7 @@ def launch_blockscout(
         },
     )
     blockscout_service = plan.add_service(
-        "{0}{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_services_suffix), config_backend
+        "{0}{1}".format(SERVICE_NAME_BLOCKSCOUT, network_id), config_backend
     )
     plan.print(blockscout_service)
 
@@ -123,9 +120,9 @@ def get_config_verif():
 def get_config_backend(
     postgres_output,
     l1_rpc_url,
-    l2_el_context,
+    l2_rpc_url,
     verif_url,
-    l2_network_name,
+    network_name,
     additional_env_vars,
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
@@ -166,8 +163,8 @@ def get_config_backend(
         ],
         env_vars={
             "ETHEREUM_JSONRPC_VARIANT": "geth",
-            "ETHEREUM_JSONRPC_HTTP_URL": l2_el_context.rpc_http_url,
-            "ETHEREUM_JSONRPC_TRACE_URL": l2_el_context.rpc_http_url,
+            "ETHEREUM_JSONRPC_HTTP_URL": l2_rpc_url,
+            "ETHEREUM_JSONRPC_TRACE_URL": l2_rpc_url,
             "DATABASE_URL": database_url,
             "COIN": "opETH",
             "MICROSERVICE_SC_VERIFIER_ENABLED": "true",
@@ -175,8 +172,8 @@ def get_config_backend(
             "MICROSERVICE_SC_VERIFIER_TYPE": "sc_verifier",
             "INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER": "true",
             "ECTO_USE_SSL": "false",
-            "NETWORK": l2_network_name,
-            "SUBNETWORK": l2_network_name,
+            "NETWORK": network_name,
+            "SUBNETWORK": network_name,
             "API_V2_ENABLED": "true",
             "PORT": "{}".format(HTTP_PORT_NUMBER),
             "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",
