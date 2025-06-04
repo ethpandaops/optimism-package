@@ -86,9 +86,8 @@ def get_service_config(
 
     env_vars = {
         "OP_CONDUCTOR_CONSENSUS_ADDR": "0.0.0.0",
-        "OP_CONDUCTOR_CONSENSUS_ADVERTISED": "{}:{}".format(
-            _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-            consensus_port.number,
+        "OP_CONDUCTOR_CONSENSUS_ADVERTISED": _net.service_url(
+            params.service_name, consensus_port
         ),
         "OP_CONDUCTOR_CONSENSUS_PORT": str(consensus_port.number),
         "OP_CONDUCTOR_EXECUTION_RPC": _net.service_url(
@@ -97,6 +96,7 @@ def get_service_config(
         "OP_CONDUCTOR_NODE_RPC": _net.service_url(
             cl_params.service_name, cl_params.ports[_net.RPC_PORT_NAME]
         ),
+        "OP_CONDUCTOR_NETWORK": network_params.network,
         # This might also become a parameter
         "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(_CONDUCTOR_HEALTH_CHECK_INTERVAL),
         # This might also become a parameter
