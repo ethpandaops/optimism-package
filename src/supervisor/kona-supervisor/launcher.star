@@ -57,7 +57,7 @@ def _get_config(
 ):
     ports = _net.ports_to_port_specs(params.ports)
     datadir = params.superchain.dependency_set.name
-
+    
     cmd = ["kona-supervisor"] + params.extra_params
 
     # apply customizations
@@ -70,16 +70,14 @@ def _get_config(
         ports=ports,
         files={
             DATA_DIR: params.superchain.dependency_set.name,
-            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
-            _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,_ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         env_vars={
             "DATADIR": "/db",
             "DEPENDENCY_SET": "{0}/{1}".format(
                 DATA_DIR, params.superchain.dependency_set.path
             ),
-            "ROLLUP_CONFIG_PATHS": _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
-            + "/rollup-*.json",
+            "ROLLUP_CONFIG_PATHS": _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/rollup-*.json",
             "L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "L2_CONSENSUS_NODES": ",".join(
                 [
