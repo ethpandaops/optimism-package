@@ -78,7 +78,7 @@ def _get_config(
             "DEPENDENCY_SET": "{0}/{1}".format(
                 DATA_DIR, params.superchain.dependency_set.path
             ),
-            "ROLLUP_CONFIG_PATHS": _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS 
+            "ROLLUP_CONFIG_PATHS": _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
             + "/rollup-*.json",
             "L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "L2_CONSENSUS_NODES": ",".join(
