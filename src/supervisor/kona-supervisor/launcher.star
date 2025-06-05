@@ -8,6 +8,7 @@ _ethereum_package_constants = import_module(
 _observability = import_module("/src/observability/observability.star")
 _prometheus = import_module("/src/observability/prometheus/prometheus_launcher.star")
 
+
 DATA_DIR = "/etc/kona-supervisor"
 DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
 
