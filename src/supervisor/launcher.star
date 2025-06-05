@@ -35,8 +35,4 @@ def launch(
             observability_helper=observability_helper,
         )
     else:
-        fail(
-            "Unsupported supervisor implementation {}".format(
-                supervisor_type
-            )
-        )
+        fail("Unsupported supervisor implementation {}".format(supervisor_type))
