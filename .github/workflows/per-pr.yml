@@ -41,6 +41,21 @@ jobs:
       - name: Run Starlark
         run: kurtosis run ${{ github.workspace }} --verbosity detailed
 
+      - name: Dump logs
+        run: kurtosis dump ./.kurtosis-dump
+        if: ${{ failure() }}
+
+      - name: Dump logs
+        run: kurtosis dump ./.kurtosis-dump
+        if: ${{ failure() }}
+
+      - name: Store logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kurtosis-logs
+          path: ./.kurtosis-dump
+
   run_k8s_test:
     name: Run k8s tests
     uses: ./.github/workflows/reusable-run-k8s.yml
