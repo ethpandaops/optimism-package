@@ -56,7 +56,7 @@ def _get_config(
 ):
     ports = _net.ports_to_port_specs(params.ports)
     datadir = params.superchain.dependency_set.name
-    
+
     cmd = ["kona-supervisor"] + params.extra_params
 
     # apply customizations
