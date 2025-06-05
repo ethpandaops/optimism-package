@@ -1,5 +1,7 @@
 op_supervisor_launcher = import_module("./src/supervisor/op-supervisor/launcher.star")
-kona_supervisor_launcher = import_module("./src/supervisor/kona-supervisor/launcher.star")
+kona_supervisor_launcher = import_module(
+    "./src/supervisor/kona-supervisor/launcher.star"
+)
 
 def launch(
     plan,

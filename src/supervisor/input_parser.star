@@ -63,7 +63,7 @@ def _parse_instance(supervisor_args, supervisor_name, superchains, registry):
     # The tradeoff that we are making is the duplication of information
     # in the parsed config, but this is a tradeoff that we are willing to make
     supervisor_params["superchain"] = superchain
-    
+
     # And default the image to the one in the registry
     supervisor_params["image"] = supervisor_params["image"] or _default_image(
         supervisor_params["type"], registry
