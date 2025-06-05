@@ -11,7 +11,7 @@ def launch(
     deployment_output,
     observability_helper,
 ):
-    supervisor_type = params.supervisor_params["type"]
+    supervisor_type = params["type"]
 
     if supervisor_type == "op-supervisor":
         return op_supervisor_launcher.launch(
