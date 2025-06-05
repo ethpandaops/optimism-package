@@ -8,7 +8,6 @@ _ethereum_package_constants = import_module(
 _observability = import_module("/src/observability/observability.star")
 _prometheus = import_module("/src/observability/prometheus/prometheus_launcher.star")
 
-
 DATA_DIR = "/etc/kona-supervisor"
 DEPENDENCY_SET_FILE_NAME = "dependency_set.json"
 
@@ -70,7 +69,8 @@ def _get_config(
         ports=ports,
         files={
             DATA_DIR: params.superchain.dependency_set.name,
-            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,_ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
+            _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         env_vars={
             "DATADIR": "/db",
