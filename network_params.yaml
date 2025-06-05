@@ -42,7 +42,7 @@ optimism_package:
         fund_dev_accounts: true
       batcher_params:
         extra_params: []
-      additional_services: ["rollup-boost", "blockscout"]
+      additional_services: ["rollup-boost"]
       tx_fuzzer_params:
         enabled: true
   op_contract_deployer_params:
