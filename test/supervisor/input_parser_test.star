@@ -74,6 +74,7 @@ def test_supervisor_input_parser_default_args(plan):
             {
                 "supervisor0": {
                     "enabled": None,
+                    "type": "op-supervisor",
                     "image": None,
                     "extra_params": None,
                     "superchain": "superchain0",
