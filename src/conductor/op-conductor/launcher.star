@@ -86,7 +86,9 @@ def get_service_config(
 
     env_vars = {
         "OP_CONDUCTOR_CONSENSUS_ADDR": "0.0.0.0",
-        "OP_CONDUCTOR_CONSENSUS_ADVERTISED": "{}:{}".format(params.service_name, consensus_port.number),
+        "OP_CONDUCTOR_CONSENSUS_ADVERTISED": "{}:{}".format(
+            params.service_name, consensus_port.number
+        ),
         "OP_CONDUCTOR_CONSENSUS_PORT": str(consensus_port.number),
         "OP_CONDUCTOR_EXECUTION_RPC": _net.service_url(
             el_params.service_name, el_params.ports[_net.RPC_PORT_NAME]
