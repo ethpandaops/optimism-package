@@ -70,7 +70,7 @@ def _get_config(
         ports=ports,
         files={
             DATA_DIR: params.superchain.dependency_set.name,
-            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output
+            _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
             _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         env_vars={

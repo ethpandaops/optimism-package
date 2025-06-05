@@ -1,12 +1,3 @@
-        op_supervisor_launcher.launch(
-            plan=plan,
-            params=supervisor_params,
-            l1_config_env_vars=l1_config_env_vars,
-            l2s=l2s,
-            jwt_file=jwt_file,
-            deployment_output=deployment_output,
-            observability_helper=observability_helper,
-        )
 op_supervisor_launcher = import_module("./src/supervisor/op-supervisor/launcher.star")
 kona_supervisor_launcher = import_module("./src/supervisor/kona-supervisor/launcher.star")
 
