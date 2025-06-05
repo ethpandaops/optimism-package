@@ -2,9 +2,9 @@ input_parser = import_module("/src/superchain/input_parser.star")
 
 _net = import_module("/src/util/net.star")
 
-_chains = [
-    {"network_params": {"network_id": 1000}},
-    {"network_params": {"network_id": 2000}},
+_default_l2s_params = [
+    struct(network_params=struct(network_id=1000)),
+    struct(network_params=struct(network_id=2000)),
 ]
 
 
@@ -12,14 +12,14 @@ def test_superchain_input_parser_empty(plan):
     expect.eq(
         input_parser.parse(
             None,
-            _chains,
+            _default_l2s_params,
         ),
         [],
     )
     expect.eq(
         input_parser.parse(
             {},
-            _chains,
+            _default_l2s_params,
         ),
         [],
     )
@@ -29,7 +29,7 @@ def test_superchain_input_parser_no_participants(plan):
     expect.eq(
         input_parser.parse(
             {"superchain0": {"participants": []}},
-            _chains,
+            _default_l2s_params,
         ),
         [],
     )
@@ -39,7 +39,7 @@ def test_superchain_input_parser_disabled(plan):
     expect.eq(
         input_parser.parse(
             {"superchain0": {"enabled": False}},
-            _chains,
+            _default_l2s_params,
         ),
         [],
     )
@@ -49,7 +49,7 @@ def test_superchain_input_parser_extra_attributes(plan):
     expect.fails(
         lambda: input_parser.parse(
             {"superchain0": {"extra": None, "name": "x"}},
-            _chains,
+            _default_l2s_params,
         ),
         "Invalid attributes in superchain configuration for superchain0: extra,name",
     )
@@ -89,21 +89,21 @@ def test_superchain_input_parser_default_args(plan):
     expect.eq(
         input_parser.parse(
             {"superchain0": None},
-            _chains,
+            _default_l2s_params,
         ),
         [expected_params],
     )
     expect.eq(
         input_parser.parse(
             {"superchain0": {}},
-            _chains,
+            _default_l2s_params,
         ),
         [expected_params],
     )
     expect.eq(
         input_parser.parse(
             {"superchain0": {"enabled": None, "participants": None}},
-            _chains,
+            _default_l2s_params,
         ),
         [expected_params],
     )

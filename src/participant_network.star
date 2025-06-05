@@ -167,7 +167,29 @@ def launch_participant_network(
     _op_proposer_launcher.launch(
         plan=plan,
         params=proposer_params,
-        cl_context=all_cl_contexts[0],
+        # FIXME We need to plumb the legacy args into the new format so that we make our lives easier when we're switching
+        sequencers_params=[
+            struct(
+                el=struct(
+                    service_name=all_el_contexts[0].ip_addr,
+                    ports={
+                        _net.RPC_PORT_NAME: _net.port(
+                            number=all_el_contexts[0].rpc_port_num
+                        )
+                    },
+                ),
+                cl=struct(
+                    service_name=all_cl_contexts[0].ip_addr,
+                    ports={
+                        _net.RPC_PORT_NAME: _net.port(
+                            number=all_cl_contexts[0].http_port
+                        )
+                    },
+                ),
+                # Conductor params are not being parsed yet
+                conductor_params=None,
+            )
+        ],
         l1_config_env_vars=l1_config_env_vars,
         gs_proposer_private_key=proposer_key,
         game_factory_address=game_factory_address,
