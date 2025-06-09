@@ -111,7 +111,7 @@ def launch(plan, schedule):
                 )
             )
 
-        launched[item.id] = item.launch(plan, launched)
+        launched[item.id] = item.launch(plan=plan, dependencies=launched)
 
     return launched
 
@@ -151,6 +151,21 @@ def _assert_item(item):
             )
         )
 
+    if not hasattr(item, "id"):
+        fail(
+            "schedule: Expected an item to have a property 'id', got {}".format(
+                item, type_of_item
+            )
+        )
+
+    type_of_id = type(item.id)
+    if type_of_id != "string":
+        fail(
+            "schedule: Expected an item to have an 'id' of type string but 'id' is of type {}".format(
+                type_of_id
+            )
+        )
+
     if not hasattr(item, "dependencies"):
         fail(
             "schedule: Expected an item to have a property 'dependencies', got {}".format(
@@ -161,21 +176,24 @@ def _assert_item(item):
     type_of_dependencies = type(item.dependencies)
     if type_of_dependencies != "list":
         fail(
-            "schedule: Expected an item to have a 'dependencies' property of type list but 'dependencies' is of type".format(
+            "schedule: Expected an item to have a 'dependencies' property of type list but 'dependencies' is of type {}".format(
                 type_of_dependencies
+            )
+        )
+
+    mistyped_dependencies = [d for d in item.dependencies if type(d) != "string"]
+    if mistyped_dependencies:
+        fail(
+            "schedule: Expected an item to have a 'dependencies' property of type list of strings but 'dependencies' contains {}".format(
+                ", ".join(
+                    ["{} of type {}".format(d, type(d)) for d in mistyped_dependencies]
+                )
             )
         )
 
     has_self_as_dependency = item.id in item.dependencies
     if has_self_as_dependency:
         fail("schedule: Item {} specifies itself as its dependency".format(item.id))
-
-    if not hasattr(item, "id"):
-        fail(
-            "schedule: Expected an item to have a property 'id', got {}".format(
-                item, type_of_item
-            )
-        )
 
     if not hasattr(item, "launch"):
         fail(
@@ -187,7 +205,7 @@ def _assert_item(item):
     type_of_launch = type(item.launch)
     if type_of_launch != "function":
         fail(
-            "schedule: Expected an item to have a 'launch' function but 'launch' is of type".format(
+            "schedule: Expected an item to have a 'launch' property of type function but 'launch' is of type {}".format(
                 type_of_launch
             )
         )
