@@ -5,6 +5,10 @@ def _default_launch(plan, dependencies):
     return None
 
 
+def _default_updater(item):
+    return item
+
+
 def test_util_schedule_dependency_invalid_item(plan):
     schedule = _schedule.create()
 
@@ -68,6 +72,73 @@ def test_util_schedule_dependency_on_self(plan):
             struct(id="a", launch=_default_launch, dependencies=["a"])
         ),
         "schedule: Item a specifies itself as its dependency",
+    )
+
+
+def test_util_schedule_add_duplicate_id(plan):
+    schedule = _schedule.create()
+
+    item_a = _schedule.item(id="a", launch=_default_launch)
+    schedule.add(item_a)
+
+    # Adding an item with the same id should fail
+    expect.fails(
+        lambda: schedule.add(item_a),
+        "schedule: Failed to add item a: item with the same ID already exists",
+    )
+
+
+def test_util_schedule_update_missing_item(plan):
+    schedule = _schedule.create()
+
+    expect.fails(
+        lambda: schedule.update(id="a", updater=_default_updater),
+        "schedule: Failed to update item a: item does not exist",
+    )
+
+
+def test_util_schedule_update_invalid_updater(plan):
+    schedule = _schedule.create()
+
+    item_a = _schedule.item(id="a", launch=_default_launch)
+    schedule.add(item_a)
+
+    expect.fails(
+        lambda: schedule.update(id="a", updater=123),
+        "schedule: Failed to update item a: expected 'updater' to be of type function but 'updater' is of type int",
+    )
+
+
+def test_util_schedule_update_success(plan):
+    schedule = _schedule.create()
+
+    item_a = _schedule.item(id="a", launch=_default_launch)
+    item_b = _schedule.item(id="b", launch=_default_launch, dependencies=["a"])
+    item_c = _schedule.item(id="c", launch=_default_launch, dependencies=["a"])
+
+    schedule.add(item_a)
+    schedule.add(item_b)
+    schedule.add(item_c)
+
+    expect.eq(schedule.sequence(), [item_a, item_b, item_c])
+
+    updated_item_b = _schedule.item(id="b", launch=_default_launch, dependencies=["c"])
+    schedule.update(id="b", updater=lambda item: updated_item_b)
+
+    expect.eq(schedule.sequence(), [item_a, item_c, updated_item_b])
+
+
+def test_util_schedule_update_changed_id(plan):
+    schedule = _schedule.create()
+
+    item_a = _schedule.item(id="a", launch=_default_launch)
+    schedule.add(item_a)
+
+    expect.fails(
+        lambda: schedule.update(
+            id="a", updater=lambda item: _schedule.item(id="b", launch=_default_launch)
+        ),
+        "schedule: Failed to update item a: updater changed the ID from a to b",
     )
 
 

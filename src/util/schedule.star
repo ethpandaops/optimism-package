@@ -10,11 +10,45 @@ def create():
             _assert_item(item)
 
             if __items_by_id.get(item.id):
-                fail("Failed to add item {}: item with the same ID already exists")
+                fail(
+                    "schedule: Failed to add item {}: item with the same ID already exists".format(
+                        item.id
+                    )
+                )
 
             __items_by_id[item.id] = item
 
         return __self()
+
+    def update(id, updater):
+        if id not in __items_by_id:
+            fail("schedule: Failed to update item {}: item does not exist".format(id))
+
+        # We rigorously ensure that all is well because the errors from here would not very readable
+        type_of_updater = type(updater)
+        if type_of_updater != "function":
+            fail(
+                "schedule: Failed to update item {}: expected 'updater' to be of type function but 'updater' is of type {}".format(
+                    id, type_of_updater
+                )
+            )
+
+        item = __items_by_id[id]
+        updated_item = _assert_item(updater(item=item))
+
+        if updated_item.id != item.id:
+            fail(
+                "schedule: Failed to update item {}: updater changed the ID from {} to {}".format(
+                    id, item.id, updated_item.id
+                )
+            )
+
+        __items_by_id[id] = updated_item
+
+        return __self()
+
+    def items():
+        return __items_by_id.values()
 
     # This function returns the items in the order they should be launched
     # based on their dependencies.
@@ -90,6 +124,8 @@ def create():
 
     __self_ref[0] = struct(
         add=add,
+        update=update,
+        items=items,
         sequence=sequence,
     )
 
