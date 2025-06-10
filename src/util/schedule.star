@@ -111,7 +111,10 @@ def launch(plan, schedule):
                 )
             )
 
-        launched[item.id] = item.launch(plan=plan, dependencies=launched)
+        # We will always only pass the explicitly defined dependencies
+        item_dependencies = {id: launched[id] for id in item.dependencies}
+
+        launched[item.id] = item.launch(plan=plan, dependencies=item_dependencies)
 
     return launched
 

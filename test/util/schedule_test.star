@@ -251,3 +251,39 @@ def test_util_schedule_launch_branching(plan):
             "d": 'd launched with dependencies {"a": "a launched with dependencies {}", "b": "b launched with dependencies {\\"a\\": \\"a launched with dependencies {}\\"}", "c1": "c1 launched with dependencies {\\"a\\": \\"a launched with dependencies {}\\", \\"b\\": \\"b launched with dependencies {\\\\\\"a\\\\\\": \\\\\\"a launched with dependencies {}\\\\\\"}\\"}", "c2": "c2 launched with dependencies {\\"a\\": \\"a launched with dependencies {}\\", \\"b\\": \\"b launched with dependencies {\\\\\\"a\\\\\\": \\\\\\"a launched with dependencies {}\\\\\\"}\\", \\"c1\\": \\"c1 launched with dependencies {\\\\\\"a\\\\\\": \\\\\\"a launched with dependencies {}\\\\\\", \\\\\\"b\\\\\\": \\\\\\"b launched with dependencies {\\\\\\\\\\\\\\"a\\\\\\\\\\\\\\": \\\\\\\\\\\\\\"a launched with dependencies {}\\\\\\\\\\\\\\"}\\\\\\"}\\"}"}',
         },
     )
+
+
+def test_util_schedule_launch_no_implicit_dependencies(plan):
+    schedule = _schedule.create()
+
+    schedule.add(
+        _schedule.item(
+            id="a",
+            launch=lambda plan, dependencies: expect.eq(dependencies, {}),
+        )
+    )
+
+    schedule.add(
+        _schedule.item(
+            id="b",
+            launch=lambda plan, dependencies: expect.eq(dependencies, {"a": None}),
+            dependencies=["a"],
+        )
+    )
+
+    schedule.add(
+        _schedule.item(
+            id="c",
+            launch=lambda plan, dependencies: expect.eq(dependencies, {"b": None}),
+            dependencies=["b"],
+        )
+    )
+
+    expect.eq(
+        _schedule.launch(plan, schedule),
+        {
+            "a": None,
+            "b": None,
+            "c": None,
+        },
+    )
