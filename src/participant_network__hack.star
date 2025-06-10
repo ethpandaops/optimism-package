@@ -1,5 +1,6 @@
 _op_batcher_launcher = import_module("./batcher/op-batcher/launcher.star")
 _op_conductor_launcher = import_module("./conductor/op-conductor/launcher.star")
+_op_conductor_ops_launcher = import_module("./conductor/op-conductor-ops/launcher.star")
 _op_proposer_launcher = import_module("./proposer/op-proposer/launcher.star")
 util = import_module("./util.star")
 _net = import_module("/src/util/net.star")
@@ -32,14 +33,11 @@ def launch_participant_network__hack(
 ):
     # In the legacy setup the first node is always the sequencer
     sequencer_participant = original_participant_network_output__hack.participants[0]
-    conductor_context = (
-        _op_conductor_launcher.launch(
-            plan=plan,
-            params=conductor_params,
-            network_params=network_params,
-            deployment_output=deployment_output,
-            # FIXME We need to plumb the legacy args into the new format so that we make our lives easier when we're switching
-            el_params=struct(
+    sequencers_params=[
+        struct(
+            name="sequencer",
+            sequencer="sequencer",
+            el=struct(
                 service_name=sequencer_participant.el_context.ip_addr,
                 ports={
                     _net.RPC_PORT_NAME: _net.port(
@@ -47,7 +45,7 @@ def launch_participant_network__hack(
                     )
                 },
             ),
-            cl_params=struct(
+            cl=struct(
                 service_name=sequencer_participant.cl_context.ip_addr,
                 ports={
                     _net.RPC_PORT_NAME: _net.port(
@@ -55,6 +53,19 @@ def launch_participant_network__hack(
                     )
                 },
             ),
+            conductor_params=conductor_params,
+        )
+    ]
+
+    conductor_context = (
+        _op_conductor_launcher.launch(
+            plan=plan,
+            params=conductor_params,
+            network_params=network_params,
+            deployment_output=deployment_output,
+            # FIXME We need to plumb the legacy args into the new format so that we make our lives easier when we're switching
+            el_params=sequencers_params.el,
+            cl_params=sequencers_params.cl,
             observability_helper=observability_helper,
             supervisors_params=supervisors_params,
             # Sidecar context is now deeply buried in the el_cl_launcher output
@@ -67,6 +78,15 @@ def launch_participant_network__hack(
         else None
     )
 
+    _op_conductor_ops_launcher.launch(
+        plan=plan,
+        l2_params=struct(
+            participants=[sequencers_params],
+            network_params=network_params,
+        ),
+        registry=registry,
+    )
+
     batcher_key = util.read_network_config_value(
         plan,
         deployment_output,
@@ -77,28 +97,7 @@ def launch_participant_network__hack(
         plan=plan,
         params=batcher_params,
         # FIXME We need to plumb the legacy args into the new format so that we make our lives easier when we're switching
-        sequencers_params=[
-            struct(
-                el=struct(
-                    service_name=sequencer_participant.el_context.ip_addr,
-                    ports={
-                        _net.RPC_PORT_NAME: _net.port(
-                            number=sequencer_participant.el_context.rpc_port_num
-                        )
-                    },
-                ),
-                cl=struct(
-                    service_name=sequencer_participant.cl_context.ip_addr,
-                    ports={
-                        _net.RPC_PORT_NAME: _net.port(
-                            number=sequencer_participant.cl_context.http_port
-                        )
-                    },
-                ),
-                # Conductor params are not being parsed yet
-                conductor_params=None,
-            )
-        ],
+        sequencers_params=sequencers_params,
         l1_config_env_vars=l1_config_env_vars,
         gs_batcher_private_key=batcher_key,
         network_params=network_params,

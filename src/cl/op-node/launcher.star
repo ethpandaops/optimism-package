@@ -38,6 +38,7 @@ def launch(
     network_params,
     da_params,
     supervisors_params,
+    conductor_params,
     is_sequencer,
     jwt_file,
     deployment_output,
@@ -72,6 +73,7 @@ def launch(
         network_params=network_params,
         da_params=da_params,
         supervisors_params=supervisors_params,
+        conductor_params=conductor_params,
         is_sequencer=is_sequencer,
         jwt_file=jwt_file,
         deployment_output=deployment_output,
@@ -123,6 +125,7 @@ def get_service_config(
     network_params,
     da_params,
     supervisors_params,
+    conductor_params,
     jwt_file,
     deployment_output,
     is_sequencer,
@@ -249,8 +252,20 @@ def get_service_config(
 
         cmd += [
             "--p2p.sequencer.key=" + sequencer_private_key,
-            "--sequencer.enabled",
+            "--sequencer.enabled=true",
             "--sequencer.l1-confs=2",
+        ]
+
+    if conductor_params:
+        cmd += [
+            "--conductor.enabled={0}".format("true"),
+            "--conductor.rpc={0}".format(
+                _net.service_url(
+                    conductor_params.service_name,
+                    conductor_params.ports[_net.RPC_PORT_NAME],
+                )
+            ),
+            "--sequencer.stopped=true",
         ]
 
     if len(cl_contexts) > 0:

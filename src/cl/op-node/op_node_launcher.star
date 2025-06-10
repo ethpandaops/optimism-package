@@ -275,6 +275,7 @@ def get_beacon_config(
                     conductor_params.ports[_net.RPC_PORT_NAME],
                 )
             ),
+            "--sequencer.stopped=true",
         ]
 
     if len(existing_cl_clients) > 0:

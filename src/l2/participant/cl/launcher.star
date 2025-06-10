@@ -2,12 +2,15 @@ _hildr_launcher = import_module("/src/cl/hildr/launcher.star")
 _kona_node_launcher = import_module("/src/cl/kona-node/launcher.star")
 _op_node_launcher = import_module("/src/cl/op-node/launcher.star")
 
+_filter = import_module("/src/util/filter.star")
+
 
 def launch(
     plan,
     params,
     network_params,
     supervisors_params,
+    conductor_params,
     da_params,
     is_sequencer,
     jwt_file,
@@ -21,8 +24,10 @@ def launch(
     node_selectors,
     observability_helper,
 ):
+    cl = None
+
     if params.type == "hildr":
-        return _hildr_launcher.launch(
+        cl = _hildr_launcher.launch(
             plan=plan,
             params=params,
             network_params=network_params,
@@ -39,7 +44,7 @@ def launch(
             observability_helper=observability_helper,
         )
     elif params.type == "kona-node":
-        return _kona_node_launcher.launch(
+        cl = _kona_node_launcher.launch(
             plan=plan,
             params=params,
             network_params=network_params,
@@ -56,12 +61,13 @@ def launch(
             observability_helper=observability_helper,
         )
     elif params.type == "op-node":
-        return _op_node_launcher.launch(
+        cl = _op_node_launcher.launch(
             plan=plan,
             params=params,
             network_params=network_params,
             da_params=da_params,
             supervisors_params=supervisors_params,
+            conductor_params=conductor_params,
             is_sequencer=is_sequencer,
             jwt_file=jwt_file,
             deployment_output=deployment_output,
@@ -74,3 +80,5 @@ def launch(
             node_selectors=node_selectors,
             observability_helper=observability_helper,
         )
+
+    return cl
