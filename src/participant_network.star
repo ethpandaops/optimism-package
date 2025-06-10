@@ -73,7 +73,7 @@ def launch_participant_network(
             el_context,
             cl_context,
             # We only add the sidecar context for the first participant (the sequencer)
-            # 
+            #
             # FIXME Kill this with fire
             sidecar_context=sidecar_context__hack if index == 0 else None,
         )
