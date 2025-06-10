@@ -119,7 +119,7 @@ def run(plan, args={}):
             _schedule.item(
                 id="l1.env_vars",
                 launch=lambda plan, dependencies: {
-                    "L1_RPC_KIND": dependencies["l1.launch"].rpc_kind,
+                    "L1_RPC_KIND": "standard",
                     "L1_RPC_URL": dependencies["l1.launch"]
                     .all_participants[0]
                     .el_context.rpc_http_url,
