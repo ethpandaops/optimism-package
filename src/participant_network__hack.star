@@ -74,18 +74,18 @@ def launch_participant_network__hack(
         sequencers_params=[
             struct(
                 el=struct(
-                    service_name=all_el_contexts[0].ip_addr,
+                    service_name=sequencer_participant.el_context.ip_addr,
                     ports={
                         _net.RPC_PORT_NAME: _net.port(
-                            number=all_el_contexts[0].rpc_port_num
+                            number=sequencer_participant.el_context.rpc_port_num
                         )
                     },
                 ),
                 cl=struct(
-                    service_name=all_cl_contexts[0].ip_addr,
+                    service_name=sequencer_participant.cl_context.ip_addr,
                     ports={
                         _net.RPC_PORT_NAME: _net.port(
-                            number=all_cl_contexts[0].http_port
+                            number=sequencer_participant.cl_context.http_port
                         )
                     },
                 ),
@@ -119,7 +119,7 @@ def launch_participant_network__hack(
     _op_proposer_launcher.launch(
         plan=plan,
         params=proposer_params,
-        cl_context=all_cl_contexts[0],
+        cl_context=sequencer_participant.cl_context,
         l1_config_env_vars=l1_config_env_vars,
         gs_proposer_private_key=proposer_key,
         game_factory_address=game_factory_address,
