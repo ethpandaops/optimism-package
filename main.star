@@ -179,10 +179,10 @@ def run(plan, args={}):
             id="op.contracts.deploy",
             launch=lambda plan, dependencies: contract_deployer.deploy_contracts(
                 plan=plan,
-                priv_key=dependencies["l1.private_key"],
-                l1_config_env_vars=dependencies["l1.env_vars"],
+                priv_key=dependencies["l1"].private_key,
+                l1_config_env_vars=dependencies["l1"].env_vars,
                 optimism_args=optimism_args,
-                l1_network=dependencies["l1.network"],
+                l1_network=dependencies["l1"].network,
                 altda_args=altda_deploy_config,
             ),
             dependencies=["l1"],
