@@ -5,6 +5,12 @@ def create():
     def __self():
         return __self_ref[0]
 
+    # Adds an item to the schedule.
+    # 
+    # This function will fail if the item already exists in the schedule,
+    # or if the item is not valid.
+    # 
+    # It will return the schedule itself so that it can be chained.
     def add(*items):
         for item in items:
             _assert_item(item)
@@ -20,6 +26,15 @@ def create():
 
         return __self()
 
+    # Updates an item in the schedule.
+    # 
+    # This is useful for inserting launch steps into the schedule
+    # after the item has been added by changing the dependencies of the item.
+    # 
+    # This function will fail if the item does not exist in the schedule,
+    # or if the updater is not a function, or if the updater changes the ID of the item.
+    #
+    # It will return the schedule itself so that it can be chained.
     def update(id, updater):
         if id not in __items_by_id:
             fail("schedule: Failed to update item {}: item does not exist".format(id))
@@ -47,6 +62,7 @@ def create():
 
         return __self()
 
+    # Returns all the items in the schedule in an unspecified order
     def items():
         return __items_by_id.values()
 
