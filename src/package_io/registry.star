@@ -12,9 +12,11 @@ OP_NODE = "op-node"
 KONA_NODE = "kona-node"
 HILDR = "hildr"
 
+OP_SUPERVISOR = "op-supervisor"
+KONA_SUPERVISOR = "kona-supervisor"
+
 OP_BATCHER = "op-batcher"
 OP_CHALLENGER = "op-challenger"
-OP_SUPERVISOR = "op-supervisor"
 OP_PROPOSER = "op-proposer"
 OP_CONDUCTOR = "op-conductor"
 OP_DEPLOYER = "op-deployer"
@@ -50,8 +52,10 @@ _DEFAULT_IMAGES = {
     OP_BATCHER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
     # Challenger
     OP_CHALLENGER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
-    # Supervisor
+    # op-supervisor
     OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+    # kona-supervisor
+    KONA_SUPERVISOR: "ghcr.io/op-rs/kona/kona-supervisor:latest",
     # Proposer
     OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
     # Conductor
