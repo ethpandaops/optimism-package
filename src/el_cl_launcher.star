@@ -168,6 +168,11 @@ def launch(
     rollup_boost_enabled = "rollup-boost" in additional_services
     external_builder = mev_params.builder_host and mev_params.builder_port
 
+    # In the legacy setup, we only get one sidecar context (for the single sequencer)
+    #
+    # We'll store it here and add it to the first participant
+    sidecar_context__hack = None
+
     for index, participant in enumerate(participants):
         cl_type = participant.cl_type
         el_type = participant.el_type
@@ -343,6 +348,7 @@ def launch(
                 builder_context=el_builder_context,
                 jwt_file=jwt_file,
             ).context
+            sidecar_context__hack = sidecar_context
 
             all_el_contexts.append(el_builder_context)
         else:
@@ -423,7 +429,7 @@ def launch(
             sequencer_enabled = False
 
     plan.print("Successfully added {0} EL/CL participants".format(num_participants))
-    return all_el_contexts, all_cl_contexts
+    return all_el_contexts, all_cl_contexts, sidecar_context__hack
 
 
 def _launch_sidecar(
