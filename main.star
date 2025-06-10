@@ -16,6 +16,7 @@ ethereum_package_static_files = import_module(
 )
 
 _registry = import_module("./src/package_io/registry.star")
+_schedule = import_module("./src/util/schedule.star")
 
 
 def run(plan, args={}):
@@ -56,57 +57,154 @@ def run(plan, args={}):
     observability_params = optimism_args.observability
     observability_helper = observability.make_helper(observability_params)
 
+    # First we create a deployment schdule so that we can add bunch of services and tasks into it
+    #
+    # In this PoC, we fill the schedule with the simple L1 tasks - launch & deploy contracts
+    schedule = _schedule.create()
+
     # Deploy the L1
-    l1_network = ""
     if external_l1_args:
         plan.print("Using external L1")
-        plan.print(external_l1_args)
 
-        l1_rpc_url = external_l1_args.el_rpc_url
-        l1_priv_key = external_l1_args.priv_key
+        schedule.add(
+            _schedule.item(
+                id="l1.env_vars",
+                launch=lambda plan, dependencies: {
+                    "L1_RPC_KIND": external_l1_args.rpc_kind,
+                    "L1_RPC_URL": external_l1_args.el_rpc_url,
+                    "CL_RPC_URL": external_l1_args.cl_rpc_url,
+                    "L1_WS_URL": external_l1_args.el_ws_url,
+                    "L1_CHAIN_ID": external_l1_args.network_id,
+                },
+            )
+        )
 
-        l1_config_env_vars = {
-            "L1_RPC_KIND": external_l1_args.rpc_kind,
-            "L1_RPC_URL": l1_rpc_url,
-            "CL_RPC_URL": external_l1_args.cl_rpc_url,
-            "L1_WS_URL": external_l1_args.el_ws_url,
-            "L1_CHAIN_ID": external_l1_args.network_id,
-        }
+        schedule.add(
+            _schedule.item(
+                id="l1.private_key",
+                launch=lambda plan, dependencies: external_l1_args.priv_key,
+            )
+        )
 
-        plan.print("Waiting for network to sync")
-        wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
+        schedule.add(
+            _schedule.item(
+                id="l1.network",
+                launch=lambda plan, dependencies: "",
+            )
+        )
+
+        schedule.add(
+            _schedule.item(
+                id="l1.startup",
+                launch=lambda plan, dependencies: wait_for_sync.wait_for_sync(
+                    plan,
+                    dependencies["l1.env_vars"],
+                ),
+                dependencies=["l1.env_vars"],
+            )
+        )
     else:
         plan.print("Deploying a local L1")
-        l1 = ethereum_package.run(plan, ethereum_args)
-        plan.print(l1.network_params)
-        # Get L1 info
-        all_l1_participants = l1.all_participants
-        l1_network = "local"
-        l1_network_params = l1.network_params
-        l1_network_id = l1.network_id
-        l1_rpc_url = all_l1_participants[0].el_context.rpc_http_url
-        l1_priv_key = l1.pre_funded_accounts[
-            12
-        ].private_key  # reserved for L2 contract deployers
-        l1_config_env_vars = get_l1_config(
-            all_l1_participants, l1_network_params, l1_network_id
+
+        schedule.add(
+            _schedule.item(
+                id="l1.launch",
+                launch=lambda plan, dependencies: ethereum_package.run(
+                    plan, ethereum_args
+                ),
+            )
         )
-        plan.print("Waiting for L1 to start up")
-        wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
 
-    deployment_output = contract_deployer.deploy_contracts(
-        plan,
-        l1_priv_key,
-        l1_config_env_vars,
-        optimism_args,
-        l1_network,
-        altda_deploy_config,
+        schedule.add(
+            _schedule.item(
+                id="l1.env_vars",
+                launch=lambda plan, dependencies: {
+                    "L1_RPC_KIND": dependencies["l1.launch"].rpc_kind,
+                    "L1_RPC_URL": dependencies["l1.launch"]
+                    .all_participants[0]
+                    .el_context.rpc_http_url,
+                    "CL_RPC_URL": dependencies["l1.launch"]
+                    .all_participants[0]
+                    .cl_context.beacon_http_url,
+                    "L1_WS_URL": dependencies["l1.launch"]
+                    .all_participants[0]
+                    .el_context.ws_url,
+                    "L1_CHAIN_ID": dependencies["l1.launch"].network_id,
+                },
+            )
+        )
+
+        schedule.add(
+            _schedule.item(
+                id="l1.private_key",
+                launch=lambda plan, dependencies: dependencies["l1.launch"]
+                .pre_funded_accounts[12]
+                .private_key,
+                dependencies=["l1.launch"],
+            )
+        )
+
+        schedule.add(
+            _schedule.item(
+                id="l1.network",
+                launch=lambda plan, dependencies: "local",
+            )
+        )
+
+        schedule.add(
+            _schedule.item(
+                id="l1.startup",
+                launch=lambda plan, dependencies: wait_for_sync.wait_for_startup(
+                    plan,
+                    dependencies["l1.env_vars"],
+                ),
+                dependencies=["l1.env_vars"],
+            )
+        )
+
+    schedule.add(
+        _schedule.item(
+            id="l1",
+            launch=lambda plan, dependencies: struct(
+                private_key=dependencies["l1.private_key"],
+                env_vars=dependencies["l1.env_vars"],
+                network=dependencies["l1.network"],
+            ),
+            dependencies=["l1.startup", "l1.private_key", "l1.env_vars", "l1.network"],
+        )
     )
 
-    jwt_file = plan.upload_files(
-        src=ethereum_package_static_files.JWT_PATH_FILEPATH,
-        name="op_jwt_file",
+    schedule.add(
+        "op.contracts.deploy",
+        lambda plan, dependencies: contract_deployer.deploy_contracts(
+            plan=plan,
+            priv_key=dependencies["l1.private_key"],
+            l1_config_env_vars=dependencies["l1.env_vars"],
+            optimism_args=optimism_args,
+            l1_network=dependencies["l1.network"],
+            altda_args=altda_deploy_config,
+        ),
+        dependencies=["l1"],
     )
+
+    schedule.add(
+        "op.jwt.upload",
+        lambda plan, dependencies: plan.upload_files(
+            src=ethereum_package_static_files.JWT_PATH_FILEPATH,
+            name="op_jwt_file",
+        ),
+    )
+
+    created = _schedule.launch(plan, schedule)
+
+    plan.print("HERERERERERERERE")
+    plan.print(created)
+
+    deployment_output = created["op.contracts.deploy"]
+    jwt_file = created["op.jwt.upload"]
+    l1_config_env_vars = created["l1.env_vars"]
+    l1_priv_key = created["l1.private_key"]
+    l1_network = created["l1.network"]
 
     # TODO We need to create the dependency sets before we launch the chains since
     # e.g. op-node now depends on the artifacts to be present
