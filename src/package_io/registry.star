@@ -21,6 +21,7 @@ OP_PROPOSER = "op-proposer"
 OP_CONDUCTOR = "op-conductor"
 OP_DEPLOYER = "op-deployer"
 OP_FAUCET = "op-faucet"
+OP_CONDUCTOR_OPS = "op-conductor-ops"
 
 PROXYD = "proxyd"
 
@@ -66,6 +67,7 @@ _DEFAULT_IMAGES = {
     # TODO: update to use a versioned image when available
     # For now, we'll need users to pass the image explicitly
     OP_FAUCET: "",
+    OP_CONDUCTOR_OPS: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor-ops:v0.0.2",
     # Proxyd
     PROXYD: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.5",
     # Sidecar

@@ -1,0 +1,18 @@
+[networks]
+
+[networks.{{ .network_name }}]
+sequencers = [
+{{- range $name, $config := .sequencers }}
+"{{ $name }}",
+{{- end }}
+]
+
+[sequencers]
+
+{{- range $name, $sequencer := .sequencers }}
+[sequencers.{{ $name }}]
+raft_addr = "{{ $sequencer.conductor_raft_address }}"
+conductor_rpc_url = "{{ $sequencer.conductor_rpc_url }}"
+node_rpc_url = "{{ $sequencer.cl_rpc_url }}"
+voting = true
+{{- end }}
