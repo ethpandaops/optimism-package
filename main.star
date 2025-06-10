@@ -200,9 +200,11 @@ def run(plan, args={}):
     plan.print("HERERERERERERERE")
     plan.print(created)
 
+    # Now we just plumb the schedule output into the existing code
     deployment_output = created["op.contracts.deploy"]
     jwt_file = created["op.jwt.upload"]
     l1_config_env_vars = created["l1.env_vars"]
+    l1_rpc_url = l1_config_env_vars["L1_RPC_URL"]
     l1_priv_key = created["l1.private_key"]
     l1_network = created["l1.network"]
 
