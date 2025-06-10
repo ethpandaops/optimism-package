@@ -1,6 +1,7 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 l2_launcher = import_module("./src/l2.star")
+l2_launcher__hack = import_module("./src/l2__hack.star")
 superchain_launcher = import_module("./src/superchain/launcher.star")
 supervisor_launcher = import_module("./src/supervisor/launcher.star")
 op_challenger_launcher = import_module("./src/challenger/op-challenger/launcher.star")
