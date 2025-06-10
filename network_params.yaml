@@ -39,7 +39,8 @@ optimism_package:
       batcher_params:
         extra_params: []
       conductor_params:
-        enabled: True
+        enabled: true
+        bootstrap: true
       additional_services: ["rollup-boost"]
       tx_fuzzer_params:
         enabled: true

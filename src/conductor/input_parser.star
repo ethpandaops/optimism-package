@@ -9,6 +9,7 @@ _DEFAULT_ARGS = {
     "admin": True,
     "proxy": True,
     "paused": False,
+    "bootstrap": False,
 }
 
 
