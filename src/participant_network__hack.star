@@ -95,7 +95,7 @@ def launch_participant_network__hack(
         plan=plan,
         params=batcher_params,
         # FIXME We need to plumb the legacy args into the new format so that we make our lives easier when we're switching
-        sequencers_params=sequencers_params,
+        sequencers_params=[sequencer_params],
         l1_config_env_vars=l1_config_env_vars,
         gs_batcher_private_key=batcher_key,
         network_params=network_params,
