@@ -115,6 +115,7 @@ def run(plan, args={}):
             )
         )
 
+        # We have a lot of services dependent on L1 env vars so we create a separate item for them
         schedule.add(
             _schedule.item(
                 id="l1.env_vars",
