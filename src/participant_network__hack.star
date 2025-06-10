@@ -81,7 +81,7 @@ def launch_participant_network__hack(
     _op_conductor_ops_launcher.launch(
         plan=plan,
         l2_params=struct(
-            participants=[sequencers_params],
+            participants=sequencers_params,
             network_params=network_params,
         ),
         registry=registry,
