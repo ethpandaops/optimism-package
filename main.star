@@ -132,6 +132,7 @@ def run(plan, args={}):
                     .el_context.ws_url,
                     "L1_CHAIN_ID": dependencies["l1.launch"].network_id,
                 },
+                dependencies=["l1.launch"],
             )
         )
 
