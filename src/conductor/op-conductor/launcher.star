@@ -102,7 +102,7 @@ def get_service_config(
         #
         # TODO This might be later added as a multiplier parameter if needed
         "OP_CONDUCTOR_HEALTHCHECK_UNSAFE_INTERVAL": str(
-            network_params.seconds_per_slot * 3
+            network_params.seconds_per_slot * 2 + 1
         ),
         "OP_CONDUCTOR_LOG_FORMAT": "logfmt",
         "OP_CONDUCTOR_LOG_LEVEL": "info",

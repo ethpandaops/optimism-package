@@ -171,6 +171,36 @@ def run(plan, args={}):
             observability_helper=observability_helper,
         )
 
+    for index, chain in enumerate(optimism_args.chains):
+        # We filter out the supervisors applicable to this network
+        l2_supervisors_params = [
+            supervisor_params
+            for supervisor_params in optimism_args.supervisors
+            if chain.network_params.network_id
+            in supervisor_params.superchain.participants
+        ]
+
+        original_l2_output__hack = l2s[index]
+
+        l2_launcher__hack.launch_l2__hack(
+            original_l2_output__hack=original_l2_output__hack,
+            plan=plan,
+            l2_services_suffix=chain.network_params.name,
+            l2_args=chain,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
+            l1_config=l1_config_env_vars,
+            l1_priv_key=l1_priv_key,
+            l1_rpc_url=l1_rpc_url,
+            global_log_level=global_log_level,
+            global_node_selectors=global_node_selectors,
+            global_tolerations=global_tolerations,
+            persistent=persistent,
+            observability_helper=observability_helper,
+            supervisors_params=l2_supervisors_params,
+            registry=registry,
+        )
+
     if optimism_args.faucet.enabled:
         _install_faucet(
             plan=plan,
