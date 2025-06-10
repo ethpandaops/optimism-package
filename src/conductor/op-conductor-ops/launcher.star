@@ -22,7 +22,11 @@ def launch(
 
         return None
 
-    config_artifact = _create_op_conductor_ops_config_artifact(plan=plan, network_params=l2_params.network_params, participants_params=participants_params)
+    config_artifact = _create_op_conductor_ops_config_artifact(
+        plan=plan,
+        network_params=l2_params.network_params,
+        participants_params=participants_params,
+    )
 
     _run_op_conductor_ops_command(
         plan=plan,
@@ -72,6 +76,7 @@ def _run_op_conductor_ops_command(
 
 def _get_participants_params_with_conductors(l2_params):
     return [
+        participant_params
         for participant_params in l2_params.participants
         if participant_params.conductor_params
         and _selectors.is_sequencer(participant_params)
