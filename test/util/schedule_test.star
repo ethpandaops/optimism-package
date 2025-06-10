@@ -200,7 +200,7 @@ def test_util_schedule_launch_branching(plan):
         _schedule.item(
             id="a",
             launch=lambda plan, dependencies: "a launched with dependencies {}".format(
-                dependencies
+                ",".join(dependencies.keys())
             ),
         )
     )
@@ -208,7 +208,7 @@ def test_util_schedule_launch_branching(plan):
         _schedule.item(
             id="b",
             launch=lambda plan, dependencies: "b launched with dependencies {}".format(
-                dependencies
+                ",".join(dependencies.keys())
             ),
             dependencies=["a"],
         )
@@ -217,7 +217,7 @@ def test_util_schedule_launch_branching(plan):
         _schedule.item(
             id="c1",
             launch=lambda plan, dependencies: "c1 launched with dependencies {}".format(
-                dependencies
+                ",".join(dependencies.keys())
             ),
             dependencies=["b"],
         )
@@ -226,7 +226,7 @@ def test_util_schedule_launch_branching(plan):
         _schedule.item(
             id="c2",
             launch=lambda plan, dependencies: "c2 launched with dependencies {}".format(
-                dependencies
+                ",".join(dependencies.keys())
             ),
             dependencies=["b"],
         )
@@ -235,7 +235,7 @@ def test_util_schedule_launch_branching(plan):
         _schedule.item(
             id="d",
             launch=lambda plan, dependencies: "d launched with dependencies {}".format(
-                dependencies
+                ",".join(dependencies.keys())
             ),
             dependencies=["c1", "c2"],
         )
@@ -244,11 +244,11 @@ def test_util_schedule_launch_branching(plan):
     expect.eq(
         _schedule.launch(plan, schedule),
         {
-            "a": "a launched with dependencies {}",
-            "b": 'b launched with dependencies {"a": "a launched with dependencies {}"}',
-            "c1": 'c1 launched with dependencies {"b": "b launched with dependencies {\\"a\\": \\"a launched with dependencies {}\\"}"}',
-            "c2": 'c2 launched with dependencies {"b": "b launched with dependencies {\\"a\\": \\"a launched with dependencies {}\\"}", "c1": "c1 launched with dependencies {\\"a\\": \\"a launched with dependencies {}\\", \\"b\\": \\"b launched with dependencies {\\\\\\"a\\\\\\": \\\\\\"a launched with dependencies {}\\\\\\"}\\"}"}',
-            "d": 'd launched with dependencies {"c1": "c1 launched with dependencies {\\"a\\": \\"a launched with dependencies {}\\", \\"b\\": \\"b launched with dependencies {\\\\\\"a\\\\\\": \\\\\\"a launched with dependencies {}\\\\\\"}\\"}", "c2": "c2 launched with dependencies {\\"a\\": \\"a launched with dependencies {}\\", \\"b\\": \\"b launched with dependencies {\\\\\\"a\\\\\\": \\\\\\"a launched with dependencies {}\\\\\\"}\\", \\"c1\\": \\"c1 launched with dependencies {\\\\\\"a\\\\\\": \\\\\\"a launched with dependencies {}\\\\\\", \\\\\\"b\\\\\\": \\\\\\"b launched with dependencies {\\\\\\\\\\\\\\"a\\\\\\\\\\\\\\": \\\\\\\\\\\\\\"a launched with dependencies {}\\\\\\\\\\\\\\"}\\\\\\"}\\"}"}',
+            "a": "a launched with dependencies ",
+            "b": "b launched with dependencies a",
+            "c1": "c1 launched with dependencies b",
+            "c2": "c2 launched with dependencies b",
+            "d": "d launched with dependencies c1,c2",
         },
     )
 
