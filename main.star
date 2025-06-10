@@ -175,24 +175,28 @@ def run(plan, args={}):
     )
 
     schedule.add(
-        "op.contracts.deploy",
-        lambda plan, dependencies: contract_deployer.deploy_contracts(
-            plan=plan,
-            priv_key=dependencies["l1.private_key"],
-            l1_config_env_vars=dependencies["l1.env_vars"],
-            optimism_args=optimism_args,
-            l1_network=dependencies["l1.network"],
-            altda_args=altda_deploy_config,
-        ),
-        dependencies=["l1"],
+        _schedule.item(
+            id="op.contracts.deploy",
+            launch=lambda plan, dependencies: contract_deployer.deploy_contracts(
+                plan=plan,
+                priv_key=dependencies["l1.private_key"],
+                l1_config_env_vars=dependencies["l1.env_vars"],
+                optimism_args=optimism_args,
+                l1_network=dependencies["l1.network"],
+                altda_args=altda_deploy_config,
+            ),
+            dependencies=["l1"],
+        )
     )
 
     schedule.add(
-        "op.jwt.upload",
-        lambda plan, dependencies: plan.upload_files(
-            src=ethereum_package_static_files.JWT_PATH_FILEPATH,
-            name="op_jwt_file",
-        ),
+        _schedule.item(
+            id="op.jwt.upload",
+            launch=lambda plan, dependencies: plan.upload_files(
+                src=ethereum_package_static_files.JWT_PATH_FILEPATH,
+                name="op_jwt_file",
+            ),
+        )
     )
 
     created = _schedule.launch(plan, schedule)
