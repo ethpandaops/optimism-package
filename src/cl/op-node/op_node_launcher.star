@@ -64,6 +64,7 @@ def launch(
     launcher,
     service_name,
     participant,
+    conductor_params,
     global_log_level,
     persistent,
     tolerations,
@@ -97,6 +98,7 @@ def launch(
         launcher=launcher,
         service_name=service_name,
         participant=participant,
+        conductor_params=conductor_params,
         log_level=log_level,
         persistent=persistent,
         tolerations=tolerations,
@@ -142,6 +144,7 @@ def get_beacon_config(
     launcher,
     service_name,
     participant,
+    conductor_params,
     log_level,
     persistent,
     tolerations,
@@ -261,6 +264,17 @@ def get_beacon_config(
             "--p2p.sequencer.key=" + sequencer_private_key,
             "--sequencer.enabled",
             "--sequencer.l1-confs=2",
+        ]
+
+    if conductor_params:
+        cmd += [
+            "--conductor.enabled={0}".format("true"),
+            "--conductor.rpc={0}".format(
+                _net.service_url(
+                    conductor_params.service_name,
+                    conductor_params.ports[_net.RPC_PORT_NAME],
+                )
+            ),
         ]
 
     if len(existing_cl_clients) > 0:

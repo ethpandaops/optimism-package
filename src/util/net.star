@@ -1,7 +1,11 @@
 HTTP_PORT_NAME = "http"
 RPC_PORT_NAME = "rpc"
-BEACON_PORT_NAME = "beacon"
+CONSENSUS_PORT_NAME = "consensus"
+ENGINE_RPC_PORT_NAME = "engine-rpc"
+WS_PORT_NAME = "ws"
 INTEROP_RPC_PORT_NAME = "rpc-interop"
+TCP_DISCOVERY_PORT_NAME = "tcp-discovery"
+UDP_DISCOVERY_PORT_NAME = "udp-discovery"
 
 
 # Creates a struct representing a service port configuration

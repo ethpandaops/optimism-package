@@ -13,12 +13,14 @@ EL_TYPE = struct(
     op_erigon="op-erigon",
     op_nethermind="op-nethermind",
     op_besu="op-besu",
+    op_rbuilder="op-rbuilder",
     op_reth="op-reth",
 )
 
 CL_TYPE = struct(
     op_node="op-node",
     hildr="hildr",
+    kona_node="kona-node",
 )
 
 CLIENT_TYPES = struct(
@@ -27,13 +29,15 @@ CLIENT_TYPES = struct(
 )
 VOLUME_SIZE = {
     "kurtosis": {
-        "op_geth_volume_size": 5000,  # 5GB
-        "op_erigon_volume_size": 3000,  # 3GB
-        "op_nethermind_volume_size": 3000,  # 3GB
-        "op_besu_volume_size": 3000,  # 3GB
-        "op_reth_volume_size": 3000,  # 3GB
-        "op_node_volume_size": 1000,  # 1GB
+        "op-geth_volume_size": 5000,  # 5GB
+        "op-erigon_volume_size": 3000,  # 3GB
+        "op-nethermind_volume_size": 3000,  # 3GB
+        "op-besu_volume_size": 3000,  # 3GB
+        "op-rbuilder_volume_size": 3000,  # 3GB
+        "op-reth_volume_size": 3000,  # 3GB
+        "op-node_volume_size": 1000,  # 1GB
         "hildr_volume_size": 1000,  # 1GB
+        "kona-node_volume_size": 1000,  # 1GB
     },
 }
 

@@ -24,13 +24,14 @@ _shared_defaults = {
 
 
 def test_l2_participant_input_parser_empty(plan):
-    expect.eq(
-        input_parser.parse(None, _default_network_params, _default_registry),
-        [],
+    expect.fails(
+        lambda: input_parser.parse(None, _default_network_params, _default_registry),
+        "Invalid participants configuration for network my-l2: at least one participant must be defined",
     )
-    expect.eq(
-        input_parser.parse({}, _default_network_params, _default_registry),
-        [],
+
+    expect.fails(
+        lambda: input_parser.parse({}, _default_network_params, _default_registry),
+        "Invalid participants configuration for network my-l2: at least one participant must be defined",
     )
 
 
@@ -61,33 +62,45 @@ def test_l2_participant_input_parser_defaults(plan):
         ),
         [
             struct(
+                name="node0",
+                sequencer="node0",
                 cl=struct(
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
                     name="node0",
                     service_name="op-cl-1000-node0-op-node",
                     labels={
                         "op.kind": "cl",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node0",
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8547),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=9003),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
                 cl_builder=struct(
                     name="node0",
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
-                    service_name="op-cl-1000-node0-op-node",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
+                    service_name="op-clbuilder-1000-node0-op-node",
                     labels={
-                        "op.kind": "cl_builder",
-                        "op.network.id": 1000,
+                        "op.kind": "clbuilder",
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node0",
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8547),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=9003),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
@@ -98,11 +111,18 @@ def test_l2_participant_input_parser_defaults(plan):
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
                     labels={
                         "op.kind": "el",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node0",
                         "op.el.type": "op-geth",
                     },
                     ports={
-                        "rpc": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8545),
+                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=30303, transport_protocol="UDP"
+                        ),
+                        _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
                     **_shared_defaults,
                 ),
@@ -110,46 +130,83 @@ def test_l2_participant_input_parser_defaults(plan):
                     name="node0",
                     type="op-geth",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
-                    service_name="op-el-1000-node0-op-geth",
+                    service_name="op-elbuilder-1000-node0-op-geth",
                     labels={
-                        "op.kind": "el_builder",
-                        "op.network.id": 1000,
+                        "op.kind": "elbuilder",
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node0",
                         "op.el.type": "op-geth",
                     },
                     ports={
-                        "rpc": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8545),
+                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=30303, transport_protocol="UDP"
+                        ),
+                        _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
+                    key=None,
                     **_shared_defaults,
                 ),
+                mev_params=struct(
+                    builder_host=None,
+                    builder_port=None,
+                    image="flashbots/rollup-boost:latest",
+                    labels={
+                        "op.kind": "mev",
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node0",
+                        "op.mev.type": "rollup-boost",
+                    },
+                    ports={
+                        _net.RPC_PORT_NAME: _net.port(number=8541),
+                    },
+                    service_name="op-mev-rollup-boost-1000-my-l2-node0",
+                    type="rollup-boost",
+                ),
+                conductor_params=None,
             ),
             struct(
+                name="node1",
+                sequencer="node0",
                 cl=struct(
                     name="node1",
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
                     service_name="op-cl-1000-node1-op-node",
                     labels={
                         "op.kind": "cl",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node1",
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8547),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=9003),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
                 cl_builder=struct(
                     name="node1",
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
-                    service_name="op-cl-1000-node1-op-node",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
+                    service_name="op-clbuilder-1000-node1-op-node",
                     labels={
-                        "op.kind": "cl_builder",
-                        "op.network.id": 1000,
+                        "op.kind": "clbuilder",
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node1",
                         "op.cl.type": "op-node",
                     },
                     ports={
-                        "beacon": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8547),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=9003),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=9003, transport_protocol="UDP"
+                        ),
                     },
                     **_shared_defaults,
                 ),
@@ -160,11 +217,18 @@ def test_l2_participant_input_parser_defaults(plan):
                     service_name="op-el-1000-node1-op-geth",
                     labels={
                         "op.kind": "el",
-                        "op.network.id": 1000,
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node1",
                         "op.el.type": "op-geth",
                     },
                     ports={
-                        "rpc": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8545),
+                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=30303, transport_protocol="UDP"
+                        ),
+                        _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
                     **_shared_defaults,
                 ),
@@ -172,19 +236,264 @@ def test_l2_participant_input_parser_defaults(plan):
                     name="node1",
                     type="op-geth",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
-                    service_name="op-el-1000-node1-op-geth",
+                    service_name="op-elbuilder-1000-node1-op-geth",
                     labels={
-                        "op.kind": "el_builder",
-                        "op.network.id": 1000,
+                        "op.kind": "elbuilder",
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node1",
                         "op.el.type": "op-geth",
                     },
                     ports={
-                        "rpc": _net.port(number=8545),
+                        _net.RPC_PORT_NAME: _net.port(number=8545),
+                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
+                        _net.UDP_DISCOVERY_PORT_NAME: _net.port(
+                            number=30303, transport_protocol="UDP"
+                        ),
+                        _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
                     },
+                    key=None,
                     **_shared_defaults,
                 ),
+                mev_params=struct(
+                    builder_host=None,
+                    builder_port=None,
+                    image="flashbots/rollup-boost:latest",
+                    labels={
+                        "op.kind": "mev",
+                        "op.network.id": "1000",
+                        "op.network.participant.name": "node1",
+                        "op.mev.type": "rollup-boost",
+                    },
+                    ports={
+                        _net.RPC_PORT_NAME: _net.port(number=8541),
+                    },
+                    service_name="op-mev-rollup-boost-1000-my-l2-node1",
+                    type="rollup-boost",
+                ),
+                conductor_params=None,
             ),
         ],
+    )
+
+
+def test_l2_participant_input_parser_el_builder_key(plan):
+    parsed = input_parser.parse(
+        {"node0": {"el_builder": {"key": "secret key"}}},
+        _default_network_params,
+        _default_registry,
+    )
+
+    expect.eq(parsed[0].el_builder.key, "secret key")
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"el": {"key": "secret key"}}},
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid attributes in EL configuration for node0 on network my-l2: key",
+    )
+
+
+def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
+    parsed = input_parser.parse(
+        {"node0": {"conductor_params": {"enabled": True}}},
+        _default_network_params,
+        _default_registry,
+    )
+    expect.eq(
+        parsed[0].conductor_params,
+        struct(
+            enabled=True,
+            extra_params=[],
+            image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:develop",
+            labels={
+                "op.kind": "conductor",
+                "op.network.id": "1000",
+                "op.network.participant.name": "node0",
+                "op.conductor.type": "op-conductor",
+            },
+            ports={
+                _net.RPC_PORT_NAME: _net.port(number=8547),
+                _net.CONSENSUS_PORT_NAME: _net.port(number=50050),
+            },
+            service_name="op-conductor-1000-my-l2-node0",
+            admin=True,
+            proxy=True,
+            paused=False,
+        ),
+    )
+
+
+def test_l2_participant_input_parser_invalid_sequencers(plan):
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"sequencer": "nodeNada"}, "node1": {"sequencer": True}},
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid sequencer value for participant node0 on network my-l2: participant nodeNada does not exist",
+    )
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"sequencer": 7}}, _default_network_params, _default_registry
+        ),
+        "Invalid sequencer value for participant node0 on network my-l2: expected string or bool, got int 7",
+    )
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"sequencer": False}}, _default_network_params, _default_registry
+        ),
+        "Invalid sequencer configuration for network my-l2: could not find at least one sequencer",
+    )
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {
+                "node0": {
+                    "sequencer": True,
+                },
+                "node1": {
+                    "sequencer": False,
+                },
+                "node2": {"sequencer": "node1"},
+            },
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid sequencer value for participant node2 on network my-l2: participant node1 is not a sequencer",
+    )
+
+    expect.fails(
+        lambda: input_parser.parse(
+            {
+                "node0": {
+                    "sequencer": True,
+                },
+                "node1": {
+                    "sequencer": False,
+                },
+                "node2": {"sequencer": None},
+                "node3": {},
+            },
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid participants configuration on network my-l2: sequencers explicitly defined for nodes node0,node1 but left implicit for node2,node3.",
+    )
+
+
+def test_l2_participant_input_parser_explicit_sequencers(plan):
+    parsed = input_parser.parse(
+        {
+            "node0": {
+                # The first node is a sequencer explicitly
+                "sequencer": True
+            },
+            "node1": {
+                # The second node is not a sequencer explicitly
+                "sequencer": False
+            },
+            "node2": {
+                # The third node is not a sequencer explicitly
+                "sequencer": False
+            },
+            "node3": {
+                # The fourth node is not a sequencer explicitly
+                "sequencer": False
+            },
+            "node4": {
+                # The fifth node refers to a sequencer explicitly
+                "sequencer": "node0"
+            },
+        },
+        _default_network_params,
+        _default_registry,
+    )
+
+    parsed_sequencers = {p.name: p.sequencer for p in parsed}
+    expect.eq(
+        parsed_sequencers,
+        {
+            "node0": "node0",
+            "node1": "node0",
+            "node2": "node0",
+            "node3": "node0",
+            "node4": "node0",
+        },
+    )
+
+    # Now we test with multiple sequencers to see whether the assignment works
+    parsed = input_parser.parse(
+        {
+            "node0": {"sequencer": True},
+            "node1": {"sequencer": True},
+            "node2": {"sequencer": True},
+            "node3": {"sequencer": False},
+            "node4": {"sequencer": False},
+            "node5": {"sequencer": "node2"},
+            "node6": {"sequencer": False},
+            "node7": {"sequencer": False},
+            "node8": {"sequencer": False},
+            "node9": {"sequencer": False},
+        },
+        _default_network_params,
+        _default_registry,
+    )
+
+    parsed_sequencers = {p.name: p.sequencer for p in parsed}
+    expect.eq(
+        parsed_sequencers,
+        {
+            "node0": "node0",
+            "node1": "node1",
+            "node2": "node2",
+            "node3": "node0",
+            "node4": "node0",
+            "node5": "node2",
+            "node6": "node0",
+            "node7": "node0",
+            "node8": "node0",
+            "node9": "node0",
+        },
+    )
+
+    # Now we test with sequencer value pointing to self
+    parsed = input_parser.parse(
+        {
+            "node0": {"sequencer": "node0"},
+            "node1": {"sequencer": "node1"},
+            "node2": {"sequencer": "node2"},
+            "node3": {"sequencer": False},
+            "node4": {"sequencer": False},
+            "node5": {"sequencer": "node2"},
+            "node6": {"sequencer": False},
+            "node7": {"sequencer": False},
+            "node8": {"sequencer": False},
+            "node9": {"sequencer": False},
+        },
+        _default_network_params,
+        _default_registry,
+    )
+
+    parsed_sequencers = {p.name: p.sequencer for p in parsed}
+    expect.eq(
+        parsed_sequencers,
+        {
+            "node0": "node0",
+            "node1": "node1",
+            "node2": "node2",
+            "node3": "node0",
+            "node4": "node0",
+            "node5": "node2",
+            "node6": "node0",
+            "node7": "node0",
+            "node8": "node0",
+            "node9": "node0",
+        },
     )
 
 

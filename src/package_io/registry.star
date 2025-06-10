@@ -12,12 +12,16 @@ OP_NODE = "op-node"
 KONA_NODE = "kona-node"
 HILDR = "hildr"
 
+OP_SUPERVISOR = "op-supervisor"
+KONA_SUPERVISOR = "kona-supervisor"
+
 OP_BATCHER = "op-batcher"
 OP_CHALLENGER = "op-challenger"
-OP_SUPERVISOR = "op-supervisor"
 OP_PROPOSER = "op-proposer"
+OP_CONDUCTOR = "op-conductor"
 OP_DEPLOYER = "op-deployer"
 OP_FAUCET = "op-faucet"
+OP_CONDUCTOR_OPS = "op-conductor-ops"
 
 PROXYD = "proxyd"
 
@@ -42,25 +46,30 @@ _DEFAULT_IMAGES = {
     OP_BESU: "ghcr.io/optimism-java/op-besu:latest",
     OP_RBUILDER: "ghcr.io/flashbots/op-rbuilder:latest",
     # CL images
-    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
     KONA_NODE: "ghcr.io/op-rs/kona/kona-node:latest",
     HILDR: "ghcr.io/optimism-java/hildr:latest",
     # Batching
     OP_BATCHER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
     # Challenger
     OP_CHALLENGER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
-    # Supervisor
+    # op-supervisor
     OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+    # kona-supervisor
+    KONA_SUPERVISOR: "ghcr.io/op-rs/kona/kona-supervisor:latest",
     # Proposer
     OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
+    # Conductor
+    OP_CONDUCTOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:develop",
     # deployer
     OP_DEPLOYER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2",
     # Faucet
     # TODO: update to use a versioned image when available
     # For now, we'll need users to pass the image explicitly
     OP_FAUCET: "",
+    OP_CONDUCTOR_OPS: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor-ops:v0.0.2",
     # Proxyd
-    PROXYD: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.2",
+    PROXYD: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.5",
     # Sidecar
     ROLLUP_BOOST: "flashbots/rollup-boost:latest",
     # DA Server

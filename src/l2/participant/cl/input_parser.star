@@ -25,15 +25,18 @@ _IMAGE_IDS = {
 }
 
 
-def parse(args, participant_name, network_id, registry):
-    return _parse(args, participant_name, network_id, registry, "cl")
+def parse(args, participant_name, network_params, registry):
+    return _parse(args, participant_name, network_params, registry, "cl")
 
 
-def parse_builder(args, participant_name, network_id, registry):
-    return _parse(args, participant_name, network_id, registry, "cl_builder")
+def parse_builder(args, participant_name, network_params, registry):
+    return _parse(args, participant_name, network_params, registry, "clbuilder")
 
 
-def _parse(args, participant_name, network_id, registry, cl_kind):
+def _parse(args, participant_name, network_params, registry, cl_kind):
+    network_id = network_params.network_id
+    network_name = network_params.name
+
     # Any extra attributes will cause an error
     _filter.assert_keys(
         args or {},
@@ -41,7 +44,7 @@ def _parse(args, participant_name, network_id, registry, cl_kind):
         "Invalid attributes in CL configuration for "
         + participant_name
         + " on network "
-        + str(network_id)
+        + network_name
         + ": {}",
     )
 
@@ -57,20 +60,23 @@ def _parse(args, participant_name, network_id, registry, cl_kind):
     )
 
     cl_params["name"] = participant_name
-    cl_params["service_name"] = "op-cl-{}-{}-{}".format(
-        network_id, participant_name, cl_params["type"]
+    cl_params["service_name"] = "op-{}-{}-{}-{}".format(
+        cl_kind, network_id, participant_name, cl_params["type"]
     )
 
     # Draft of what the labels could look like
     cl_params["labels"] = {
         "op.kind": cl_kind,
-        "op.network.id": network_id,
+        "op.network.id": str(network_id),
+        "op.network.participant.name": participant_name,
         "op.cl.type": cl_params["type"],
     }
 
-    # We register the beacon port on the CL
+    # We register the CL ports
     cl_params["ports"] = {
-        _net.BEACON_PORT_NAME: _net.port(number=8545),
+        _net.RPC_PORT_NAME: _net.port(number=8547),
+        _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=9003),
+        _net.UDP_DISCOVERY_PORT_NAME: _net.port(number=9003, transport_protocol="UDP"),
     }
 
     return struct(**cl_params)

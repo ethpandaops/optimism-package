@@ -43,7 +43,7 @@ def parse(tx_fuzzer_args, network_params, registry):
     # Add labels
     tx_fuzzer_params["labels"] = {
         "op.kind": "tx-fuzzer",
-        "op.network.id": network_id,
+        "op.network.id": str(network_id),
     }
 
     return struct(**tx_fuzzer_params)

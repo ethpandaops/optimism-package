@@ -3,8 +3,10 @@ _id = import_module("/src/util/id.star")
 
 _l2_participant_input_parser = import_module("./participant/input_parser.star")
 _batcher_input_parser = import_module("/src/batcher/input_parser.star")
+_da_input_parser = import_module("/src/da/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
+_tx_fuzzer_input_parser = import_module("/src/tx-fuzzer/input_parser.star")
 
 _DEFAULT_NETWORK_PARAMS = {
     "network": "kurtosis",
@@ -21,9 +23,13 @@ _DEFAULT_NETWORK_PARAMS = {
 _DEFAULT_ARGS = {
     "participants": {},
     "network_params": _DEFAULT_NETWORK_PARAMS,
+    "da_params": None,
     "proposer_params": None,
     "batcher_params": None,
     "proxyd_params": None,
+    "tx_fuzzer_params": None,
+    # FIXME Make blockscout use the "enabled" pattern
+    "additional_services": [],
 }
 
 
@@ -33,8 +39,25 @@ def parse(args, registry):
     return _assert_unique_l2_ids(
         _filter.remove_none(
             [
-                _parse_instance(l2_args or {}, l2_name, l2_id_generator, registry)
-                for l2_name, l2_args in (args or {}).items()
+                _parse_instance(
+                    l2_args
+                    or {
+                        # If we get empty L2 args, we supply some defaults so that we get at least one participant
+                        "participants": {
+                            "node0": None,
+                        }
+                    },
+                    l2_name,
+                    l2_id_generator,
+                    registry,
+                )
+                for l2_name, l2_args in (
+                    args
+                    or {
+                        # If we get no networks, we supply a default one
+                        "opkurtosis": None,
+                    }
+                ).items()
             ]
         )
     )
@@ -88,7 +111,24 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
 
     # We add the proxyd params
     l2_params["proxyd_params"] = _proxyd_input_parser.parse(
-        l2_params["proxyd_params"], l2_params["network_params"], registry
+        proxyd_args=l2_params["proxyd_params"],
+        network_params=l2_params["network_params"],
+        participants_params=l2_params["participants"],
+        registry=registry,
+    )
+
+    # We add the tx-fuzzer params
+    l2_params["tx_fuzzer_params"] = _tx_fuzzer_input_parser.parse(
+        tx_fuzzer_args=l2_params["tx_fuzzer_params"],
+        network_params=l2_params["network_params"],
+        registry=registry,
+    )
+
+    # We add the DA params
+    l2_params["da_params"] = _da_input_parser.parse(
+        da_args=l2_params["da_params"],
+        network_params=l2_params["network_params"],
+        registry=registry,
     )
 
     return struct(
