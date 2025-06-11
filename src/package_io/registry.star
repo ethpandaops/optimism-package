@@ -64,9 +64,8 @@ _DEFAULT_IMAGES = {
     # deployer
     OP_DEPLOYER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2",
     # Faucet
-    # TODO: update to use a versioned image when available
-    # For now, we'll need users to pass the image explicitly
-    OP_FAUCET: "",
+    OP_FAUCET: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-faucet:develop",
+    # conductor-ops
     OP_CONDUCTOR_OPS: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor-ops:v0.0.2",
     # Proxyd
     PROXYD: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.5",
