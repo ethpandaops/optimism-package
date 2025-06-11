@@ -322,6 +322,7 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
             admin=True,
             proxy=True,
             paused=False,
+            bootstrap=False,
         ),
     )
 

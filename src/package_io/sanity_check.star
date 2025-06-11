@@ -152,6 +152,7 @@ SUBCATEGORY_PARAMS = {
         "admin",
         "proxy",
         "paused",
+        "bootstrap",
     ],
     "da_params": [
         "enabled",

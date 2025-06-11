@@ -2,6 +2,8 @@ _observability = import_module("/src/observability/observability.star")
 _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
+
+_filter = import_module("/src/util/filter.star")
 _net = import_module("/src/util/net.star")
 
 #
@@ -17,6 +19,8 @@ def launch(
     plan,
     params,
     network_params,
+    supervisors_params,
+    sidecar_context,
     deployment_output,
     el_params,
     cl_params,
@@ -26,6 +30,8 @@ def launch(
         plan=plan,
         params=params,
         network_params=network_params,
+        supervisors_params=supervisors_params,
+        sidecar_context=sidecar_context,
         deployment_output=deployment_output,
         el_params=el_params,
         cl_params=cl_params,
@@ -61,6 +67,8 @@ def get_service_config(
     plan,
     params,
     network_params,
+    supervisors_params,
+    sidecar_context,
     deployment_output,
     el_params,
     cl_params,
@@ -82,16 +90,18 @@ def get_service_config(
     env_vars = {
         "OP_CONDUCTOR_CONSENSUS_ADDR": "0.0.0.0",
         "OP_CONDUCTOR_CONSENSUS_ADVERTISED": "{}:{}".format(
-            _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-            consensus_port.number,
+            params.service_name, consensus_port.number
         ),
         "OP_CONDUCTOR_CONSENSUS_PORT": str(consensus_port.number),
-        "OP_CONDUCTOR_EXECUTION_RPC": _net.service_url(
+        "OP_CONDUCTOR_EXECUTION_RPC": sidecar_context.rpc_http_url
+        if sidecar_context
+        else _net.service_url(
             el_params.service_name, el_params.ports[_net.RPC_PORT_NAME]
         ),
         "OP_CONDUCTOR_NODE_RPC": _net.service_url(
             cl_params.service_name, cl_params.ports[_net.RPC_PORT_NAME]
         ),
+        "OP_CONDUCTOR_ROLLUP_BOOST_ENABLED": "true" if sidecar_context else "false",
         # This might also become a parameter
         "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(_CONDUCTOR_HEALTH_CHECK_INTERVAL),
         # This might also become a parameter
@@ -111,12 +121,20 @@ def get_service_config(
             network_params.network_id,
         ),
         "OP_CONDUCTOR_PAUSED": "true" if params.paused else "false",
+        "OP_CONDUCTOR_RAFT_BOOTSTRAP": "true" if params.bootstrap else "false",
         "OP_CONDUCTOR_RAFT_SERVER_ID": params.service_name,
         "OP_CONDUCTOR_RAFT_STORAGE_DIR": _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "OP_CONDUCTOR_RPC_ADDR": "0.0.0.0",
         "OP_CONDUCTOR_RPC_PORT": str(rpc_port.number),
         "OP_CONDUCTOR_RPC_ENABLE_ADMIN": "true" if params.admin else "false",
         "OP_CONDUCTOR_RPC_ENABLE_PROXY": "true" if params.proxy else "false",
+        "OP_CONDUCTOR_SUPERVISOR_RPC": _filter.first(
+            [
+                _net.service_url(s.service_name, s.ports[_net.RPC_PORT_NAME])
+                for s in supervisors_params
+            ]
+        )
+        or "",
     }
 
     if observability_helper.enabled:
