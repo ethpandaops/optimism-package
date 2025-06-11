@@ -141,12 +141,12 @@ optimism_package:
       enabled: true
 
       # List of L2 network_ids that participate in this set
-      # 
+      #
       # Please refer to chains[].network_params.network_id for more information
       participants: ["2151908"]
 
       # OR a special "*" meaning all networks
-      participants: "*"   
+      participants: "*"
     # If superchain config is left empty, a superchain with all L2 networks will be created
     superchain-other:
   # Supervisor configuration
@@ -164,6 +164,11 @@ optimism_package:
 
       # Optional list of CLI arguments that will be passed to the op-supervisor command for modifying its behaviour
       extra_params: []
+
+  # Interop Monitor configuration
+  interop_mon:
+    enabled: true
+    image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-interop-mon:latest"
 
   # AltDA Deploy Configuration, which is passed to op-deployer.
   #
@@ -325,7 +330,7 @@ optimism_package:
         # Builder secret key used by op-rbuilder to sign transactions
         # Defaults to None - not used
         el_builder_key: ""
-        
+
         # The type of builder CL client that should be started
         # Valid values are:
         # op-node
@@ -493,9 +498,9 @@ optimism_package:
       image: ""
 
       # List of L2 chains that this challenger is connected to
-      # 
+      #
       # This field accepts several configuration types:
-      # 
+      #
       # A list of network IDs, in which case the challenger will connect to all the nodes in these network
       participants: ["2151908"]
 

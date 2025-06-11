@@ -11,6 +11,7 @@ ROOT_PARAMS = [
     "global_tolerations",
     "persistent",
     "faucet",
+    "interop_mon",
 ]
 
 OBSERVABILITY_PARAMS = [
