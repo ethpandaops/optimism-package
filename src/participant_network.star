@@ -33,7 +33,11 @@ def launch_participant_network(
     num_participants = len(participants)
 
     # First EL and sequencer CL
-    all_el_contexts, all_cl_contexts = el_cl_client_launcher.launch(
+    (
+        all_el_contexts,
+        all_cl_contexts,
+        sidecar_context__hack,
+    ) = el_cl_client_launcher.launch(
         plan=plan,
         jwt_file=jwt_file,
         network_params=network_params,
@@ -68,6 +72,10 @@ def launch_participant_network(
             cl_type,
             el_context,
             cl_context,
+            # We only add the sidecar context for the first participant (the sequencer)
+            #
+            # FIXME Kill this with fire
+            sidecar_context=sidecar_context__hack if index == 0 else None,
         )
 
         all_participants.append(participant_entry)

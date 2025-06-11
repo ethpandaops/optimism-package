@@ -66,11 +66,7 @@ def launch_participant_network__hack(
             cl_params=sequencer_params.cl,
             observability_helper=observability_helper,
             supervisors_params=supervisors_params,
-            # Sidecar context is now deeply buried in the el_cl_launcher output
-            # and we cannot dig it out without risking breaking well everything
-            #
-            # FIXME After refactoring, this should be passed in
-            sidecar_context=None,
+            sidecar_context=sequencer_participant.sidecar_context,
         ).context
         if conductor_params
         else None
