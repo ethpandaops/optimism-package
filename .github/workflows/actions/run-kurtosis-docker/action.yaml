@@ -13,7 +13,7 @@ runs:
   steps:
     - name: Start enclave ${{ inputs.enclave }}
       shell: bash
-      run: kurtosis run . --args-file ${{ inputs.args-file }} --enclave ${{ inputs.enclave }} --verbosity detailed
+      run: kurtosis run . ${{ inputs.args-file && format('--args-file={}', inputs.args-file) || '' }} --enclave=${{ inputs.enclave }} --verbosity detailed
 
     - name: Dump kurtosis logs
       shell: bash
