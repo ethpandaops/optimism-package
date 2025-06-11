@@ -4,6 +4,7 @@ Support for the op-interop-mon service.
 observability = import_module("../../observability/observability.star")
 _net = import_module("/src/util/net.star")
 
+
 def launch(
     plan,
     image,
@@ -47,7 +48,8 @@ def launch(
     )
     service = plan.add_service("interop-mon", config)
     observability.register_op_service_metrics_job(
-        observability_helper, service,
+        observability_helper,
+        service,
     )
 
     return struct(service=service)

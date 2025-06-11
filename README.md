@@ -165,11 +165,6 @@ optimism_package:
       # Optional list of CLI arguments that will be passed to the op-supervisor command for modifying its behaviour
       extra_params: []
 
-  # Interop Monitor configuration
-  interop_mon:
-    enabled: true
-    image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-interop-mon:latest"
-
   # AltDA Deploy Configuration, which is passed to op-deployer.
   #
   # For simplicity we currently enforce chains to all be altda or all rollups.

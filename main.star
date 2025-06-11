@@ -7,7 +7,9 @@ supervisor_launcher = import_module("./src/supervisor/launcher.star")
 op_challenger_launcher = import_module("./src/challenger/op-challenger/launcher.star")
 
 faucet = import_module("./src/faucet/op-faucet/op_faucet_launcher.star")
-interop_mon = import_module("./src/interop-mon/op-interop-mon/op_interop_mon_launcher.star")
+interop_mon = import_module(
+    "./src/interop-mon/op-interop-mon/op_interop_mon_launcher.star"
+)
 observability = import_module("./src/observability/observability.star")
 util = import_module("./src/util.star")
 

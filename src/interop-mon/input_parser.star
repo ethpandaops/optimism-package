@@ -10,6 +10,7 @@ _DEFAULT_ARGS = {
     "image": None,
 }
 
+
 def parse(args, network_params, registry):
     """Parse the input arguments for the op-interop-mon service.
 
@@ -34,6 +35,8 @@ def parse(args, network_params, registry):
         return None
 
     # Default the image to the one in the registry if not specified
-    interop_params["image"] = interop_params["image"] or registry.get(_registry.OP_INTEROP_MON)
+    interop_params["image"] = interop_params["image"] or registry.get(
+        _registry.OP_INTEROP_MON
+    )
 
     return struct(**interop_params)
