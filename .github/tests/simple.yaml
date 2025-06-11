@@ -4,7 +4,6 @@ optimism_package:
   chains:
     - participants:
       - el_type: op-geth
-        el_image: ""
         el_log_level: ""
         el_extra_env_vars: {}
         el_extra_labels: {}
@@ -48,7 +47,6 @@ optimism_package:
         game_type: 1
         proposal_interval: 10m
       mev_params:
-        image: ""
         builder_host: ""
         builder_port: ""
       additional_services: []
