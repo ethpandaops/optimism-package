@@ -28,6 +28,8 @@ optimism_package:
         node_selectors: {}
         tolerations: []
         count: 1
+      - el_type: op-reth
+        cl_type: op-node
       network_params:
         network: "kurtosis"
         network_id: "2151908"
