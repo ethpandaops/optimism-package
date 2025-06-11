@@ -1,6 +1,7 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 l2_launcher = import_module("./src/l2.star")
+l2_launcher__hack = import_module("./src/l2__hack.star")
 superchain_launcher = import_module("./src/superchain/launcher.star")
 supervisor_launcher = import_module("./src/supervisor/launcher.star")
 op_challenger_launcher = import_module("./src/challenger/op-challenger/launcher.star")
@@ -169,6 +170,36 @@ def run(plan, args={}):
             l1_config_env_vars=l1_config_env_vars,
             deployment_output=deployment_output,
             observability_helper=observability_helper,
+        )
+
+    for index, chain in enumerate(optimism_args.chains):
+        # We filter out the supervisors applicable to this network
+        l2_supervisors_params = [
+            supervisor_params
+            for supervisor_params in optimism_args.supervisors
+            if chain.network_params.network_id
+            in supervisor_params.superchain.participants
+        ]
+
+        original_l2_output__hack = l2s[index]
+
+        l2_launcher__hack.launch_l2__hack(
+            original_l2_output__hack=original_l2_output__hack,
+            plan=plan,
+            l2_services_suffix=chain.network_params.name,
+            l2_args=chain,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
+            l1_config=l1_config_env_vars,
+            l1_priv_key=l1_priv_key,
+            l1_rpc_url=l1_rpc_url,
+            global_log_level=global_log_level,
+            global_node_selectors=global_node_selectors,
+            global_tolerations=global_tolerations,
+            persistent=persistent,
+            observability_helper=observability_helper,
+            supervisors_params=l2_supervisors_params,
+            registry=registry,
         )
 
     if optimism_args.faucet.enabled:
