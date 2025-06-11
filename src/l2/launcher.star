@@ -115,6 +115,7 @@ def launch(
             network_params=network_params,
             da_params=params.da_params,
             supervisors_params=supervisors_params,
+            conductor_params=participant_params.conductor_params,
             is_sequencer=is_sequencer,
             el_context=el.context,
             cl_contexts=cl_contexts,
