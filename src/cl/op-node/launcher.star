@@ -258,7 +258,7 @@ def get_service_config(
 
     if conductor_params:
         cmd += [
-            "--conductor.enabled={0}".format("true"),
+            "--conductor.enabled=true",
             "--conductor.rpc={0}".format(
                 _net.service_url(
                     conductor_params.service_name,
