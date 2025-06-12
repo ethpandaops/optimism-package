@@ -30,9 +30,11 @@ def launch(
         "--l2-rpcs={}".format(l2_rpcs_string),
     ]
 
-    ports = _net.ports_to_port_specs({
-        "metrics": _net.port(number=7300),
-    })
+    ports = _net.ports_to_port_specs(
+        {
+            "metrics": _net.port(number=7300),
+        }
+    )
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
