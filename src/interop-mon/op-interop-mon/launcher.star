@@ -25,24 +25,31 @@ def launch(
 
     l2_rpcs_string = ",".join(l2_rpcs)
 
+    cmd = [
+        "op-interop-mon",
+        "--l2-rps={}".format(l2_rpcs_string),
+        "--metrics-enabled=true",
+    ]
+
+    ports = _net.ports_to_port_specs({
+        "metrics": _net.port(number=7300),
+    })
+
+    if observability_helper.enabled:
+        observability.configure_op_service_metrics(cmd, ports)
+
     config = ServiceConfig(
         image=image,
-        env_vars={
-            "OP_INTEROP_MON_METRICS_ENABLED": "true",
-            "OP_INTEROP_MON_L2_RPCS": l2_rpcs_string,
-        },
-        ports={
-            "metrics": PortSpec(
-                number=7300,
-                transport_protocol="TCP",
-                application_protocol="http",
-            ),
-        },
+        cmd=cmd,
+        ports=ports,
     )
-    service = plan.add_service("interop-mon", config)
-    observability.register_op_service_metrics_job(
-        observability_helper,
-        service,
-    )
+
+    service = plan.add_service("op-interop-mon", config)
+
+    if observability_helper.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper,
+            service,
+        )
 
     return struct(service=service)
