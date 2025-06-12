@@ -27,7 +27,7 @@ def launch(
 
     cmd = [
         "op-interop-mon",
-        "--l2-rps={}".format(l2_rpcs_string),
+        "--l2-rpcs={}".format(l2_rpcs_string),
         "--metrics-enabled=true",
     ]
 
