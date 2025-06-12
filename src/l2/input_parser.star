@@ -135,7 +135,9 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
 
     # We add the explorer params
     l2_params["blockscout_params"] = _blockscout_input_parser.parse(
-        args=l2_params["blockscout_params"], registry=registry
+        blockscout_args=l2_params["blockscout_params"],
+        network_params=l2_params["network_params"],
+        registry=registry,
     )
 
     return struct(
