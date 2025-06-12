@@ -229,6 +229,7 @@ def input_parser(
 
 def parse_network_params(plan, registry, input_args):
     results = {}
+    network_params = default_network_params()
 
     # configure observability
 
