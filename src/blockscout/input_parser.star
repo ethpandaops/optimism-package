@@ -26,33 +26,33 @@ def parse(blockscout_args, network_params, registry):
     if not blockscout_params["enabled"]:
         return None
 
-    blockscout_params["database"] = struct(
-        service_name="op-blockscout-db-{}-{}".format(network_id, network_name),
+    return struct(
+        database=struct(
+            service_name="op-blockscout-db-{}-{}".format(network_id, network_name),
+        ),
+        blockscout=struct(
+            image=blockscout_params["image"] or registry.get(_registry.OP_BLOCKSCOUT),
+            service_name="op-blockscout-{}-{}".format(network_id, network_name),
+            labels={
+                "op.kind": "blockscout",
+                "op.network.id": str(network_id),
+            },
+            ports={
+                _net.HTTP_PORT_NAME: _net.port(number=4000),
+            },
+        ),
+        verifier=struct(
+            image=blockscout_params["verifier_image"]
+            or registry.get(_registry.OP_BLOCKSCOUT_VERIFIER),
+            service_name="op-blockscout-verifier-{}-{}".format(
+                network_id, network_name
+            ),
+            labels={
+                "op.kind": "blockscout-verifier",
+                "op.network.id": str(network_id),
+            },
+            ports={
+                _net.HTTP_PORT_NAME: _net.port(number=8050),
+            },
+        ),
     )
-
-    blockscout_params["blockscout"] = struct(
-        image=blockscout_params["image"] or registry.get(_registry.OP_BLOCKSCOUT),
-        service_name="op-blockscout-{}-{}".format(network_id, network_name),
-        labels={
-            "op.kind": "blockscout",
-            "op.network.id": str(network_id),
-        },
-        ports={
-            _net.HTTP_PORT_NAME: _net.port(number=4000),
-        },
-    )
-
-    blockscout_params["verifier"] = struct(
-        image=blockscout_params["verifier_image"]
-        or registry.get(_registry.OP_BLOCKSCOUT_VERIFIER),
-        service_name="op-blockscout-verifier-{}-{}".format(network_id, network_name),
-        labels={
-            "op.kind": "blockscout-verifier",
-            "op.network.id": str(network_id),
-        },
-        ports={
-            _net.HTTP_PORT_NAME: _net.port(number=8050),
-        },
-    )
-
-    return struct(**blockscout_params)

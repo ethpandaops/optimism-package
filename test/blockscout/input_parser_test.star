@@ -72,22 +72,22 @@ def test_blockscout_input_parser_default_args_enabled(plan):
 
     expect.eq(
         _input_parser.parse(
-            {"enabled": True},
-            _default_network_params,
-            _default_registry,
+            blockscout_args={"enabled": True},
+            network_params=_default_network_params,
+            registry=_default_registry,
         ),
         _default_params,
     )
 
     expect.eq(
         _input_parser.parse(
-            {
+            blockscout_args={
                 "enabled": True,
                 "image": None,
                 "verifier_image": None,
             },
-            _default_network_params,
-            _default_registry,
+            network_params=_default_network_params,
+            registry=_default_registry,
         ),
         _default_params,
     )

@@ -34,7 +34,7 @@ def launch(
     )
 
     postgres_output = _postgres.run(
-        plan,
+        plan=plan,
         service_name=params.database.service_name,
         database="blockscout",
         extra_configs=["max_connections=1000"],
@@ -53,7 +53,7 @@ def launch(
         l2_rpc_url=l2_rpc_url,
         verif_url=verif_url,
         network_name=network_name,
-        {
+        additional_env_vars={
             "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": portal_address,
             "INDEXER_OPTIMISM_L1_DEPOSITS_START_BLOCK": l1_deposit_start_block,
             "INDEXER_OPTIMISM_L1_WITHDRAWALS_START_BLOCK": l1_deposit_start_block,
