@@ -37,10 +37,17 @@ def parse(args, network_params, registry):
             )
         )
 
-    return _apply_sequencers(
+    participants_params = _assert_conductors(
         participants_params=participants_params,
         network_params=network_params,
     )
+
+    participants_params = _apply_sequencers(
+        participants_params=participants_params,
+        network_params=network_params,
+    )
+
+    return participants_params
 
 
 def _parse_instance(participant_args, participant_name, network_params, registry):
@@ -222,5 +229,24 @@ def _apply_sequencers(participants_params, network_params):
         )
         for p in participants_params
     ]
+
+    return participants_params
+
+
+# Helper function that ensures that if there are conductors present, we have at least two participants defined
+#
+# This is needed since a conductor needs to have at least one peer (see OP_CONDUCTOR_HEALTHCHECK_MIN_PEER_COUNT)
+def _assert_conductors(participants_params, network_params):
+    has_conductors = any([p.conductor_params for p in participants_params])
+
+    if not has_conductors:
+        return participants_params
+
+    if len(participants_params) == 1:
+        fail(
+            "Invalid participants configuration for network {}: at least two participants must be defined if conductors are present".format(
+                network_params.name
+            )
+        )
 
     return participants_params

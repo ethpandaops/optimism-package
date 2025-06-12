@@ -298,7 +298,7 @@ def test_l2_participant_input_parser_el_builder_key(plan):
 
 def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
     parsed = input_parser.parse(
-        {"node0": {"conductor_params": {"enabled": True}}},
+        {"node0": {"conductor_params": {"enabled": True}}, "node1": {}},
         _default_network_params,
         _default_registry,
     )
@@ -324,6 +324,19 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
             paused=False,
             bootstrap=False,
         ),
+    )
+
+
+def test_l2_participant_input_parser_defaults_conductor_enabled_insufficient_peers(
+    plan,
+):
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"conductor_params": {"enabled": True}}},
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid participants configuration for network my-l2: at least two participants must be defined if conductors are present",
     )
 
 
