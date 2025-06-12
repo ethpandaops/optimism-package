@@ -14,7 +14,7 @@ jobs:
       matrix:
         file_name:
           [
-            "./network_params.yaml"
+            "./network_params.yaml",
           ]
     runs-on: ubuntu-latest
     steps:
@@ -23,20 +23,11 @@ jobs:
 
       - name: Install mise
         uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
-
-      - name: Run Starlark
-        run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }} --verbosity detailed
-
-      - name: Dump logs
-        run: kurtosis dump ./.kurtosis-dump && ls -al .kurtosis-dump
-        if: ${{ failure() }}
-
-      - name: Store logs
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
+      
+      - name: Run kurtosis
+        uses: ./.github/workflows/actions/run-kurtosis-docker
         with:
-          name: kurtosis-logs
-          path: ./.kurtosis-dump/enclaves/
+          args-file: ${{ matrix.file_name }}
 
   # Make sure that `kurtosis run .` without an --args-file works fine (the defaults in input_parser.star are correct)
   run_without_args:
@@ -49,19 +40,8 @@ jobs:
       - name: Install mise
         uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
 
-      - name: Run Starlark
-        run: kurtosis run ${{ github.workspace }} --verbosity detailed
-
-      - name: Dump logs
-        run: kurtosis dump .kurtosis-dump && ls -al .kurtosis-dump
-        if: ${{ failure() }}
-
-      - name: Store logs
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: kurtosis-logs
-          path: .kurtosis-dump/
+      - name: Run kurtosis
+        uses: ./.github/workflows/actions/run-kurtosis-docker
 
   run_k8s_test:
     name: Run k8s tests

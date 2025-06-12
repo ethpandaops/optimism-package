@@ -1,0 +1,28 @@
+name: Run Kurtosis using Docker driver
+description: Runs Kurtosis enclave using Docker driver
+inputs:
+  args-file:
+    description: "Kurtosis args file"
+    default: ""
+  enclave:
+    description: "Kurtosis enclave name"
+    default: "devnet"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Start enclave ${{ inputs.enclave }}
+      shell: bash
+      run: kurtosis run . ${{ inputs.args-file && format('--args-file={0}', inputs.args-file) || '' }} --enclave=${{ inputs.enclave }} --verbosity detailed
+
+    - name: Dump kurtosis logs
+      shell: bash
+      if: ${{ failure() }}
+      run: kurtosis dump ./.kurtosis-dump
+
+    - name: Store kurtosis logs
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: kurtosis-logs
+        path: ./.kurtosis-dump/enclaves/
