@@ -27,6 +27,7 @@ _DEFAULT_ARGS = {
     "da_params": None,
     "proposer_params": None,
     "batcher_params": None,
+    "blockscout_params": None,
     "proxyd_params": None,
     "tx_fuzzer_params": None,
     # FIXME Make blockscout use the "enabled" pattern
@@ -134,7 +135,7 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
 
     # We add the explorer params
     l2_params["blockscout_params"] = _blockscout_input_parser.parse(
-        args=input_args.get("blockscout_params"), registry=registry
+        args=l2_params["blockscout_params"], registry=registry
     )
 
     return struct(
