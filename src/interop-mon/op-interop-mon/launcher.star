@@ -21,16 +21,9 @@ def launch(
 
     l2_rpcs = []
     for l2 in l2s:
-        l2_rpcs.append(
-            "http://{0}:{1}".format(
-                l2.participants[0].el_context.ip_addr,
-                l2.participants[0].el_context.rpc_port_num,
-            )
-        )
+        l2_rpcs.append(l2.participants[0].el_context.rpc_http_url)
 
     l2_rpcs_string = ",".join(l2_rpcs)
-
-    plan.print("l2_rpcs: {0}".format(l2_rpcs_string))
 
     config = ServiceConfig(
         image=image,
