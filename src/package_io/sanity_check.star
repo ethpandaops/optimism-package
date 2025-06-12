@@ -170,6 +170,11 @@ SUBCATEGORY_PARAMS = {
         "min_memory",
         "max_memory",
     ],
+    "blockscout_params": [
+        "enabled",
+        "image",
+        "verifier_image",
+    ],
 }
 
 OP_CONTRACT_DEPLOYER_PARAMS = [
@@ -184,7 +189,7 @@ OP_CONTRACT_DEPLOYER_OVERRIDES = [
     "vmType",
 ]
 
-ADDITIONAL_SERVICES_PARAMS = ["blockscout", "rollup-boost"]
+ADDITIONAL_SERVICES_PARAMS = ["rollup-boost"]
 
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",
