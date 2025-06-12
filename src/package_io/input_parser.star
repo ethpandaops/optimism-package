@@ -244,7 +244,6 @@ def parse_network_params(plan, registry, input_args):
         network_params=struct(**network_params),
         registry=registry,
     )
-    results["interop_mon"].update(input_args.get("interop_mon", {}))
 
     results["observability"]["prometheus_params"] = default_prometheus_params(registry)
     results["observability"]["prometheus_params"].update(
