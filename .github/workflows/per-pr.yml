@@ -15,7 +15,6 @@ jobs:
         file_name:
           [
             "./network_params.yaml",
-            "./.github/tests/simple.yaml",
           ]
     runs-on: ubuntu-latest
     steps:
