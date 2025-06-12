@@ -88,7 +88,6 @@ _DEFAULT_IMAGES = {
     GRAFANA: "grafana/grafana:11.5.0",
     LOKI: "grafana/loki:3.3.2",
     PROMTAIL: "grafana/promtail:3.3.2",
-
     # Explorers
     OP_BLOCKSCOUT: "blockscout/blockscout-optimism:6.8.0",
     OP_BLOCKSCOUT_VERIFIER: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0",

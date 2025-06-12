@@ -116,7 +116,12 @@ def test_blockscout_input_parser_custom_params(plan):
 
 
 def test_blockscout_input_parser_custom_registry(plan):
-    registry = _registry.Registry({_registry.OP_BLOCKSCOUT: "op-blockscout:greatest", _registry.OP_BLOCKSCOUT_VERIFIER: "op-blockscout-verifier:shadiest"})
+    registry = _registry.Registry(
+        {
+            _registry.OP_BLOCKSCOUT: "op-blockscout:greatest",
+            _registry.OP_BLOCKSCOUT_VERIFIER: "op-blockscout-verifier:shadiest",
+        }
+    )
 
     parsed = _input_parser.parse(
         blockscout_args={"enabled": True},
@@ -127,7 +132,11 @@ def test_blockscout_input_parser_custom_registry(plan):
     expect.eq(parsed.verifier.image, "op-blockscout-verifier:shadiest")
 
     parsed = _input_parser.parse(
-        {"enabled": True, "image": "op-blockscout:oldest", "verifier_image": "op-blockscout-verifier:tiniest"},
+        {
+            "enabled": True,
+            "image": "op-blockscout:oldest",
+            "verifier_image": "op-blockscout-verifier:tiniest",
+        },
         _default_network_params,
         registry,
     )
