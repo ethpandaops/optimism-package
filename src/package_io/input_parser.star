@@ -240,6 +240,7 @@ def parse_network_params(plan, registry, input_args):
 
     results["interop_mon"] = _interop_mon_input_parser.parse(
         args=input_args.get("interop_mon", {}),
+        network_params=struct(**network_params),
         registry=registry,
     )
     results["interop_mon"].update(input_args.get("interop_mon", {}))
