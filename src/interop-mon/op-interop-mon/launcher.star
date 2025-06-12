@@ -28,7 +28,6 @@ def launch(
     cmd = [
         "op-interop-mon",
         "--l2-rpcs={}".format(l2_rpcs_string),
-        "--metrics-enabled=true",
     ]
 
     ports = _net.ports_to_port_specs({
