@@ -42,6 +42,8 @@ optimism_package:
         enabled: true
         bootstrap: true
       additional_services: ["rollup-boost"]
+      blockscout_params:
+        enabled: true
       tx_fuzzer_params:
         enabled: true
   op_contract_deployer_params:
