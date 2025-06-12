@@ -16,6 +16,7 @@ _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
 _supervisor_input_parser = import_module("/src/supervisor/input_parser.star")
 _tx_fuzzer_parser = import_module("/src/tx-fuzzer/input_parser.star")
+_interop_mon_input_parser = import_module("/src/interop-mon/input_parser.star")
 
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
@@ -107,6 +108,7 @@ def input_parser(
             enabled=results["faucet"]["enabled"],
             image=results["faucet"]["image"],
         ),
+        interop_mon=results["interop_mon"],
         altda_deploy_config=struct(
             use_altda=results["altda_deploy_config"]["use_altda"],
             da_commitment_type=results["altda_deploy_config"]["da_commitment_type"],
@@ -227,6 +229,7 @@ def input_parser(
 
 def parse_network_params(plan, registry, input_args):
     results = {}
+    network_params = default_network_params()
 
     # configure observability
 
@@ -235,6 +238,12 @@ def parse_network_params(plan, registry, input_args):
 
     results["faucet"] = _default_faucet_params(registry)
     results["faucet"].update(input_args.get("faucet", {}))
+
+    results["interop_mon"] = _interop_mon_input_parser.parse(
+        args=input_args.get("interop_mon", {}),
+        network_params=struct(**network_params),
+        registry=registry,
+    )
 
     results["observability"]["prometheus_params"] = default_prometheus_params(registry)
     results["observability"]["prometheus_params"].update(
