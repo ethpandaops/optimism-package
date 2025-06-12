@@ -108,10 +108,7 @@ def input_parser(
             enabled=results["faucet"]["enabled"],
             image=results["faucet"]["image"],
         ),
-        interop_mon=struct(
-            enabled=results["interop_mon"]["enabled"],
-            image=results["interop_mon"]["image"],
-        ),
+        interop_mon=results["interop_mon"],
         altda_deploy_config=struct(
             use_altda=results["altda_deploy_config"]["use_altda"],
             da_commitment_type=results["altda_deploy_config"]["da_commitment_type"],
@@ -241,7 +238,10 @@ def parse_network_params(plan, registry, input_args):
     results["faucet"] = _default_faucet_params(registry)
     results["faucet"].update(input_args.get("faucet", {}))
 
-    results["interop_mon"] = _default_interop_mon_params(registry)
+    results["interop_mon"] = _interop_mon_input_parser.parse(
+        args=input_args.get("interop_mon", {}),
+        registry=registry,
+    )
     results["interop_mon"].update(input_args.get("interop_mon", {}))
 
     results["observability"]["prometheus_params"] = default_prometheus_params(registry)
@@ -501,13 +501,6 @@ def _default_faucet_params(registry):
     return {
         "enabled": False,
         "image": registry.get(_registry.OP_FAUCET),
-    }
-
-
-def _default_interop_mon_params(registry):
-    return {
-        "enabled": True,
-        "image": registry.get(_registry.OP_INTEROP_MON),
     }
 
 
