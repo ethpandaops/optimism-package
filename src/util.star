@@ -1,6 +1,6 @@
 constants = import_module("./package_io/constants.star")
 
-DEPLOYMENT_UTILS_IMAGE = "mslipper/deployment-utils:latest"
+DEPLOYMENT_UTILS_IMAGE = "badouralix/curl-jq:latest"
 
 
 def read_network_config_value(plan, network_config_file, json_file, json_path):

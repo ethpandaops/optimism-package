@@ -76,7 +76,7 @@ _DEFAULT_IMAGES = {
     # Tx Fuzzer
     TX_FUZZER: "ethpandaops/tx-fuzz:master",
     # utils
-    DEPLOYMENT_UTILS: "mslipper/deployment-utils:latest",
+    DEPLOYMENT_UTILS: "badouralix/curl-jq:latest",
     # observability
     PROMETHEUS: "prom/prometheus:v3.1.0",
     GRAFANA: "grafana/grafana:11.5.0",
