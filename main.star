@@ -215,7 +215,7 @@ def run(plan, args={}):
         )
 
     # Launch interop monitoring
-    if optimism_args.interop_mon.enabled:
+    if optimism_args.interop_mon and optimism_args.interop_mon.enabled:
         interop_mon.launch(
             plan=plan,
             image=optimism_args.interop_mon.image,
