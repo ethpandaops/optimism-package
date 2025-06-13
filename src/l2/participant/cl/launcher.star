@@ -28,6 +28,9 @@ def launch(
     cl = None
 
     if params.type == "hildr":
+        if conductor_params:
+            fail("Node {} on network {}: hildr does not support conductor parameters".format(params.name, network_params.network))
+
         cl = _hildr_launcher.launch(
             plan=plan,
             params=params,
@@ -45,6 +48,9 @@ def launch(
             observability_helper=observability_helper,
         )
     elif params.type == "kona-node":
+        if conductor_params:
+            fail("Node {} on network {}: kona-node does not support conductor parameters".format(params.name, network_params.network))
+
         cl = _kona_node_launcher.launch(
             plan=plan,
             params=params,
