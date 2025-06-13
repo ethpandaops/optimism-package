@@ -1,5 +1,5 @@
 participant_network = import_module("./participant_network.star")
-blockscout = import_module("./blockscout/blockscout_launcher.star")
+_blockscout_launcher = import_module("./blockscout/launcher.star")
 _da_server_launcher = import_module("./da/da-server/launcher.star")
 _tx_fuzzer_launcher = import_module("./tx-fuzzer/launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
@@ -99,19 +99,19 @@ def launch_l2(
 
         plan.print("Successfully launched transaction fuzzer")
 
-    for additional_service in l2_args.additional_services:
-        if additional_service == "blockscout":
-            plan.print("Launching op-blockscout")
-            blockscout.launch_blockscout(
-                plan,
-                l2_services_suffix,
-                l1_rpc_url,
-                all_el_contexts[0],  # first l2 EL url
-                network_params.name,
-                deployment_output,
-                network_params.network_id,
-            )
-            plan.print("Successfully launched op-blockscout")
+    if l2_args.blockscout_params:
+        plan.print("Launching op-blockscout")
+
+        _blockscout_launcher.launch(
+            plan=plan,
+            params=l2_args.blockscout_params,
+            network_params=network_params,
+            l1_rpc_url=l1_rpc_url,
+            l2_rpc_url=all_el_contexts[0].rpc_http_url,
+            deployment_output=deployment_output,
+        )
+
+        plan.print("Successfully launched op-blockscout")
 
     plan.print(l2.participants)
     plan.print(

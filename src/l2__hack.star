@@ -1,5 +1,4 @@
 participant_network__hack = import_module("./participant_network__hack.star")
-blockscout = import_module("./blockscout/blockscout_launcher.star")
 _da_server_launcher = import_module("./da/da-server/launcher.star")
 _tx_fuzzer_launcher = import_module("./tx-fuzzer/launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")

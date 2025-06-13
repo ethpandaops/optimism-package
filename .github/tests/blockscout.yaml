@@ -4,5 +4,5 @@ optimism_package:
         - el_type: op-geth
       network_params:
         name: op-rollup-one
-      additional_services:
-        - blockscout
+      blockscout_params:
+        enabled: True

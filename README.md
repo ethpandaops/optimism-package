@@ -461,7 +461,6 @@ optimism_package:
       # Additional services to run alongside the network
       # Defaults to []
       # Available services:
-      # - blockscout
       # - rollup-boost
       # - da_server
       additional_services: []
@@ -483,6 +482,12 @@ optimism_package:
           - "--addr=0.0.0.0"
           - "--port=3100"
           - "--log.level=debug"
+
+      blockscout_params:
+        enabled: false
+        image: "blockscout/blockscout-optimism:6.8.0"
+        verifier_image: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
+        
 
   challengers:
     my-challenger:
@@ -582,8 +587,8 @@ optimism_package:
     - participants:
         - el_type: op-geth
           cl_type: op-node
-      additional_services:
-        - blockscout
+      blockscout_params:
+        enabled: True
 ethereum_package:
   participants:
     - el_type: geth
@@ -642,15 +647,15 @@ optimism_package:
       network_params:
         name: op-rollup-one
         network_id: "3151909"
-      additional_services:
-        - blockscout
+      blockscout_params:
+        enabled: True
     - participants:
         - el_type: op-geth
       network_params:
         name: op-rollup-two
         network_id: "3151910"
-      additional_services:
-        - blockscout
+      blockscout_params:
+        enabled: True
 ethereum_package:
   participants:
     - el_type: geth

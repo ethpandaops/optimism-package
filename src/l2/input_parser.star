@@ -3,6 +3,7 @@ _id = import_module("/src/util/id.star")
 
 _l2_participant_input_parser = import_module("./participant/input_parser.star")
 _batcher_input_parser = import_module("/src/batcher/input_parser.star")
+_blockscout_input_parser = import_module("/src/blockscout/input_parser.star")
 _da_input_parser = import_module("/src/da/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
@@ -26,6 +27,7 @@ _DEFAULT_ARGS = {
     "da_params": None,
     "proposer_params": None,
     "batcher_params": None,
+    "blockscout_params": None,
     "proxyd_params": None,
     "tx_fuzzer_params": None,
     # FIXME Make blockscout use the "enabled" pattern
@@ -127,6 +129,13 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
     # We add the DA params
     l2_params["da_params"] = _da_input_parser.parse(
         da_args=l2_params["da_params"],
+        network_params=l2_params["network_params"],
+        registry=registry,
+    )
+
+    # We add the explorer params
+    l2_params["blockscout_params"] = _blockscout_input_parser.parse(
+        blockscout_args=l2_params["blockscout_params"],
         network_params=l2_params["network_params"],
         registry=registry,
     )

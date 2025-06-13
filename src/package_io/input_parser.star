@@ -7,6 +7,7 @@ _ethereum_package_shared_utils = import_module(
 )
 
 _batcher_input_parser = import_module("/src/batcher/input_parser.star")
+_blockscout_input_parser = import_module("/src/blockscout/input_parser.star")
 _da_input_parser = import_module("/src/da/input_parser.star")
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
 _conductor_input_parser = import_module("/src/conductor/input_parser.star")
@@ -198,6 +199,7 @@ def input_parser(
                 ),
                 proxyd_params=result["proxyd_params"],
                 batcher_params=result["batcher_params"],
+                blockscout_params=result["blockscout_params"],
                 proposer_params=result["proposer_params"],
                 mev_params=result["mev_params"],
                 conductor_params=result["conductor_params"],
@@ -288,6 +290,13 @@ def parse_network_params(plan, registry, input_args):
             chain.get("batcher_params", {}),
             struct(**network_params),
             registry,
+        )
+
+        blockscout_params = _blockscout_input_parser.parse(
+            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
+            blockscout_args=chain.get("blockscout_params", {}),
+            network_params=struct(**network_params),
+            registry=registry,
         )
 
         proposer_params = _proposer_input_parser.parse(
@@ -434,6 +443,7 @@ def parse_network_params(plan, registry, input_args):
             "network_params": network_params,
             "proxyd_params": proxyd_params,
             "batcher_params": batcher_params,
+            "blockscout_params": blockscout_params,
             "proposer_params": proposer_params,
             "mev_params": mev_params,
             "conductor_params": conductor_params,
