@@ -10,6 +10,7 @@ _DEFAULT_ARGS = {
     "extra_env_vars": {},
     "extra_labels": {},
     "extra_params": [],
+    "node_selectors": {},
     "tolerations": [],
     "volume_size": 0,
     "min_cpu": 0,

@@ -54,6 +54,15 @@ def launch(
         params.log_level, log_level, VERBOSITY_LEVELS
     )
 
+    cl_node_selectors = _ethereum_package_input_parser.get_client_node_selectors(
+        params.node_selectors,
+        node_selectors,
+    )
+
+    cl_tolerations = _ethereum_package_input_parser.get_client_tolerations(
+        params.tolerations, [], tolerations
+    )
+
     config = get_service_config(
         plan=plan,
         params=params,
@@ -63,8 +72,8 @@ def launch(
         is_sequencer=is_sequencer,
         log_level=cl_log_level,
         persistent=persistent,
-        tolerations=tolerations,
-        node_selectors=node_selectors,
+        tolerations=cl_tolerations,
+        node_selectors=cl_node_selectors,
         el_context=el_context,
         cl_contexts=cl_contexts,
         l1_config_env_vars=l1_config_env_vars,
