@@ -2,9 +2,7 @@ _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 _input_parser = import_module("/src/package_io/input_parser.star")
-_conductor_input_parser = import_module(
-    "/src/conductor/input_parser.star"
-)
+_conductor_input_parser = import_module("/src/conductor/input_parser.star")
 _l2_input_parser = import_module("/src/l2/input_parser.star")
 _observability = import_module("/src/observability/observability.star")
 _registry = import_module("/src/package_io/registry.star")
@@ -382,27 +380,35 @@ def test_l2_participant_cl_launcher_incompatible_conductor(plan):
     participant_params = l2_params.participants[0]
     cl_params = participant_params.cl
 
-    conductor_params = _conductor_input_parser.parse(conductor_args={"enabled": True}, participant_name=participant_params.name, network_params=l2_params.network_params, registry=_default_registry)
-
-    expect.fails(lambda: _cl_launcher.launch(
-        plan=plan,
-        params=cl_params,
+    conductor_params = _conductor_input_parser.parse(
+        conductor_args={"enabled": True},
+        participant_name=participant_params.name,
         network_params=l2_params.network_params,
-        supervisors_params=[],
-        conductor_params=conductor_params,
-        da_params=l2_params.da_params,
-        is_sequencer=True,
-        jwt_file=_default_jwt_file,
-        deployment_output=_default_deployment_output,
-        l1_config_env_vars=_default_l1_config_env_vars,
-        log_level=_default_log_level,
-        persistent=True,
-        tolerations=[],
-        node_selectors={},
-        el_context=_default_el_context,
-        cl_contexts=_default_cl_contexts,
-        observability_helper=observability_helper,
-    ), "Node node0 on network kurtosis: hildr does not support conductor parameters")
+        registry=_default_registry,
+    )
+
+    expect.fails(
+        lambda: _cl_launcher.launch(
+            plan=plan,
+            params=cl_params,
+            network_params=l2_params.network_params,
+            supervisors_params=[],
+            conductor_params=conductor_params,
+            da_params=l2_params.da_params,
+            is_sequencer=True,
+            jwt_file=_default_jwt_file,
+            deployment_output=_default_deployment_output,
+            l1_config_env_vars=_default_l1_config_env_vars,
+            log_level=_default_log_level,
+            persistent=True,
+            tolerations=[],
+            node_selectors={},
+            el_context=_default_el_context,
+            cl_contexts=_default_cl_contexts,
+            observability_helper=observability_helper,
+        ),
+        "Node node0 on network kurtosis: hildr does not support conductor parameters",
+    )
 
     l2s_params = _l2_input_parser.parse(
         {
@@ -423,22 +429,25 @@ def test_l2_participant_cl_launcher_incompatible_conductor(plan):
     participant_params = l2_params.participants[0]
     cl_params = participant_params.cl
 
-    expect.fails(lambda: _cl_launcher.launch(
-        plan=plan,
-        params=cl_params,
-        network_params=l2_params.network_params,
-        supervisors_params=[],
-        conductor_params=conductor_params,
-        da_params=l2_params.da_params,
-        is_sequencer=True,
-        jwt_file=_default_jwt_file,
-        deployment_output=_default_deployment_output,
-        l1_config_env_vars=_default_l1_config_env_vars,
-        log_level=_default_log_level,
-        persistent=True,
-        tolerations=[],
-        node_selectors={},
-        el_context=_default_el_context,
-        cl_contexts=_default_cl_contexts,
-        observability_helper=observability_helper,
-    ), "Node node0 on network kurtosis: kona-node does not support conductor parameters")
+    expect.fails(
+        lambda: _cl_launcher.launch(
+            plan=plan,
+            params=cl_params,
+            network_params=l2_params.network_params,
+            supervisors_params=[],
+            conductor_params=conductor_params,
+            da_params=l2_params.da_params,
+            is_sequencer=True,
+            jwt_file=_default_jwt_file,
+            deployment_output=_default_deployment_output,
+            l1_config_env_vars=_default_l1_config_env_vars,
+            log_level=_default_log_level,
+            persistent=True,
+            tolerations=[],
+            node_selectors={},
+            el_context=_default_el_context,
+            cl_contexts=_default_cl_contexts,
+            observability_helper=observability_helper,
+        ),
+        "Node node0 on network kurtosis: kona-node does not support conductor parameters",
+    )

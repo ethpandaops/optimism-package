@@ -29,7 +29,11 @@ def launch(
 
     if params.type == "hildr":
         if conductor_params:
-            fail("Node {} on network {}: hildr does not support conductor parameters".format(params.name, network_params.network))
+            fail(
+                "Node {} on network {}: hildr does not support conductor parameters".format(
+                    params.name, network_params.network
+                )
+            )
 
         cl = _hildr_launcher.launch(
             plan=plan,
@@ -49,7 +53,11 @@ def launch(
         )
     elif params.type == "kona-node":
         if conductor_params:
-            fail("Node {} on network {}: kona-node does not support conductor parameters".format(params.name, network_params.network))
+            fail(
+                "Node {} on network {}: kona-node does not support conductor parameters".format(
+                    params.name, network_params.network
+                )
+            )
 
         cl = _kona_node_launcher.launch(
             plan=plan,
