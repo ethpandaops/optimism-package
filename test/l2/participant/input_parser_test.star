@@ -18,6 +18,7 @@ _shared_defaults = {
     "max_mem": 0,
     "min_cpu": 0,
     "min_mem": 0,
+    "node_selectors": {},
     "tolerations": [],
     "volume_size": 0,
 }
