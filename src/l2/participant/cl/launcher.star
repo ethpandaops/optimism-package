@@ -1,3 +1,4 @@
+_observability = import_module("/src/observability/observability.star")
 _hildr_launcher = import_module("/src/cl/hildr/launcher.star")
 _kona_node_launcher = import_module("/src/cl/kona-node/launcher.star")
 _op_node_launcher = import_module("/src/cl/op-node/launcher.star")
@@ -27,6 +28,13 @@ def launch(
     cl = None
 
     if params.type == "hildr":
+        if conductor_params:
+            fail(
+                "Node {} on network {}: hildr does not support conductor parameters".format(
+                    params.name, network_params.network
+                )
+            )
+
         cl = _hildr_launcher.launch(
             plan=plan,
             params=params,
@@ -44,6 +52,13 @@ def launch(
             observability_helper=observability_helper,
         )
     elif params.type == "kona-node":
+        if conductor_params:
+            fail(
+                "Node {} on network {}: kona-node does not support conductor parameters".format(
+                    params.name, network_params.network
+                )
+            )
+
         cl = _kona_node_launcher.launch(
             plan=plan,
             params=params,
@@ -79,6 +94,16 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             observability_helper=observability_helper,
+        )
+
+    # Register metrics
+    for metrics_info in _filter.remove_none(cl.context.cl_nodes_metrics_info):
+        _observability.register_node_metrics_job(
+            observability_helper,
+            params.type,
+            "beacon",
+            network_params.network,
+            metrics_info,
         )
 
     return cl
