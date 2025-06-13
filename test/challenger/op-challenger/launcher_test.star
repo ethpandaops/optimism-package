@@ -67,6 +67,10 @@ def test_op_challenger_launch_with_defaults(plan):
                 ),
                 participants=[
                     struct(
+                        cl=struct(
+                            service_name="my-cl",
+                            ports={_net.RPC_PORT_NAME: _net.port(number=8545)},
+                        ),
                         el=struct(
                             service_name="my-el",
                             ports={_net.RPC_PORT_NAME: _net.port(number=8545)},
@@ -102,7 +106,7 @@ def test_op_challenger_launch_with_defaults(plan):
             "--l1-eth-rpc=L1_RPC_URL",
             "--l2-eth-rpc=http://my-el:8545",
             "--private-key=challenger_private_key",
-            "--rollup-rpc=beacon_http_url",
+            "--rollup-rpc=http://my-cl:8545",
             "--cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
             "--metrics.enabled",
             "--metrics.addr=0.0.0.0",
