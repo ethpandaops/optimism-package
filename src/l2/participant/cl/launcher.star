@@ -1,3 +1,4 @@
+_observability = import_module("/src/observability/observability.star")
 _hildr_launcher = import_module("/src/cl/hildr/launcher.star")
 _kona_node_launcher = import_module("/src/cl/kona-node/launcher.star")
 _op_node_launcher = import_module("/src/cl/op-node/launcher.star")
@@ -79,6 +80,16 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             observability_helper=observability_helper,
+        )
+
+    # Register metrics
+    for metrics_info in _filter.remove_none(cl.context.cl_nodes_metrics_info):
+        _observability.register_node_metrics_job(
+            observability_helper,
+            params.type,
+            "beacon",
+            network_params.network,
+            metrics_info,
         )
 
     return cl
