@@ -118,7 +118,7 @@ def launch_participant_network__hack(
     _op_proposer_launcher.launch(
         plan=plan,
         params=proposer_params,
-        cl_context=sequencer_participant.cl_context,
+        sequencers_params=[sequencer_params],
         l1_config_env_vars=l1_config_env_vars,
         gs_proposer_private_key=proposer_key,
         game_factory_address=game_factory_address,

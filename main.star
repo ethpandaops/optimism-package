@@ -11,6 +11,8 @@ interop_mon = import_module("./src/interop-mon/op-interop-mon/launcher.star")
 observability = import_module("./src/observability/observability.star")
 util = import_module("./src/util.star")
 
+_net = import_module("./src/util/net.star")
+
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
 ethereum_package_static_files = import_module(
@@ -151,12 +153,43 @@ def run(plan, args={}):
             )
         )
 
+    # FIXME We have to do a bit of plumbing to adjust the legacy params to the new format
+    #
+    # This will be gone once the new input parsers are plugged in
+    l2s_params = [
+        struct(
+            network_params=optimism_args.chains[index].network_params,
+            participants=[
+                struct(
+                    el=struct(
+                        service_name=participant.el_context.ip_addr,
+                        ports={
+                            _net.RPC_PORT_NAME: _net.port(
+                                number=participant.el_context.rpc_port_num
+                            )
+                        },
+                    ),
+                    cl=struct(
+                        service_name=participant.cl_context.ip_addr,
+                        ports={
+                            _net.RPC_PORT_NAME: _net.port(
+                                number=participant.cl_context.http_port
+                            )
+                        },
+                    ),
+                )
+                for participant in l2.participants
+            ],
+        )
+        for index, l2 in enumerate(l2s)
+    ]
+
     for supervisor_params in optimism_args.supervisors:
         supervisor_launcher.launch(
             plan=plan,
             params=supervisor_params,
             l1_config_env_vars=l1_config_env_vars,
-            l2s=l2s,
+            l2s_params=l2s_params,
             jwt_file=jwt_file,
             deployment_output=deployment_output,
             observability_helper=observability_helper,
@@ -166,7 +199,7 @@ def run(plan, args={}):
         op_challenger_launcher.launch(
             plan=plan,
             params=challenger_params,
-            l2s=l2s,
+            l2s_params=l2s_params,
             supervisors_params=optimism_args.supervisors,
             l1_config_env_vars=l1_config_env_vars,
             deployment_output=deployment_output,

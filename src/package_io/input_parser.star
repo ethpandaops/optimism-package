@@ -457,16 +457,28 @@ def parse_network_params(plan, registry, input_args):
 
     results["chains"] = chains
 
+    # FIXME We have to do a bit of plumbing to adjust the legacy params to the new format
+    #
+    # This will be gone once the new input parsers are plugged in
+    l2s_params = [
+        struct(
+            network_params=struct(**network_params),
+        )
+        for chain in chains
+    ]
+
     # configure superchains
 
     results["superchains"] = _superchain_input_parser.parse(
-        args=input_args.get("superchains"), chains=chains
+        args=input_args.get("superchains"),
+        l2s_params=l2s_params,
     )
 
     # configure op-challenger
 
     results["challengers"] = _challenger_input_parser.parse(
-        args=input_args.get("challengers"), chains=chains
+        args=input_args.get("challengers"),
+        l2s_params=l2s_params,
     )
 
     # configure op-supervisor

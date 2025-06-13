@@ -46,7 +46,7 @@ def test_interop_op_supervisor_ports(plan):
     result = _op_supervisor_launcher.launch(
         plan=plan,
         l1_config_env_vars={"L1_RPC_URL": "http://l1.rpc"},
-        l2s=[],
+        l2s_params=[],
         jwt_file="/jwt_file",
         params=supervisor_params,
         deployment_output="/deployment_output",
