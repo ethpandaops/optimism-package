@@ -2,8 +2,8 @@ _launcher = import_module("/src/superchain/launcher.star")
 _input_parser = import_module("/src/superchain/input_parser.star")
 
 _chains = [
-    {"network_params": {"network_id": 1000}},
-    {"network_params": {"network_id": 2000}},
+    struct(network_params=struct(network_id=1000)),
+    struct(network_params=struct(network_id=2000)),
 ]
 
 

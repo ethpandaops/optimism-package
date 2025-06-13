@@ -1,27 +1,34 @@
 input_parser = import_module("/src/challenger/input_parser.star")
 
-_chains = [
-    {"network_params": {"network_id": 1000}},
-    {"network_params": {"network_id": 2000}},
+_default_l2s_params = [
+    struct(network_params=struct(network_id=1000)),
+    struct(network_params=struct(network_id=2000)),
 ]
 
 
 def test_challenger_input_parser_empty(plan):
-    expect.eq(input_parser.parse(None, _chains), [])
-    expect.eq(input_parser.parse({}, _chains), [])
+    expect.eq(input_parser.parse(None, _default_l2s_params), [])
+    expect.eq(input_parser.parse({}, _default_l2s_params), [])
 
 
 def test_challenger_input_parser_disabled(plan):
-    expect.eq(input_parser.parse({"challenger": {"enabled": False}}, _chains), [])
+    expect.eq(
+        input_parser.parse({"challenger": {"enabled": False}}, _default_l2s_params), []
+    )
 
 
 def test_challenger_input_parser_no_participants(plan):
-    expect.eq(input_parser.parse({"challenger": {"participants": []}}, _chains), [])
+    expect.eq(
+        input_parser.parse({"challenger": {"participants": []}}, _default_l2s_params),
+        [],
+    )
 
 
 def test_challenger_input_parser_extra_attributes(plan):
     expect.fails(
-        lambda: input_parser.parse({"challenger": {"extra": [], "name": ""}}, _chains),
+        lambda: input_parser.parse(
+            {"challenger": {"extra": [], "name": ""}}, _default_l2s_params
+        ),
         "Invalid attributes in challenger configuration for challenger: extra,name",
     )
 
@@ -41,11 +48,11 @@ def test_challenger_input_parser_default_args(plan):
     )
 
     expect.eq(
-        input_parser.parse({"challenger": None}, _chains),
+        input_parser.parse({"challenger": None}, _default_l2s_params),
         [expected_params],
     )
     expect.eq(
-        input_parser.parse({"challenger": {}}, _chains),
+        input_parser.parse({"challenger": {}}, _default_l2s_params),
         [expected_params],
     )
     expect.eq(
@@ -61,7 +68,7 @@ def test_challenger_input_parser_default_args(plan):
                     "cannon_trace_types": None,
                 }
             },
-            _chains,
+            _default_l2s_params,
         ),
         [expected_params],
     )
