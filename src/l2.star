@@ -64,7 +64,6 @@ def launch_l2(
         global_node_selectors=global_node_selectors,
         global_tolerations=global_tolerations,
         persistent=persistent,
-        additional_services=l2_args.additional_services,
         observability_helper=observability_helper,
         supervisors_params=supervisors_params,
         da_server_context=da_server_context,

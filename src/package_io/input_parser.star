@@ -205,7 +205,6 @@ def input_parser(
                 conductor_params=result["conductor_params"],
                 da_params=result["da_params"],
                 tx_fuzzer_params=result["tx_fuzzer_params"],
-                additional_services=result["additional_services"],
             )
             for result in results["chains"]
         ],
@@ -454,9 +453,6 @@ def parse_network_params(plan, registry, input_args):
             "mev_params": mev_params,
             "conductor_params": conductor_params,
             "da_params": da_params,
-            "additional_services": chain.get(
-                "additional_services", DEFAULT_ADDITIONAL_SERVICES
-            ),
             "tx_fuzzer_params": tx_fuzzer_params,
         }
         chains.append(result)
@@ -610,7 +606,6 @@ def default_chains(registry):
             "proposer_params": _default_proposer_params(registry),
             "mev_params": default_mev_params(),
             "da_params": default_da_server_params(registry),
-            "additional_services": DEFAULT_ADDITIONAL_SERVICES,
             "tx_fuzzer_params": default_tx_fuzzer_params(registry),
         }
     ]

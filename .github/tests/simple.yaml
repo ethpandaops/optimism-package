@@ -48,10 +48,6 @@ optimism_package:
         extra_params: []
         game_type: 1
         proposal_interval: 10m
-      mev_params:
-        builder_host: ""
-        builder_port: ""
-      additional_services: []
   challengers:
     challenger:
       enabled: true

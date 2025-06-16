@@ -145,7 +145,7 @@ SUBCATEGORY_PARAMS = {
     "proxyd_params": ["image", "extra_params"],
     "batcher_params": ["image", "extra_params"],
     "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
-    "mev_params": ["image", "type", "builder_host", "builder_port"],
+    "mev_params": ["enabled", "image", "type", "builder_host", "builder_port"],
     "conductor_params": [
         "enabled",
         "image",
@@ -188,8 +188,6 @@ OP_CONTRACT_DEPLOYER_OVERRIDES = [
     "faultGameAbsolutePrestate",
     "vmType",
 ]
-
-ADDITIONAL_SERVICES_PARAMS = ["rollup-boost"]
 
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",
@@ -299,16 +297,6 @@ def sanity_check(plan, optimism_config):
             plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
         )
 
-        # Checks additional_services
-        if "additional_services" in input_args:
-            for additional_services in input_args["additional_services"]:
-                if additional_services not in ADDITIONAL_SERVICES_PARAMS:
-                    fail(
-                        "Invalid additional_services {0}, allowed fields: {1}".format(
-                            additional_services, ADDITIONAL_SERVICES_PARAMS
-                        )
-                    )
-
         # Checks subcategories
         for subcategories in SUBCATEGORY_PARAMS.keys():
             validate_params(
@@ -319,7 +307,6 @@ def sanity_check(plan, optimism_config):
             combined_root_params = (
                 PARTICIPANT_CATEGORIES.keys() + SUBCATEGORY_PARAMS.keys()
             )
-            combined_root_params.append("additional_services")
             combined_root_params.append("op_contract_deployer_params")
 
             if param not in combined_root_params:

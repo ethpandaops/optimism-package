@@ -52,7 +52,6 @@ def launch_l2__hack(
         global_node_selectors=global_node_selectors,
         global_tolerations=global_tolerations,
         persistent=persistent,
-        additional_services=l2_args.additional_services,
         observability_helper=observability_helper,
         supervisors_params=supervisors_params,
         da_server_context=original_l2_output__hack.da_server_context__hack,

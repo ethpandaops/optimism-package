@@ -30,8 +30,6 @@ _DEFAULT_ARGS = {
     "blockscout_params": None,
     "proxyd_params": None,
     "tx_fuzzer_params": None,
-    # FIXME Make blockscout use the "enabled" pattern
-    "additional_services": [],
 }
 
 
