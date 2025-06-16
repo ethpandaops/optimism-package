@@ -128,6 +128,7 @@ def test_mev_input_parser_custom_params(plan):
             labels={
                 "op.kind": "mev",
                 "op.network.id": "1000",
+                "op.network.participant.index": "0",
                 "op.network.participant.name": "node0",
                 "op.mev.type": "rollup-boost",
             },
