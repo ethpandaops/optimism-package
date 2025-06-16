@@ -52,7 +52,7 @@ def test_l2_participant_input_parser_invalid_name(plan):
         lambda: input_parser.parse(
             {"node_0": None}, _default_network_params, _default_registry
         ),
-        "Node on network my-l2 can only contain alphanumeric characters and '-', got 'node_0'",
+        "Name of the node on network my-l2 can only contain alphanumeric characters and '-', got 'node_0'",
     )
 
 
