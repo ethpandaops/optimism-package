@@ -86,6 +86,12 @@ def _parse_instance(supervisor_args, supervisor_name, superchains, registry):
         )
     }
 
+    supervisor_params["labels"] = {
+        "op.kind": "supervisor",
+        "op.supervisor.type": supervisor_params["type"],
+        "op.supervisor.superchain": superchain.name,
+    }
+
     return struct(**supervisor_params)
 
 

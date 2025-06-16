@@ -87,6 +87,11 @@ def test_supervisor_input_parser_default_args(plan):
                 enabled=True,
                 extra_params=[],
                 image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+                labels={
+                    "op.kind": "supervisor",
+                    "op.supervisor.type": "op-supervisor",
+                    "op.supervisor.superchain": "superchain0",
+                },
                 name="supervisor0",
                 ports={
                     "rpc": _net.port(
