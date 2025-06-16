@@ -385,6 +385,7 @@ def test_l2_participant_cl_launcher_incompatible_conductor(plan):
 
     conductor_params = _conductor_input_parser.parse(
         conductor_args={"enabled": True},
+        participant_index=0,
         participant_name=participant_params.name,
         network_params=l2_params.network_params,
         registry=_default_registry,

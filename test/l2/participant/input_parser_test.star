@@ -322,6 +322,7 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
             labels={
                 "op.kind": "conductor",
                 "op.network.id": "1000",
+                "op.network.participant.index": "0",
                 "op.network.participant.name": "node0",
                 "op.conductor.type": "op-conductor",
             },
