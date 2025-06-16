@@ -1,13 +1,29 @@
 optimism_package:
   chains:
-    - participants:
-        - el_type: op-geth
-          cl_type: op-node
-        - el_type: op-reth
-          cl_type: op-node
-        - el_type: op-erigon
-          cl_type: op-node
-        - el_type: op-nethermind
-          cl_type: op-node
-        - el_type: op-besu
-          cl_type: op-node
+    chain0:
+      participants:
+        node0:
+          el:
+            type: op-geth
+          cl:
+            type: op-node
+        node1:
+          el:
+            type: op-reth
+          cl:
+            type: op-node
+        node2:
+          el:
+            type: op-erigon
+          cl:
+            type: op-node
+        node3:
+          el:
+            type: op-nethermind
+          cl:
+            type: op-node
+        node4:
+          el:
+            type: op-besu
+          cl:
+            type: op-node

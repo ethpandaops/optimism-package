@@ -1,7 +1,7 @@
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
-l2_launcher = import_module("./src/l2.star")
-l2_launcher__hack = import_module("./src/l2__hack.star")
+_l2_launcher = import_module("./src/l2/launcher.star")
+_l2_launcher__hack = import_module("./src/l2/launcher__hack.star")
 superchain_launcher = import_module("./src/superchain/launcher.star")
 supervisor_launcher = import_module("./src/supervisor/launcher.star")
 op_challenger_launcher = import_module("./src/challenger/op-challenger/launcher.star")
@@ -124,72 +124,38 @@ def run(plan, args={}):
         )
 
     l2s = []
-    for chain in optimism_args.chains:
+    for l2_params in optimism_args.chains:
         # We filter out the supervisors applicable to this network
         l2_supervisors_params = [
             supervisor_params
             for supervisor_params in optimism_args.supervisors
-            if chain.network_params.network_id
+            if l2_params.network_params.network_id
             in supervisor_params.superchain.participants
         ]
 
         l2s.append(
-            l2_launcher.launch_l2(
+            _l2_launcher.launch(
                 plan=plan,
-                l2_services_suffix=chain.network_params.name,
-                l2_args=chain,
-                jwt_file=jwt_file,
-                deployment_output=deployment_output,
-                l1_config=l1_config_env_vars,
-                l1_priv_key=l1_priv_key,
-                l1_rpc_url=l1_rpc_url,
-                global_log_level=global_log_level,
-                global_node_selectors=global_node_selectors,
-                global_tolerations=global_tolerations,
-                persistent=persistent,
-                observability_helper=observability_helper,
+                params=l2_params,
                 supervisors_params=l2_supervisors_params,
-                registry=registry,
+                jwt_file=jwt_file,
+                l1_config_env_vars=l1_config_env_vars,
+                deployment_output=deployment_output,
+                node_selectors=global_node_selectors,
+                observability_helper=observability_helper,
+                l1_rpc_url=l1_rpc_url,
+                log_level=global_log_level,
+                tolerations=global_tolerations,
+                persistent=persistent,
             )
         )
-
-    # FIXME We have to do a bit of plumbing to adjust the legacy params to the new format
-    #
-    # This will be gone once the new input parsers are plugged in
-    l2s_params = [
-        struct(
-            network_params=optimism_args.chains[index].network_params,
-            participants=[
-                struct(
-                    el=struct(
-                        service_name=participant.el_context.ip_addr,
-                        ports={
-                            _net.RPC_PORT_NAME: _net.port(
-                                number=participant.el_context.rpc_port_num
-                            )
-                        },
-                    ),
-                    cl=struct(
-                        service_name=participant.cl_context.ip_addr,
-                        ports={
-                            _net.RPC_PORT_NAME: _net.port(
-                                number=participant.cl_context.http_port
-                            )
-                        },
-                    ),
-                )
-                for participant in l2.participants
-            ],
-        )
-        for index, l2 in enumerate(l2s)
-    ]
 
     for supervisor_params in optimism_args.supervisors:
         supervisor_launcher.launch(
             plan=plan,
             params=supervisor_params,
             l1_config_env_vars=l1_config_env_vars,
-            l2s_params=l2s_params,
+            l2s_params=optimism_args.chains,
             jwt_file=jwt_file,
             deployment_output=deployment_output,
             observability_helper=observability_helper,
@@ -199,40 +165,38 @@ def run(plan, args={}):
         op_challenger_launcher.launch(
             plan=plan,
             params=challenger_params,
-            l2s_params=l2s_params,
+            l2s_params=optimism_args.chains,
             supervisors_params=optimism_args.supervisors,
             l1_config_env_vars=l1_config_env_vars,
             deployment_output=deployment_output,
             observability_helper=observability_helper,
         )
 
-    for index, chain in enumerate(optimism_args.chains):
+    for index, l2_params in enumerate(optimism_args.chains):
         # We filter out the supervisors applicable to this network
         l2_supervisors_params = [
             supervisor_params
             for supervisor_params in optimism_args.supervisors
-            if chain.network_params.network_id
+            if l2_params.network_params.network_id
             in supervisor_params.superchain.participants
         ]
 
-        original_l2_output__hack = l2s[index]
+        original_launcher_output__hack = l2s[index]
 
-        l2_launcher__hack.launch_l2__hack(
-            original_l2_output__hack=original_l2_output__hack,
+        _l2_launcher__hack.launch(
+            original_launcher_output__hack=original_launcher_output__hack,
             plan=plan,
-            l2_services_suffix=chain.network_params.name,
-            l2_args=chain,
-            jwt_file=jwt_file,
-            deployment_output=deployment_output,
-            l1_config=l1_config_env_vars,
-            l1_priv_key=l1_priv_key,
-            l1_rpc_url=l1_rpc_url,
-            global_log_level=global_log_level,
-            global_node_selectors=global_node_selectors,
-            global_tolerations=global_tolerations,
-            persistent=persistent,
-            observability_helper=observability_helper,
+            params=l2_params,
             supervisors_params=l2_supervisors_params,
+            jwt_file=jwt_file,
+            l1_config_env_vars=l1_config_env_vars,
+            deployment_output=deployment_output,
+            node_selectors=global_node_selectors,
+            observability_helper=observability_helper,
+            l1_rpc_url=l1_rpc_url,
+            log_level=global_log_level,
+            tolerations=global_tolerations,
+            persistent=persistent,
             registry=registry,
         )
 
@@ -303,7 +267,7 @@ def _install_faucet(
             faucet.faucet_data(
                 name=l2.name,
                 chain_id=chain_id,
-                el_rpc=l2.participants[0].el_context.rpc_http_url,
+                el_rpc=l2.participants[0].el.context.rpc_http_url,
                 private_key=private_key,
             )
         )

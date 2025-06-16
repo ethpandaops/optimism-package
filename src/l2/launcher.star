@@ -2,11 +2,15 @@ _cl_launcher = import_module("./participant/cl/launcher.star")
 _el_launcher = import_module("./participant/el/launcher.star")
 _da_server_launcher = import_module("/src/da/da-server/launcher.star")
 _op_batcher_launcher = import_module("/src/batcher/op-batcher/launcher.star")
+_op_conductor_launcher = import_module("/src/conductor/op-conductor/launcher.star")
 _op_proposer_launcher = import_module("/src/proposer/op-proposer/launcher.star")
 _proxyd_launcher = import_module("/src/proxyd/launcher.star")
+_rollup_boost_launcher = import_module("/src/mev/rollup-boost/launcher.star")
 _tx_fuzzer_launcher = import_module("/src/tx-fuzzer/launcher.star")
 
 _selectors = import_module("./selectors.star")
+_util = import_module("/src/util.star")
+_net = import_module("/src/util/net.star")
 
 
 def launch(
@@ -16,6 +20,7 @@ def launch(
     jwt_file,
     deployment_output,
     l1_config_env_vars,
+    l1_rpc_url,
     log_level,
     persistent,
     tolerations,
@@ -32,7 +37,7 @@ def launch(
         )
     )
 
-    _launch_da_maybe(
+    da = _launch_da_maybe(
         plan=plan, da_params=params.da_params, log_prefix=network_log_prefix
     )
 
@@ -94,8 +99,34 @@ def launch(
             node_selectors=node_selectors,
             bootnode_contexts=bootnode_contexts,
             observability_helper=observability_helper,
-            # FIXME
-            supervisors_params=[],
+            supervisors_params=supervisors_params,
+        )
+
+        cl_contexts = [p.cl.context for p in participants]
+
+        #
+        # Launch the builders & sidecar
+        #
+
+        sidecar_and_builders = _launch_sidecar_maybe(
+            plan=plan,
+            participant_params=participant_params,
+            network_params=network_params,
+            supervisors_params=supervisors_params,
+            is_sequencer=is_sequencer,
+            da_params=params.da_params,
+            el_context=el.context,
+            cl_contexts=cl_contexts,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
+            l1_config_env_vars=l1_config_env_vars,
+            log_level=log_level,
+            persistent=persistent,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            bootnode_contexts=bootnode_contexts + [el.context],
+            observability_helper=observability_helper,
+            log_prefix=participant_log_prefix,
         )
 
         #
@@ -103,7 +134,6 @@ def launch(
         #
 
         cl_params = participant_params.cl
-        cl_contexts = [p.cl.context for p in participants]
 
         plan.print(
             "{}: Launching CL ({})".format(participant_log_prefix, cl_params.type)
@@ -117,7 +147,9 @@ def launch(
             supervisors_params=supervisors_params,
             conductor_params=participant_params.conductor_params,
             is_sequencer=is_sequencer,
-            el_context=el.context,
+            el_context=sidecar_and_builders.el_builder.context
+            if sidecar_and_builders and sidecar_and_builders.el_builder
+            else el.context,
             cl_contexts=cl_contexts,
             jwt_file=jwt_file,
             deployment_output=deployment_output,
@@ -130,22 +162,20 @@ def launch(
         )
 
         # Add the EL/CL pair to the list of launched participants
-        participants.append(struct(el=el, cl=cl, name=participant_name))
+        participants.append(
+            struct(
+                el=el,
+                cl=cl,
+                name=participant_name,
+                sidecar=sidecar_and_builders.sidecar if sidecar_and_builders else None,
+            )
+        )
 
-    _launch_proxyd_maybe(
-        plan=plan,
-        proxyd_params=params.proxyd_params,
+    return struct(
+        name=network_params.name,
+        network_id=network_params.network_id,
         participants=participants,
-        network_params=network_params,
-        observability_helper=observability_helper,
-        log_prefix=network_log_prefix,
-    )
-    _launch_tx_fuzzer_maybe(
-        plan=plan,
-        tx_fuzzer_params=params.tx_fuzzer_params,
-        participants=participants,
-        node_selectors=node_selectors,
-        log_prefix=network_log_prefix,
+        da=da,
     )
 
 
@@ -153,42 +183,148 @@ def _launch_da_maybe(plan, da_params, log_prefix):
     if da_params:
         plan.print("{}: Launching DA".format(log_prefix))
 
-        _da_server_launcher.launch(
+        da = _da_server_launcher.launch(
             plan=plan,
             params=da_params,
-        ).context
+        )
 
         plan.print("{}: Successfully launched DA".format(log_prefix))
 
+        return da
 
-def _launch_proxyd_maybe(
-    plan, proxyd_params, participants, network_params, observability_helper, log_prefix
+
+def _launch_sidecar_maybe(
+    plan,
+    participant_params,
+    network_params,
+    da_params,
+    supervisors_params,
+    is_sequencer,
+    el_context,
+    cl_contexts,
+    jwt_file,
+    deployment_output,
+    l1_config_env_vars,
+    log_level,
+    persistent,
+    tolerations,
+    node_selectors,
+    bootnode_contexts,
+    observability_helper,
+    log_prefix,
 ):
-    if proxyd_params:
-        plan.print("{}: Launching proxyd".format(log_prefix))
+    mev_params = participant_params.mev_params
+    if not mev_params:
+        plan.print("{}: Rollup boost not enabled, skipping launch".format(log_prefix))
 
-        _proxyd_launcher.launch(
+        return None
+
+    # We only launch MEV for the sequencers
+    if not is_sequencer:
+        plan.print(
+            "{}: Rollup boost not active for non-sequencer nodes, skipping launch".format(
+                log_prefix
+            )
+        )
+
+        return None
+
+    el_builder_params = participant_params.el_builder
+    cl_builder_params = participant_params.cl_builder
+
+    is_external_builder = mev_params.builder_host and mev_params.builder_port
+    if is_external_builder:
+        plan.print(
+            "{}: External EL builder specified - EL/CL builders will not be launched".format(
+                log_prefix
+            )
+        )
+
+    el_builder = (
+        None
+        if is_external_builder
+        else _el_launcher.launch(
             plan=plan,
-            params=proxyd_params,
+            params=el_builder_params,
             network_params=network_params,
+            sequencer_params=participant_params,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
+            log_level=log_level,
+            persistent=persistent,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            bootnode_contexts=bootnode_contexts,
+            observability_helper=observability_helper,
+            supervisors_params=supervisors_params,
+        )
+    )
+
+    el_builder_context = (
+        struct(
+            ip_addr=mev_params.builder_host,
+            engine_rpc_port_num=mev_params.builder_port,
+            rpc_port_num=mev_params.builder_port,
+            rpc_http_url=_net.service_url(
+                mev_params.builder_host, _net.port(number=mev_params.builder_port)
+            ),
+            client_name="external-builder",
+        )
+        if is_external_builder
+        else el_builder.context
+    )
+
+    sidecar = _launch_sidecar(
+        plan=plan,
+        mev_params=mev_params,
+        network_params=network_params,
+        sequencer_context=el_context,
+        builder_context=el_builder_context,
+        jwt_file=jwt_file,
+    )
+
+    cl_builder = (
+        None
+        if is_external_builder
+        else _cl_launcher.launch(
+            plan=plan,
+            params=cl_builder_params,
+            network_params=network_params,
+            da_params=da_params,
+            supervisors_params=supervisors_params,
+            conductor_params=None,
+            is_sequencer=True,
+            el_context=el_builder_context,
+            cl_contexts=cl_contexts,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
+            l1_config_env_vars=l1_config_env_vars,
+            log_level=log_level,
+            persistent=persistent,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
             observability_helper=observability_helper,
         )
+    )
 
-        plan.print("{}: Successfully launched proxyd".format(log_prefix))
+    return struct(
+        el_builder=el_builder,
+        cl_builder=cl_builder,
+        sidecar=sidecar,
+    )
 
 
-def _launch_tx_fuzzer_maybe(
-    plan, tx_fuzzer_params, participants, node_selectors, log_prefix
+def _launch_sidecar(
+    plan, mev_params, network_params, sequencer_context, builder_context, jwt_file
 ):
-    if tx_fuzzer_params:
-        plan.print("{}: Launching tx fuzzer".format(log_prefix))
-
-        _tx_fuzzer_launcher.launch(
+    if mev_params.type == "rollup-boost":
+        return _rollup_boost_launcher.launch(
             plan=plan,
-            params=tx_fuzzer_params,
-            # FIXME
-            el_context=participants[0].el.context,
-            node_selectors=node_selectors,
+            params=mev_params,
+            network_params=network_params,
+            sequencer_context=sequencer_context,
+            builder_context=builder_context,
+            jwt_file=jwt_file,
         )
-
-        plan.print("{}: Successfully launched tx fuzzer".format(log_prefix))
+    else:
+        fail("Invalid MEV type: {}".format(mev_params.type))

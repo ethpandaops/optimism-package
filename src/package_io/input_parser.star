@@ -10,7 +10,7 @@ _batcher_input_parser = import_module("/src/batcher/input_parser.star")
 _blockscout_input_parser = import_module("/src/blockscout/input_parser.star")
 _da_input_parser = import_module("/src/da/input_parser.star")
 _challenger_input_parser = import_module("/src/challenger/input_parser.star")
-_conductor_input_parser = import_module("/src/conductor/input_parser.star")
+_l2_input_parser = import_module("/src/l2/input_parser.star")
 _mev_input_parser = import_module("/src/mev/input_parser.star")
 _superchain_input_parser = import_module("/src/superchain/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
@@ -120,94 +120,7 @@ def input_parser(
                 "da_resolver_refund_percentage"
             ],
         ),
-        chains=[
-            struct(
-                participants=[
-                    struct(
-                        el_type=participant["el_type"],
-                        el_image=participant["el_image"],
-                        el_log_level=participant["el_log_level"],
-                        el_extra_env_vars=participant["el_extra_env_vars"],
-                        el_extra_labels=participant["el_extra_labels"],
-                        el_extra_params=participant["el_extra_params"],
-                        el_tolerations=participant["el_tolerations"],
-                        el_volume_size=participant["el_volume_size"],
-                        el_min_cpu=participant["el_min_cpu"],
-                        el_max_cpu=participant["el_max_cpu"],
-                        el_min_mem=participant["el_min_mem"],
-                        el_max_mem=participant["el_max_mem"],
-                        cl_type=participant["cl_type"],
-                        cl_image=participant["cl_image"],
-                        cl_log_level=participant["cl_log_level"],
-                        cl_extra_env_vars=participant["cl_extra_env_vars"],
-                        cl_extra_labels=participant["cl_extra_labels"],
-                        cl_extra_params=participant["cl_extra_params"],
-                        cl_tolerations=participant["cl_tolerations"],
-                        cl_volume_size=participant["cl_volume_size"],
-                        cl_min_cpu=participant["cl_min_cpu"],
-                        cl_max_cpu=participant["cl_max_cpu"],
-                        cl_min_mem=participant["cl_min_mem"],
-                        cl_max_mem=participant["cl_max_mem"],
-                        el_builder_type=participant["el_builder_type"],
-                        el_builder_image=participant["el_builder_image"],
-                        el_builder_key=participant["el_builder_key"],
-                        el_builder_log_level=participant["el_builder_log_level"],
-                        el_builder_extra_env_vars=participant[
-                            "el_builder_extra_env_vars"
-                        ],
-                        el_builder_extra_labels=participant["el_builder_extra_labels"],
-                        el_builder_extra_params=participant["el_builder_extra_params"],
-                        el_builder_tolerations=participant["el_builder_tolerations"],
-                        el_builder_volume_size=participant["el_builder_volume_size"],
-                        el_builder_min_cpu=participant["el_builder_min_cpu"],
-                        el_builder_max_cpu=participant["el_builder_max_cpu"],
-                        el_builder_min_mem=participant["el_builder_min_mem"],
-                        el_builder_max_mem=participant["el_builder_max_mem"],
-                        cl_builder_type=participant["cl_builder_type"],
-                        cl_builder_image=participant["cl_builder_image"],
-                        cl_builder_log_level=participant["cl_builder_log_level"],
-                        cl_builder_extra_env_vars=participant[
-                            "cl_builder_extra_env_vars"
-                        ],
-                        cl_builder_extra_labels=participant["cl_builder_extra_labels"],
-                        cl_builder_extra_params=participant["cl_builder_extra_params"],
-                        cl_builder_tolerations=participant["cl_builder_tolerations"],
-                        cl_builder_volume_size=participant["cl_builder_volume_size"],
-                        cl_builder_min_cpu=participant["cl_builder_min_cpu"],
-                        cl_builder_max_cpu=participant["cl_builder_max_cpu"],
-                        cl_builder_min_mem=participant["cl_builder_min_mem"],
-                        cl_builder_max_mem=participant["cl_builder_max_mem"],
-                        node_selectors=participant["node_selectors"],
-                        tolerations=participant["tolerations"],
-                        count=participant["count"],
-                    )
-                    for participant in result["participants"]
-                ],
-                network_params=struct(
-                    network=result["network_params"]["network"],
-                    network_id=result["network_params"]["network_id"],
-                    seconds_per_slot=result["network_params"]["seconds_per_slot"],
-                    name=result["network_params"]["name"],
-                    fjord_time_offset=result["network_params"]["fjord_time_offset"],
-                    granite_time_offset=result["network_params"]["granite_time_offset"],
-                    holocene_time_offset=result["network_params"][
-                        "holocene_time_offset"
-                    ],
-                    isthmus_time_offset=result["network_params"]["isthmus_time_offset"],
-                    interop_time_offset=result["network_params"]["interop_time_offset"],
-                    fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
-                ),
-                proxyd_params=result["proxyd_params"],
-                batcher_params=result["batcher_params"],
-                blockscout_params=result["blockscout_params"],
-                proposer_params=result["proposer_params"],
-                mev_params=result["mev_params"],
-                conductor_params=result["conductor_params"],
-                da_params=result["da_params"],
-                tx_fuzzer_params=result["tx_fuzzer_params"],
-            )
-            for result in results["chains"]
-        ],
+        chains=results["chains"],
         challengers=results["challengers"],
         superchains=results["superchains"],
         supervisors=results["supervisors"],
@@ -273,214 +186,20 @@ def parse_network_params(plan, registry, input_args):
 
     # configure chains
 
-    chains = []
-
-    seen_names = {}
-    seen_network_ids = {}
-    for chain in input_args.get("chains", default_chains(registry)):
-        network_params = default_network_params()
-        network_params.update(chain.get("network_params", {}))
-
-        network_name = network_params["name"]
-        network_id = network_params["network_id"]
-
-        batcher_params = _batcher_input_parser.parse(
-            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
-            chain.get("batcher_params", {}),
-            struct(**network_params),
-            registry,
-        )
-
-        blockscout_params = _blockscout_input_parser.parse(
-            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
-            blockscout_args=chain.get("blockscout_params", {}),
-            network_params=struct(**network_params),
-            registry=registry,
-        )
-
-        proposer_params = _proposer_input_parser.parse(
-            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
-            chain.get("proposer_params", {}),
-            struct(**network_params),
-            registry,
-        )
-
-        # FIXME MEV configuration will move under a participant configuration with multiple sequencers functionality
-        # and will require participant params (of the sequencer) to be passed in
-        mev_params = _mev_input_parser.parse(
-            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
-            mev_args=chain.get("mev_params", {}),
-            network_params=struct(**network_params),
-            # FIXME At the moment the "name" of the sequencer is just its index in the array
-            # so we pass 0 as the name
-            participant_name="0",
-            # FIXME At the moment the index of the sequencer is just its index in the array
-            # so we pass 0 as the index
-            participant_index=0,
-            registry=registry,
-        )
-
-        # FIXME Conductor configuration will move under a participant configuration with multiple sequencers functionality
-        # and will require participant params (of the sequencer) to be passed in
-        conductor_params = _conductor_input_parser.parse(
-            conductor_args=chain.get("conductor_params", {}),
-            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
-            network_params=struct(**network_params),
-            # FIXME At the moment the "name" of the sequencer is just its index in the array
-            # so we pass 0 as the name
-            participant_name="0",
-            # FIXME At the moment the index of the sequencer is just its index in the array
-            # so we pass 0 as the index
-            participant_index=0,
-            registry=registry,
-        )
-
-        da_params = _da_input_parser.parse(
-            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
-            chain.get("da_params", {}),
-            struct(**network_params),
-            registry,
-        )
-
-        tx_fuzzer_params = _tx_fuzzer_parser.parse(
-            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
-            chain.get("tx_fuzzer_params", {}),
-            struct(**network_params),
-            registry,
-        )
-
-        if network_name in seen_names:
-            fail("Network name {0} is duplicated".format(network_name))
-
-        if network_id in seen_network_ids:
-            fail("Network id {0} is duplicated".format(network_id))
-
-        participants = []
-        for i, p in enumerate(chain.get("participants", [default_participant()])):
-            participant = default_participant()
-            participant.update(p)
-
-            el_type = participant["el_type"]
-            cl_type = participant["cl_type"]
-            el_image = participant["el_image"]
-            if el_image == "":
-                default_image = registry.get(el_type, "")
-                if default_image == "":
-                    fail(
-                        "{0} received an empty image name and we don't have a default for it".format(
-                            el_type
-                        )
-                    )
-                participant["el_image"] = default_image
-
-            cl_image = participant["cl_image"]
-            if cl_image == "":
-                default_image = registry.get(cl_type, "")
-                if default_image == "":
-                    fail(
-                        "{0} received an empty image name and we don't have a default for it".format(
-                            cl_type
-                        )
-                    )
-                participant["cl_image"] = default_image
-
-            el_builder_type = participant["el_builder_type"]
-            el_builder_image = participant["el_builder_image"]
-            if el_builder_image == "":
-                default_image = registry.get(el_builder_type, "")
-                if default_image == "":
-                    fail(
-                        "{0} received an empty image name and we don't have a default for it".format(
-                            el_builder_type
-                        )
-                    )
-                participant["el_builder_image"] = default_image
-
-            cl_builder_type = participant["cl_builder_type"]
-            cl_builder_image = participant["cl_builder_image"]
-            if cl_builder_image == "":
-                default_image = registry.get(cl_builder_type, "")
-                if default_image == "":
-                    fail(
-                        "{0} received an empty image name and we don't have a default for it".format(
-                            cl_builder_type
-                        )
-                    )
-                participant["cl_builder_image"] = default_image
-
-            for _ in range(0, participant["count"]):
-                participant_copy = ethereum_package_input_parser.deep_copy_participant(
-                    participant
-                )
-                participants.append(participant_copy)
-
-        proxyd_params = _proxyd_input_parser.parse(
-            # FIXME The network_params will come from the new L2 parser once that's in. Until then they need to be converted to a struct
-            proxyd_args=chain.get("proxyd_params", {}),
-            network_params=struct(**network_params),
-            # FIXME The participants params will come from the new L2 parser once that's in. Until then we need to convert the old ones to the new format
-            participants_params=[
-                struct(
-                    # Name is something we don't have in the legacy params, we only have array indices
-                    name=str(index),
-                    el=struct(
-                        service_name="op-el-{0}-{1}-{2}-{3}-{4}".format(
-                            network_id,
-                            _ethereum_package_shared_utils.zfill_custom(
-                                index + 1, len(str(len(participants)))
-                            ),
-                            p["el_type"],
-                            p["cl_type"],
-                            network_name,
-                        ),
-                        ports={
-                            _net.RPC_PORT_NAME: _net.port(number=8545),
-                        },
-                    ),
-                )
-                for index, p in enumerate(participants)
-            ],
-            registry=registry,
-        )
-
-        result = {
-            "participants": participants,
-            "network_params": network_params,
-            "proxyd_params": proxyd_params,
-            "batcher_params": batcher_params,
-            "blockscout_params": blockscout_params,
-            "proposer_params": proposer_params,
-            "mev_params": mev_params,
-            "conductor_params": conductor_params,
-            "da_params": da_params,
-            "tx_fuzzer_params": tx_fuzzer_params,
-        }
-        chains.append(result)
-
-    results["chains"] = chains
-
-    # FIXME We have to do a bit of plumbing to adjust the legacy params to the new format
-    #
-    # This will be gone once the new input parsers are plugged in
-    l2s_params = [
-        struct(
-            network_params=struct(**network_params),
-        )
-        for chain in chains
-    ]
+    results["chains"] = _l2_input_parser.parse(
+        args=input_args.get("chains"), registry=registry
+    )
 
     # configure superchains
 
     results["superchains"] = _superchain_input_parser.parse(
-        args=input_args.get("superchains"),
-        l2s_params=l2s_params,
+        args=input_args.get("superchains"), l2s_params=results["chains"]
     )
 
     # configure op-challenger
 
     results["challengers"] = _challenger_input_parser.parse(
-        args=input_args.get("challengers"),
-        l2s_params=l2s_params,
+        args=input_args.get("challengers"), l2s_params=results["chains"]
     )
 
     # configure op-supervisor
@@ -596,21 +315,6 @@ def default_mev_params():
     }
 
 
-def default_chains(registry):
-    return [
-        {
-            "participants": [default_participant()],
-            "network_params": default_network_params(),
-            "proxyd_params": _default_proxyd_params(registry),
-            "batcher_params": _default_batcher_params(registry),
-            "proposer_params": _default_proposer_params(registry),
-            "mev_params": default_mev_params(),
-            "da_params": default_da_server_params(registry),
-            "tx_fuzzer_params": default_tx_fuzzer_params(registry),
-        }
-    ]
-
-
 def default_network_params():
     return {
         "network": constants.NETWORK_NAME,
@@ -651,58 +355,12 @@ def _default_proposer_params(registry):
 
 def default_participant():
     return {
-        "el_type": "op-geth",
-        "el_image": "",
-        "el_log_level": "",
-        "el_extra_env_vars": {},
-        "el_extra_labels": {},
-        "el_extra_params": [],
-        "el_tolerations": [],
-        "el_volume_size": 0,
-        "el_min_cpu": 0,
-        "el_max_cpu": 0,
-        "el_min_mem": 0,
-        "el_max_mem": 0,
-        "cl_type": "op-node",
-        "cl_image": "",
-        "cl_log_level": "",
-        "cl_extra_env_vars": {},
-        "cl_extra_labels": {},
-        "cl_extra_params": [],
-        "cl_tolerations": [],
-        "cl_volume_size": 0,
-        "cl_min_cpu": 0,
-        "cl_max_cpu": 0,
-        "cl_min_mem": 0,
-        "cl_max_mem": 0,
-        "el_builder_type": "op-geth",
-        "el_builder_image": "",
-        "el_builder_key": "",
-        "el_builder_log_level": "",
-        "el_builder_extra_env_vars": {},
-        "el_builder_extra_labels": {},
-        "el_builder_extra_params": [],
-        "el_builder_tolerations": [],
-        "el_builder_volume_size": 0,
-        "el_builder_min_cpu": 0,
-        "el_builder_max_cpu": 0,
-        "el_builder_min_mem": 0,
-        "el_builder_max_mem": 0,
-        "cl_builder_type": "op-node",
-        "cl_builder_image": "",
-        "cl_builder_log_level": "",
-        "cl_builder_extra_env_vars": {},
-        "cl_builder_extra_labels": {},
-        "cl_builder_extra_params": [],
-        "cl_builder_tolerations": [],
-        "cl_builder_volume_size": 0,
-        "cl_builder_min_cpu": 0,
-        "cl_builder_max_cpu": 0,
-        "cl_builder_min_mem": 0,
-        "cl_builder_max_mem": 0,
-        "node_selectors": {},
-        "tolerations": [],
-        "count": 1,
+        "el": {
+            "type": "op-geth",
+        },
+        "cl": {
+            "type": "op-node",
+        },
     }
 
 
