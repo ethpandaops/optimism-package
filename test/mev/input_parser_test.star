@@ -90,10 +90,11 @@ def test_mev_input_parser_default_args(plan):
 
     expect.eq(
         _input_parser.parse(
-            {"enabled": False},
-            _default_network_params,
-            _default_participant_name,
-            _default_registry,
+            mev_args={"enabled": False},
+            network_params=_default_network_params,
+            participant_index=_default_participant_index,
+            participant_name=_default_participant_name,
+            registry=_default_registry,
         ),
         None,
     )
