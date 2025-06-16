@@ -69,6 +69,7 @@ def _get_config(
     return ServiceConfig(
         image=params.image,
         ports=ports,
+        labels=params.labels,
         files={
             DATA_DIR: params.superchain.dependency_set.name,
             _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,

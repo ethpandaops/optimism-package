@@ -104,6 +104,7 @@ def test_l2_participant_cl_launcher_hildr(plan):
         {
             "op.kind": "cl",
             "op.network.id": "2151908",
+            "op.network.participant.index": "0",
             "op.network.participant.name": "node0",
             "op.cl.type": "hildr",
         },
@@ -227,6 +228,7 @@ def test_l2_participant_cl_launcher_kona_node(plan):
         {
             "op.kind": "cl",
             "op.network.id": "2151908",
+            "op.network.participant.index": "0",
             "op.network.participant.name": "node0",
             "op.cl.type": "kona-node",
         },
@@ -334,6 +336,7 @@ def test_l2_participant_cl_launcher_op_node(plan):
         {
             "op.kind": "cl",
             "op.network.id": "2151908",
+            "op.network.participant.index": "0",
             "op.network.participant.name": "node0",
             "op.cl.type": "op-node",
         },
@@ -382,6 +385,7 @@ def test_l2_participant_cl_launcher_incompatible_conductor(plan):
 
     conductor_params = _conductor_input_parser.parse(
         conductor_args={"enabled": True},
+        participant_index=0,
         participant_name=participant_params.name,
         network_params=l2_params.network_params,
         registry=_default_registry,

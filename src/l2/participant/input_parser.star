@@ -21,10 +21,16 @@ _DEFAULT_ARGS = {
 
 
 def parse(args, network_params, registry):
+    participant_index_generator = _id.autoincrement(initial=0)
+
     participants_params = _filter.remove_none(
         [
             _parse_instance(
-                participant_args or {}, participant_name, network_params, registry
+                participant_args=participant_args or {},
+                participant_name=participant_name,
+                participant_index_generator=participant_index_generator,
+                network_params=network_params,
+                registry=registry,
             )
             for participant_name, participant_args in (args or {}).items()
         ]
@@ -50,9 +56,21 @@ def parse(args, network_params, registry):
     return participants_params
 
 
-def _parse_instance(participant_args, participant_name, network_params, registry):
+def _parse_instance(
+    participant_args,
+    participant_name,
+    participant_index_generator,
+    network_params,
+    registry,
+):
     network_id = network_params.network_id
     network_name = network_params.name
+
+    # To bridge the legacy list format to the new dictionary format for participants,
+    # we introduce an index label
+    #
+    # This will be added to the EL/CL labels so that the optimism devent SDK can extract the legacy node index
+    participant_index = participant_index_generator()
 
     # Any extra attributes will cause an error
     _filter.assert_keys(
@@ -108,6 +126,7 @@ def _parse_instance(participant_args, participant_name, network_params, registry
         mev_args=participant_params["mev_params"],
         network_params=network_params,
         participant_name=participant_name,
+        participant_index=participant_index,
         registry=registry,
     )
 
@@ -119,23 +138,41 @@ def _parse_instance(participant_args, participant_name, network_params, registry
         conductor_args=participant_params["conductor_params"],
         network_params=network_params,
         participant_name=participant_name,
+        participant_index=participant_index,
         registry=registry,
     )
 
     return struct(
         el=_el_input_parser.parse(
-            participant_params["el"], participant_name, network_params, registry
+            el_args=participant_params["el"],
+            participant_name=participant_name,
+            participant_index=participant_index,
+            network_params=network_params,
+            registry=registry,
         ),
         el_builder=_el_input_parser.parse_builder(
-            participant_params["el_builder"], participant_name, network_params, registry
+            el_args=participant_params["el_builder"],
+            participant_name=participant_name,
+            participant_index=participant_index,
+            network_params=network_params,
+            registry=registry,
         ),
         cl=_cl_input_parser.parse(
-            participant_params["cl"], participant_name, network_params, registry
+            cl_args=participant_params["cl"],
+            participant_name=participant_name,
+            participant_index=participant_index,
+            network_params=network_params,
+            registry=registry,
         ),
         cl_builder=_cl_input_parser.parse_builder(
-            participant_params["cl_builder"], participant_name, network_params, registry
+            cl_args=participant_params["cl_builder"],
+            participant_name=participant_name,
+            participant_index=participant_index,
+            network_params=network_params,
+            registry=registry,
         ),
         name=participant_name,
+        index=participant_index,
         sequencer=sequencer,
         mev_params=mev_params,
         conductor_params=conductor_params,

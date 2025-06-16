@@ -13,7 +13,9 @@ _DEFAULT_ARGS = {
 }
 
 
-def parse(conductor_args, network_params, participant_name, registry):
+def parse(
+    conductor_args, network_params, participant_name, participant_index, registry
+):
     network_id = network_params.network_id
     network_name = network_params.name
 
@@ -55,6 +57,7 @@ def parse(conductor_args, network_params, participant_name, registry):
     conductor_params["labels"] = {
         "op.kind": "conductor",
         "op.network.id": str(network_id),
+        "op.network.participant.index": str(participant_index),
         "op.network.participant.name": participant_name,
         "op.conductor.type": "op-conductor",
     }
