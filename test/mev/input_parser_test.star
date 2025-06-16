@@ -25,7 +25,7 @@ def test_mev_input_parser_extra_attributes(plan):
 def test_mev_input_parser_invalid_builder_params(plan):
     expect.fails(
         lambda: _input_parser.parse(
-            mev_args={"builder_port": "7"},
+            mev_args={"enabled": True, "builder_port": "7"},
             network_params=_default_network_params,
             participant_index=_default_participant_index,
             participant_name=_default_participant_name,
@@ -36,7 +36,7 @@ def test_mev_input_parser_invalid_builder_params(plan):
 
     expect.fails(
         lambda: _input_parser.parse(
-            mev_args={"builder_host": "localhost"},
+            mev_args={"enabled": True, "builder_host": "localhost"},
             network_params=_default_network_params,
             participant_index=_default_participant_index,
             participant_name=_default_participant_name,
@@ -48,6 +48,7 @@ def test_mev_input_parser_invalid_builder_params(plan):
 
 def test_mev_input_parser_default_args(plan):
     _default_params = struct(
+        enabled=True,
         image="flashbots/rollup-boost:latest",
         type="rollup-boost",
         builder_host=None,
@@ -73,7 +74,7 @@ def test_mev_input_parser_default_args(plan):
             participant_name=_default_participant_name,
             registry=_default_registry,
         ),
-        _default_params,
+        None,
     )
 
     expect.eq(
@@ -84,12 +85,23 @@ def test_mev_input_parser_default_args(plan):
             participant_name=_default_participant_name,
             registry=_default_registry,
         ),
-        _default_params,
+        None,
+    )
+
+    expect.eq(
+        _input_parser.parse(
+            {"enabled": False},
+            _default_network_params,
+            _default_participant_name,
+            _default_registry,
+        ),
+        None,
     )
 
     expect.eq(
         _input_parser.parse(
             mev_args={
+                "enabled": True,
                 "image": None,
                 "type": None,
                 "builder_host": None,
@@ -107,6 +119,7 @@ def test_mev_input_parser_default_args(plan):
 def test_mev_input_parser_custom_params(plan):
     parsed = _input_parser.parse(
         mev_args={
+            "enabled": True,
             "image": "op-rollup-boost:brightest",
             "builder_host": "localhost",
             "builder_port": 8080,
@@ -120,6 +133,7 @@ def test_mev_input_parser_custom_params(plan):
     expect.eq(
         parsed,
         struct(
+            enabled=True,
             image="op-rollup-boost:brightest",
             type="rollup-boost",
             builder_host="localhost",
@@ -143,7 +157,7 @@ def test_mev_input_parser_custom_registry(plan):
     registry = _registry.Registry({_registry.ROLLUP_BOOST: "rollup-boost:greatest"})
 
     parsed = _input_parser.parse(
-        mev_args={},
+        mev_args={"enabled": True},
         network_params=_default_network_params,
         participant_index=_default_participant_index,
         participant_name=_default_participant_name,
@@ -152,7 +166,7 @@ def test_mev_input_parser_custom_registry(plan):
     expect.eq(parsed.image, "rollup-boost:greatest")
 
     parsed = _input_parser.parse(
-        mev_args={"image": "rollup-boost:oldest"},
+        mev_args={"enabled": True, "image": "rollup-boost:oldest"},
         network_params=_default_network_params,
         participant_index=_default_participant_index,
         participant_name=_default_participant_name,

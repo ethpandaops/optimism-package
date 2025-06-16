@@ -3,6 +3,7 @@ _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
 _DEFAULT_ARGS = {
+    "enabled": False,
     "image": None,
     # At the moment we only support rollup-boost
     "type": "rollup-boost",
@@ -31,6 +32,9 @@ def parse(mev_args, network_params, participant_name, participant_index, registr
 
     # We filter the None values so that we can merge dicts easily
     mev_params = _DEFAULT_ARGS | _filter.remove_none(mev_args or {})
+
+    if not mev_params["enabled"]:
+        return None
 
     # Now we check that we either have none or both of builder_host & builder_port
     if mev_params["builder_host"] and not mev_params["builder_port"]:

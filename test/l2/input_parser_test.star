@@ -129,7 +129,6 @@ def test_l2_input_parser_defaults(plan):
                 tx_fuzzer_params=None,
                 # Blockscout is disabled by default
                 blockscout_params=None,
-                additional_services=[],
             )
         ],
     )
@@ -163,7 +162,6 @@ def test_l2_input_parser_defaults(plan):
                 tx_fuzzer_params=None,
                 # Blockscout is disabled by default
                 blockscout_params=None,
-                additional_services=[],
             )
         ],
     )

@@ -445,6 +445,9 @@ optimism_package:
 
       # Default MEV configuration
       mev_params:
+        # MEV is disabled by default
+        enabled: false
+
         # The Docker image that should be used for rollup boost; leave blank to use the default rollup-boost image
         # Defaults to "flashbots/rollup-boost:latest"
         image: ""
@@ -693,11 +696,10 @@ optimism_package:
         - el_builder_type: op-rbuilder
           cl_builder_type: op-node
       mev_params:
-        rollup_boost_image: "flashbots/rollup-boost:latest"
+        enabled: true
+        image: "flashbots/rollup-boost:latest"
         builder_host: "localhost"
         builder_port: "8545"
-      additional_services:
-        - rollup-boost
 ```
 
 #### Run tx-fuzz to send l2 transactions

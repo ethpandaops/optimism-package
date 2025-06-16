@@ -47,7 +47,6 @@ def launch(
     global_node_selectors,
     global_tolerations,
     persistent,
-    additional_services,
     observability_helper,
     supervisors_params,
     da_server_context,
@@ -165,7 +164,7 @@ def launch(
     all_el_contexts = []
     sequencer_enabled = True
     sequencer_context = None
-    rollup_boost_enabled = "rollup-boost" in additional_services
+    rollup_boost_enabled = mev_params
     external_builder = mev_params.builder_host and mev_params.builder_port
 
     # In the legacy setup, we only get one sidecar context (for the single sequencer)

@@ -25,7 +25,6 @@ def launch_participant_network__hack(
     global_node_selectors,
     global_tolerations,
     persistent,
-    additional_services,
     observability_helper,
     supervisors_params,
     da_server_context,

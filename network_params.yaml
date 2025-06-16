@@ -41,7 +41,8 @@ optimism_package:
       conductor_params:
         enabled: true
         bootstrap: true
-      additional_services: ["rollup-boost"]
+      mev_params:
+        enabled: true
       blockscout_params:
         enabled: true
       tx_fuzzer_params:
