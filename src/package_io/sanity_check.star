@@ -150,6 +150,7 @@ EXTERNAL_L1_NETWORK_PARAMS = [
     "priv_key",
 ]
 
+
 def validate_params(plan, input_args, category, allowed_params):
     if category in input_args:
         for param in input_args[category].keys():
@@ -163,7 +164,11 @@ def validate_params(plan, input_args, category, allowed_params):
 
 def sanity_check(plan, optimism_config):
     if type(optimism_config) != "dict":
-        fail("Invalid input_args type, expected dict, got {}".format(type(optimism_config)))
+        fail(
+            "Invalid input_args type, expected dict, got {}".format(
+                type(optimism_config)
+            )
+        )
 
     for key in optimism_config.keys():
         if key not in ROOT_PARAMS:

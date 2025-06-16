@@ -29,7 +29,7 @@ def test_interop_kona_supervisor_ports(plan):
                                 "image": "op-node:latest",
                             },
                         }
-                    }
+                    },
                 }
             },
             "superchains": {"superchain0": {}},
