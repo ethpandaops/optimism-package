@@ -32,29 +32,41 @@ _IMAGE_IDS = {
 }
 
 
-def parse(el_args, participant_name, network_params, registry):
+def parse(el_args, participant_name, participant_index, network_params, registry):
     return _parse(
         el_args=el_args,
         default_args=_DEFAULT_ARGS,
         participant_name=participant_name,
+        participant_index=participant_index,
         network_params=network_params,
         registry=registry,
         el_kind="el",
     )
 
 
-def parse_builder(el_args, participant_name, network_params, registry):
+def parse_builder(
+    el_args, participant_name, participant_index, network_params, registry
+):
     return _parse(
         el_args=el_args,
         default_args=_DEFAULT_BUILDER_ARGS,
         participant_name=participant_name,
+        participant_index=participant_index,
         network_params=network_params,
         registry=registry,
         el_kind="elbuilder",
     )
 
 
-def _parse(el_args, default_args, participant_name, network_params, registry, el_kind):
+def _parse(
+    el_args,
+    default_args,
+    participant_name,
+    participant_index,
+    network_params,
+    registry,
+    el_kind,
+):
     network_id = network_params.network_id
     network_name = network_params.name
 
@@ -89,6 +101,7 @@ def _parse(el_args, default_args, participant_name, network_params, registry, el
     el_params["labels"] = {
         "op.kind": el_kind,
         "op.network.id": str(network_id),
+        "op.network.participant.index": str(participant_index),
         "op.network.participant.name": participant_name,
         "op.el.type": el_params["type"],
     }

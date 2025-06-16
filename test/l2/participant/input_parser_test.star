@@ -73,6 +73,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "cl",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "0",
                         "op.network.participant.name": "node0",
                         "op.cl.type": "op-node",
                     },
@@ -93,6 +94,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "clbuilder",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "0",
                         "op.network.participant.name": "node0",
                         "op.cl.type": "op-node",
                     },
@@ -113,6 +115,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "el",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "0",
                         "op.network.participant.name": "node0",
                         "op.el.type": "op-geth",
                     },
@@ -135,6 +138,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "elbuilder",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "0",
                         "op.network.participant.name": "node0",
                         "op.el.type": "op-geth",
                     },
@@ -157,6 +161,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "mev",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "0",
                         "op.network.participant.name": "node0",
                         "op.mev.type": "rollup-boost",
                     },
@@ -179,6 +184,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "cl",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "1",
                         "op.network.participant.name": "node1",
                         "op.cl.type": "op-node",
                     },
@@ -199,6 +205,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "clbuilder",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "1",
                         "op.network.participant.name": "node1",
                         "op.cl.type": "op-node",
                     },
@@ -219,6 +226,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "el",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "1",
                         "op.network.participant.name": "node1",
                         "op.el.type": "op-geth",
                     },
@@ -241,6 +249,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "elbuilder",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "1",
                         "op.network.participant.name": "node1",
                         "op.el.type": "op-geth",
                     },
@@ -263,6 +272,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "mev",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "1",
                         "op.network.participant.name": "node1",
                         "op.mev.type": "rollup-boost",
                     },

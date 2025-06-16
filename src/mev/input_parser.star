@@ -15,7 +15,7 @@ _IMAGE_IDS = {
 }
 
 
-def parse(mev_args, network_params, participant_name, registry):
+def parse(mev_args, network_params, participant_name, participant_index, registry):
     network_id = network_params.network_id
     network_name = network_params.name
 
@@ -53,6 +53,7 @@ def parse(mev_args, network_params, participant_name, registry):
         "op.kind": "mev",
         "op.network.id": str(network_id),
         "op.mev.type": mev_params["type"],
+        "op.network.participant.index": str(participant_index),
         "op.network.participant.name": participant_name,
     }
 
