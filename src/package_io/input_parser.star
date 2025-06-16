@@ -353,17 +353,6 @@ def _default_proposer_params(registry):
     }
 
 
-def default_participant():
-    return {
-        "el": {
-            "type": "op-geth",
-        },
-        "cl": {
-            "type": "op-node",
-        },
-    }
-
-
 def default_op_contract_deployer_params(registry):
     return {
         "image": registry.get(_registry.OP_DEPLOYER),
