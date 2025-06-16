@@ -65,6 +65,10 @@ def _get_config(
                 application_protocol="http",
             ),
         },
+        labels={
+            "op.kind": "faucet"
+            # TODO Add network IDs
+        },
         files={
             mount_path: faucet_config,
         },
