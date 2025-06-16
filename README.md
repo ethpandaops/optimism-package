@@ -202,168 +202,170 @@ optimism_package:
     chain-a:
     # Specification of the optimism-participants in the network
       participants:
-        # EL(Execution Layer) Specific flags 
-        el:
-          # The type of EL client that should be started
-          # Valid values are:
-          # op-geth
-          # op-reth
-          # op-erigon
-          # op-nethermind
-          # op-besu
-          type: op-geth
+        # Nodes are keyed by their name
+        node0:
+          # EL(Execution Layer) Specific flags 
+          el:
+            # The type of EL client that should be started
+            # Valid values are:
+            # op-geth
+            # op-reth
+            # op-erigon
+            # op-nethermind
+            # op-besu
+            type: op-geth
 
-          # The Docker image that should be used for the EL client; leave blank to use the default for the client type
-          # Defaults by client:
-          # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
-          # - op-reth: parithoshj/op-reth:latest
-          # - op-erigon: testinprod/op-erigon:latest
-          # - op-nethermind: nethermindeth/nethermind:op-c482d56
-          # - op-besu: ghcr.io/optimism-java/op-besu:latest
-          image: ""
+            # The Docker image that should be used for the EL client; leave blank to use the default for the client type
+            # Defaults by client:
+            # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
+            # - op-reth: parithoshj/op-reth:latest
+            # - op-erigon: testinprod/op-erigon:latest
+            # - op-nethermind: nethermindeth/nethermind:op-c482d56
+            # - op-besu: ghcr.io/optimism-java/op-besu:latest
+            image: ""
 
-          # The log level string that this participant's EL client should log at
-          # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-          # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
-          # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-          # over a specific participant's logging
-          log_level: ""
+            # The log level string that this participant's EL client should log at
+            # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+            # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
+            # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+            # over a specific participant's logging
+            log_level: ""
 
-          # A list of optional extra env_vars the el container should spin up with
-          extra_env_vars: {}
+            # A list of optional extra env_vars the el container should spin up with
+            extra_env_vars: {}
 
-          # A list of optional extra labels the el container should spin up with
-          # Example; el_extra_labels: {"ethereum-package.partition": "1"}
-          extra_labels: {}
+            # A list of optional extra labels the el container should spin up with
+            # Example; el_extra_labels: {"ethereum-package.partition": "1"}
+            extra_labels: {}
 
-          # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
-          extra_params: []
+            # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
+            extra_params: []
 
-          # A list of tolerations that will be passed to the EL client container
-          # Only works with Kubernetes
-          # Example: el_tolerations:
-          # - key: "key"
-          #   operator: "Equal"
-          #   value: "value"
-          #   effect: "NoSchedule"
-          #   toleration_seconds: 3600
-          # Defaults to empty
-          tolerations: []
+            # A list of tolerations that will be passed to the EL client container
+            # Only works with Kubernetes
+            # Example: el_tolerations:
+            # - key: "key"
+            #   operator: "Equal"
+            #   value: "value"
+            #   effect: "NoSchedule"
+            #   toleration_seconds: 3600
+            # Defaults to empty
+            tolerations: []
 
-          # Node selectors
-          # Only works with Kubernetes
-          # Example: node_selectors: { "disktype": "ssd" }
-          # Defaults to empty
-          node_selectors: {}
+            # Node selectors
+            # Only works with Kubernetes
+            # Example: node_selectors: { "disktype": "ssd" }
+            # Defaults to empty
+            node_selectors: {}
 
-          # Persistent storage size for the EL client container (in MB)
-          # Defaults to 0, which means that the default size for the client will be used
-          # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
-          volume_size: 0
+            # Persistent storage size for the EL client container (in MB)
+            # Defaults to 0, which means that the default size for the client will be used
+            # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+            volume_size: 0
 
-          # Resource management for el containers
-          # CPU is milicores
-          # RAM is in MB
-          # Defaults to 0, which results in no resource limits
-          min_cpu: 0
-          max_cpu: 0
-          min_mem: 0
-          max_mem: 0
+            # Resource management for el containers
+            # CPU is milicores
+            # RAM is in MB
+            # Defaults to 0, which results in no resource limits
+            min_cpu: 0
+            max_cpu: 0
+            min_mem: 0
+            max_mem: 0
 
-        # CL(Consensus Layer) Specific flags
-        cl:
-          # The type of CL client that should be started
-          # Valid values are:
-          # op-node
-          # hildr
-          type: op-node
+          # CL(Consensus Layer) Specific flags
+          cl:
+            # The type of CL client that should be started
+            # Valid values are:
+            # op-node
+            # hildr
+            type: op-node
 
-          # The Docker image that should be used for the CL client; leave blank to use the default for the client type
-          # Defaults by client:
-          # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
-          # - hildr: ghcr.io/optimism-java/hildr:latest
-          image: ""
+            # The Docker image that should be used for the CL client; leave blank to use the default for the client type
+            # Defaults by client:
+            # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
+            # - hildr: ghcr.io/optimism-java/hildr:latest
+            image: ""
 
-          # The log level string that this participant's CL client should log at
-          # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-          # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-          # over a specific participant's logging
-          log_level: ""
+            # The log level string that this participant's CL client should log at
+            # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+            # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+            # over a specific participant's logging
+            log_level: ""
 
-          # A list of optional extra env_vars the cl container should spin up with
-          extra_env_vars: {}
+            # A list of optional extra env_vars the cl container should spin up with
+            extra_env_vars: {}
 
-          # A list of optional extra labels that will be passed to the CL client Beacon container.
-          # Example; cl_extra_labels: {"ethereum-package.partition": "1"}
-          extra_labels: {}
+            # A list of optional extra labels that will be passed to the CL client Beacon container.
+            # Example; cl_extra_labels: {"ethereum-package.partition": "1"}
+            extra_labels: {}
 
-          # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
-          # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
-          extra_params: []
+            # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
+            # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
+            extra_params: []
 
-          # A list of tolerations that will be passed to the CL client container
-          # Only works with Kubernetes
-          # Example: el_tolerations:
-          # - key: "key"
-          #   operator: "Equal"
-          #   value: "value"
-          #   effect: "NoSchedule"
-          #   toleration_seconds: 3600
-          # Defaults to empty
-          tolerations: []
+            # A list of tolerations that will be passed to the CL client container
+            # Only works with Kubernetes
+            # Example: el_tolerations:
+            # - key: "key"
+            #   operator: "Equal"
+            #   value: "value"
+            #   effect: "NoSchedule"
+            #   toleration_seconds: 3600
+            # Defaults to empty
+            tolerations: []
 
-          # Node selectors
-          # Only works with Kubernetes
-          # Example: node_selectors: { "disktype": "ssd" }
-          # Defaults to empty
-          node_selectors: {}
+            # Node selectors
+            # Only works with Kubernetes
+            # Example: node_selectors: { "disktype": "ssd" }
+            # Defaults to empty
+            node_selectors: {}
 
-          # Persistent storage size for the CL client container (in MB)
-          # Defaults to 0, which means that the default size for the client will be used
-          # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
-          volume_size: 0
+            # Persistent storage size for the CL client container (in MB)
+            # Defaults to 0, which means that the default size for the client will be used
+            # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+            volume_size: 0
 
-          # Resource management for cl containers
-          # CPU is milicores
-          # RAM is in MB
-          # Defaults to 0, which results in no resource limits
-          min_cpu: 0
-          max_cpu: 0
-          min_mem: 0
-          max_mem: 0
+            # Resource management for cl containers
+            # CPU is milicores
+            # RAM is in MB
+            # Defaults to 0, which results in no resource limits
+            min_cpu: 0
+            max_cpu: 0
+            min_mem: 0
+            max_mem: 0
 
-        # Builder client specific flags
-        el_builder:
-          # The type of builder EL client that should be started
-          # Valid values are:
-          # op-geth
-          # op-reth
-          # op-rbuilder
-          type: ""
+          # Builder client specific flags
+          el_builder:
+            # The type of builder EL client that should be started
+            # Valid values are:
+            # op-geth
+            # op-reth
+            # op-rbuilder
+            type: ""
 
-          # The Docker image that should be used for the builder EL client; leave blank to use the default for the client type
-          # Defaults by client:
-          # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
-          # - op-reth: parithoshj/op-reth:latest
-          # - op-rbuilder: ghcr.io/flashbots/op-rbuilder:latest
-          image: ""
+            # The Docker image that should be used for the builder EL client; leave blank to use the default for the client type
+            # Defaults by client:
+            # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
+            # - op-reth: parithoshj/op-reth:latest
+            # - op-rbuilder: ghcr.io/flashbots/op-rbuilder:latest
+            image: ""
 
-          # Builder secret key used by op-rbuilder to sign transactions
-          # Defaults to None - not used
-          key: ""
-        
-        cl_builder:
-          # The type of builder CL client that should be started
-          # Valid values are:
-          # op-node
-          # hildr
-          type: ""
+            # Builder secret key used by op-rbuilder to sign transactions
+            # Defaults to None - not used
+            key: ""
+          
+          cl_builder:
+            # The type of builder CL client that should be started
+            # Valid values are:
+            # op-node
+            # hildr
+            type: ""
 
-          # The Docker image that should be used for the builder CL client; leave blank to use the default for the client type
-          # Defaults by client:
-          # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
-          # - hildr: ghcr.io/optimism-java/hildr:latest
-          image: ""
+            # The Docker image that should be used for the builder CL client; leave blank to use the default for the client type
+            # Defaults by client:
+            # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
+            # - hildr: ghcr.io/optimism-java/hildr:latest
+            image: ""
 
       # Default configuration parameters for the network
       network_params:
@@ -581,10 +583,11 @@ optimism_package:
   chains:
     opkurtosis:
       participants:
-        el:
-          type: op-geth
-        cl:
-          type: op-node
+        node0:
+          el:
+            type: op-geth
+          cl:
+            type: op-node
       blockscout_params:
         enabled: True
 ethereum_package:

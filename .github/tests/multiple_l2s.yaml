@@ -1,7 +1,7 @@
 optimism_package:
   chains:
     op-rollup-one:
-     network_params:
+      network_params:
         network_id: '3151909'
     op-rollup-two:
       network_params:
