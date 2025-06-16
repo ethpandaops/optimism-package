@@ -164,8 +164,10 @@ def launch(
     all_el_contexts = []
     sequencer_enabled = True
     sequencer_context = None
-    rollup_boost_enabled = mev_params
-    external_builder = mev_params.builder_host and mev_params.builder_port
+    rollup_boost_enabled = mev_params != None
+    external_builder = rollup_boost_enabled and (
+        mev_params.builder_host and mev_params.builder_port
+    )
 
     # In the legacy setup, we only get one sidecar context (for the single sequencer)
     #
