@@ -138,6 +138,7 @@ def _parse_instance(
         conductor_args=participant_params["conductor_params"],
         network_params=network_params,
         participant_name=participant_name,
+        participant_index=participant_index,
         registry=registry,
     )
 

@@ -330,6 +330,9 @@ def parse_network_params(plan, registry, input_args):
             # FIXME At the moment the "name" of the sequencer is just its index in the array
             # so we pass 0 as the name
             participant_name="0",
+            # FIXME At the moment the index of the sequencer is just its index in the array
+            # so we pass 0 as the index
+            participant_index=0,
             registry=registry,
         )
 
