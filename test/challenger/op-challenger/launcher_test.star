@@ -13,21 +13,25 @@ def test_op_challenger_launch_with_defaults(plan):
     parsed_input_args = input_parser.input_parser(
         plan,
         {
-            "chains": [
-                {
+            "chains": {
+                "opkurtosis": {
                     "network_params": {
                         "network_id": 1000,
                     },
-                    "participants": [
-                        {
-                            "el_type": "op-reth",
-                            "el_image": "op-reth:latest",
-                            "cl_type": "op-node",
-                            "cl_image": "op-node:latest",
+                    "participants": {
+                        "node0": {
+                            "el": {
+                                "type": "op-reth",
+                                "image": "op-reth:latest",
+                            },
+                            "cl": {
+                                "type": "op-node",
+                                "image": "op-node:latest",
+                            },
                         }
-                    ],
+                    },
                 }
-            ],
+            },
             "challengers": {"challenger": None},
         },
     )

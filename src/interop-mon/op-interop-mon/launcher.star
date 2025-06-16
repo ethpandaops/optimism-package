@@ -19,15 +19,11 @@ def launch(
         l2_rpcs (str): Comma-separated list of L2 RPC endpoints to monitor.
     """
 
-    l2_rpcs = []
-    for l2 in l2s:
-        l2_rpcs.append(l2.participants[0].el_context.rpc_http_url)
-
-    l2_rpcs_string = ",".join(l2_rpcs)
-
     cmd = [
         "op-interop-mon",
-        "--l2-rpcs={}".format(l2_rpcs_string),
+        "--l2-rpcs={}".format(
+            ",".join([p.el.context.rpc_http_url for l2 in l2s for p in l2.participants])
+        ),
     ]
 
     ports = _net.ports_to_port_specs(

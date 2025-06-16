@@ -21,21 +21,25 @@ def test_tx_fuzzer_launch_with_defaults(plan):
     parsed_input_args = input_parser.input_parser(
         plan,
         {
-            "chains": [
-                {
-                    "participants": [
-                        {
-                            "el_type": "op-reth",
-                            "el_image": "op-reth:latest",
-                            "cl_type": "op-node",
-                            "cl_image": "op-node:latest",
+            "chains": {
+                "opkurtosis": {
+                    "participants": {
+                        "node0": {
+                            "el": {
+                                "type": "op-reth",
+                                "image": "op-reth:latest",
+                            },
+                            "cl": {
+                                "type": "op-node",
+                                "image": "op-node:latest",
+                            },
                         }
-                    ],
+                    },
                     "tx_fuzzer_params": {
                         "enabled": True,
                     },
                 }
-            ]
+            }
         },
         registry=reg,
     )

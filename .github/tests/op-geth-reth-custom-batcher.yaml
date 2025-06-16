@@ -1,10 +1,17 @@
 optimism_package:
   chains:
-    - participants:
-      - el_type: op-geth
-        cl_type: op-node
-      - el_type: op-reth
-        cl_type: op-node
+    chain0:
+      participants:
+        node0:
+          el:
+            type: op-geth
+          cl:
+            type: op-node
+        node1:
+          el:
+            type: op-reth
+          cl:
+            type: op-node
       network_params:
         fjord_time_offset: 0
         granite_time_offset: 0

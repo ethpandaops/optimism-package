@@ -1,4 +1,6 @@
 optimism_package:
   chains:
-    - participants:
-        - count: 2
+    op-kurtosis:
+      participants:
+        node0:
+        node1:
