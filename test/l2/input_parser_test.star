@@ -33,8 +33,8 @@ def test_l2_input_parser_extra_attributes(plan):
 
 def test_l2_input_parser_invalid_name(plan):
     expect.fails(
-        lambda: input_parser.parse({"network-0": None}, _default_registry),
-        "ID cannot contain '-': network-0",
+        lambda: input_parser.parse({"network_0": None}, _default_registry),
+        "L2 name can only contain alphanumeric characters and '-', got 'network_0'",
     )
 
 

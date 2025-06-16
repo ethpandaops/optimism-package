@@ -87,7 +87,7 @@ def _parse_instance(
     participant_params = _DEFAULT_ARGS | _filter.remove_none(participant_args or {})
 
     # We make sure the name adheres to our standards
-    _id.assert_id(participant_name)
+    _id.assert_id(id=participant_name, name="Node on network {}".format(network_name))
 
     # Now we make sure the sequencer property is valid
     #

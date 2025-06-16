@@ -87,7 +87,7 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
     )
 
     # We make sure the L2 name is a valid name
-    _id.assert_id(l2_name)
+    _id.assert_id(id=l2_name, name="L2 name")
 
     # We filter the None values so that we can merge dicts easily
     l2_params = _DEFAULT_ARGS | _filter.remove_none(l2_args or {})

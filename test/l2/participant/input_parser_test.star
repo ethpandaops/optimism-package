@@ -50,9 +50,9 @@ def test_l2_participant_input_parser_extra_attributes(plan):
 def test_l2_participant_input_parser_invalid_name(plan):
     expect.fails(
         lambda: input_parser.parse(
-            {"node-0": None}, _default_network_params, _default_registry
+            {"node_0": None}, _default_network_params, _default_registry
         ),
-        "ID cannot contain '-': node-0",
+        "Node on network my-l2 can only contain alphanumeric characters and '-', got 'node_0'",
     )
 
 
