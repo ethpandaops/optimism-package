@@ -98,6 +98,7 @@ def get_service_config(
         image=params.image,
         ports=ports,
         cmd=cmd,
+        labels=params.labels,
         files={
             _CONFIG_DIRPATH_ON_SERVICE: config_artifact_name,
         },
