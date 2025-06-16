@@ -215,6 +215,7 @@ def get_challenger_config(
         cmd=cmd,
         entrypoint=["op-challenger"],
         files=files,
+        labels=params.labels,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ports=ports,
     )

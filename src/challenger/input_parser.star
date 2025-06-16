@@ -62,6 +62,11 @@ def _parse_instance(challenger_args, challenger_name, l2s_params):
         "-".join([str(p) for p in challenger_params["participants"]]),
     )
 
+    challenger_params["labels"] = {
+        "op.kind": "challenger",
+        "op.network.id": ",".join([str(network_id) for network_id in network_ids]),
+    }
+
     # Now we make sure to cover the prestate arg combinations
     #
     # First we check we only have one of them defined
