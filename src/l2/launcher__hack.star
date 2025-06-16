@@ -119,7 +119,7 @@ def launch(
 
     _launch_blockscout_maybe(
         plan=plan,
-        blockscout_params=params=params.blockscout_params,
+        blockscout_params=params.blockscout_params,
         network_params=network_params,
         l1_rpc_url=l1_rpc_url,
         l2_rpc_url=_net.service_url(
