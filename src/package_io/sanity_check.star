@@ -72,61 +72,6 @@ ALTDA_DEPLOY_CONFIG_PARAMS = [
     "da_resolver_refund_percentage",
 ]
 
-PARTICIPANT_CATEGORIES = {
-    "participants": [
-        "el",
-        "el_builder",
-        "cl",
-        "cl_builder",
-        "conductor_params",
-        "mev_params",
-    ],
-}
-
-SUBCATEGORY_PARAMS = {
-    "network_params": [
-        "network",
-        "network_id",
-        "seconds_per_slot",
-        "name",
-        "fjord_time_offset",
-        "granite_time_offset",
-        "holocene_time_offset",
-        "isthmus_time_offset",
-        "interop_time_offset",
-        "fund_dev_accounts",
-    ],
-    "proxyd_params": ["image", "extra_params"],
-    "batcher_params": ["image", "extra_params"],
-    "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
-    "mev_params": ["image", "type", "builder_host", "builder_port"],
-    "da_params": [
-        "enabled",
-        "image",
-        "extra_params",
-        "type",
-    ],
-    "tx_fuzzer_params": [
-        "enabled",
-        "image",
-        "extra_params",
-        "min_cpu",
-        "max_cpu",
-        "min_memory",
-        "max_memory",
-    ],
-    "blockscout_params": [
-        "enabled",
-        "image",
-        "verifier_image",
-        "extra_params",
-        "min_cpu",
-        "max_cpu",
-        "min_memory",
-        "max_memory",
-    ],
-}
-
 OP_CONTRACT_DEPLOYER_PARAMS = [
     "image",
     "l1_artifacts_locator",
@@ -245,26 +190,6 @@ def sanity_check(plan, optimism_config):
                             additional_services, ADDITIONAL_SERVICES_PARAMS
                         )
                     )
-
-        # Checks subcategories
-        for subcategories in SUBCATEGORY_PARAMS.keys():
-            validate_params(
-                plan, input_args, subcategories, SUBCATEGORY_PARAMS[subcategories]
-            )
-        # Checks everything else
-        for param in input_args.keys():
-            combined_root_params = (
-                PARTICIPANT_CATEGORIES.keys() + SUBCATEGORY_PARAMS.keys()
-            )
-            combined_root_params.append("additional_services")
-            combined_root_params.append("op_contract_deployer_params")
-
-            if param not in combined_root_params:
-                fail(
-                    "Invalid parameter {0}, allowed fields {1}".format(
-                        param, combined_root_params
-                    )
-                )
 
         # If everything passes, print a message
 
