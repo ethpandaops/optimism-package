@@ -267,7 +267,7 @@ def _install_faucet(
             faucet.faucet_data(
                 name=l2.name,
                 chain_id=chain_id,
-                el_rpc=l2.participants[0].el_context.rpc_http_url,
+                el_rpc=l2.participants[0].el.context.rpc_http_url,
                 private_key=private_key,
             )
         )
