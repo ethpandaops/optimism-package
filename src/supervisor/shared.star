@@ -10,13 +10,11 @@ _net = import_module("/src/util/net.star")
 def get_cls_interop_rpc_urls(l2s_params, superchain_params):
     return [
         _net.service_url(
-            cl.service_name,
+            participant_params.cl.service_name,
             superchain_params.ports[_net.INTEROP_RPC_PORT_NAME],
         )
         # We go chain by chain
         for l2_params in l2s_params
         # Participant by participant
         for participant_params in l2_params.participants
-        # And CL by CL
-        for cl in _l2_selectors.get_cls_params(participant_params=participant_params)
     ]
