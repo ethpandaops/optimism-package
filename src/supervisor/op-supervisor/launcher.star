@@ -1,5 +1,6 @@
 _file = import_module("/src/util/file.star")
 _net = import_module("/src/util/net.star")
+_shared = import_module("../shared.star")
 
 _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
@@ -84,14 +85,7 @@ def _get_config(
             + "/rollup-*.json",
             "OP_SUPERVISOR_L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "OP_SUPERVISOR_L2_CONSENSUS_NODES": ",".join(
-                [
-                    _net.service_url(
-                        participant.cl.service_name,
-                        params.superchain.ports[_net.INTEROP_RPC_PORT_NAME],
-                    )
-                    for l2_params in l2s_params
-                    for participant in l2_params.participants
-                ]
+                _shared.get_cls_interop_rpc_urls(l2s_params=l2s_params, superchain_params=params.superchain)
             ),
             "OP_SUPERVISOR_L2_CONSENSUS_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "OP_SUPERVISOR_RPC_ADDR": "0.0.0.0",
