@@ -4,8 +4,8 @@ _net = import_module("/src/util/net.star")
 _id = import_module("/src/util/id.star")
 _selectors = import_module("/src/l2/selectors.star")
 
-_el_input_parser = import_module("./el/input_parser.star")
-_cl_input_parser = import_module("./cl/input_parser.star")
+_el_input_parser = import_module("/src/el/input_parser.star")
+_cl_input_parser = import_module("/src/cl/input_parser.star")
 _mev_input_parser = import_module("/src/mev/input_parser.star")
 _conductor_input_parser = import_module("/src/conductor/input_parser.star")
 
