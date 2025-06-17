@@ -142,8 +142,8 @@ def launch(
             supervisors_params=supervisors_params,
             conductor_params=participant_params.conductor_params,
             is_sequencer=is_sequencer,
-            el_context=sidecar_and_builders.el_builder.context
-            if sidecar_and_builders and sidecar_and_builders.el_builder
+            el_context=sidecar_and_builders.el.context
+            if sidecar_and_builders and sidecar_and_builders.el
             else el.context,
             cl_contexts=cl_contexts,
             jwt_file=jwt_file,
@@ -159,10 +159,19 @@ def launch(
         # Add the EL/CL pair to the list of launched participants
         participants.append(
             struct(
+                name=participant_name,
                 el=el,
                 cl=cl,
+                el_builder=sidecar_and_builders.el,
+                cl_builder=sidecar_and_builders.cl,
+                sidecar=sidecar_and_builders.sidecar,
+            ) if sidecar_and_builders else struct(
                 name=participant_name,
-                sidecar=sidecar_and_builders.sidecar if sidecar_and_builders else None,
+                el=el,
+                cl=cl,
+                el_builder=None
+                cl_builder=None
+                sidecar=None,
             )
         )
 
@@ -214,21 +223,8 @@ def _launch_sidecar_maybe(
 
         return None
 
-    # We only launch MEV for the sequencers
-    if not is_sequencer:
-        plan.print(
-            "{}: Rollup boost not active for non-sequencer nodes, skipping launch".format(
-                log_prefix
-            )
-        )
-
-        return None
-
-    el_builder_params = participant_params.el_builder
-    cl_builder_params = participant_params.cl_builder
-
-    is_external_builder = mev_params.builder_host and mev_params.builder_port
-    if is_external_builder:
+    external_el_builder_params = mev_params.external_el_builder
+    if external_el_builder_params:
         plan.print(
             "{}: External EL builder specified - EL/CL builders will not be launched".format(
                 log_prefix
@@ -237,10 +233,10 @@ def _launch_sidecar_maybe(
 
     el_builder = (
         None
-        if is_external_builder
+        if external_el_builder_params
         else _el_launcher.launch(
             plan=plan,
-            params=el_builder_params,
+            params=mev_params.el_builder,
             network_params=network_params,
             sequencer_params=participant_params,
             jwt_file=jwt_file,
@@ -257,15 +253,15 @@ def _launch_sidecar_maybe(
 
     el_builder_context = (
         struct(
-            ip_addr=mev_params.builder_host,
-            engine_rpc_port_num=mev_params.builder_port,
-            rpc_port_num=mev_params.builder_port,
+            ip_addr=external_el_builder_params.host,
+            engine_rpc_port_num=external_el_builder_params.port,
+            rpc_port_num=external_el_builder_params.port,
             rpc_http_url=_net.service_url(
-                mev_params.builder_host, _net.port(number=mev_params.builder_port)
+                external_el_builder_params.host, _net.port(number=external_el_builder_params.port)
             ),
             client_name="external-builder",
         )
-        if is_external_builder
+        if external_el_builder_params
         else el_builder.context
     )
 
@@ -280,10 +276,10 @@ def _launch_sidecar_maybe(
 
     cl_builder = (
         None
-        if is_external_builder
+        if external_el_builder_params
         else _cl_launcher.launch(
             plan=plan,
-            params=cl_builder_params,
+            params=mev_params.cl_builder,
             network_params=network_params,
             da_params=da_params,
             supervisors_params=supervisors_params,
@@ -303,8 +299,8 @@ def _launch_sidecar_maybe(
     )
 
     return struct(
-        el_builder=el_builder,
-        cl_builder=cl_builder,
+        el=el_builder,
+        cl=cl_builder,
         sidecar=sidecar,
     )
 
