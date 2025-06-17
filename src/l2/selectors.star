@@ -35,12 +35,17 @@ def create_get_sequencer_params_for(participants_params):
 def is_sequencer(participant_params):
     return participant_params.sequencer == participant_params.name
 
+
 # Returns a list of CL params of all CL nodes for a participant
-# 
+#
 # This can either be a one-element list with just the regular CL node
 # or a two-element list with the regular CL and a MEV CL builder
 def get_cls_params(participant_params):
-    return _filter.remove_none([
-        participant_params.cl,
-        participant_params.mev_params.cl_builder if participant_params.mev_params else None
-    ])
+    return _filter.remove_none(
+        [
+            participant_params.cl,
+            participant_params.mev_params.cl_builder
+            if participant_params.mev_params
+            else None,
+        ]
+    )
