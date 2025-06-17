@@ -115,7 +115,7 @@ def _parse_external_el_builder(external_el_builder_args, log_string):
 
     # Any extra attributes will cause an error
     _filter.assert_keys(
-        mev_args or {},
+        external_el_builder_args,
         _DEFAULT_EXTERNAL_EL_BUILDER_ARGS.keys(),
         "Invalid attributes in MEV external EL builder configuration for "
         + log_string
