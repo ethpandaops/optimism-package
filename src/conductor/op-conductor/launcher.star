@@ -20,7 +20,7 @@ def launch(
     params,
     network_params,
     supervisors_params,
-    sidecar_context,
+    mev_params,
     deployment_output,
     el_params,
     cl_params,
@@ -31,7 +31,7 @@ def launch(
         params=params,
         network_params=network_params,
         supervisors_params=supervisors_params,
-        sidecar_context=sidecar_context,
+        mev_params=mev_params,
         deployment_output=deployment_output,
         el_params=el_params,
         cl_params=cl_params,
@@ -68,7 +68,7 @@ def get_service_config(
     params,
     network_params,
     supervisors_params,
-    sidecar_context,
+    mev_params,
     deployment_output,
     el_params,
     cl_params,
@@ -93,15 +93,17 @@ def get_service_config(
             params.service_name, consensus_port.number
         ),
         "OP_CONDUCTOR_CONSENSUS_PORT": str(consensus_port.number),
-        "OP_CONDUCTOR_EXECUTION_RPC": sidecar_context.rpc_http_url
-        if sidecar_context
+        "OP_CONDUCTOR_EXECUTION_RPC": _net.service_url(
+            mev_params.service_name, mev_params.ports[_net.RPC_PORT_NAME]
+        )
+        if mev_params
         else _net.service_url(
             el_params.service_name, el_params.ports[_net.RPC_PORT_NAME]
         ),
         "OP_CONDUCTOR_NODE_RPC": _net.service_url(
             cl_params.service_name, cl_params.ports[_net.RPC_PORT_NAME]
         ),
-        "OP_CONDUCTOR_ROLLUP_BOOST_ENABLED": "true" if sidecar_context else "false",
+        "OP_CONDUCTOR_ROLLUP_BOOST_ENABLED": "true" if mev_params else "false",
         # This might also become a parameter
         "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(_CONDUCTOR_HEALTH_CHECK_INTERVAL),
         # This might also become a parameter
