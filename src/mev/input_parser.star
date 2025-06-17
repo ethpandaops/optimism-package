@@ -74,7 +74,7 @@ def parse(mev_args, network_params, participant_name, participant_index, registr
             registry=registry,
         )
 
-        mev_params["cl_builder"] = _el_input_parser.parse_builder(
+        mev_params["cl_builder"] = _cl_input_parser.parse_builder(
             cl_args=mev_params["cl_builder"],
             participant_name=participant_name,
             participant_index=participant_index,
