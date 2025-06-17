@@ -7,7 +7,7 @@ _observability = import_module("/src/observability/observability.star")
 _registry = import_module("/src/package_io/registry.star")
 _util = import_module("/src/util.star")
 
-_el_launcher = import_module("/src/l2/participant/el/launcher.star")
+_el_launcher = import_module("/src/el/launcher.star")
 
 _default_registry = _registry.Registry()
 _default_deployment_output = "/deployment.output.json"

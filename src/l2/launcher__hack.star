@@ -1,7 +1,4 @@
 _blockscout_launcher = import_module("/src/blockscout/launcher.star")
-_cl_launcher = import_module("./participant/cl/launcher.star")
-_el_launcher = import_module("./participant/el/launcher.star")
-_da_server_launcher = import_module("/src/da/da-server/launcher.star")
 _op_batcher_launcher = import_module("/src/batcher/op-batcher/launcher.star")
 _op_conductor_launcher = import_module("/src/conductor/op-conductor/launcher.star")
 _op_proposer_launcher = import_module("/src/proposer/op-proposer/launcher.star")
@@ -170,20 +167,6 @@ def _launch_blockscout_maybe(
         )
 
         plan.print("{}: Successfully launched blockscout".format(log_prefix))
-
-
-def _launch_da_maybe(plan, da_params, log_prefix):
-    if da_params:
-        plan.print("{}: Launching DA".format(log_prefix))
-
-        da = _da_server_launcher.launch(
-            plan=plan,
-            params=da_params,
-        )
-
-        plan.print("{}: Successfully launched DA".format(log_prefix))
-
-        return da
 
 
 def _launch_proxyd_maybe(
