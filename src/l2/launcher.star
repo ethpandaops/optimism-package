@@ -142,8 +142,8 @@ def launch(
             supervisors_params=supervisors_params,
             conductor_params=participant_params.conductor_params,
             is_sequencer=is_sequencer,
-            el_context=sidecar_and_builders.el.context
-            if sidecar_and_builders and sidecar_and_builders.el
+            el_context=sidecar_and_builders.sidecar.context
+            if sidecar_and_builders
             else el.context,
             cl_contexts=cl_contexts,
             jwt_file=jwt_file,
