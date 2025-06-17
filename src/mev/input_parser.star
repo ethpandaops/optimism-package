@@ -46,14 +46,25 @@ def parse(mev_args, network_params, participant_name, participant_index, registr
         return None
 
     # Now we parse the builder configuration
-    mev_params["external_el_builder"] = _parse_external_el_builder(external_el_builder_args=mev_params["external_el_builder"], log_string=mev_log_string)
+    mev_params["external_el_builder"] = _parse_external_el_builder(
+        external_el_builder_args=mev_params["external_el_builder"],
+        log_string=mev_log_string,
+    )
     if mev_params["external_el_builder"]:
         # We will fail if both the external builder and the el/cl builders were specified
         if mev_params["el_builder"]:
-            fail("Invalid combination of el_builder and external_el_builder in MEV configuration for {}".format(mev_log_string))
-        
+            fail(
+                "Invalid combination of el_builder and external_el_builder in MEV configuration for {}".format(
+                    mev_log_string
+                )
+            )
+
         if mev_params["cl_builder"]:
-            fail("Invalid combination of cl_builder and external_el_builder in MEV configuration for {}".format(mev_log_string))
+            fail(
+                "Invalid combination of cl_builder and external_el_builder in MEV configuration for {}".format(
+                    mev_log_string
+                )
+            )
     else:
         mev_params["el_builder"] = _el_input_parser.parse_builder(
             el_args=mev_params["el_builder"],
@@ -106,7 +117,9 @@ def _parse_external_el_builder(external_el_builder_args, log_string):
     _filter.assert_keys(
         mev_args or {},
         _DEFAULT_EXTERNAL_EL_BUILDER_ARGS.keys(),
-        "Invalid attributes in MEV external EL builder configuration for " + log_string + ": {}",
+        "Invalid attributes in MEV external EL builder configuration for "
+        + log_string
+        + ": {}",
     )
 
     # No host and no port means the external builder is disabled
@@ -115,13 +128,19 @@ def _parse_external_el_builder(external_el_builder_args, log_string):
 
     # We check that we either have none or both of builder_host & builder_port
     if external_el_builder_args["host"] and not external_el_builder_args["port"]:
-        fail("Missing port attribute in MEV external EL builder configuration for {}".format(log_string))
+        fail(
+            "Missing port attribute in MEV external EL builder configuration for {}".format(
+                log_string
+            )
+        )
     elif not external_el_builder_args["host"] and external_el_builder_args["port"]:
-        fail("Missing host attribute in MEV external EL builder configuration for {}".format(log_string))
+        fail(
+            "Missing host attribute in MEV external EL builder configuration for {}".format(
+                log_string
+            )
+        )
 
-    return struct(
-        **external_el_builder_args
-    )
+    return struct(**external_el_builder_args)
 
 
 def _default_image(mev_type, registry):

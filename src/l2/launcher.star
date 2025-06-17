@@ -165,12 +165,14 @@ def launch(
                 el_builder=sidecar_and_builders.el,
                 cl_builder=sidecar_and_builders.cl,
                 sidecar=sidecar_and_builders.sidecar,
-            ) if sidecar_and_builders else struct(
+            )
+            if sidecar_and_builders
+            else struct(
                 name=participant_name,
                 el=el,
                 cl=cl,
-                el_builder=None
-                cl_builder=None
+                el_builder=None,
+                cl_builder=None,
                 sidecar=None,
             )
         )
@@ -257,7 +259,8 @@ def _launch_sidecar_maybe(
             engine_rpc_port_num=external_el_builder_params.port,
             rpc_port_num=external_el_builder_params.port,
             rpc_http_url=_net.service_url(
-                external_el_builder_params.host, _net.port(number=external_el_builder_params.port)
+                external_el_builder_params.host,
+                _net.port(number=external_el_builder_params.port),
             ),
             client_name="external-builder",
         )

@@ -2,8 +2,9 @@ _l2_selectors = import_module("/src/l2/selectors.star")
 
 _net = import_module("/src/util/net.star")
 
+
 # Helper utility to get interop RPC URLs for all CL nodes from all L2 networks
-# 
+#
 # This encapsulates the logic required to get the URLs not only for the regular CLs
 # but for the MEV CL builders as well
 def get_cls_interop_rpc_urls(l2s_params, superchain_params):

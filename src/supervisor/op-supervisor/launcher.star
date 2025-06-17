@@ -85,7 +85,9 @@ def _get_config(
             + "/rollup-*.json",
             "OP_SUPERVISOR_L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "OP_SUPERVISOR_L2_CONSENSUS_NODES": ",".join(
-                _shared.get_cls_interop_rpc_urls(l2s_params=l2s_params, superchain_params=params.superchain)
+                _shared.get_cls_interop_rpc_urls(
+                    l2s_params=l2s_params, superchain_params=params.superchain
+                )
             ),
             "OP_SUPERVISOR_L2_CONSENSUS_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "OP_SUPERVISOR_RPC_ADDR": "0.0.0.0",
