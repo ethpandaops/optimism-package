@@ -11,9 +11,7 @@ _conductor_input_parser = import_module("/src/conductor/input_parser.star")
 
 _DEFAULT_ARGS = {
     "el": None,
-    "el_builder": None,
     "cl": None,
-    "cl_builder": None,
     "sequencer": None,
     "mev_params": None,
     "conductor_params": None,
@@ -152,22 +150,8 @@ def _parse_instance(
             network_params=network_params,
             registry=registry,
         ),
-        el_builder=_el_input_parser.parse_builder(
-            el_args=participant_params["el_builder"],
-            participant_name=participant_name,
-            participant_index=participant_index,
-            network_params=network_params,
-            registry=registry,
-        ),
         cl=_cl_input_parser.parse(
             cl_args=participant_params["cl"],
-            participant_name=participant_name,
-            participant_index=participant_index,
-            network_params=network_params,
-            registry=registry,
-        ),
-        cl_builder=_cl_input_parser.parse_builder(
-            cl_args=participant_params["cl_builder"],
             participant_name=participant_name,
             participant_index=participant_index,
             network_params=network_params,
@@ -251,9 +235,7 @@ def _apply_sequencers(participants_params, network_params):
     return [
         struct(
             el=p.el,
-            el_builder=p.el_builder,
             cl=p.cl,
-            cl_builder=p.cl_builder,
             name=p.name,
             sequencer=p.name
             # We set the value to the name of node itself (i.e. this is a sequencer) if this node is in the list of sequencers
