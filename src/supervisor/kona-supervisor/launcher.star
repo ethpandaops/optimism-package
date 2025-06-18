@@ -59,7 +59,7 @@ def _get_config(
 ):
     ports = _net.ports_to_port_specs(params.ports)
 
-    cmd = params.extra_params
+    cmd = list(params.extra_params)
 
     # apply customizations
 
