@@ -18,6 +18,7 @@ _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
 _supervisor_input_parser = import_module("/src/supervisor/input_parser.star")
 _tx_fuzzer_parser = import_module("/src/tx-fuzzer/input_parser.star")
 _interop_mon_input_parser = import_module("/src/interop-mon/input_parser.star")
+_contracts_input_parser = import_module("/src/contracts/input_parser.star")
 
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
@@ -124,16 +125,7 @@ def input_parser(
         challengers=results["challengers"],
         superchains=results["superchains"],
         supervisors=results["supervisors"],
-        op_contract_deployer_params=struct(
-            image=results["op_contract_deployer_params"]["image"],
-            l1_artifacts_locator=results["op_contract_deployer_params"][
-                "l1_artifacts_locator"
-            ],
-            l2_artifacts_locator=results["op_contract_deployer_params"][
-                "l2_artifacts_locator"
-            ],
-            overrides=results["op_contract_deployer_params"]["overrides"],
-        ),
+        op_contract_deployer_params=results["op_contract_deployer_params"],
         global_log_level=results["global_log_level"],
         global_node_selectors=results["global_node_selectors"],
         global_tolerations=results["global_tolerations"],
@@ -212,11 +204,8 @@ def parse_network_params(plan, registry, input_args):
 
     # configure op-deployer
 
-    results["op_contract_deployer_params"] = default_op_contract_deployer_params(
-        registry
-    )
-    results["op_contract_deployer_params"].update(
-        input_args.get("op_contract_deployer_params", {})
+    results["op_contract_deployer_params"] = _contracts_input_parser.parse(
+        args=input_args.get("op_contract_deployer_params"), registry=registry
     )
 
     # configure global args
@@ -350,15 +339,6 @@ def _default_proposer_params(registry):
         "extra_params": [],
         "game_type": 1,
         "proposal_interval": "10m",
-    }
-
-
-def default_op_contract_deployer_params(registry):
-    return {
-        "image": registry.get(_registry.OP_DEPLOYER),
-        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
-        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
-        "overrides": {},
     }
 
 
