@@ -16,7 +16,11 @@ def test_contracts_input_parser_default_args(plan):
             l1_artifacts_locator="https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
             l2_artifacts_locator="https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
             overrides={},
-            multisig={},
+            safes=struct(
+                enabled=False,
+                image=None,
+                roles={},
+            ),
         ),
     )
 
@@ -28,6 +32,10 @@ def test_contracts_input_parser_custom_args(plan):
                 "image": "op-deployer:latest",
                 "l1_artifacts_locator": "artifact://l1-artifacts",
                 "l2_artifacts_locator": "artifact://l2-artifacts",
+                "safes": {
+                    "enabled": True,
+                    "image": "safe-utils:latest",
+                },
             },
             registry=_default_registry,
         ),
@@ -36,6 +44,10 @@ def test_contracts_input_parser_custom_args(plan):
             l1_artifacts_locator="artifact://l1-artifacts",
             l2_artifacts_locator="artifact://l2-artifacts",
             overrides={},
-            multisig={},
+            safes=struct(
+                enabled=True,
+                image="safe-utils:latest",
+                roles={},
+            ),
         ),
     )

@@ -72,18 +72,6 @@ ALTDA_DEPLOY_CONFIG_PARAMS = [
     "da_resolver_refund_percentage",
 ]
 
-OP_CONTRACT_DEPLOYER_PARAMS = [
-    "image",
-    "l1_artifacts_locator",
-    "l2_artifacts_locator",
-    "overrides",
-]
-
-OP_CONTRACT_DEPLOYER_OVERRIDES = [
-    "faultGameAbsolutePrestate",
-    "vmType",
-]
-
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",
     "rpc_kind",
@@ -178,22 +166,7 @@ def sanity_check(plan, optimism_config):
     if type(chains) != "dict":
         fail("Invalid input_args type, expected dict, got {}".format(type(chains)))
 
-        # If everything passes, print a message
-
-    if "op_contract_deployer_params" in optimism_config:
-        validate_params(
-            plan,
-            optimism_config,
-            "op_contract_deployer_params",
-            OP_CONTRACT_DEPLOYER_PARAMS,
-        )
-        validate_params(
-            plan,
-            optimism_config["op_contract_deployer_params"],
-            "overrides",
-            OP_CONTRACT_DEPLOYER_OVERRIDES,
-        )
-
+    # If everything passes, print a message
     plan.print("Sanity check for OP package passed")
 
 
