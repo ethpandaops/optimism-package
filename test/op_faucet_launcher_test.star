@@ -21,7 +21,7 @@ def test_launch_with_defaults(plan):
             name="l1",
         ),
         op_faucet_launcher.faucet_data(
-            chain_id="10",
+            chain_id=10,
             el_rpc="http://l2-rpc",
             private_key=constants.dev_accounts[1]["private_key"],
             name="l2",

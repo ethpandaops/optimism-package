@@ -70,7 +70,7 @@ def _get_config(
         },
         labels={
             "op.kind": "faucet",
-            "op.network.id": "-".join(network_ids),
+            "op.network.id": "-".join([str(network_id) for network_id in network_ids]),
         },
         files={
             mount_path: faucet_config,
