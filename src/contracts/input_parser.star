@@ -8,6 +8,7 @@ _DEFAULT_ARGS = {
     "l1_artifacts_locator": None,
     "l2_artifacts_locator": None,
     "overrides": {},
+    "multisig": {},
 }
 
 
@@ -33,5 +34,16 @@ def parse(args, registry):
         _registry.OP_CONTRACTS
     )
 
+    _validate_string_map("overrides", op_deployer_params["overrides"])
+    _validate_string_map("multisig", op_deployer_params["multisig"])
+
     return struct(**op_deployer_params)
 
+
+def _validate_string_map(name, string_map):
+    if type(string_map) != "dict":
+        fail("{} must be a dict, got {}".format(name, type(string_map)))
+
+    for key, value in string_map.items():
+        if type(value) != "string":
+            fail("{} must be a dict of strings, got {}".format(name, type(value)))

@@ -41,6 +41,7 @@ OP_BLOCKSCOUT = "op-blockscout"
 OP_BLOCKSCOUT_VERIFIER = "op-blockscout-verifier"
 
 OP_CONTRACTS = "op-contracts"
+SAFE_UTILS = "safe-utils"
 
 
 _DEFAULT_IMAGES = {
@@ -95,6 +96,8 @@ _DEFAULT_IMAGES = {
     OP_BLOCKSCOUT_VERIFIER: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0",
     # Contracts artifact
     OP_CONTRACTS: "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
+    # Safe-utils
+    SAFE_UTILS: "us-docker.pkg.dev/oplabs-tools-artifacts/images/safe-utils:develop",
 }
 
 
