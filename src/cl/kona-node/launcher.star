@@ -168,7 +168,15 @@ def get_service_config(
     ]
 
     if observability_helper.enabled:
-        _observability.configure_op_service_metrics(cmd, ports)
+        cmd += [
+            "--metrics.enabled",
+            "--metrics.addr",
+            "0.0.0.0",
+            "--metrics.port",
+            "{0}".format(_observability.METRICS_PORT_NUM),
+        ]
+
+        _observability.expose_metrics_port(ports)
 
     # Add the node command config
     cmd += [
@@ -229,15 +237,6 @@ def get_service_config(
     env_vars = dict(params.extra_env_vars)
 
     # apply customizations
-
-    if observability_helper.enabled:
-        cmd += [
-            "--metrics.enabled=true",
-            "--metrics.addr=0.0.0.0",
-            "--metrics.port={0}".format(_observability.METRICS_PORT_NUM),
-        ]
-
-        _observability.expose_metrics_port(ports)
 
     if is_sequencer:
         sequencer_private_key = _util.read_network_config_value(
