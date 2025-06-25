@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/ethpandaops/optimism-package/compare/1.3.0...1.4.0) (2025-06-25)
+
+
+### Features
+
+* add challenger to superchain role ([#350](https://github.com/ethpandaops/optimism-package/issues/350)) ([011513f](https://github.com/ethpandaops/optimism-package/commit/011513f7a420befce41861dd046d64ebd685ac19))
+
+
+### Bug Fixes
+
+* **op-faucet:** loosen expectation on network_id type ([#345](https://github.com/ethpandaops/optimism-package/issues/345)) ([e43f71d](https://github.com/ethpandaops/optimism-package/commit/e43f71d46d7ed59083e659d1530af74ceed7e3b7))
+
 ## [1.3.0](https://github.com/ethpandaops/optimism-package/compare/1.2.0...1.3.0) (2025-06-17)
 
 
