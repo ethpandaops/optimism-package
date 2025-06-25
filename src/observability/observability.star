@@ -25,6 +25,9 @@ METRICS_INFO_URL_KEY = "url"
 METRICS_INFO_PATH_KEY = "path"
 METRICS_INFO_ADDITIONAL_CONFIG_KEY = "config"
 
+PPROF_PORT_ID = "pprof"
+PPROF_PORT_NUM = 6060
+
 
 def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
     if not helper.enabled:
@@ -45,6 +48,13 @@ def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NU
         ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
 
+def expose_pprof_port(ports, port_id=PPROF_PORT_ID, port_num=PPROF_PORT_NUM):
+    ports[port_id] = ethereum_package_shared_utils.new_port_spec(
+        port_num,
+        ethereum_package_shared_utils.TCP_PROTOCOL,
+        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+    )
+
 
 # configures the CLI flags and ports for a service using the standard op-service setup.
 # Note: kona services use identical metrics args.
@@ -57,6 +67,14 @@ def configure_op_service_metrics(cmd, ports):
 
     expose_metrics_port(ports)
 
+def configure_op_service_pprof(cmd, ports):
+    cmd += [
+        "--pprof.enabled",
+        "--pprof.addr=0.0.0.0",
+        "--pprof.port={0}".format(PPROF_PORT_NUM),
+    ]
+
+    expose_pprof_port(ports)
 
 def make_helper(observability_params):
     return struct(
