@@ -99,12 +99,13 @@ def run(plan, args={}):
         wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
 
     deployment_output = contract_deployer.deploy_contracts(
-        plan,
-        l1_priv_key,
-        l1_config_env_vars,
-        optimism_args,
-        l1_network,
-        altda_deploy_config,
+        plan=plan,
+        priv_key=l1_priv_key,
+        l1_config_env_vars=l1_config_env_vars,
+        optimism_args=optimism_args,
+        l1_network=l1_network,
+        altda_args=altda_deploy_config,
+        registry=registry,
     )
 
     jwt_file = plan.upload_files(
