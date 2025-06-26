@@ -62,6 +62,9 @@ def launch(
                 observability_helper, service, l2_params.network_params.name
             )
 
+    if params.pprof_enabled:
+        observability.configure_op_service_pprof(cmd, ports)
+
     return struct(
         service=service,
         l2s=challenger_l2s_params,
