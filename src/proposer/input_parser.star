@@ -7,6 +7,7 @@ _DEFAULT_ARGS = {
     "extra_params": [],
     "game_type": 1,
     "proposal_interval": "10m",
+    "pprof_enabled": False,
 }
 
 
