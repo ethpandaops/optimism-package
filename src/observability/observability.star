@@ -40,19 +40,25 @@ def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
 
     return metrics_info
 
-
-def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NUM):
+def expose_http_port(ports, port_id, port_num):
     ports[port_id] = ethereum_package_shared_utils.new_port_spec(
         port_num,
         ethereum_package_shared_utils.TCP_PROTOCOL,
         ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
 
-def expose_pprof_port(ports, port_id=PPROF_PORT_ID, port_num=PPROF_PORT_NUM):
-    ports[port_id] = ethereum_package_shared_utils.new_port_spec(
-        port_num,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
-        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+def expose_metrics_port(ports):
+    expose_http_port(
+        ports,
+        METRICS_PORT_ID,
+        METRICS_PORT_NUM,
+    )
+
+def expose_pprof_port(ports):
+    expose_http_port(
+        ports,
+        PPROF_PORT_ID,
+        PPROF_PORT_NUM,
     )
 
 
