@@ -40,6 +40,7 @@ def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
 
     return metrics_info
 
+
 def expose_http_port(ports, port_id, port_num):
     ports[port_id] = ethereum_package_shared_utils.new_port_spec(
         port_num,
@@ -47,12 +48,14 @@ def expose_http_port(ports, port_id, port_num):
         ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
 
+
 def expose_metrics_port(ports):
     expose_http_port(
         ports,
         METRICS_PORT_ID,
         METRICS_PORT_NUM,
     )
+
 
 def expose_pprof_port(ports):
     expose_http_port(
@@ -73,6 +76,7 @@ def configure_op_service_metrics(cmd, ports):
 
     expose_metrics_port(ports)
 
+
 def configure_op_service_pprof(cmd, ports):
     cmd += [
         "--pprof.enabled",
@@ -81,6 +85,7 @@ def configure_op_service_pprof(cmd, ports):
     ]
 
     expose_pprof_port(ports)
+
 
 def make_helper(observability_params):
     return struct(

@@ -143,7 +143,6 @@ def get_service_config(
     if params.pprof_enabled:
         observability.configure_op_service_pprof(cmd, ports)
 
-
     return ServiceConfig(
         image=params.image,
         ports=ports,
