@@ -14,16 +14,16 @@ _DEFAULT_ARGS = {
 }
 
 
-def parse(args, chains):
+def parse(args, l2s_params):
     return _filter.remove_none(
         [
-            _parse_instance(challenger_args or {}, challenger_name, chains)
+            _parse_instance(challenger_args or {}, challenger_name, l2s_params)
             for challenger_name, challenger_args in (args or {}).items()
         ]
     )
 
 
-def _parse_instance(challenger_args, challenger_name, chains):
+def _parse_instance(challenger_args, challenger_name, l2s_params):
     # Any extra attributes will cause an error
     _filter.assert_keys(
         challenger_args,
@@ -43,7 +43,7 @@ def _parse_instance(challenger_args, challenger_name, chains):
         return None
 
     # We expand the list of participants since we support a special "*" value to include all networks
-    network_ids = [c["network_params"]["network_id"] for c in chains]
+    network_ids = [c.network_params.network_id for c in l2s_params]
     challenger_params["participants"] = _expansion.expand_asterisc(
         challenger_params["participants"],
         network_ids,
@@ -61,6 +61,11 @@ def _parse_instance(challenger_args, challenger_name, chains):
         challenger_name,
         "-".join([str(p) for p in challenger_params["participants"]]),
     )
+
+    challenger_params["labels"] = {
+        "op.kind": "challenger",
+        "op.network.id": "-".join([str(network_id) for network_id in network_ids]),
+    }
 
     # Now we make sure to cover the prestate arg combinations
     #

@@ -1,7 +1,14 @@
 optimism_package:
   chains:
-    - participants:
-        - el_type: op-geth
-          cl_type: op-node
-        - el_type: op-geth
-          cl_type: hildr
+    chain0:
+      participants:
+        node0:
+          el:
+            type: op-geth
+          cl:
+            type: op-node
+        node1:
+          el:
+            type: op-geth
+          cl:
+            type: hildr

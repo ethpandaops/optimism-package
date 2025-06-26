@@ -22,6 +22,7 @@ OP_CONDUCTOR = "op-conductor"
 OP_DEPLOYER = "op-deployer"
 OP_FAUCET = "op-faucet"
 OP_CONDUCTOR_OPS = "op-conductor-ops"
+OP_INTEROP_MON = "op-interop-mon"
 
 PROXYD = "proxyd"
 
@@ -35,6 +36,9 @@ PROMETHEUS = "prometheus"
 GRAFANA = "grafana"
 LOKI = "loki"
 PROMTAIL = "promtail"
+
+OP_BLOCKSCOUT = "op-blockscout"
+OP_BLOCKSCOUT_VERIFIER = "op-blockscout-verifier"
 
 
 _DEFAULT_IMAGES = {
@@ -64,10 +68,11 @@ _DEFAULT_IMAGES = {
     # deployer
     OP_DEPLOYER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2",
     # Faucet
-    # TODO: update to use a versioned image when available
-    # For now, we'll need users to pass the image explicitly
-    OP_FAUCET: "",
+    OP_FAUCET: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-faucet:develop",
+    # conductor-ops
     OP_CONDUCTOR_OPS: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor-ops:v0.0.2",
+    # Interop Monitor
+    OP_INTEROP_MON: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-interop-mon:latest",
     # Proxyd
     PROXYD: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.5",
     # Sidecar
@@ -83,6 +88,9 @@ _DEFAULT_IMAGES = {
     GRAFANA: "grafana/grafana:11.5.0",
     LOKI: "grafana/loki:3.3.2",
     PROMTAIL: "grafana/promtail:3.3.2",
+    # Explorers
+    OP_BLOCKSCOUT: "blockscout/blockscout-optimism:6.8.0",
+    OP_BLOCKSCOUT_VERIFIER: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0",
 }
 
 

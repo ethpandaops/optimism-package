@@ -18,6 +18,7 @@ _shared_defaults = {
     "max_mem": 0,
     "min_cpu": 0,
     "min_mem": 0,
+    "node_selectors": {},
     "tolerations": [],
     "volume_size": 0,
 }
@@ -49,9 +50,9 @@ def test_l2_participant_input_parser_extra_attributes(plan):
 def test_l2_participant_input_parser_invalid_name(plan):
     expect.fails(
         lambda: input_parser.parse(
-            {"node-0": None}, _default_network_params, _default_registry
+            {"node_0": None}, _default_network_params, _default_registry
         ),
-        "ID cannot contain '-': node-0",
+        "Name of the node on network my-l2 can only contain alphanumeric characters and '-', got 'node_0'",
     )
 
 
@@ -72,6 +73,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "cl",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "0",
                         "op.network.participant.name": "node0",
                         "op.cl.type": "op-node",
                     },
@@ -92,6 +94,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "clbuilder",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "0",
                         "op.network.participant.name": "node0",
                         "op.cl.type": "op-node",
                     },
@@ -112,6 +115,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "el",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "0",
                         "op.network.participant.name": "node0",
                         "op.el.type": "op-geth",
                     },
@@ -134,6 +138,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "elbuilder",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "0",
                         "op.network.participant.name": "node0",
                         "op.el.type": "op-geth",
                     },
@@ -149,22 +154,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     key=None,
                     **_shared_defaults,
                 ),
-                mev_params=struct(
-                    builder_host=None,
-                    builder_port=None,
-                    image="flashbots/rollup-boost:latest",
-                    labels={
-                        "op.kind": "mev",
-                        "op.network.id": "1000",
-                        "op.network.participant.name": "node0",
-                        "op.mev.type": "rollup-boost",
-                    },
-                    ports={
-                        _net.RPC_PORT_NAME: _net.port(number=8541),
-                    },
-                    service_name="op-mev-rollup-boost-1000-my-l2-node0",
-                    type="rollup-boost",
-                ),
+                mev_params=None,
                 conductor_params=None,
             ),
             struct(
@@ -178,6 +168,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "cl",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "1",
                         "op.network.participant.name": "node1",
                         "op.cl.type": "op-node",
                     },
@@ -198,6 +189,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "clbuilder",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "1",
                         "op.network.participant.name": "node1",
                         "op.cl.type": "op-node",
                     },
@@ -218,6 +210,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "el",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "1",
                         "op.network.participant.name": "node1",
                         "op.el.type": "op-geth",
                     },
@@ -240,6 +233,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     labels={
                         "op.kind": "elbuilder",
                         "op.network.id": "1000",
+                        "op.network.participant.index": "1",
                         "op.network.participant.name": "node1",
                         "op.el.type": "op-geth",
                     },
@@ -255,22 +249,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     key=None,
                     **_shared_defaults,
                 ),
-                mev_params=struct(
-                    builder_host=None,
-                    builder_port=None,
-                    image="flashbots/rollup-boost:latest",
-                    labels={
-                        "op.kind": "mev",
-                        "op.network.id": "1000",
-                        "op.network.participant.name": "node1",
-                        "op.mev.type": "rollup-boost",
-                    },
-                    ports={
-                        _net.RPC_PORT_NAME: _net.port(number=8541),
-                    },
-                    service_name="op-mev-rollup-boost-1000-my-l2-node1",
-                    type="rollup-boost",
-                ),
+                mev_params=None,
                 conductor_params=None,
             ),
         ],
@@ -298,7 +277,7 @@ def test_l2_participant_input_parser_el_builder_key(plan):
 
 def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
     parsed = input_parser.parse(
-        {"node0": {"conductor_params": {"enabled": True}}},
+        {"node0": {"conductor_params": {"enabled": True}}, "node1": {}},
         _default_network_params,
         _default_registry,
     )
@@ -311,6 +290,7 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
             labels={
                 "op.kind": "conductor",
                 "op.network.id": "1000",
+                "op.network.participant.index": "0",
                 "op.network.participant.name": "node0",
                 "op.conductor.type": "op-conductor",
             },
@@ -322,7 +302,21 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
             admin=True,
             proxy=True,
             paused=False,
+            bootstrap=False,
         ),
+    )
+
+
+def test_l2_participant_input_parser_defaults_conductor_enabled_insufficient_peers(
+    plan,
+):
+    expect.fails(
+        lambda: input_parser.parse(
+            {"node0": {"conductor_params": {"enabled": True}}},
+            _default_network_params,
+            _default_registry,
+        ),
+        "Invalid participants configuration for network my-l2: at least two participants must be defined if conductors are present",
     )
 
 

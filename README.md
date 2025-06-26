@@ -6,12 +6,21 @@ the L2 chains and all associated artifacts such as contract deployments.
 ```yaml
 optimism_package:
   chains:
-    - participants:
-        - el_type: op-geth
-          cl_type: op-node
-        - el_type: op-reth
-        - el_type: op-erigon
-        - el_type: op-nethermind
+    chain0:
+      participants:
+        node0:
+          el:
+            type: op-geth
+          cl:
+            type: op-node
+        node1:
+          el:
+            type: op-reth
+          cl:
+            type: op-erigon
+        node2:
+          el:
+            type: op-nethermind
 ethereum_package:
   network_params:
     preset: minimal
@@ -141,12 +150,12 @@ optimism_package:
       enabled: true
 
       # List of L2 network_ids that participate in this set
-      # 
+      #
       # Please refer to chains[].network_params.network_id for more information
       participants: ["2151908"]
 
       # OR a special "*" meaning all networks
-      participants: "*"   
+      participants: "*"
     # If superchain config is left empty, a superchain with all L2 networks will be created
     superchain-other:
   # Supervisor configuration
@@ -189,177 +198,174 @@ optimism_package:
 
   # An array of L2 networks to run
   chains:
+    # Chains are keyed by their network name
+    chain-a:
     # Specification of the optimism-participants in the network
-    - participants:
-      # EL(Execution Layer) Specific flags
-        # The type of EL client that should be started
-        # Valid values are:
-        # op-geth
-        # op-reth
-        # op-erigon
-        # op-nethermind
-        # op-besu
-      - el_type: op-geth
+      participants:
+        # Nodes are keyed by their name
+        node0:
+          # EL(Execution Layer) Specific flags 
+          el:
+            # The type of EL client that should be started
+            # Valid values are:
+            # op-geth
+            # op-reth
+            # op-erigon
+            # op-nethermind
+            # op-besu
+            type: op-geth
 
-        # The Docker image that should be used for the EL client; leave blank to use the default for the client type
-        # Defaults by client:
-        # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
-        # - op-reth: parithoshj/op-reth:latest
-        # - op-erigon: testinprod/op-erigon:latest
-        # - op-nethermind: nethermindeth/nethermind:op-c482d56
-        # - op-besu: ghcr.io/optimism-java/op-besu:latest
-        el_image: ""
+            # The Docker image that should be used for the EL client; leave blank to use the default for the client type
+            # Defaults by client:
+            # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
+            # - op-reth: parithoshj/op-reth:latest
+            # - op-erigon: testinprod/op-erigon:latest
+            # - op-nethermind: nethermindeth/nethermind:op-c482d56
+            # - op-besu: ghcr.io/optimism-java/op-besu:latest
+            image: ""
 
-        # The log level string that this participant's EL client should log at
-        # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-        # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
-        # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-        # over a specific participant's logging
-        el_log_level: ""
+            # The log level string that this participant's EL client should log at
+            # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+            # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
+            # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+            # over a specific participant's logging
+            log_level: ""
 
-        # A list of optional extra env_vars the el container should spin up with
-        el_extra_env_vars: {}
+            # A list of optional extra env_vars the el container should spin up with
+            extra_env_vars: {}
 
-        # A list of optional extra labels the el container should spin up with
-        # Example; el_extra_labels: {"ethereum-package.partition": "1"}
-        el_extra_labels: {}
+            # A list of optional extra labels the el container should spin up with
+            # Example; el_extra_labels: {"ethereum-package.partition": "1"}
+            extra_labels: {}
 
-        # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
-        el_extra_params: []
+            # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
+            extra_params: []
 
-        # A list of tolerations that will be passed to the EL client container
-        # Only works with Kubernetes
-        # Example: el_tolerations:
-        # - key: "key"
-        #   operator: "Equal"
-        #   value: "value"
-        #   effect: "NoSchedule"
-        #   toleration_seconds: 3600
-        # Defaults to empty
-        el_tolerations: []
+            # A list of tolerations that will be passed to the EL client container
+            # Only works with Kubernetes
+            # Example: el_tolerations:
+            # - key: "key"
+            #   operator: "Equal"
+            #   value: "value"
+            #   effect: "NoSchedule"
+            #   toleration_seconds: 3600
+            # Defaults to empty
+            tolerations: []
 
-        # Persistent storage size for the EL client container (in MB)
-        # Defaults to 0, which means that the default size for the client will be used
-        # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
-        el_volume_size: 0
+            # Node selectors
+            # Only works with Kubernetes
+            # Example: node_selectors: { "disktype": "ssd" }
+            # Defaults to empty
+            node_selectors: {}
 
-        # Resource management for el containers
-        # CPU is milicores
-        # RAM is in MB
-        # Defaults to 0, which results in no resource limits
-        el_min_cpu: 0
-        el_max_cpu: 0
-        el_min_mem: 0
-        el_max_mem: 0
+            # Persistent storage size for the EL client container (in MB)
+            # Defaults to 0, which means that the default size for the client will be used
+            # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+            volume_size: 0
 
-      # CL(Consensus Layer) Specific flags
-        # The type of CL client that should be started
-        # Valid values are:
-        # op-node
-        # hildr
-        cl_type: op-node
+            # Resource management for el containers
+            # CPU is milicores
+            # RAM is in MB
+            # Defaults to 0, which results in no resource limits
+            min_cpu: 0
+            max_cpu: 0
+            min_mem: 0
+            max_mem: 0
 
-        # The Docker image that should be used for the CL client; leave blank to use the default for the client type
-        # Defaults by client:
-        # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
-        # - hildr: ghcr.io/optimism-java/hildr:latest
-        cl_image: ""
+          # CL(Consensus Layer) Specific flags
+          cl:
+            # The type of CL client that should be started
+            # Valid values are:
+            # op-node
+            # hildr
+            type: op-node
 
-        # The log level string that this participant's CL client should log at
-        # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-        # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-        # over a specific participant's logging
-        cl_log_level: ""
+            # The Docker image that should be used for the CL client; leave blank to use the default for the client type
+            # Defaults by client:
+            # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
+            # - hildr: ghcr.io/optimism-java/hildr:latest
+            image: ""
 
-        # A list of optional extra env_vars the cl container should spin up with
-        cl_extra_env_vars: {}
+            # The log level string that this participant's CL client should log at
+            # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+            # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+            # over a specific participant's logging
+            log_level: ""
 
-        # A list of optional extra labels that will be passed to the CL client Beacon container.
-        # Example; cl_extra_labels: {"ethereum-package.partition": "1"}
-        cl_extra_labels: {}
+            # A list of optional extra env_vars the cl container should spin up with
+            extra_env_vars: {}
 
-        # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
-        # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
-        cl_extra_params: []
+            # A list of optional extra labels that will be passed to the CL client Beacon container.
+            # Example; cl_extra_labels: {"ethereum-package.partition": "1"}
+            extra_labels: {}
 
-        # A list of tolerations that will be passed to the CL client container
-        # Only works with Kubernetes
-        # Example: el_tolerations:
-        # - key: "key"
-        #   operator: "Equal"
-        #   value: "value"
-        #   effect: "NoSchedule"
-        #   toleration_seconds: 3600
-        # Defaults to empty
-        cl_tolerations: []
+            # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
+            # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
+            extra_params: []
 
-        # Persistent storage size for the CL client container (in MB)
-        # Defaults to 0, which means that the default size for the client will be used
-        # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
-        cl_volume_size: 0
+            # A list of tolerations that will be passed to the CL client container
+            # Only works with Kubernetes
+            # Example: el_tolerations:
+            # - key: "key"
+            #   operator: "Equal"
+            #   value: "value"
+            #   effect: "NoSchedule"
+            #   toleration_seconds: 3600
+            # Defaults to empty
+            tolerations: []
 
-        # Resource management for cl containers
-        # CPU is milicores
-        # RAM is in MB
-        # Defaults to 0, which results in no resource limits
-        cl_min_cpu: 0
-        cl_max_cpu: 0
-        cl_min_mem: 0
-        cl_max_mem: 0
+            # Node selectors
+            # Only works with Kubernetes
+            # Example: node_selectors: { "disktype": "ssd" }
+            # Defaults to empty
+            node_selectors: {}
 
-      # Builder client specific flags
-        # The type of builder EL client that should be started
-        # Valid values are:
-        # op-geth
-        # op-reth
-        # op-rbuilder
-        el_builder_type: ""
+            # Persistent storage size for the CL client container (in MB)
+            # Defaults to 0, which means that the default size for the client will be used
+            # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+            volume_size: 0
 
-        # The Docker image that should be used for the builder EL client; leave blank to use the default for the client type
-        # Defaults by client:
-        # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
-        # - op-reth: parithoshj/op-reth:latest
-        # - op-rbuilder: ghcr.io/flashbots/op-rbuilder:latest
-        el_builder_image: ""
+            # Resource management for cl containers
+            # CPU is milicores
+            # RAM is in MB
+            # Defaults to 0, which results in no resource limits
+            min_cpu: 0
+            max_cpu: 0
+            min_mem: 0
+            max_mem: 0
 
-        # Builder secret key used by op-rbuilder to sign transactions
-        # Defaults to None - not used
-        el_builder_key: ""
-        
-        # The type of builder CL client that should be started
-        # Valid values are:
-        # op-node
-        # hildr
-        cl_builder_type: ""
+          # Builder client specific flags
+          el_builder:
+            # The type of builder EL client that should be started
+            # Valid values are:
+            # op-geth
+            # op-reth
+            # op-rbuilder
+            type: ""
 
-        # The Docker image that should be used for the builder CL client; leave blank to use the default for the client type
-        # Defaults by client:
-        # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
-        # - hildr: ghcr.io/optimism-java/hildr:latest
-        cl_builder_image: ""
+            # The Docker image that should be used for the builder EL client; leave blank to use the default for the client type
+            # Defaults by client:
+            # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
+            # - op-reth: parithoshj/op-reth:latest
+            # - op-rbuilder: ghcr.io/flashbots/op-rbuilder:latest
+            image: ""
 
-        # Participant specific flags
-        # Node selector
-        # Only works with Kubernetes
-        # Example: node_selectors: { "disktype": "ssd" }
-        # Defaults to empty
-        node_selectors: {}
+            # Builder secret key used by op-rbuilder to sign transactions
+            # Defaults to None - not used
+            key: ""
+          
+          cl_builder:
+            # The type of builder CL client that should be started
+            # Valid values are:
+            # op-node
+            # hildr
+            type: ""
 
-        # A list of tolerations that will be passed to the EL/CL/validator containers
-        # This is to be used when you don't want to specify the tolerations for each container separately
-        # Only works with Kubernetes
-        # Example: tolerations:
-        # - key: "key"
-        #   operator: "Equal"
-        #   value: "value"
-        #   effect: "NoSchedule"
-        #   toleration_seconds: 3600
-        # Defaults to empty
-        tolerations: []
-
-        # Count of nodes to spin up for this participant
-        # Default to 1
-        count: 1
+            # The Docker image that should be used for the builder CL client; leave blank to use the default for the client type
+            # Defaults by client:
+            # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
+            # - hildr: ghcr.io/optimism-java/hildr:latest
+            image: ""
 
       # Default configuration parameters for the network
       network_params:
@@ -374,11 +380,6 @@ optimism_package:
 
         # Seconds per slots
         seconds_per_slot: 2
-
-        # Name of your rollup.
-        # Must be unique for each rollup (if you run multiple rollups)
-        # Defaults to "op-kurtosis"
-        name: "op-kurtosis"
 
         # Triggering future forks in the network
         # Fjord fork
@@ -445,6 +446,9 @@ optimism_package:
 
       # Default MEV configuration
       mev_params:
+        # MEV is disabled by default
+        enabled: false
+
         # The Docker image that should be used for rollup boost; leave blank to use the default rollup-boost image
         # Defaults to "flashbots/rollup-boost:latest"
         image: ""
@@ -457,14 +461,6 @@ optimism_package:
 
         # The port of an external builder
         builder_port: ""
-
-      # Additional services to run alongside the network
-      # Defaults to []
-      # Available services:
-      # - blockscout
-      # - rollup-boost
-      # - da_server
-      additional_services: []
 
       # Configuration for da-server - https://specs.optimism.io/experimental/alt-da.html#da-server
       # TODO: each op-node and op-batcher should potentially have their own da-server, instead of sharing one like we currently do. For eg batcher needs to write via its da-server, whereas op-nodes don't.
@@ -484,6 +480,12 @@ optimism_package:
           - "--port=3100"
           - "--log.level=debug"
 
+      blockscout_params:
+        enabled: false
+        image: "blockscout/blockscout-optimism:6.8.0"
+        verifier_image: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
+        
+
   challengers:
     my-challenger:
       # Whether this challenger is active
@@ -493,9 +495,9 @@ optimism_package:
       image: ""
 
       # List of L2 chains that this challenger is connected to
-      # 
+      #
       # This field accepts several configuration types:
-      # 
+      #
       # A list of network IDs, in which case the challenger will connect to all the nodes in these network
       participants: ["2151908"]
 
@@ -579,11 +581,15 @@ It is required for you to launch an L1 Ethereum node to interact with the L2 net
 ```yaml
 optimism_package:
   chains:
-    - participants:
-        - el_type: op-geth
-          cl_type: op-node
-      additional_services:
-        - blockscout
+    opkurtosis:
+      participants:
+        node0:
+          el:
+            type: op-geth
+          cl:
+            type: op-node
+      blockscout_params:
+        enabled: True
 ethereum_package:
   participants:
     - el_type: geth
@@ -614,15 +620,22 @@ use the `network_params` section of your arguments file to specify the hard fork
 ```yaml
 optimism_package:
   chains:
-    - participants:
-      - el_type: op-geth
-        el_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:<tag>"
-        cl_type: op-node
-        cl_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:<tag>"
-      - el_type: op-geth
-        el_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:<tag>"
-        cl_type: op-node
-        cl_image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:<tag>"
+    opkurtosis:
+      participants:
+        node0:
+          el:
+            type: op-geth
+            image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:<tag>"
+          cl:
+            type: op-node
+            image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:<tag>"
+        node1:
+          el:
+            type: op-geth
+            image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:<tag>"
+          cl:
+            type: op-node
+            image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:<tag>"
       network_params:
         fjord_time_offset: 0
         granite_time_offset: 0
@@ -637,20 +650,25 @@ Additionally, you can spin up multiple L2 networks by providing a list of L2 con
 ```yaml
 optimism_package:
   chains:
-    - participants:
-        - el_type: op-geth
+    op-rollup-one:
+      participants:
+        node0:
+          el:
+            type: op-geth
       network_params:
         name: op-rollup-one
         network_id: "3151909"
-      additional_services:
-        - blockscout
-    - participants:
-        - el_type: op-geth
+      blockscout_params:
+        enabled: True
+    op-rollup-two:
+      participants:
+        node0:
+          el:
+            type: op-geth
       network_params:
-        name: op-rollup-two
         network_id: "3151910"
-      additional_services:
-        - blockscout
+      blockscout_params:
+        enabled: True
 ethereum_package:
   participants:
     - el_type: geth
@@ -684,15 +702,18 @@ To use rollup boost, you can add `rollup-boost` as an additional service and con
 ```yaml
 optimism_package:
   chains:
-    - participants:
-        - el_builder_type: op-rbuilder
-          cl_builder_type: op-node
+    chain0:
+      participants:
+        node0:
+          el_builder:
+            type: op-rbuilder
+          cl_builder:
+            type: op-node
       mev_params:
-        rollup_boost_image: "flashbots/rollup-boost:latest"
+        enabled: true
+        image: "flashbots/rollup-boost:latest"
         builder_host: "localhost"
         builder_port: "8545"
-      additional_services:
-        - rollup-boost
 ```
 
 #### Run tx-fuzz to send l2 transactions

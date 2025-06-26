@@ -1,19 +1,7 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
-)
+_postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
-postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
-
-util = import_module("../util.star")
-
-IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout-optimism:6.8.0"
-IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
-
-SERVICE_NAME_BLOCKSCOUT = "op-blockscout"
-
-HTTP_PORT_ID = "http"
-HTTP_PORT_NUMBER = 4000
-HTTP_PORT_NUMBER_VERIF = 8050
+_net = import_module("/src/util/net.star")
+_util = import_module("/src/util.star")
 
 BLOCKSCOUT_MIN_CPU = 100
 BLOCKSCOUT_MAX_CPU = 1000
@@ -25,65 +13,47 @@ BLOCKSCOUT_VERIF_MAX_CPU = 1000
 BLOCKSCOUT_VERIF_MIN_MEMORY = 10
 BLOCKSCOUT_VERIF_MAX_MEMORY = 1024
 
-USED_PORTS = {
-    HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-        HTTP_PORT_NUMBER,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
-        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
-}
 
-VERIF_USED_PORTS = {
-    HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-        HTTP_PORT_NUMBER_VERIF,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
-        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
-}
-
-
-def launch_blockscout(
+def launch(
     plan,
-    l2_services_suffix,
+    params,
+    network_params,
+    l2_rpc_url,
     l1_rpc_url,
-    l2_el_context,
-    l2_network_name,
     deployment_output,
-    network_id,
 ):
+    network_id = network_params.network_id
+    network_name = network_params.name
+
     rollup_filename = "rollup-{0}".format(network_id)
-    portal_address = util.read_network_config_value(
+    portal_address = _util.read_network_config_value(
         plan, deployment_output, rollup_filename, ".deposit_contract_address"
     )
-    l1_deposit_start_block = util.read_network_config_value(
+    l1_deposit_start_block = _util.read_network_config_value(
         plan, deployment_output, rollup_filename, ".genesis.l1.number"
     )
 
-    postgres_output = postgres.run(
-        plan,
-        service_name="{0}-postgres{1}".format(
-            SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
-        ),
+    postgres_output = _postgres.run(
+        plan=plan,
+        service_name=params.database.service_name,
         database="blockscout",
         extra_configs=["max_connections=1000"],
     )
 
-    config_verif = get_config_verif()
-    verif_service_name = "{0}-verif{1}".format(
-        SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
-    )
-    verif_service = plan.add_service(verif_service_name, config_verif)
+    verif_config = get_config_verif(verifier_params=params.verifier)
+    verif_service = plan.add_service(params.verifier.service_name, verif_config)
     verif_url = "http://{}:{}".format(
         verif_service.hostname, verif_service.ports["http"].number
     )
 
     config_backend = get_config_backend(
-        postgres_output,
-        l1_rpc_url,
-        l2_el_context,
-        verif_url,
-        l2_network_name,
-        {
+        blockscout_params=params.blockscout,
+        postgres_output=postgres_output,
+        l1_rpc_url=l1_rpc_url,
+        l2_rpc_url=l2_rpc_url,
+        verif_url=verif_url,
+        network_name=network_name,
+        additional_env_vars={
             "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": portal_address,
             "INDEXER_OPTIMISM_L1_DEPOSITS_START_BLOCK": l1_deposit_start_block,
             "INDEXER_OPTIMISM_L1_WITHDRAWALS_START_BLOCK": l1_deposit_start_block,
@@ -93,9 +63,8 @@ def launch_blockscout(
         },
     )
     blockscout_service = plan.add_service(
-        "{0}{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_services_suffix), config_backend
+        params.blockscout.service_name, config_backend
     )
-    plan.print(blockscout_service)
 
     blockscout_url = "http://{}:{}".format(
         blockscout_service.hostname, blockscout_service.ports["http"].number
@@ -104,13 +73,14 @@ def launch_blockscout(
     return blockscout_url
 
 
-def get_config_verif():
+def get_config_verif(verifier_params):
     return ServiceConfig(
-        image=IMAGE_NAME_BLOCKSCOUT_VERIF,
-        ports=VERIF_USED_PORTS,
+        image=verifier_params.image,
+        ports=_net.ports_to_port_specs(verifier_params.ports),
+        labels=verifier_params.labels,
         env_vars={
             "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR": "0.0.0.0:{}".format(
-                HTTP_PORT_NUMBER_VERIF
+                verifier_params.ports[_net.HTTP_PORT_NAME].number
             )
         },
         min_cpu=BLOCKSCOUT_VERIF_MIN_CPU,
@@ -121,11 +91,12 @@ def get_config_verif():
 
 
 def get_config_backend(
+    blockscout_params,
     postgres_output,
     l1_rpc_url,
-    l2_el_context,
+    l2_rpc_url,
     verif_url,
-    l2_network_name,
+    network_name,
     additional_env_vars,
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
@@ -157,8 +128,9 @@ def get_config_backend(
     } | additional_env_vars
 
     return ServiceConfig(
-        image=IMAGE_NAME_BLOCKSCOUT,
-        ports=USED_PORTS,
+        image=blockscout_params.image,
+        ports=_net.ports_to_port_specs(blockscout_params.ports),
+        labels=blockscout_params.labels,
         cmd=[
             "/bin/sh",
             "-c",
@@ -166,8 +138,8 @@ def get_config_backend(
         ],
         env_vars={
             "ETHEREUM_JSONRPC_VARIANT": "geth",
-            "ETHEREUM_JSONRPC_HTTP_URL": l2_el_context.rpc_http_url,
-            "ETHEREUM_JSONRPC_TRACE_URL": l2_el_context.rpc_http_url,
+            "ETHEREUM_JSONRPC_HTTP_URL": l2_rpc_url,
+            "ETHEREUM_JSONRPC_TRACE_URL": l2_rpc_url,
             "DATABASE_URL": database_url,
             "COIN": "opETH",
             "MICROSERVICE_SC_VERIFIER_ENABLED": "true",
@@ -175,10 +147,10 @@ def get_config_backend(
             "MICROSERVICE_SC_VERIFIER_TYPE": "sc_verifier",
             "INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER": "true",
             "ECTO_USE_SSL": "false",
-            "NETWORK": l2_network_name,
-            "SUBNETWORK": l2_network_name,
+            "NETWORK": network_name,
+            "SUBNETWORK": network_name,
             "API_V2_ENABLED": "true",
-            "PORT": "{}".format(HTTP_PORT_NUMBER),
+            "PORT": "{}".format(blockscout_params.ports[_net.HTTP_PORT_NAME].number),
             "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",
         }
         | optimism_env_vars,

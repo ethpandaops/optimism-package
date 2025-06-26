@@ -268,13 +268,14 @@ def get_beacon_config(
 
     if conductor_params:
         cmd += [
-            "--conductor.enabled={0}".format("true"),
+            "--conductor.enabled=true",
             "--conductor.rpc={0}".format(
                 _net.service_url(
                     conductor_params.service_name,
                     conductor_params.ports[_net.RPC_PORT_NAME],
                 )
             ),
+            "--sequencer.stopped=true",
         ]
 
     if len(existing_cl_clients) > 0:

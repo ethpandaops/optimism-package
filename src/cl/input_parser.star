@@ -10,6 +10,7 @@ _DEFAULT_ARGS = {
     "extra_env_vars": {},
     "extra_labels": {},
     "extra_params": [],
+    "node_selectors": {},
     "tolerations": [],
     "volume_size": 0,
     "min_cpu": 0,
@@ -25,21 +26,39 @@ _IMAGE_IDS = {
 }
 
 
-def parse(args, participant_name, network_params, registry):
-    return _parse(args, participant_name, network_params, registry, "cl")
+def parse(cl_args, participant_name, participant_index, network_params, registry):
+    return _parse(
+        cl_args=cl_args,
+        participant_name=participant_name,
+        participant_index=participant_index,
+        network_params=network_params,
+        registry=registry,
+        cl_kind="cl",
+    )
 
 
-def parse_builder(args, participant_name, network_params, registry):
-    return _parse(args, participant_name, network_params, registry, "clbuilder")
+def parse_builder(
+    cl_args, participant_name, participant_index, network_params, registry
+):
+    return _parse(
+        cl_args=cl_args,
+        participant_name=participant_name,
+        participant_index=participant_index,
+        network_params=network_params,
+        registry=registry,
+        cl_kind="clbuilder",
+    )
 
 
-def _parse(args, participant_name, network_params, registry, cl_kind):
+def _parse(
+    cl_args, participant_name, participant_index, network_params, registry, cl_kind
+):
     network_id = network_params.network_id
     network_name = network_params.name
 
     # Any extra attributes will cause an error
     _filter.assert_keys(
-        args or {},
+        cl_args or {},
         _DEFAULT_ARGS.keys(),
         "Invalid attributes in CL configuration for "
         + participant_name
@@ -50,7 +69,7 @@ def _parse(args, participant_name, network_params, registry, cl_kind):
 
     # We filter the None values so that we can merge dicts easily
     # and merge the config with the defaults
-    cl_params = _DEFAULT_ARGS | _filter.remove_none(args or {})
+    cl_params = _DEFAULT_ARGS | _filter.remove_none(cl_args or {})
 
     # We default the image to the one in the registry
     #
@@ -68,6 +87,7 @@ def _parse(args, participant_name, network_params, registry, cl_kind):
     cl_params["labels"] = {
         "op.kind": cl_kind,
         "op.network.id": str(network_id),
+        "op.network.participant.index": str(participant_index),
         "op.network.participant.name": participant_name,
         "op.cl.type": cl_params["type"],
     }

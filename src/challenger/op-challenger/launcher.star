@@ -22,25 +22,32 @@ util = import_module("../../util.star")
 def launch(
     plan,
     params,
-    l2s,
+    l2s_params,
     supervisors_params,
     l1_config_env_vars,
     deployment_output,
     observability_helper,
 ):
     # We need to only grab the networks this challenger is connected to
-    challenger_l2s = [l2 for l2 in l2s if l2.network_id in params.participants]
+    challenger_l2s_params = [
+        l2_params
+        for l2_params in l2s_params
+        if l2_params.network_params.network_id in params.participants
+    ]
     supervisor_params = _filter.first(
         supervisors_params,
         lambda s: any(
-            [l2.network_id in s.superchain.participants for l2 in challenger_l2s]
+            [
+                l2_params.network_params.network_id in s.superchain.participants
+                for l2_params in challenger_l2s_params
+            ]
         ),
     )
 
     config = get_challenger_config(
         plan=plan,
         params=params,
-        l2s=challenger_l2s,
+        l2s_params=challenger_l2s_params,
         supervisor_params=supervisor_params,
         l1_config_env_vars=l1_config_env_vars,
         deployment_output=deployment_output,
@@ -50,21 +57,21 @@ def launch(
     service = plan.add_service(params.service_name, config)
 
     if observability_helper.enabled:
-        for l2 in challenger_l2s:
+        for l2_params in challenger_l2s_params:
             observability.register_op_service_metrics_job(
-                observability_helper, service, l2.name
+                observability_helper, service, l2_params.network_params.name
             )
 
     return struct(
         service=service,
-        l2s=challenger_l2s,
+        l2s=challenger_l2s_params,
     )
 
 
 def get_challenger_config(
     plan,
     params,
-    l2s,
+    l2s_params,
     supervisor_params,
     l1_config_env_vars,
     deployment_output,
@@ -75,7 +82,7 @@ def get_challenger_config(
     # TODO The "proper" solution for this is still somewhere out there:
     # - op-deployer output might need to be restructured
     # - we might need to do some additional checks to make sure the networks really do share the deployments
-    first_network_id = l2s[0].network_id
+    first_network_id = l2s_params[0].network_params.network_id
 
     # We'll grab the game factory address from the deployments
     game_factory_address = util.read_network_config_value(
@@ -102,9 +109,9 @@ def get_challenger_config(
                 [
                     "{0}/genesis-{1}.json".format(
                         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-                        l2.network_id,
+                        l2_params.network_params.network_id,
                     )
-                    for l2 in l2s
+                    for l2_params in l2s_params
                 ]
             )
         ),
@@ -113,9 +120,9 @@ def get_challenger_config(
                 [
                     "{0}/rollup-{1}.json".format(
                         ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-                        l2.network_id,
+                        l2_params.network_params.network_id,
                     )
-                    for l2 in l2s
+                    for l2_params in l2s_params
                 ]
             )
         ),
@@ -127,8 +134,11 @@ def get_challenger_config(
             ",".join(
                 [
                     # TODO: we need to handle multiple participants better
-                    l2.participants[0].el_context.rpc_http_url
-                    for l2 in l2s
+                    _net.service_url(
+                        l2_params.participants[0].el.service_name,
+                        l2_params.participants[0].el.ports[_net.RPC_PORT_NAME],
+                    )
+                    for l2_params in l2s_params
                 ]
             )
         ),
@@ -137,8 +147,11 @@ def get_challenger_config(
             ",".join(
                 [
                     # TODO: we need to handle multiple participants better
-                    l2.participants[0].cl_context.beacon_http_url
-                    for l2 in l2s
+                    _net.service_url(
+                        l2_params.participants[0].cl.service_name,
+                        l2_params.participants[0].cl.ports[_net.RPC_PORT_NAME],
+                    )
+                    for l2_params in l2s_params
                 ]
             )
         ),
@@ -202,6 +215,7 @@ def get_challenger_config(
         cmd=cmd,
         entrypoint=["op-challenger"],
         files=files,
+        labels=params.labels,
         private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ports=ports,
     )

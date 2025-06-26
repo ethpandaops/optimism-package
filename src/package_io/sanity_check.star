@@ -11,6 +11,7 @@ ROOT_PARAMS = [
     "global_tolerations",
     "persistent",
     "faucet",
+    "interop_mon",
 ]
 
 OBSERVABILITY_PARAMS = [
@@ -71,105 +72,6 @@ ALTDA_DEPLOY_CONFIG_PARAMS = [
     "da_resolver_refund_percentage",
 ]
 
-PARTICIPANT_CATEGORIES = {
-    "participants": [
-        "el_type",
-        "el_image",
-        "el_log_level",
-        "el_extra_env_vars",
-        "el_extra_labels",
-        "el_extra_params",
-        "el_tolerations",
-        "el_volume_size",
-        "el_min_cpu",
-        "el_max_cpu",
-        "el_min_mem",
-        "el_max_mem",
-        "cl_type",
-        "cl_image",
-        "cl_log_level",
-        "cl_extra_env_vars",
-        "cl_extra_labels",
-        "cl_extra_params",
-        "cl_tolerations",
-        "cl_volume_size",
-        "cl_min_cpu",
-        "cl_max_cpu",
-        "cl_min_mem",
-        "cl_max_mem",
-        "el_builder_type",
-        "el_builder_image",
-        "el_builder_key",
-        "el_builder_log_level",
-        "el_builder_extra_env_vars",
-        "el_builder_extra_labels",
-        "el_builder_extra_params",
-        "el_builder_tolerations",
-        "el_builder_volume_size",
-        "el_builder_min_cpu",
-        "el_builder_max_cpu",
-        "el_builder_min_mem",
-        "el_builder_max_mem",
-        "cl_builder_type",
-        "cl_builder_image",
-        "cl_builder_log_level",
-        "cl_builder_extra_env_vars",
-        "cl_builder_extra_labels",
-        "cl_builder_extra_params",
-        "cl_builder_tolerations",
-        "cl_builder_volume_size",
-        "cl_builder_min_cpu",
-        "cl_builder_max_cpu",
-        "cl_builder_min_mem",
-        "cl_builder_max_mem",
-        "node_selectors",
-        "tolerations",
-        "count",
-    ],
-}
-
-SUBCATEGORY_PARAMS = {
-    "network_params": [
-        "network",
-        "network_id",
-        "seconds_per_slot",
-        "name",
-        "fjord_time_offset",
-        "granite_time_offset",
-        "holocene_time_offset",
-        "isthmus_time_offset",
-        "interop_time_offset",
-        "fund_dev_accounts",
-    ],
-    "proxyd_params": ["image", "extra_params"],
-    "batcher_params": ["image", "extra_params"],
-    "proposer_params": ["image", "extra_params", "game_type", "proposal_interval"],
-    "mev_params": ["image", "type", "builder_host", "builder_port"],
-    "conductor_params": [
-        "enabled",
-        "image",
-        "extra_params",
-        "admin",
-        "proxy",
-        "paused",
-    ],
-    "da_params": [
-        "enabled",
-        "image",
-        "extra_params",
-        "type",
-    ],
-    "tx_fuzzer_params": [
-        "enabled",
-        "image",
-        "extra_params",
-        "min_cpu",
-        "max_cpu",
-        "min_memory",
-        "max_memory",
-    ],
-}
-
 OP_CONTRACT_DEPLOYER_PARAMS = [
     "image",
     "l1_artifacts_locator",
@@ -182,8 +84,6 @@ OP_CONTRACT_DEPLOYER_OVERRIDES = [
     "vmType",
 ]
 
-ADDITIONAL_SERVICES_PARAMS = ["blockscout", "rollup-boost"]
-
 EXTERNAL_L1_NETWORK_PARAMS = [
     "network_id",
     "rpc_kind",
@@ -192,18 +92,6 @@ EXTERNAL_L1_NETWORK_PARAMS = [
     "cl_rpc_url",
     "priv_key",
 ]
-
-
-def deep_validate_params(plan, input_args, category, allowed_params):
-    if category in input_args:
-        for item in input_args[category]:
-            for param in item.keys():
-                if param not in allowed_params:
-                    fail(
-                        "Invalid parameter {0} for {1}. Allowed fields: {2}".format(
-                            param, category, allowed_params
-                        )
-                    )
 
 
 def validate_params(plan, input_args, category, allowed_params):
@@ -219,7 +107,11 @@ def validate_params(plan, input_args, category, allowed_params):
 
 def sanity_check(plan, optimism_config):
     if type(optimism_config) != "dict":
-        fail("Invalid input_args type, expected dict")
+        fail(
+            "Invalid input_args type, expected dict, got {}".format(
+                type(optimism_config)
+            )
+        )
 
     for key in optimism_config.keys():
         if key not in ROOT_PARAMS:
@@ -281,46 +173,10 @@ def sanity_check(plan, optimism_config):
             ALTDA_DEPLOY_CONFIG_PARAMS,
         )
 
-    chains = optimism_config.get("chains", [])
+    chains = optimism_config.get("chains", {})
 
-    if type(chains) != "list":
-        fail("Invalid input_args type, expected list")
-
-    for input_args in chains:
-        # Checks participants
-        deep_validate_params(
-            plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
-        )
-
-        # Checks additional_services
-        if "additional_services" in input_args:
-            for additional_services in input_args["additional_services"]:
-                if additional_services not in ADDITIONAL_SERVICES_PARAMS:
-                    fail(
-                        "Invalid additional_services {0}, allowed fields: {1}".format(
-                            additional_services, ADDITIONAL_SERVICES_PARAMS
-                        )
-                    )
-
-        # Checks subcategories
-        for subcategories in SUBCATEGORY_PARAMS.keys():
-            validate_params(
-                plan, input_args, subcategories, SUBCATEGORY_PARAMS[subcategories]
-            )
-        # Checks everything else
-        for param in input_args.keys():
-            combined_root_params = (
-                PARTICIPANT_CATEGORIES.keys() + SUBCATEGORY_PARAMS.keys()
-            )
-            combined_root_params.append("additional_services")
-            combined_root_params.append("op_contract_deployer_params")
-
-            if param not in combined_root_params:
-                fail(
-                    "Invalid parameter {0}, allowed fields {1}".format(
-                        param, combined_root_params
-                    )
-                )
+    if type(chains) != "dict":
+        fail("Invalid input_args type, expected dict, got {}".format(type(chains)))
 
         # If everything passes, print a message
 

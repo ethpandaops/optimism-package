@@ -6,26 +6,32 @@ ethereum_package_constants = import_module(
 )
 util = import_module("/src/util.star")
 
+_net = import_module("/src/util/net.star")
+
 
 def test_op_challenger_launch_with_defaults(plan):
     parsed_input_args = input_parser.input_parser(
         plan,
         {
-            "chains": [
-                {
+            "chains": {
+                "opkurtosis": {
                     "network_params": {
                         "network_id": 1000,
                     },
-                    "participants": [
-                        {
-                            "el_type": "op-reth",
-                            "el_image": "op-reth:latest",
-                            "cl_type": "op-node",
-                            "cl_image": "op-node:latest",
+                    "participants": {
+                        "node0": {
+                            "el": {
+                                "type": "op-reth",
+                                "image": "op-reth:latest",
+                            },
+                            "cl": {
+                                "type": "op-node",
+                                "image": "op-node:latest",
+                            },
                         }
-                    ],
+                    },
                 }
-            ],
+            },
             "challengers": {"challenger": None},
         },
     )
@@ -57,17 +63,21 @@ def test_op_challenger_launch_with_defaults(plan):
     op_challenger_launcher.launch(
         plan=plan,
         params=parsed_input_args.challengers[0],
-        l2s=[
+        l2s_params=[
             struct(
-                network_id=1000,
-                name="my-network",
+                network_params=struct(
+                    network_id=1000,
+                    name="my-network",
+                ),
                 participants=[
                     struct(
-                        cl_context=struct(
-                            beacon_http_url="beacon_http_url",
+                        cl=struct(
+                            service_name="my-cl",
+                            ports={_net.RPC_PORT_NAME: _net.port(number=8545)},
                         ),
-                        el_context=struct(
-                            rpc_http_url="rpc_http_url",
+                        el=struct(
+                            service_name="my-el",
+                            ports={_net.RPC_PORT_NAME: _net.port(number=8545)},
                         ),
                     )
                 ],
@@ -98,9 +108,9 @@ def test_op_challenger_launch_with_defaults(plan):
             "--datadir=/data/op-challenger/op-challenger-data",
             "--l1-beacon=CL_RPC_URL",
             "--l1-eth-rpc=L1_RPC_URL",
-            "--l2-eth-rpc=rpc_http_url",
+            "--l2-eth-rpc=http://my-el:8545",
             "--private-key=challenger_private_key",
-            "--rollup-rpc=beacon_http_url",
+            "--rollup-rpc=http://my-cl:8545",
             "--cannon-prestates-url=https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
             "--metrics.enabled",
             "--metrics.addr=0.0.0.0",

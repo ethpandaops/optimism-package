@@ -1,9 +1,12 @@
 optimism_package:
   chains:
-    - participants:
-      - el_type: op-geth
-      additional_services:
-        - blockscout
+    chain0:
+      participants:
+        node0:
+          el:
+            type: op-geth
+      blockscout_params:
+        enabled: true
 ethereum_package:
   participants:
     - el_type: nethermind

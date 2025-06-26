@@ -2,12 +2,13 @@ _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 _input_parser = import_module("/src/package_io/input_parser.star")
+_conductor_input_parser = import_module("/src/conductor/input_parser.star")
 _l2_input_parser = import_module("/src/l2/input_parser.star")
 _observability = import_module("/src/observability/observability.star")
 _registry = import_module("/src/package_io/registry.star")
 _util = import_module("/src/util.star")
 
-_cl_launcher = import_module("/src/l2/participant/cl/launcher.star")
+_cl_launcher = import_module("/src/cl/launcher.star")
 
 _default_registry = _registry.Registry()
 _default_deployment_output = "/deployment.output.json"
@@ -59,6 +60,7 @@ def test_l2_participant_cl_launcher_hildr(plan):
         params=cl_params,
         network_params=l2_params.network_params,
         supervisors_params=[],
+        conductor_params=None,
         da_params=l2_params.da_params,
         is_sequencer=True,
         jwt_file=_default_jwt_file,
@@ -102,6 +104,7 @@ def test_l2_participant_cl_launcher_hildr(plan):
         {
             "op.kind": "cl",
             "op.network.id": "2151908",
+            "op.network.participant.index": "0",
             "op.network.participant.name": "node0",
             "op.cl.type": "hildr",
         },
@@ -153,6 +156,7 @@ def test_l2_participant_cl_launcher_kona_node(plan):
         params=cl_params,
         network_params=l2_params.network_params,
         supervisors_params=[],
+        conductor_params=None,
         da_params=l2_params.da_params,
         is_sequencer=True,
         jwt_file=_default_jwt_file,
@@ -224,6 +228,7 @@ def test_l2_participant_cl_launcher_kona_node(plan):
         {
             "op.kind": "cl",
             "op.network.id": "2151908",
+            "op.network.participant.index": "0",
             "op.network.participant.name": "node0",
             "op.cl.type": "kona-node",
         },
@@ -275,6 +280,7 @@ def test_l2_participant_cl_launcher_op_node(plan):
         params=cl_params,
         network_params=l2_params.network_params,
         supervisors_params=[],
+        conductor_params=None,
         da_params=l2_params.da_params,
         is_sequencer=True,
         jwt_file=_default_jwt_file,
@@ -330,6 +336,7 @@ def test_l2_participant_cl_launcher_op_node(plan):
         {
             "op.kind": "cl",
             "op.network.id": "2151908",
+            "op.network.participant.index": "0",
             "op.network.participant.name": "node0",
             "op.cl.type": "op-node",
         },
@@ -341,4 +348,110 @@ def test_l2_participant_cl_launcher_op_node(plan):
     expect.eq(
         service_config.files["/jwt"].artifact_names,
         [_default_jwt_file],
+    )
+
+
+def test_l2_participant_cl_launcher_incompatible_conductor(plan):
+    # We'll need the observability params from the legacy parser
+    legacy_params = _input_parser.input_parser(
+        plan=plan,
+        input_args={},
+    )
+    observability_helper = _observability.make_helper(legacy_params.observability)
+
+    sequencer_private_key_mock = "sequencer_private_key"
+    kurtosistest.mock(_util, "read_network_config_value").mock_return_value(
+        sequencer_private_key_mock
+    )
+
+    l2s_params = _l2_input_parser.parse(
+        {
+            "network0": {
+                "participants": {
+                    "node0": {
+                        "cl": {
+                            "type": "hildr",
+                        }
+                    }
+                }
+            }
+        },
+        registry=_default_registry,
+    )
+
+    l2_params = l2s_params[0]
+    participant_params = l2_params.participants[0]
+    cl_params = participant_params.cl
+
+    conductor_params = _conductor_input_parser.parse(
+        conductor_args={"enabled": True},
+        participant_index=0,
+        participant_name=participant_params.name,
+        network_params=l2_params.network_params,
+        registry=_default_registry,
+    )
+
+    expect.fails(
+        lambda: _cl_launcher.launch(
+            plan=plan,
+            params=cl_params,
+            network_params=l2_params.network_params,
+            supervisors_params=[],
+            conductor_params=conductor_params,
+            da_params=l2_params.da_params,
+            is_sequencer=True,
+            jwt_file=_default_jwt_file,
+            deployment_output=_default_deployment_output,
+            l1_config_env_vars=_default_l1_config_env_vars,
+            log_level=_default_log_level,
+            persistent=True,
+            tolerations=[],
+            node_selectors={},
+            el_context=_default_el_context,
+            cl_contexts=_default_cl_contexts,
+            observability_helper=observability_helper,
+        ),
+        "Node node0 on network kurtosis: hildr does not support conductor parameters",
+    )
+
+    l2s_params = _l2_input_parser.parse(
+        {
+            "network0": {
+                "participants": {
+                    "node0": {
+                        "cl": {
+                            "type": "kona-node",
+                        }
+                    }
+                }
+            }
+        },
+        registry=_default_registry,
+    )
+
+    l2_params = l2s_params[0]
+    participant_params = l2_params.participants[0]
+    cl_params = participant_params.cl
+
+    expect.fails(
+        lambda: _cl_launcher.launch(
+            plan=plan,
+            params=cl_params,
+            network_params=l2_params.network_params,
+            supervisors_params=[],
+            conductor_params=conductor_params,
+            da_params=l2_params.da_params,
+            is_sequencer=True,
+            jwt_file=_default_jwt_file,
+            deployment_output=_default_deployment_output,
+            l1_config_env_vars=_default_l1_config_env_vars,
+            log_level=_default_log_level,
+            persistent=True,
+            tolerations=[],
+            node_selectors={},
+            el_context=_default_el_context,
+            cl_contexts=_default_cl_contexts,
+            observability_helper=observability_helper,
+        ),
+        "Node node0 on network kurtosis: kona-node does not support conductor parameters",
     )

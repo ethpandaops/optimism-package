@@ -4,8 +4,8 @@ _net = import_module("/src/util/net.star")
 _id = import_module("/src/util/id.star")
 _selectors = import_module("/src/l2/selectors.star")
 
-_el_input_parser = import_module("./el/input_parser.star")
-_cl_input_parser = import_module("./cl/input_parser.star")
+_el_input_parser = import_module("/src/el/input_parser.star")
+_cl_input_parser = import_module("/src/cl/input_parser.star")
 _mev_input_parser = import_module("/src/mev/input_parser.star")
 _conductor_input_parser = import_module("/src/conductor/input_parser.star")
 
@@ -21,10 +21,16 @@ _DEFAULT_ARGS = {
 
 
 def parse(args, network_params, registry):
+    participant_index_generator = _id.autoincrement(initial=0)
+
     participants_params = _filter.remove_none(
         [
             _parse_instance(
-                participant_args or {}, participant_name, network_params, registry
+                participant_args=participant_args or {},
+                participant_name=participant_name,
+                participant_index_generator=participant_index_generator,
+                network_params=network_params,
+                registry=registry,
             )
             for participant_name, participant_args in (args or {}).items()
         ]
@@ -37,15 +43,34 @@ def parse(args, network_params, registry):
             )
         )
 
-    return _apply_sequencers(
+    participants_params = _assert_conductors(
         participants_params=participants_params,
         network_params=network_params,
     )
 
+    participants_params = _apply_sequencers(
+        participants_params=participants_params,
+        network_params=network_params,
+    )
 
-def _parse_instance(participant_args, participant_name, network_params, registry):
+    return participants_params
+
+
+def _parse_instance(
+    participant_args,
+    participant_name,
+    participant_index_generator,
+    network_params,
+    registry,
+):
     network_id = network_params.network_id
     network_name = network_params.name
+
+    # To bridge the legacy list format to the new dictionary format for participants,
+    # we introduce an index label
+    #
+    # This will be added to the EL/CL labels so that the optimism devent SDK can extract the legacy node index
+    participant_index = participant_index_generator()
 
     # Any extra attributes will cause an error
     _filter.assert_keys(
@@ -62,7 +87,9 @@ def _parse_instance(participant_args, participant_name, network_params, registry
     participant_params = _DEFAULT_ARGS | _filter.remove_none(participant_args or {})
 
     # We make sure the name adheres to our standards
-    _id.assert_id(participant_name)
+    _id.assert_id(
+        id=participant_name, name="Name of the node on network {}".format(network_name)
+    )
 
     # Now we make sure the sequencer property is valid
     #
@@ -101,6 +128,7 @@ def _parse_instance(participant_args, participant_name, network_params, registry
         mev_args=participant_params["mev_params"],
         network_params=network_params,
         participant_name=participant_name,
+        participant_index=participant_index,
         registry=registry,
     )
 
@@ -112,23 +140,41 @@ def _parse_instance(participant_args, participant_name, network_params, registry
         conductor_args=participant_params["conductor_params"],
         network_params=network_params,
         participant_name=participant_name,
+        participant_index=participant_index,
         registry=registry,
     )
 
     return struct(
         el=_el_input_parser.parse(
-            participant_params["el"], participant_name, network_params, registry
+            el_args=participant_params["el"],
+            participant_name=participant_name,
+            participant_index=participant_index,
+            network_params=network_params,
+            registry=registry,
         ),
         el_builder=_el_input_parser.parse_builder(
-            participant_params["el_builder"], participant_name, network_params, registry
+            el_args=participant_params["el_builder"],
+            participant_name=participant_name,
+            participant_index=participant_index,
+            network_params=network_params,
+            registry=registry,
         ),
         cl=_cl_input_parser.parse(
-            participant_params["cl"], participant_name, network_params, registry
+            cl_args=participant_params["cl"],
+            participant_name=participant_name,
+            participant_index=participant_index,
+            network_params=network_params,
+            registry=registry,
         ),
         cl_builder=_cl_input_parser.parse_builder(
-            participant_params["cl_builder"], participant_name, network_params, registry
+            cl_args=participant_params["cl_builder"],
+            participant_name=participant_name,
+            participant_index=participant_index,
+            network_params=network_params,
+            registry=registry,
         ),
         name=participant_name,
+        index=participant_index,
         sequencer=sequencer,
         mev_params=mev_params,
         conductor_params=conductor_params,
@@ -222,5 +268,24 @@ def _apply_sequencers(participants_params, network_params):
         )
         for p in participants_params
     ]
+
+    return participants_params
+
+
+# Helper function that ensures that if there are conductors present, we have at least two participants defined
+#
+# This is needed since a conductor needs to have at least one peer (see OP_CONDUCTOR_HEALTHCHECK_MIN_PEER_COUNT)
+def _assert_conductors(participants_params, network_params):
+    has_conductors = any([p.conductor_params for p in participants_params])
+
+    if not has_conductors:
+        return participants_params
+
+    if len(participants_params) == 1:
+        fail(
+            "Invalid participants configuration for network {}: at least two participants must be defined if conductors are present".format(
+                network_params.name
+            )
+        )
 
     return participants_params
