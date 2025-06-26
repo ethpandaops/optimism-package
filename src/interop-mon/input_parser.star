@@ -8,6 +8,7 @@ _registry = import_module("/src/package_io/registry.star")
 _DEFAULT_ARGS = {
     "enabled": False,
     "image": None,
+    "pprof_enabled": False,
 }
 
 

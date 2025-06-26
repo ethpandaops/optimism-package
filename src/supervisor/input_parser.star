@@ -9,6 +9,7 @@ _DEFAULT_ARGS = {
     "superchain": None,
     "image": None,
     "extra_params": [],
+    "pprof_enabled": False,
 }
 
 _IMAGE_IDS = {

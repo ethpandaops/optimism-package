@@ -2,9 +2,9 @@ optimism_package:
   chains:
     opkurtosis:
       participants:
-        node0: 
+        node0:
           sequencer: true
-          el: 
+          el:
             type: op-geth
           cl:
             type: op-node
@@ -14,7 +14,7 @@ optimism_package:
             bootstrap: true
         node1:
           sequencer: true
-          el: 
+          el:
             type: op-reth
           cl:
             type: op-node
@@ -23,7 +23,7 @@ optimism_package:
             enabled: true
         node2:
           sequencer: true
-          el: 
+          el:
             type: op-reth
           cl:
             type: op-node
@@ -44,6 +44,7 @@ optimism_package:
         granite_time_offset: 0
         fund_dev_accounts: true
       batcher_params:
+        pprof_enabled: true
         extra_params: []
       blockscout_params:
         enabled: true

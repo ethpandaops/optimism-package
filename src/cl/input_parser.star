@@ -17,6 +17,7 @@ _DEFAULT_ARGS = {
     "max_cpu": 0,
     "min_mem": 0,
     "max_mem": 0,
+    "pprof_enabled": False,
 }
 
 _IMAGE_IDS = {
