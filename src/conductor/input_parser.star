@@ -10,6 +10,7 @@ _DEFAULT_ARGS = {
     "proxy": True,
     "paused": False,
     "bootstrap": False,
+    "pprof_enabled": False,
 }
 
 
