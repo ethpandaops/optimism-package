@@ -35,6 +35,9 @@ def launch(
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
 
+    if params.pprof_enabled:
+        observability.configure_op_service_pprof(cmd, ports)
+
     config = ServiceConfig(
         image=image,
         cmd=cmd,
