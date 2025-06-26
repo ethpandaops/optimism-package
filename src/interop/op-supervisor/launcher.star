@@ -52,6 +52,7 @@ def launch(
     jwt_file,
     supervisor_params,
     observability_helper,
+    observability_params,
 ):
     dependency_set_json = supervisor_params.dependency_set
     if not dependency_set_json:
@@ -74,10 +75,11 @@ def launch(
 
     service = plan.add_service(interop_constants.SUPERVISOR_SERVICE_NAME, config)
 
-    observability.register_op_service_metrics_job(
-        observability_helper,
-        service,
-    )
+    if observability_params.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper,
+            service,
+        )
 
     return struct(service=service)
 

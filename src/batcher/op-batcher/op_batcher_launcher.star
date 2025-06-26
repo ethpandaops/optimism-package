@@ -46,6 +46,7 @@ def launch(
     batcher_params,
     network_params,
     observability_helper,
+    observability_params,
     da_server_context,
 ):
     config = get_batcher_config(
@@ -64,9 +65,10 @@ def launch(
     service = plan.add_service(service_name, config)
     service_url = util.make_service_http_url(service)
 
-    observability.register_op_service_metrics_job(
-        observability_helper, service, network_params.network
-    )
+    if observability_params.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper, service, network_params.network
+        )
 
     return service_url
 
@@ -97,7 +99,7 @@ def get_batcher_config(
         "--rpc.addr=0.0.0.0",
         "--rpc.port=" + str(BATCHER_HTTP_PORT_NUM),
         "--rpc.enable-admin",
-        "--max-channel-duration=1",
+        "--max-channel-duration=" + str(batcher_params.max_channel_duration),
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
         "--private-key=" + gs_batcher_private_key,
         # da commitments currently have to be sent as calldata to the batcher inbox

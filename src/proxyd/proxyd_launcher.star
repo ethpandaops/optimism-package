@@ -41,6 +41,7 @@ def launch(
     network_params,
     el_contexts,
     observability_helper,
+    observability_params,
 ):
     config_template = read_file(CONFIG_TEMPLATE_FILEPATH)
 
@@ -62,9 +63,10 @@ def launch(
     service = plan.add_service("proxyd-{0}".format(network_params.network_id), config)
     service_url = util.make_service_http_url(service)
 
-    observability.register_op_service_metrics_job(
-        observability_helper, service, network_params.network
-    )
+    if observability_params.enabled:
+        observability.register_op_service_metrics_job(
+            observability_helper, service, network_params.network
+        )
 
     return service_url
 
@@ -125,7 +127,7 @@ def get_proxyd_config(
     cmd += proxyd_params.extra_params
 
     return ServiceConfig(
-        image="{0}:{1}".format(proxyd_params.image, proxyd_params.tag),
+        image=proxyd_params.image,
         ports=ports,
         cmd=cmd,
         files={

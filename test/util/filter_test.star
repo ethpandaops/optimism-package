@@ -72,3 +72,43 @@ def test_filter_remove_keys(plan):
         lambda: filter.remove_keys([], []),
         "Unsupported type for remove_keys: want dict, got list",
     )
+
+
+def test_filter_assert_keys(plan):
+    filter.assert_keys({}, [])
+    filter.assert_keys({}, ["key"])
+    filter.assert_keys({"key": "value"}, ["key"])
+    filter.assert_keys({"key": "value"}, ["key", "other"])
+
+    expect.fails(
+        lambda: filter.assert_keys({"key": True, "kee": None}, []),
+        "Invalid attributes specified: key,kee",
+    )
+    expect.fails(
+        lambda: filter.assert_keys({"kee": "value"}, ["key"]),
+        "Invalid attributes specified: kee",
+    )
+
+    expect.fails(
+        lambda: filter.assert_keys(
+            {"key": False}, [], "Invalid attributes in my little object: {}"
+        ),
+        "Invalid attributes in my little object: key",
+    )
+
+
+def test_filter_first(plan):
+    # With the default predicate
+    expect.eq(filter.first([]), None)
+    expect.eq(filter.first([None]), None)
+    expect.eq(filter.first([False]), None)
+    expect.eq(filter.first([[]]), None)
+
+    # With custom predicate
+    expect.eq(filter.first([1, 2, 3], lambda v: v == 2), 2)
+    expect.eq(filter.first([4, 5, 6], lambda v: v == 2), None)
+    expect.eq(filter.first([False], lambda v: v != None), False)
+    expect.eq(filter.first([[]], lambda v: v != None), [])
+
+    # With custom default
+    expect.eq(filter.first([False], default=4), 4)

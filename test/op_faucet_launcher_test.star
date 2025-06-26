@@ -9,7 +9,7 @@ constants = import_module("/src/package_io/constants.star")
 
 def test_launch_with_defaults(plan):
     """Test launching the op-faucet service with default parameters."""
-    faucet_image = input_parser.DEFAULT_FAUCET_IMAGES["op-faucet"]
+    faucet_image = "op-faucet:latest"
     service_name = "op-faucet"
 
     # Create test faucet data

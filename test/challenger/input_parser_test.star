@@ -19,7 +19,7 @@ def test_challenger_input_parser_no_participants(plan):
     expect.eq(input_parser.parse({"challenger": {"participants": []}}, _chains), [])
 
 
-def test_challenger_input_parser_extra_attrbites(plan):
+def test_challenger_input_parser_extra_attributes(plan):
     expect.fails(
         lambda: input_parser.parse({"challenger": {"extra": [], "name": ""}}, _chains),
         "Invalid attributes in challenger configuration for challenger: extra,name",
@@ -29,7 +29,7 @@ def test_challenger_input_parser_extra_attrbites(plan):
 def test_challenger_input_parser_default_args(plan):
     expected_params = struct(
         name="challenger",
-        service_name="op-challenger-challenger",
+        service_name="op-challenger-challenger-1000-2000",
         enabled=True,
         image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
         extra_params=[],

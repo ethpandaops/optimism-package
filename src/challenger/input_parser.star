@@ -1,5 +1,6 @@
 _expansion = import_module("/src/util/expansion.star")
 _filter = import_module("/src/util/filter.star")
+_id = import_module("/src/util/id.star")
 
 _DEFAULT_ARGS = {
     "enabled": True,
@@ -24,13 +25,15 @@ def parse(args, chains):
 
 def _parse_instance(challenger_args, challenger_name, chains):
     # Any extra attributes will cause an error
-    extra_keys = _filter.remove_keys(challenger_args, _DEFAULT_ARGS.keys())
-    if len(extra_keys) > 0:
-        fail(
-            "Invalid attributes in challenger configuration for {}: {}".format(
-                challenger_name, ",".join(extra_keys)
-            )
-        )
+    _filter.assert_keys(
+        challenger_args,
+        _DEFAULT_ARGS.keys(),
+        "Invalid attributes in challenger configuration for "
+        + challenger_name
+        + ": {}",
+    )
+
+    _id.assert_id(challenger_name)
 
     # We filter the None values so that we can merge dicts easily
     # and merge the config with the defaults
@@ -54,7 +57,10 @@ def _parse_instance(challenger_args, challenger_name, chains):
 
     # We add name & service name
     challenger_params["name"] = challenger_name
-    challenger_params["service_name"] = "op-challenger-{}".format(challenger_name)
+    challenger_params["service_name"] = "op-challenger-{}-{}".format(
+        challenger_name,
+        "-".join([str(p) for p in challenger_params["participants"]]),
+    )
 
     # Now we make sure to cover the prestate arg combinations
     #

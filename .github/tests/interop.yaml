@@ -1,6 +1,11 @@
 optimism_package:
-  interop:
-    enabled: true
+  superchains:
+    superchain-0:
+  supervisors:
+    supervisor-0: &x-supervisor
+      superchain: superchain-0
+    supervisor-1:
+      <<: *x-supervisor
   chains:
     - participants:
       - el_type: op-geth
