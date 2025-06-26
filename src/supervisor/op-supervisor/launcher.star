@@ -67,7 +67,7 @@ def _get_config(
         _observability.configure_op_service_metrics(cmd, ports)
 
     if params.pprof_enabled:
-        observability.configure_op_service_pprof(cmd, ports)
+        _observability.configure_op_service_pprof(cmd, ports)
 
     return ServiceConfig(
         image=params.image,
