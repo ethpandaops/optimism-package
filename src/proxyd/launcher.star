@@ -94,6 +94,9 @@ def get_service_config(
     if observability_helper.enabled:
         _observability.expose_metrics_port(ports, port_num=_METRICS_PORT_NUM)
 
+    if params.pprof_enabled:
+        observability.configure_op_service_pprof(cmd, ports)
+
     return ServiceConfig(
         image=params.image,
         ports=ports,
