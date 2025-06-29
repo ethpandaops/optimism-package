@@ -12,6 +12,8 @@ optimism_package:
           conductor_params:
             enabled: true
             bootstrap: true
+          mev_params:
+            enabled: true
         node1:
           sequencer: true
           el: 
@@ -21,6 +23,8 @@ optimism_package:
             log_level: debug
           conductor_params:
             enabled: true
+          mev_params:
+            enabled: true
         node2:
           sequencer: true
           el: 
@@ -29,6 +33,8 @@ optimism_package:
             type: op-node
             log_level: debug
           conductor_params:
+            enabled: true
+          mev_params:
             enabled: true
         node3:
           sequencer: "node0"
