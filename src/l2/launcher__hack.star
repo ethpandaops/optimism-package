@@ -52,11 +52,6 @@ def launch(
             participant_params=participant_params,
             network_params=network_params,
             supervisors_params=supervisors_params,
-            sidecar_context=original_launcher_output__hack.participants[
-                index_hack
-            ].sidecar.context
-            if original_launcher_output__hack.participants[index_hack].sidecar
-            else None,
             deployment_output=deployment_output,
             observability_helper=observability_helper,
             log_prefix=participant_log_prefix,
@@ -298,7 +293,6 @@ def _launch_conductor_maybe(
     participant_params,
     network_params,
     supervisors_params,
-    sidecar_context,
     deployment_output,
     observability_helper,
     log_prefix,
@@ -322,7 +316,7 @@ def _launch_conductor_maybe(
             params=participant_params.conductor_params,
             network_params=network_params,
             supervisors_params=supervisors_params,
-            sidecar_context=sidecar_context,
+            mev_params=participant_params.mev_params,
             deployment_output=deployment_output,
             el_params=participant_params.el,
             cl_params=participant_params.cl,
