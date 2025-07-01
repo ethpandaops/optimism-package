@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install mise
-        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
+        uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
 
       - name: Run Starlark
         run: kurtosis run ${{ github.workspace }} --verbosity detailed --args-file ${{ matrix.file_name }} || echo "TEST_FAILED=true" >> $GITHUB_ENV
@@ -61,7 +61,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install mise
-        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
+        uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
 
       - name: Deploy L1
         run: kurtosis run --enclave test --args-file ./.github/tests/external-l1/ethereum.yaml github.com/ethpandaops/ethereum-package
