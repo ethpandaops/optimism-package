@@ -138,10 +138,16 @@ def get_service_config(
     }
 
     if observability_helper.enabled:
-        _observability.configure_op_service_metrics(cmd, ports)
+        env_vars |= {
+            "OP_CONDUCTOR_METRICS_ADDR": "0.0.0.0",
+            "OP_CONDUCTOR_METRICS_ENABLED": "true",
+            "OP_CONDUCTOR_METRICS_PORT": str(_observability.METRICS_PORT_NUM),
+        }
 
-    if params.pprof_enabled:
-        _observability.configure_op_service_pprof(cmd, ports)
+        _observability.expose_metrics_port(ports)
+
+        if params.pprof_enabled:
+            _observability.configure_op_service_pprof_with_env(env_vars, ports)
 
     return ServiceConfig(
         image=params.image,

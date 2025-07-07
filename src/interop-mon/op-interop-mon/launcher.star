@@ -7,6 +7,7 @@ _net = import_module("/src/util/net.star")
 
 def launch(
     plan,
+    params,
     image,
     l2s,
     observability_helper,

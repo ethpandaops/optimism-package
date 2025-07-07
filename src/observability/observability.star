@@ -87,6 +87,14 @@ def configure_op_service_pprof(cmd, ports):
     expose_pprof_port(ports)
 
 
+def configure_op_service_pprof_with_env(env_vars, ports):
+    env_vars["OP_PPROF_ENABLED"] = "true"
+    env_vars["OP_PPROF_ADDR"] = "0.0.0.0"
+    env_vars["OP_PPROF_PORT"] = str(PPROF_PORT_NUM)
+
+    expose_pprof_port(ports)
+
+
 def make_helper(observability_params):
     return struct(
         params=observability_params,

@@ -322,7 +322,7 @@ def test_l2_participant_cl_launcher_op_node(plan):
             "--safedb.path=/data/op-node/op-node-beacon-data",
             "--altda.enabled=false",
             "--altda.da-server=",
-            "--metrics.enabled=true",
+            "--metrics.enabled",
             "--metrics.addr=0.0.0.0",
             "--metrics.port=9001",
             "--p2p.sequencer.key={}".format(sequencer_private_key_mock),
