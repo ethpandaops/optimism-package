@@ -175,6 +175,7 @@ def deploy_contracts(
             "superchainProxyAdminOwner": read_chain_cmd(
                 "l1ProxyAdmin", l2_chain_ids_list[0]
             ),
+            "challenger": read_chain_cmd("challenger", l2_chain_ids_list[0]),
         },
         "chains": [],
     }
