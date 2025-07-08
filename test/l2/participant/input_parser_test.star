@@ -84,6 +84,7 @@ def test_l2_participant_input_parser_defaults(plan):
                             number=9003, transport_protocol="UDP"
                         ),
                     },
+                    pprof_enabled=False,
                     **_shared_defaults,
                 ),
                 cl_builder=struct(
@@ -105,6 +106,7 @@ def test_l2_participant_input_parser_defaults(plan):
                             number=9003, transport_protocol="UDP"
                         ),
                     },
+                    pprof_enabled=False,
                     **_shared_defaults,
                 ),
                 el=struct(
@@ -179,6 +181,7 @@ def test_l2_participant_input_parser_defaults(plan):
                             number=9003, transport_protocol="UDP"
                         ),
                     },
+                    pprof_enabled=False,
                     **_shared_defaults,
                 ),
                 cl_builder=struct(
@@ -200,6 +203,7 @@ def test_l2_participant_input_parser_defaults(plan):
                             number=9003, transport_protocol="UDP"
                         ),
                     },
+                    pprof_enabled=False,
                     **_shared_defaults,
                 ),
                 el=struct(
@@ -303,6 +307,7 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
             proxy=True,
             paused=False,
             bootstrap=False,
+            pprof_enabled=False,
         ),
     )
 

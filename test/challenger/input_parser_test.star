@@ -46,6 +46,7 @@ def test_challenger_input_parser_default_args(plan):
         cannon_prestates_url="https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
         cannon_trace_types=[],
         datadir="/data/op-challenger/op-challenger-data",
+        pprof_enabled=False,
     )
 
     expect.eq(

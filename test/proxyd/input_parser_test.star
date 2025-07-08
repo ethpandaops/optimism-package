@@ -44,6 +44,7 @@ def test_proxyd_input_parser_default_args(plan):
             "op.network.id": "1000",
         },
         replicas={"node0": "http://op-el-node0:8888"},
+        pprof_enabled=False,
     )
 
     expect.eq(
@@ -105,6 +106,8 @@ def test_proxyd_input_parser_custom_params(plan):
                 "op.network.id": "1000",
             },
             replicas={"node0": "http://op-el-node0:8888"},
+            # pprof is disabled by default
+            pprof_enabled=False,
         ),
     )
 

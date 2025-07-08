@@ -215,6 +215,7 @@ def run(plan, args={}):
     if optimism_args.interop_mon and optimism_args.interop_mon.enabled:
         interop_mon.launch(
             plan=plan,
+            params=optimism_args.interop_mon,
             image=optimism_args.interop_mon.image,
             l2s=l2s,
             observability_helper=observability_helper,

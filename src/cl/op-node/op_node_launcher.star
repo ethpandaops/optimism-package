@@ -226,13 +226,10 @@ def get_beacon_config(
     # apply customizations
 
     if observability_helper.enabled:
-        cmd += [
-            "--metrics.enabled=true",
-            "--metrics.addr=0.0.0.0",
-            "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
-        ]
+        observability.configure_op_service_metrics(cmd, ports)
 
-        observability.expose_metrics_port(ports)
+    if params.pprof_enabled:
+        observability.configure_op_service_pprof(cmd, ports)
 
     if supervisor_params:
         interop_rpc_port = supervisor_params.superchain.ports[

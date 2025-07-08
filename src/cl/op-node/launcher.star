@@ -225,13 +225,10 @@ def get_service_config(
     # apply customizations
 
     if observability_helper.enabled:
-        cmd += [
-            "--metrics.enabled=true",
-            "--metrics.addr=0.0.0.0",
-            "--metrics.port={0}".format(_observability.METRICS_PORT_NUM),
-        ]
+        _observability.configure_op_service_metrics(cmd, ports)
 
-        _observability.expose_metrics_port(ports)
+    if params.pprof_enabled:
+        _observability.configure_op_service_pprof(cmd, ports)
 
     if supervisor_params:
         interop_rpc_port = supervisor_params.superchain.ports[

@@ -35,6 +35,7 @@ def test_proposer_input_parser_default_args(plan):
             "op.kind": "proposer",
             "op.network.id": "1000",
         },
+        pprof_enabled=False,
     )
 
     expect.eq(
@@ -97,6 +98,7 @@ def test_proposer_input_parser_custom_params(plan):
                 "op.kind": "proposer",
                 "op.network.id": "1000",
             },
+            pprof_enabled=False,
         ),
     )
 

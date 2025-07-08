@@ -67,6 +67,7 @@ def test_conductor_input_parser_default_args_enabled(plan):
         proxy=True,
         paused=False,
         bootstrap=False,
+        pprof_enabled=False,
     )
 
     expect.eq(
@@ -119,6 +120,7 @@ def test_conductor_input_parser_custom_params(plan):
             proxy=True,
             paused=False,
             bootstrap=False,
+            pprof_enabled=False,
         ),
     )
 

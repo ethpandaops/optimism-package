@@ -33,6 +33,7 @@ def test_batcher_input_parser_default_args(plan):
             "op.kind": "batcher",
             "op.network.id": "1000",
         },
+        pprof_enabled=False,
     )
 
     expect.eq(
@@ -89,6 +90,7 @@ def test_batcher_input_parser_custom_params(plan):
                 "op.kind": "batcher",
                 "op.network.id": "1000",
             },
+            pprof_enabled=False,
         ),
     )
 
