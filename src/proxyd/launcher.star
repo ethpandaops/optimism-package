@@ -92,7 +92,7 @@ def get_service_config(
     # apply customizations
 
     if observability_helper.enabled:
-        _observability.expose_metrics_port(ports)
+        _observability.expose_http_port(ports,"metrics", _METRICS_PORT_NUM)
 
     if params.pprof_enabled:
         _observability.configure_op_service_pprof(cmd, ports)
