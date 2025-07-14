@@ -62,13 +62,6 @@ def launch(
             log_prefix=participant_log_prefix,
         )
 
-    # We now bootstrap the conductor cluster
-    _op_conductor_ops_launcher.launch(
-        plan=plan,
-        l2_params=params,
-        registry=registry,
-    )
-
     # We get a list of sequencers to be used with batcher & proposer
     sequencers_params = _selectors.get_sequencers_params(params.participants)
 
@@ -95,6 +88,13 @@ def launch(
         l1_config_env_vars=l1_config_env_vars,
         log_prefix=network_log_prefix,
         observability_helper=observability_helper,
+    )
+
+    # We now bootstrap the conductor cluster
+    _op_conductor_ops_launcher.launch(
+        plan=plan,
+        l2_params=params,
+        registry=registry,
     )
 
     _launch_proxyd_maybe(
