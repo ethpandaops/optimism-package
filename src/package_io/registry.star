@@ -64,7 +64,7 @@ _DEFAULT_IMAGES = {
     # Proposer
     OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
     # Conductor
-    OP_CONDUCTOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:v0.7.0",
+    OP_CONDUCTOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:v0.7.1",
     # deployer
     OP_DEPLOYER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2",
     # Faucet

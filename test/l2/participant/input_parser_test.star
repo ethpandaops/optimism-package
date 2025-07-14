@@ -286,7 +286,7 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
         struct(
             enabled=True,
             extra_params=[],
-            image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:v0.7.0",
+            image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:v0.7.1",
             labels={
                 "op.kind": "conductor",
                 "op.network.id": "1000",
