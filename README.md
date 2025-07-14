@@ -169,7 +169,7 @@ optimism_package:
       superchain: superchain-a
 
       # The Docker image that should be used for the supervisor; leave blank to use the default op-supervisor image
-      image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop"
+      image: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:v1.9.4"
 
       # Optional list of CLI arguments that will be passed to the op-supervisor command for modifying its behaviour
       extra_params: []
