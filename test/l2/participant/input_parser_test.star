@@ -67,7 +67,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 sequencer="node0",
                 cl=struct(
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
                     name="node0",
                     service_name="op-cl-1000-node0-op-node",
                     labels={
@@ -89,7 +89,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 cl_builder=struct(
                     name="node0",
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
                     service_name="op-clbuilder-1000-node0-op-node",
                     labels={
                         "op.kind": "clbuilder",
@@ -163,7 +163,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 cl=struct(
                     name="node1",
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
                     service_name="op-cl-1000-node1-op-node",
                     labels={
                         "op.kind": "cl",
@@ -184,7 +184,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 cl_builder=struct(
                     name="node1",
                     type="op-node",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
                     service_name="op-clbuilder-1000-node1-op-node",
                     labels={
                         "op.kind": "clbuilder",
@@ -286,7 +286,7 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
         struct(
             enabled=True,
             extra_params=[],
-            image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:develop",
+            image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:v0.7.1",
             labels={
                 "op.kind": "conductor",
                 "op.network.id": "1000",

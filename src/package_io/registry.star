@@ -50,21 +50,21 @@ _DEFAULT_IMAGES = {
     OP_BESU: "ghcr.io/optimism-java/op-besu:latest",
     OP_RBUILDER: "ghcr.io/flashbots/op-rbuilder:latest",
     # CL images
-    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3",
+    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
     KONA_NODE: "ghcr.io/op-rs/kona/kona-node:latest",
     HILDR: "ghcr.io/optimism-java/hildr:latest",
     # Batching
-    OP_BATCHER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
+    OP_BATCHER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.14.0",
     # Challenger
-    OP_CHALLENGER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
+    OP_CHALLENGER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:v1.5.1",
     # op-supervisor
-    OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+    OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:v0.3.0-dev.4",
     # kona-supervisor
     KONA_SUPERVISOR: "ghcr.io/op-rs/kona/kona-supervisor:latest",
     # Proposer
-    OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
+    OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:v1.10.0",
     # Conductor
-    OP_CONDUCTOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:develop",
+    OP_CONDUCTOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:v0.7.1",
     # deployer
     OP_DEPLOYER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2",
     # Faucet
