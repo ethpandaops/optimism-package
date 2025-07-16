@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.4.0](https://github.com/ethpandaops/optimism-package/compare/1.3.0...1.4.0) (2025-07-16)
+
+
+### Features
+
+* add challenger to superchain role ([#350](https://github.com/ethpandaops/optimism-package/issues/350)) ([011513f](https://github.com/ethpandaops/optimism-package/commit/011513f7a420befce41861dd046d64ebd685ac19))
+* Update `kona-node` sequencer flags ([#354](https://github.com/ethpandaops/optimism-package/issues/354)) ([6e84d23](https://github.com/ethpandaops/optimism-package/commit/6e84d233c096c4a9768b6af62c2aff96c16843cc))
+
+
+### Bug Fixes
+
+* Failing CI after conductor image update ([#356](https://github.com/ethpandaops/optimism-package/issues/356)) ([2f87a9b](https://github.com/ethpandaops/optimism-package/commit/2f87a9b2fd226caf533a7348c50d58d5c9b23618))
+* kona supervisor cmd ([#343](https://github.com/ethpandaops/optimism-package/issues/343)) ([112d48d](https://github.com/ethpandaops/optimism-package/commit/112d48d94a138644d99adf76b607b27ff86a31a4))
+* **launcher/kona:** fix the kona node launcher ([#348](https://github.com/ethpandaops/optimism-package/issues/348)) ([dfc94bd](https://github.com/ethpandaops/optimism-package/commit/dfc94bda4f4e3deb0531859b875149efd4bb60af))
+* **op-faucet:** loosen expectation on network_id type ([#345](https://github.com/ethpandaops/optimism-package/issues/345)) ([e43f71d](https://github.com/ethpandaops/optimism-package/commit/e43f71d46d7ed59083e659d1530af74ceed7e3b7))
+
 ## [1.3.0](https://github.com/ethpandaops/optimism-package/compare/1.2.0...1.3.0) (2025-06-17)
 
 
