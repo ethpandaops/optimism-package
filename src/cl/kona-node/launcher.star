@@ -248,8 +248,8 @@ def get_service_config(
         )
 
         cmd += [
+            "--mode=sequencer",
             "--p2p.sequencer.key=" + sequencer_private_key,
-            "--sequencer.enabled",
             "--sequencer.l1-confs=2",
         ]
 
