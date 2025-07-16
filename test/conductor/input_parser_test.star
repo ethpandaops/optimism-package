@@ -50,7 +50,7 @@ def test_conductor_input_parser_default_args_enabled(plan):
     _default_params = struct(
         enabled=True,
         extra_params=[],
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:develop",
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:v0.7.1",
         labels={
             "op.kind": "conductor",
             "op.network.id": "1000",

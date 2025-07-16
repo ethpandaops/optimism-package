@@ -70,7 +70,7 @@ def test_l2_input_parser_defaults(plan):
 
     _default_batcher_params = struct(
         extra_params=[],
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.14.0",
         ports={
             _net.HTTP_PORT_NAME: _net.port(number=8548),
         },
@@ -84,7 +84,7 @@ def test_l2_input_parser_defaults(plan):
     _default_proposer_params = struct(
         extra_params=[],
         game_type=1,
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:v1.10.0",
         ports={
             _net.HTTP_PORT_NAME: _net.port(number=8560),
         },
