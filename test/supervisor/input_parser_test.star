@@ -11,7 +11,7 @@ _superchains = [
 
 _default_supervisor = struct(
     extra_params=[],
-    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:v0.3.0-dev.4",
     name="supervisor",
     ports={
         "rpc": _net.port(
@@ -86,7 +86,7 @@ def test_supervisor_input_parser_default_args(plan):
             struct(
                 enabled=True,
                 extra_params=[],
-                image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+                image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:v0.3.0-dev.4",
                 labels={
                     "op.kind": "supervisor",
                     "op.supervisor.type": "op-supervisor",

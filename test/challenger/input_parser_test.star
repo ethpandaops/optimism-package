@@ -38,7 +38,7 @@ def test_challenger_input_parser_default_args(plan):
         name="challenger",
         service_name="op-challenger-challenger-1000-2000",
         enabled=True,
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:v1.5.1",
         labels={"op.kind": "challenger", "op.network.id": "1000-2000"},
         extra_params=[],
         participants=[1000, 2000],

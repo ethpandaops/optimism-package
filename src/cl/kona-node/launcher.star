@@ -230,15 +230,6 @@ def get_service_config(
 
     # apply customizations
 
-    if observability_helper.enabled:
-        cmd += [
-            "--metrics.enabled=true",
-            "--metrics.addr=0.0.0.0",
-            "--metrics.port={0}".format(_observability.METRICS_PORT_NUM),
-        ]
-
-        _observability.expose_metrics_port(ports)
-
     if is_sequencer:
         sequencer_private_key = _util.read_network_config_value(
             plan,
@@ -248,8 +239,8 @@ def get_service_config(
         )
 
         cmd += [
+            "--mode=sequencer",
             "--p2p.sequencer.key=" + sequencer_private_key,
-            "--sequencer.enabled",
             "--sequencer.l1-confs=2",
         ]
 
