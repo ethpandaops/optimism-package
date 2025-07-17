@@ -6,8 +6,10 @@ FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806
 
 FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
-utils = import_module("../util.star")
+_utils = import_module("../util.star")
 _filter = import_module("../util/filter.star")
+_registry = import_module("/src/package_io/registry.star")
+_file = import_module("/src/util/file.star")
 
 ethereum_package_genesis_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
@@ -72,7 +74,7 @@ def _normalize_artifacts_locators(plan, l1_locator, l2_locator):
 
 
 def deploy_contracts(
-    plan, priv_key, l1_config_env_vars, optimism_args, l1_network, altda_args
+    plan, priv_key, l1_config_env_vars, optimism_args, l1_network, altda_args, registry
 ):
     l2_chain_ids_list = [
         str(chain.network_params.network_id) for chain in optimism_args.chains
@@ -116,10 +118,11 @@ def deploy_contracts(
         name="op-deployer-fund-script",
     )
 
+    # fund wallets
     plan.run_sh(
         name="op-deployer-fund",
         description="Collect keys, and fund addresses",
-        image=utils.DEPLOYMENT_UTILS_IMAGE,
+        image=_utils.DEPLOYMENT_UTILS_IMAGE,
         env_vars={
             "DEPLOYER_PRIVATE_KEY": priv_key,
             "FUND_PRIVATE_KEY": ethereum_package_genesis_constants.PRE_FUNDED_ACCOUNTS[
@@ -141,6 +144,101 @@ def deploy_contracts(
         },
         run='bash /fund-script/fund.sh "{0}"'.format(l2_chain_ids),
     )
+
+    apply_files = {
+        "/network-data": op_deployer_init.files_artifacts[0],
+    }
+
+    # deploy safes if necessary
+    safes_params = optimism_args.op_contract_deployer_params.safes
+
+    if safes_params.enabled:
+        roles = {}
+        for name, spec in safes_params.roles.items():
+            parts = spec.split(":")
+            threshold = int(parts[0])
+            num_owners = int(parts[1])
+            owners = [
+                ethereum_package_genesis_constants.PRE_FUNDED_ACCOUNTS[i].address
+                for i in range(num_owners)
+            ]
+            roles[name] = {
+                "threshold": threshold,
+                "owners": owners,
+            }
+
+        safe_utils_image = safes_params.image
+        pk = priv_key
+        node_url = l1_config_env_vars["L1_RPC_URL"]
+        mount_point = "/safes-data"
+        contracts_path = "{0}/contracts.json".format(mount_point)
+        safes_path = "{0}/safes.json".format(mount_point)
+        roles_path = "/roles/roles.json"
+
+        # first deploy the contracts if need be
+        safe = plan.run_sh(
+            name="op-deployer-deploy-safe-contracts",
+            description="Deploy safe contracts",
+            image=safe_utils_image,
+            store=[
+                StoreSpec(
+                    src=mount_point,
+                    name="safe-utils-data",
+                )
+            ],
+            env_vars={
+                "PK": pk,
+                "NODE_URL": node_url,
+                "OUTPUT": contracts_path,
+            },
+            run=" && ".join(
+                [
+                    "mkdir -p {0}".format(mount_point),
+                    "/deploy_contracts.sh",
+                ]
+            ),
+        )
+
+        # then create the roles spec file
+        roles_spec = _file.from_string(
+            plan,
+            "/roles.json",
+            json.encode(roles),
+            "op-deployer-roles-spec",
+            "Rendered roles spec",
+        )
+
+        # then create the safes
+        plan.run_sh(
+            name="op-deployer-deploy-safes",
+            description="Deploy safes",
+            image=safe_utils_image,
+            env_vars={
+                "PK": pk,
+                "NODE_URL": node_url,
+                "CONTRACTS_JSON": contracts_path,
+                "ROLES_JSON": roles_path,
+                "OUTPUT": safes_path,
+            },
+            files={
+                mount_point: safe.files_artifacts[0],
+                "/roles": roles_spec,
+            },
+            store=[
+                StoreSpec(
+                    src=mount_point,
+                    name="safe-utils-data",
+                )
+            ],
+            run=" && ".join(
+                [
+                    "mkdir -p {0}".format(mount_point),
+                    "/provision_wallets.sh",
+                ]
+            ),
+        )
+
+        apply_files[mount_point] = safe.files_artifacts[0]
 
     hardfork_schedule = []
     for index, chain in enumerate(optimism_args.chains):
@@ -168,14 +266,25 @@ def deploy_contracts(
         "l1ContractsLocator": l1_artifacts_locator,
         "l2ContractsLocator": l2_artifacts_locator,
         "superchainRoles": {
-            "superchainGuardian": read_chain_cmd("l1ProxyAdmin", l2_chain_ids_list[0]),
-            "protocolVersionsOwner": read_chain_cmd(
-                "l1ProxyAdmin", l2_chain_ids_list[0]
+            "superchainGuardian": _read_chain_cmd(
+                role="superchainGuardian",
+                fallback="l1ProxyAdmin",
+                chain_id=l2_chain_ids_list[0],
             ),
-            "superchainProxyAdminOwner": read_chain_cmd(
-                "l1ProxyAdmin", l2_chain_ids_list[0]
+            "protocolVersionsOwner": _read_chain_cmd(
+                role="protocolVersionsOwner",
+                fallback="l1ProxyAdmin",
+                chain_id=l2_chain_ids_list[0],
             ),
-            "challenger": read_chain_cmd("challenger", l2_chain_ids_list[0]),
+            "superchainProxyAdminOwner": _read_chain_cmd(
+                role="superchainProxyAdminOwner",
+                fallback="l1ProxyAdmin",
+                chain_id=l2_chain_ids_list[0],
+            ),
+            "challenger": _read_chain_cmd(
+                role="challenger",
+                chain_id=l2_chain_ids_list[0],
+            ),
         },
         "chains": [],
     }
@@ -207,21 +316,37 @@ def deploy_contracts(
                         True if chain.network_params.fund_dev_accounts else False
                     ),
                 },
-                "baseFeeVaultRecipient": read_chain_cmd(
-                    "baseFeeVaultRecipient", chain_id
+                "baseFeeVaultRecipient": _read_chain_cmd(
+                    role="baseFeeVaultRecipient", chain_id=chain_id
                 ),
-                "l1FeeVaultRecipient": read_chain_cmd("l1FeeVaultRecipient", chain_id),
-                "sequencerFeeVaultRecipient": read_chain_cmd(
-                    "sequencerFeeVaultRecipient", chain_id
+                "l1FeeVaultRecipient": _read_chain_cmd(
+                    role="l1FeeVaultRecipient", chain_id=chain_id
+                ),
+                "sequencerFeeVaultRecipient": _read_chain_cmd(
+                    role="sequencerFeeVaultRecipient", chain_id=chain_id
                 ),
                 "roles": {
-                    "batcher": read_chain_cmd("batcher", chain_id),
-                    "challenger": read_chain_cmd("challenger", chain_id),
-                    "l1ProxyAdminOwner": read_chain_cmd("l1ProxyAdmin", chain_id),
-                    "l2ProxyAdminOwner": read_chain_cmd("l2ProxyAdmin", chain_id),
-                    "proposer": read_chain_cmd("proposer", chain_id),
-                    "systemConfigOwner": read_chain_cmd("systemConfigOwner", chain_id),
-                    "unsafeBlockSigner": read_chain_cmd("sequencer", chain_id),
+                    "batcher": _read_chain_cmd(role="batcher", chain_id=chain_id),
+                    "challenger": _read_chain_cmd(role="challenger", chain_id=chain_id),
+                    "l1ProxyAdminOwner": _read_chain_cmd(
+                        role="l1ProxyAdminOwner",
+                        fallback="l1ProxyAdmin",
+                        chain_id=chain_id,
+                    ),
+                    "l2ProxyAdminOwner": _read_chain_cmd(
+                        role="l2ProxyAdminOwner",
+                        fallback="l2ProxyAdmin",
+                        chain_id=chain_id,
+                    ),
+                    "proposer": _read_chain_cmd(role="proposer", chain_id=chain_id),
+                    "systemConfigOwner": _read_chain_cmd(
+                        role="systemConfigOwner", chain_id=chain_id
+                    ),
+                    "unsafeBlockSigner": _read_chain_cmd(
+                        role="unsafeBlockSigner",
+                        fallback="sequencer",
+                        chain_id=chain_id,
+                    ),
                 },
                 "dangerousAdditionalDisputeGames": [
                     {
@@ -253,22 +378,23 @@ def deploy_contracts(
         intent["chains"].append(intent_chain)
 
     intent_json = json.encode(intent)
-    intent_json_artifact = utils.write_to_file(plan, intent_json, "/tmp", "intent.json")
+    intent_json_artifact = _utils.write_to_file(
+        plan, intent_json, "/tmp", "intent.json"
+    )
+
+    apply_files["/tmp"] = intent_json_artifact
 
     op_deployer_configure = plan.run_sh(
         name="op-deployer-configure",
         description="Configure L2 contract deployments",
-        image=utils.DEPLOYMENT_UTILS_IMAGE,
+        image=_utils.DEPLOYMENT_UTILS_IMAGE,
         store=[
             StoreSpec(
                 src="/network-data",
                 name="op-deployer-configs",
             )
         ],
-        files={
-            "/network-data": op_deployer_init.files_artifacts[0],
-            "/tmp": intent_json_artifact,
-        },
+        files=apply_files,
         run=" && ".join(
             [
                 # zhwrd: this mess is temporary until we implement json reading for op-deployer intent file
@@ -328,7 +454,7 @@ def deploy_contracts(
         plan.run_sh(
             name="op-deployer-generate-chainspec",
             description="Generate chainspec",
-            image=utils.DEPLOYMENT_UTILS_IMAGE,
+            image=_utils.DEPLOYMENT_UTILS_IMAGE,
             env_vars={"CHAIN_ID": str(chain.network_params.network_id)},
             store=[
                 StoreSpec(
@@ -350,5 +476,9 @@ def chain_key(index, key):
     return "chains.[{0}].{1}".format(index, key)
 
 
-def read_chain_cmd(filename, l2_chain_id):
-    return "`jq -r .address /network-data/{0}-{1}.json`".format(filename, l2_chain_id)
+def _read_chain_cmd(role, chain_id, fallback=None):
+    # if the role is in the safes.json file, use it
+    # otherwise, read the fallback from the network-data file
+    return "`jq -e -r .{0} /safes-data/safes.json 2>/dev/null | grep -v null || jq -e -r .address /network-data/{1}-{2}.json`".format(
+        role, fallback or role, chain_id
+    )
