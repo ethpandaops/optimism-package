@@ -1,12 +1,7 @@
-ENVRC_PATH = "/workspace/optimism/.envrc"
-FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
-FACTORY_ADDRESS = "0x4e59b44847b379578588920cA78FbF26c0B4956C"
-# raw tx data for deploying Create2Factory contract to L1
-FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222"
-
 FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
 utils = import_module("../util.star")
+_artifacts = import_module("./artifacts.star")
 _filter = import_module("../util/filter.star")
 
 ethereum_package_genesis_constants = import_module(
@@ -18,57 +13,6 @@ CANNED_VALUES = {
     "eip1559DenominatorCanyon": 250,
     "eip1559Elasticity": 6,
 }
-
-
-def _normalize_artifacts_locator(locator):
-    """Transform artifact locator from 'artifact://NAME' format to (name, file_path) pair.
-
-    If the locator doesn't use the artifact:// format, returns (None, original_locator).
-
-    Args:
-        locator: The original artifact locator string
-
-    Returns:
-        tuple: (artifact_name, normalized_locator, mount_point)
-    """
-    if locator and locator.startswith("artifact://"):
-        artifact_name = locator[len("artifact://") :]
-        mount_point = "/{0}".format(artifact_name)
-        return (artifact_name, "file://{0}".format(mount_point), mount_point)
-    return (None, locator, None)
-
-
-def _normalize_artifacts_locators(plan, l1_locator, l2_locator):
-    """Normalize artifact locators with specific mount points.
-
-    Args:
-        plan: The plan object
-        l1_locator: The L1 artifact locator
-        l2_locator: The L2 artifact locator
-
-    Returns:
-        tuple: (l1_artifacts_locator, l2_artifacts_locator, extra_files)
-    """
-    (
-        l1_artifact_name,
-        l1_artifacts_locator,
-        l1_mount_point,
-    ) = _normalize_artifacts_locator(l1_locator)
-    (
-        l2_artifact_name,
-        l2_artifacts_locator,
-        l2_mount_point,
-    ) = _normalize_artifacts_locator(l2_locator)
-
-    extra_files = {}
-    if l1_mount_point:
-        extra_files[l1_mount_point] = plan.get_files_artifact(name=l1_artifact_name)
-    if (
-        l2_mount_point and l2_mount_point not in extra_files
-    ):  # shortcut if both are the same
-        extra_files[l2_mount_point] = plan.get_files_artifact(name=l2_artifact_name)
-
-    return l1_artifacts_locator, l2_artifacts_locator, extra_files
 
 
 def deploy_contracts(
@@ -105,7 +49,7 @@ def deploy_contracts(
         l1_artifacts_locator,
         l2_artifacts_locator,
         contracts_extra_files,
-    ) = _normalize_artifacts_locators(
+    ) = _artifacts.normalize_locators(
         plan,
         optimism_args.op_contract_deployer_params.l1_artifacts_locator,
         optimism_args.op_contract_deployer_params.l2_artifacts_locator,
