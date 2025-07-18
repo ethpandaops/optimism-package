@@ -5,6 +5,7 @@ _registry = import_module("/src/package_io/registry.star")
 _DEFAULT_ARGS = {
     "image": None,
     "extra_params": [],
+    "pprof_enabled": False,
 }
 
 

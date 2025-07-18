@@ -101,6 +101,7 @@ def test_supervisor_input_parser_default_args(plan):
                 service_name="op-supervisor-supervisor0-superchain0",
                 superchain=_superchains[0],
                 type="op-supervisor",
+                pprof_enabled=False,
             ),
         ],
     )
