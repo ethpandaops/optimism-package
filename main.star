@@ -315,7 +315,7 @@ def _launch_opcm_migrate_maybe(
     deployment_output,
 ):
     if l2_params.migration_params:
-        log_prefix = "L2 network {}".format(l2_params.name)
+        log_prefix = "L2 network {}".format(l2_params.network_params.name)
 
         plan.print("{}: Running interop migration".format(log_prefix))
 
