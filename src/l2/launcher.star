@@ -180,6 +180,7 @@ def launch(
         da=da,
     )
 
+
 def _launch_opcm_migrate_maybe(plan, migration_params, deployment_output, log_prefix):
     if migration_params:
         plan.print("{}: Running interop migration".format(log_prefix))
