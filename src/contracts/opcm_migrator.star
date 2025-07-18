@@ -14,6 +14,7 @@ def launch(
     network_id,
     l1_config_env_vars,
     op_contract_deployer_params,
+    migration_params,
 ):
     # Normalize the L2 artifacts locator
     l2_artifacts_locator = _artifacts.normalize_locator(
@@ -64,21 +65,20 @@ def launch(
             "DEPLOYER_CACHE_DIR": "/op-deployer/cache",
             "DEPLOYER_PRIVATE_KEY": priv_key,
             "DEPLOYER_ARTIFACTS_LOCATOR": l2_artifacts_locator,
-            "DEPLOYER_PROXY_ADMIN_OWNER": "FIXME",  # Coming from the deployment output
             "DEPLOYER_OPCM_IMPL_ADDRESS": "FIXME",  # Coming from the deployment output
-            "DEPLOYER_PERMISSIONED": "FIXME",  # Coming from the args file
-            "DEPLOYER_STARTING_ANCHOR_ROOT": "FIXME",  # Coming from the args file
-            "DEPLOYER_STARTING_ANCHOR_L2_SEQUENCE_NUMBER": "FIXME",  # Coming from the args file
+            "DEPLOYER_PERMISSIONED": migration_params.permissionless,  # This is a bit of a mindfuck since the flag in the go code is called permissionless but the env variable is permissioned
+            "DEPLOYER_STARTING_ANCHOR_ROOT": migration_params.starting_anchor_root,
+            "DEPLOYER_STARTING_ANCHOR_L2_SEQUENCE_NUMBER": migration_params.starting_anchor_l2_sequence_number,
             "DEPLOYER_PROPOSER_ADDRESS": "FIXME",  # Coming from the deployment output
             "DEPLOYER_CHALLENGER_ADDRESS": "FIXME",  # Coming from the deployment output
-            "DEPLOYER_DISPUTE_MAX_GAME_DEPTH": "FIXME",  # Coming from the args file
-            "DEPLOYER_DISPUTE_SPLIT_DEPTH": "FIXME",  # Coming from the args file
-            "DEPLOYER_INITIAL_BOND": "FIXME",  # Coming from the args file
-            "DEPLOYER_DISPUTE_CLOCK_EXTENSION": "FIXME",  # Coming from the args file
-            "DEPLOYER_DISPUTE_MAX_CLOCK_DURATION": "FIXME",  # Coming from the args file
+            "DEPLOYER_DISPUTE_MAX_GAME_DEPTH": migration_params.dispute_max_game_depth,
+            "DEPLOYER_DISPUTE_SPLIT_DEPTH": migration_params.dispute_split_depth,
+            "DEPLOYER_DISPUTE_MAX_CLOCK_DURATION": migration_params.dispute_max_clock_duration,
+            "DEPLOYER_DISPUTE_CLOCK_EXTENSION": migration_params.dispute_clock_extension,
+            "DEPLOYER_DISPUTE_ABSOLUTE_PRESTATE": migration_params.dispute_absolute_prestate,
+            "DEPLOYER_INITIAL_BOND": migration_params.initial_bond,
             "DEPLOYER_SYSTEM_CONFIG_PROXY_ADDRESS": system_config_proxy_address,
             "DEPLOYER_OP_CHAIN_PROXY_ADMIN_ADDRESS": proxy_admin_address,
-            "DEPLOYER_DISPUTE_ABSOLUTE_PRESTATE": "FIXME",  # Coming from the args file
             "L1_RPC_URL": l1_config_env_vars["L1_RPC_URL"],
         },
         run="op-deployer manage migrate > /op-deployer/output.json",
