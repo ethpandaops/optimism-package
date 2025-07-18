@@ -166,35 +166,12 @@ def launch(
             )
         )
 
-    deployment_output = _launch_opcm_migrate_maybe(
-        plan=plan,
-        migration_params=params.migration_params,
-        deployment_output=deployment_output,
-        log_prefix=network_log_prefix,
-    )
-
     return struct(
         name=network_params.name,
         network_id=network_params.network_id,
         participants=participants,
         da=da,
     )
-
-
-def _launch_opcm_migrate_maybe(plan, migration_params, deployment_output, log_prefix):
-    if migration_params:
-        plan.print("{}: Running interop migration".format(log_prefix))
-
-        deployment_output = _opcm_migration_launcher.launch(
-            plan=plan,
-            params=migration_params,
-        )
-
-        plan.print("{}: Successfully ran interop migration".format(log_prefix))
-
-        return deployment_output
-
-    return deployment_output
 
 
 def _launch_da_maybe(plan, da_params, log_prefix):

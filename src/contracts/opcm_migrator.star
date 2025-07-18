@@ -9,7 +9,7 @@ ethereum_package_genesis_constants = import_module(
 
 def launch(
     plan,
-    priv_key,
+    l1_priv_key,
     deployment_output,
     network_id,
     l1_config_env_vars,
@@ -63,7 +63,7 @@ def launch(
         env_vars={
             # We supply the command args as env variables (just because we can use a nice dict instead of string interpolation)
             "DEPLOYER_CACHE_DIR": "/op-deployer/cache",
-            "DEPLOYER_PRIVATE_KEY": priv_key,
+            "DEPLOYER_PRIVATE_KEY": l1_priv_key,
             "DEPLOYER_ARTIFACTS_LOCATOR": l2_artifacts_locator,
             "DEPLOYER_OPCM_IMPL_ADDRESS": "FIXME",  # Coming from the deployment output
             "DEPLOYER_PERMISSIONED": migration_params.permissionless,  # This is a bit of a mindfuck since the flag in the go code is called permissionless but the env variable is permissioned

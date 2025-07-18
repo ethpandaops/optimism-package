@@ -2,6 +2,7 @@ ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.s
 contract_deployer = import_module("./src/contracts/contract_deployer.star")
 _l2_launcher = import_module("./src/l2/launcher.star")
 _l2_launcher__hack = import_module("./src/l2/launcher__hack.star")
+_opcm_migration_launcher = import_module("./src/contracts/opcm_migrator.star")
 superchain_launcher = import_module("./src/superchain/launcher.star")
 supervisor_launcher = import_module("./src/supervisor/launcher.star")
 op_challenger_launcher = import_module("./src/challenger/op-challenger/launcher.star")
@@ -150,6 +151,30 @@ def run(plan, args={}):
             )
         )
 
+        # Now we want to run the OPCM.migrate
+        #
+        # This needs to be done once the network is live but before we launch the challengers
+        # which complicates our launch sequence even more.
+        #
+        # On top of this, the migration changes the dispute game factory address
+        # which now needs to be modified in the deployment output. Alternative to this,
+        # we could pass the dispute game factory address as an individual parameter to the challenger and proposer launchers
+        # (instead of them reading the value from the deployment output). That way we would read the value
+        # somewhere around here, then overwrite it with the output of the OPCM.migration.
+        #
+        # FIXME Decide whether to:
+        #
+        # - A) Overwrite the dispute game factory address in the deployment output when running the OPCM.migrate
+        # - B) Only return the dispute game factory address from the OPCM.migrate and pass it to the challenger and proposer launchers
+        deployment_output = _launch_opcm_migrate_maybe(
+            plan=plan,
+            deployment_output=deployment_output,
+            l1_priv_key=l1_priv_key,
+            l1_config_env_vars=l1_config_env_vars,
+            op_contract_deployer_params=optimism_args.op_contract_deployer_params,
+            l2_params=l2_params,
+        )
+
     for supervisor_params in optimism_args.supervisors:
         supervisor_launcher.launch(
             plan=plan,
@@ -279,3 +304,36 @@ def _install_faucet(
         faucet_params.image or registry.get(_registry.OP_FAUCET),
         faucets,
     )
+
+
+def _launch_opcm_migrate_maybe(
+    plan,
+    l1_priv_key,
+    l1_config_env_vars,
+    op_contract_deployer_params,
+    l2_params,
+    deployment_output,
+):
+    if l2_params.migration_params:
+        log_prefix = "L2 network {}".format(l2_params.name)
+
+        plan.print("{}: Running interop migration".format(log_prefix))
+
+        # We now modify the deployment output
+        #
+        # See the comment above for the alternative
+        deployment_output = _opcm_migration_launcher.launch(
+            plan=plan,
+            l1_priv_key=l1_priv_key,
+            l1_config_env_vars=l1_config_env_vars,
+            deployment_output=deployment_output,
+            network_id=l2_params.network_params.network_id,
+            op_contract_deployer_params=op_contract_deployer_params,
+            migration_params=l2_params.migration_params,
+        )
+
+        plan.print("{}: Successfully ran interop migration".format(log_prefix))
+
+        return deployment_output
+
+    return deployment_output
