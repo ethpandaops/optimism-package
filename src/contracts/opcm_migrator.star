@@ -50,7 +50,6 @@ def launch(
         name="op-deployer-opcm-migrate",
         description="Run OPCM.migrate",
         image=op_contract_deployer_params.image,
-        env_vars=l1_config_env_vars,
         files={
             # We need to supply the original op-deployer deployment output since we'll need some of the addresses
             "/op-deployer/data": deployment_output,
