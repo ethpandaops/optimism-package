@@ -53,6 +53,7 @@ def launch(
     jwt_file,
     deployment_output,
     is_sequencer,
+    conductor_params,
     log_level,
     persistent,
     tolerations,
@@ -94,6 +95,7 @@ def launch(
         jwt_file=jwt_file,
         deployment_output=deployment_output,
         is_sequencer=is_sequencer,
+        conductor_params=conductor_params,
         beacon_node_identity_recipe=beacon_node_identity_recipe,
         log_level=cl_log_level,
         persistent=persistent,
@@ -143,6 +145,7 @@ def get_service_config(
     jwt_file,
     deployment_output,
     is_sequencer,
+    conductor_params,
     beacon_node_identity_recipe,
     log_level,
     persistent,
@@ -242,6 +245,17 @@ def get_service_config(
             "--mode=sequencer",
             "--p2p.sequencer.key=" + sequencer_private_key,
             "--sequencer.l1-confs=2",
+        ]
+
+    if conductor_params:
+        cmd += [
+            "--conductor.rpc={0}".format(
+                _net.service_url(
+                    conductor_params.service_name,
+                    conductor_params.ports[_net.RPC_PORT_NAME],
+                )
+            ),
+            "--sequencer.stopped=true",
         ]
 
     if len(cl_contexts) > 0:
