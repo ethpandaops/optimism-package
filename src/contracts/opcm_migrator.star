@@ -1,4 +1,4 @@
-utils = import_module("../util.star")
+_util = import_module("../util.star")
 _artifacts = import_module("./artifacts.star")
 _filter = import_module("../util/filter.star")
 
@@ -27,20 +27,20 @@ def launch(
     #
     # FIXME
 
-    proxy_admin_address = util.read_network_config_value(
+    proxy_admin_address = _util.read_network_config_value(
         plan,
         deployment_output,
         "state",
         '.opChainDeployments[] | select(.id=="{0}") | .ProxyAdmin'.format(
-            util.to_hex_chain_id(network_id)
+            _util.to_hex_chain_id(network_id)
         ),
     )
-    system_config_proxy_address = util.read_network_config_value(
+    system_config_proxy_address = _util.read_network_config_value(
         plan,
         deployment_output,
         "state",
         '.opChainDeployments[] | select(.id=="{0}") | .SystemConfigProxy'.format(
-            util.to_hex_chain_id(network_id)
+            _util.to_hex_chain_id(network_id)
         ),
     )
 
