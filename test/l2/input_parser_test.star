@@ -231,6 +231,7 @@ def test_l2_input_parser_tx_fuzzer_defaults(plan):
 def test_l2_input_parser_migration_defaults(plan):
     _default__migration_params = struct(
         enabled=True,
+        permissionless=False,
         starting_anchor_root=None,
         starting_anchor_l2_sequence_number=None,
         dispute_max_game_depth=None,

@@ -23,6 +23,7 @@ _DEFAULT_NETWORK_PARAMS = {
 
 _DEFAULT_MIGRATION_PARAMS = {
     "enabled": False,
+    "permissionless": False,
     "starting_anchor_root": None,
     "starting_anchor_l2_sequence_number": None,
     "dispute_max_game_depth": None,
