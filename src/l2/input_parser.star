@@ -21,6 +21,18 @@ _DEFAULT_NETWORK_PARAMS = {
     "fund_dev_accounts": True,
 }
 
+_DEFAULT_MIGRATION_PARAMS = {
+    "enabled": False,
+    "starting_anchor_root": None,
+    "starting_anchor_l2_sequence_number": None,
+    "dispute_max_game_depth": None,
+    "dispute_split_depth": None,
+    "dispute_max_clock_duration": None,
+    "dispute_clock_extension": None,
+    "dispute_absolute_prestate": None,
+    "initial_bond": None,
+}
+
 _DEFAULT_ARGS = {
     "participants": {},
     "network_params": _DEFAULT_NETWORK_PARAMS,
@@ -30,6 +42,7 @@ _DEFAULT_ARGS = {
     "blockscout_params": None,
     "proxyd_params": None,
     "tx_fuzzer_params": None,
+    "migration_params": None,
 }
 
 
@@ -138,6 +151,11 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
         registry=registry,
     )
 
+    l2_params["migration_params"] = _parse_migration_params(
+        migration_args=l2_params["migration_params"],
+        l2_name=l2_name,
+    )
+
     return struct(
         **l2_params,
     )
@@ -176,3 +194,22 @@ def _parse_network_params(network_args, l2_name, l2_id_generator):
     network_params["name"] = l2_name
 
     return struct(**network_params)
+
+
+def _parse_migration_params(migration_args, l2_name):
+    # Any extra attributes will cause an error
+    _filter.assert_keys(
+        migration_args or {},
+        _DEFAULT_MIGRATION_PARAMS.keys(),
+        "Invalid attributes in L2 migration_params for " + l2_name + ": {}",
+    )
+
+    # We filter the None values so that we can merge dicts easily
+    migration_params = _DEFAULT_MIGRATION_PARAMS | _filter.remove_none(
+        migration_args or {}
+    )
+
+    if not migration_params["enabled"]:
+        return None
+
+    return struct(**migration_params)

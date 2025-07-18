@@ -132,6 +132,8 @@ def test_l2_input_parser_defaults(plan):
                 tx_fuzzer_params=None,
                 # Blockscout is disabled by default
                 blockscout_params=None,
+                # OPCM.migrate is disabled by default
+                migration_params=None,
             )
         ],
     )
@@ -165,6 +167,8 @@ def test_l2_input_parser_defaults(plan):
                 tx_fuzzer_params=None,
                 # Blockscout is disabled by default
                 blockscout_params=None,
+                # OPCM.migrate is disabled by default
+                migration_params=None,
             )
         ],
     )
@@ -199,7 +203,7 @@ def test_l2_input_parser_da_defaults(plan):
     expect.eq(parsed[0].da_params, _default_da_params)
 
 
-def test_l2_input_parser_tz_fuzzer_defaults(plan):
+def test_l2_input_parser_tx_fuzzer_defaults(plan):
     _default_tx_fuzzer_params = struct(
         enabled=True,
         extra_params=[],
@@ -222,6 +226,31 @@ def test_l2_input_parser_tz_fuzzer_defaults(plan):
         _default_registry,
     )
     expect.eq(parsed[0].tx_fuzzer_params, _default_tx_fuzzer_params)
+
+
+def test_l2_input_parser_migration_defaults(plan):
+    _default__migration_params = struct(
+        enabled=True,
+        starting_anchor_root=None,
+        starting_anchor_l2_sequence_number=None,
+        dispute_max_game_depth=None,
+        dispute_split_depth=None,
+        dispute_max_clock_duration=None,
+        dispute_clock_extension=None,
+        dispute_absolute_prestate=None,
+        initial_bond=None,
+    )
+
+    parsed = input_parser.parse(
+        {
+            "network1": {
+                "participants": {"node0": {}},
+                "migration_params": {"enabled": True},
+            }
+        },
+        _default_registry,
+    )
+    expect.eq(parsed[0].migration_params, _default__migration_params)
 
 
 def test_l2_input_parser_auto_network_id(plan):
