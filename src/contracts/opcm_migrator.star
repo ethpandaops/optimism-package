@@ -11,6 +11,7 @@ def launch(
     plan,
     priv_key,
     deployment_output,
+    network_id,
     l1_config_env_vars,
     op_contract_deployer_params,
 ):
@@ -25,6 +26,23 @@ def launch(
     # You can refer to read_chain_cmd function in contract_deployer or read_network_config_value in the challenger launcher
     #
     # FIXME
+
+    proxy_admin_address = util.read_network_config_value(
+        plan,
+        deployment_output,
+        "state",
+        '.opChainDeployments[] | select(.id=="{0}") | .ProxyAdmin'.format(
+            util.to_hex_chain_id(network_id)
+        ),
+    )
+    system_config_proxy_address = util.read_network_config_value(
+        plan,
+        deployment_output,
+        "state",
+        '.opChainDeployments[] | select(.id=="{0}") | .SystemConfigProxy'.format(
+            util.to_hex_chain_id(network_id)
+        ),
+    )
 
     # We'll run the OPCM.migrate and collect its output
     opcm_migrate = plan.run_sh(
@@ -58,8 +76,8 @@ def launch(
             "DEPLOYER_INITIAL_BOND": "FIXME",  # Coming from the args file
             "DEPLOYER_DISPUTE_CLOCK_EXTENSION": "FIXME",  # Coming from the args file
             "DEPLOYER_DISPUTE_MAX_CLOCK_DURATION": "FIXME",  # Coming from the args file
-            "DEPLOYER_SYSTEM_CONFIG_PROXY_ADDRESS": "FIXME",  # Coming from the args file
-            "DEPLOYER_OP_CHAIN_PROXY_ADMIN_ADDRESS": "FIXME",  # Coming from the args file
+            "DEPLOYER_SYSTEM_CONFIG_PROXY_ADDRESS": system_config_proxy_address,
+            "DEPLOYER_OP_CHAIN_PROXY_ADMIN_ADDRESS": proxy_admin_address,
             "DEPLOYER_DISPUTE_ABSOLUTE_PRESTATE": "FIXME",  # Coming from the args file
             "L1_RPC_URL": l1_config_env_vars["L1_RPC_URL"],
         },
