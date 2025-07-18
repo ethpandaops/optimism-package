@@ -1,4 +1,5 @@
 utils = import_module("../util.star")
+_artifacts = import_module("./artifacts.star")
 _filter = import_module("../util/filter.star")
 
 ethereum_package_genesis_constants = import_module(
@@ -21,7 +22,7 @@ def launch(
     # Some of the input for the migrate call are coming from the original deployment output
     # so we'll need to jq them out
     #
-    # You can refer to read_chain_cmd function in contract_deployer
+    # You can refer to read_chain_cmd function in contract_deployer or read_network_config_value in the challenger launcher
     #
     # FIXME
 
