@@ -249,7 +249,10 @@ def deploy_contracts(
             }
         )
         for index, fork_key, activation_timestamp in hardfork_schedule:
-            intent_chain["deployOverrides"][fork_key] = "0x%x" % activation_timestamp
+            if index == i:
+                intent_chain["deployOverrides"][fork_key] = (
+                    "0x%x" % activation_timestamp
+                )
         intent["chains"].append(intent_chain)
 
     intent_json = json.encode(intent)
