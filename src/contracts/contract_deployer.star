@@ -22,10 +22,10 @@ CANNED_VALUES = {
 
 def build_hardfork_schedule(chains):
     """Build hardfork schedule from chains configuration.
-    
+
     Args:
         chains: List of chain configurations with network_params containing hardfork times
-        
+
     Returns:
         List of tuples (chain_index, fork_key, activation_timestamp) for all activated hardforks
     """
@@ -47,7 +47,7 @@ def build_hardfork_schedule(chains):
         for fork_key, activation_timestamp in renames:
             if activation_timestamp != None:
                 hardfork_schedule.append((index, fork_key, activation_timestamp))
-    
+
     return hardfork_schedule
 
 
