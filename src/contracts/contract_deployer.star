@@ -20,37 +20,6 @@ CANNED_VALUES = {
 }
 
 
-def build_hardfork_schedule(chains):
-    """Build hardfork schedule from chains configuration.
-
-    Args:
-        chains: List of chain configurations with network_params containing hardfork times
-
-    Returns:
-        List of tuples (chain_index, fork_key, activation_timestamp) for all activated hardforks
-    """
-    hardfork_schedule = []
-    for index, chain in enumerate(chains):
-        np = chain.network_params
-
-        # rename each hardfork to the name the override expects
-        renames = (
-            ("l2GenesisFjordTimeOffset", np.fjord_time_offset),
-            ("l2GenesisGraniteTimeOffset", np.granite_time_offset),
-            ("l2GenesisHoloceneTimeOffset", np.holocene_time_offset),
-            ("l2GenesisIsthmusTimeOffset", np.isthmus_time_offset),
-            ("l2GenesisInteropTimeOffset", np.interop_time_offset),
-        )
-
-        # only include the hardforks that have been activated since
-        # toml does not support null values
-        for fork_key, activation_timestamp in renames:
-            if activation_timestamp != None:
-                hardfork_schedule.append((index, fork_key, activation_timestamp))
-
-    return hardfork_schedule
-
-
 def _normalize_artifacts_locator(locator):
     """Transform artifact locator from 'artifact://NAME' format to (name, file_path) pair.
 
@@ -100,6 +69,195 @@ def _normalize_artifacts_locators(plan, l1_locator, l2_locator):
         extra_files[l2_mount_point] = plan.get_files_artifact(name=l2_artifact_name)
 
     return l1_artifacts_locator, l2_artifacts_locator, extra_files
+
+
+def _build_hardfork_schedule(chain):
+    """Build hardfork schedule from chain configuration.
+
+    Args:
+        chain: Chain configuration with network_params containing hardfork times
+
+    Returns:
+        List of tuples (fork_key, activation_timestamp) for all activated hardforks
+    """
+    np = chain.network_params
+
+    # rename each hardfork to the name the override expects
+    renames = (
+        ("l2GenesisFjordTimeOffset", np.fjord_time_offset),
+        ("l2GenesisGraniteTimeOffset", np.granite_time_offset),
+        ("l2GenesisHoloceneTimeOffset", np.holocene_time_offset),
+        ("l2GenesisIsthmusTimeOffset", np.isthmus_time_offset),
+        ("l2GenesisInteropTimeOffset", np.interop_time_offset),
+    )
+
+    # only include the hardforks that have been activated since
+    # toml does not support null values
+    hardfork_schedule = []
+    for fork_key, activation_timestamp in renames:
+        if activation_timestamp != None:
+            hardfork_schedule.append((fork_key, activation_timestamp))
+
+    return hardfork_schedule
+
+
+def _build_superchain_roles(primary_chain_id):
+    """Build superchain roles configuration.
+
+    Args:
+        primary_chain_id: Primary L2 chain ID to use for superchain roles
+
+    Returns:
+        Dictionary containing superchain roles configuration
+    """
+    return {
+        "superchainGuardian": read_chain_cmd("l1ProxyAdmin", primary_chain_id),
+        "protocolVersionsOwner": read_chain_cmd("l1ProxyAdmin", primary_chain_id),
+        "superchainProxyAdminOwner": read_chain_cmd("l1ProxyAdmin", primary_chain_id),
+        "challenger": read_chain_cmd("challenger", primary_chain_id),
+    }
+
+
+def _build_global_deploy_overrides(optimism_args):
+    """Build global deploy overrides if fault game absolute prestate is configured.
+
+    Args:
+        optimism_args: Optimism configuration arguments
+
+    Returns:
+        Tuple of (absolute_prestate, global_deploy_overrides_dict or None)
+    """
+    absolute_prestate = ""
+    global_overrides = None
+
+    if (
+        "faultGameAbsolutePrestate"
+        in optimism_args.op_contract_deployer_params.overrides
+    ):
+        absolute_prestate = optimism_args.op_contract_deployer_params.overrides[
+            "faultGameAbsolutePrestate"
+        ]
+        global_overrides = {
+            "dangerouslyAllowCustomDisputeParameters": True,
+            "faultGameAbsolutePrestate": absolute_prestate,
+        }
+
+    return absolute_prestate, global_overrides
+
+
+def _build_chain_intent(
+    chain, absolute_prestate, vm_type, altda_args, hardfork_schedule
+):
+    """Build intent configuration for a single chain.
+
+    Args:
+        chain: Chain configuration
+        absolute_prestate: Fault game absolute prestate value
+        vm_type: VM type for dispute games
+        altda_args: Alternative DA configuration
+        hardfork_schedule: List of hardfork activation schedules
+
+    Returns:
+        Dictionary containing chain intent configuration
+    """
+    chain_id = str(chain.network_params.network_id)
+    intent_chain = dict(CANNED_VALUES)
+    intent_chain.update(
+        {
+            "deployOverrides": {
+                "l2BlockTime": chain.network_params.seconds_per_slot,
+                "fundDevAccounts": (
+                    True if chain.network_params.fund_dev_accounts else False
+                ),
+            },
+            "baseFeeVaultRecipient": read_chain_cmd("baseFeeVaultRecipient", chain_id),
+            "l1FeeVaultRecipient": read_chain_cmd("l1FeeVaultRecipient", chain_id),
+            "sequencerFeeVaultRecipient": read_chain_cmd(
+                "sequencerFeeVaultRecipient", chain_id
+            ),
+            "roles": {
+                "batcher": read_chain_cmd("batcher", chain_id),
+                "challenger": read_chain_cmd("challenger", chain_id),
+                "l1ProxyAdminOwner": read_chain_cmd("l1ProxyAdmin", chain_id),
+                "l2ProxyAdminOwner": read_chain_cmd("l2ProxyAdmin", chain_id),
+                "proposer": read_chain_cmd("proposer", chain_id),
+                "systemConfigOwner": read_chain_cmd("systemConfigOwner", chain_id),
+                "unsafeBlockSigner": read_chain_cmd("sequencer", chain_id),
+            },
+            "dangerousAdditionalDisputeGames": [
+                {
+                    "respectedGameType": 0,
+                    "faultGameAbsolutePrestate": absolute_prestate,
+                    "faultGameMaxDepth": 73,
+                    "faultGameSplitDepth": 30,
+                    "faultGameClockExtension": 10800,
+                    "faultGameMaxClockDuration": 302400,
+                    "dangerouslyAllowCustomDisputeParameters": True,
+                    "vmType": vm_type,
+                    "useCustomOracle": False,
+                    "oracleMinProposalSize": 0,
+                    "oracleChallengePeriodSeconds": 0,
+                    "makeRespected": False,
+                }
+            ],
+            "dangerousAltDAConfig": {
+                "useAltDA": altda_args.use_altda,
+                "daCommitmentType": altda_args.da_commitment_type,
+                "daChallengeWindow": altda_args.da_challenge_window,
+                "daResolveWindow": altda_args.da_resolve_window,
+                "daBondSize": altda_args.da_bond_size,
+            },
+        }
+    )
+
+    # Apply hardfork schedule overrides for this chain
+    for fork_key, activation_timestamp in hardfork_schedule:
+        intent_chain["deployOverrides"][fork_key] = "0x%x" % activation_timestamp
+
+    return intent_chain
+
+
+def _build_deployment_intent(
+    optimism_args, l1_artifacts_locator, l2_artifacts_locator, altda_args
+):
+    """Build the complete deployment intent configuration.
+
+    Args:
+        optimism_args: Optimism configuration arguments
+        l1_artifacts_locator: L1 contracts artifact locator
+        l2_artifacts_locator: L2 contracts artifact locator
+        altda_args: Alternative DA configuration
+
+    Returns:
+        Dictionary containing the complete deployment intent
+    """
+    l2_chain_ids_list = [
+        str(chain.network_params.network_id) for chain in optimism_args.chains
+    ]
+
+    intent = {
+        "useInterop": len(optimism_args.superchains) > 0,
+        "l1ContractsLocator": l1_artifacts_locator,
+        "l2ContractsLocator": l2_artifacts_locator,
+        "superchainRoles": _build_superchain_roles(l2_chain_ids_list[0]),
+        "chains": [],
+    }
+
+    absolute_prestate, global_overrides = _build_global_deploy_overrides(optimism_args)
+    if global_overrides:
+        intent["globalDeployOverrides"] = global_overrides
+
+    overrides = _filter.remove_none(optimism_args.op_contract_deployer_params.overrides)
+    vm_type = overrides.get("vmType", "CANNON")
+
+    for _, chain in enumerate(optimism_args.chains):
+        hardfork_schedule = _build_hardfork_schedule(chain)
+        chain_intent = _build_chain_intent(
+            chain, absolute_prestate, vm_type, altda_args, hardfork_schedule
+        )
+        intent["chains"].append(chain_intent)
+
+    return intent
 
 
 def deploy_contracts(
@@ -173,101 +331,9 @@ def deploy_contracts(
         run='bash /fund-script/fund.sh "{0}"'.format(l2_chain_ids),
     )
 
-    hardfork_schedule = build_hardfork_schedule(optimism_args.chains)
-
-    intent = {
-        # TODO At the moment, we assume that if there are any superchains defined, we'll need to deploy interop contracts
-        # We'll need to update the op-deployer logic to better suit the interop scenario
-        "useInterop": len(optimism_args.superchains) > 0,
-        "l1ContractsLocator": l1_artifacts_locator,
-        "l2ContractsLocator": l2_artifacts_locator,
-        "superchainRoles": {
-            "superchainGuardian": read_chain_cmd("l1ProxyAdmin", l2_chain_ids_list[0]),
-            "protocolVersionsOwner": read_chain_cmd(
-                "l1ProxyAdmin", l2_chain_ids_list[0]
-            ),
-            "superchainProxyAdminOwner": read_chain_cmd(
-                "l1ProxyAdmin", l2_chain_ids_list[0]
-            ),
-            "challenger": read_chain_cmd("challenger", l2_chain_ids_list[0]),
-        },
-        "chains": [],
-    }
-
-    absolute_prestate = ""
-    if (
-        "faultGameAbsolutePrestate"
-        in optimism_args.op_contract_deployer_params.overrides
-    ):
-        absolute_prestate = optimism_args.op_contract_deployer_params.overrides[
-            "faultGameAbsolutePrestate"
-        ]
-        intent["globalDeployOverrides"] = {
-            "dangerouslyAllowCustomDisputeParameters": True,
-            "faultGameAbsolutePrestate": absolute_prestate,
-        }
-
-    overrides = _filter.remove_none(optimism_args.op_contract_deployer_params.overrides)
-    vm_type = overrides.get("vmType", "CANNON")
-
-    for i, chain in enumerate(optimism_args.chains):
-        chain_id = str(chain.network_params.network_id)
-        intent_chain = dict(CANNED_VALUES)
-        intent_chain.update(
-            {
-                "deployOverrides": {
-                    "l2BlockTime": chain.network_params.seconds_per_slot,
-                    "fundDevAccounts": (
-                        True if chain.network_params.fund_dev_accounts else False
-                    ),
-                },
-                "baseFeeVaultRecipient": read_chain_cmd(
-                    "baseFeeVaultRecipient", chain_id
-                ),
-                "l1FeeVaultRecipient": read_chain_cmd("l1FeeVaultRecipient", chain_id),
-                "sequencerFeeVaultRecipient": read_chain_cmd(
-                    "sequencerFeeVaultRecipient", chain_id
-                ),
-                "roles": {
-                    "batcher": read_chain_cmd("batcher", chain_id),
-                    "challenger": read_chain_cmd("challenger", chain_id),
-                    "l1ProxyAdminOwner": read_chain_cmd("l1ProxyAdmin", chain_id),
-                    "l2ProxyAdminOwner": read_chain_cmd("l2ProxyAdmin", chain_id),
-                    "proposer": read_chain_cmd("proposer", chain_id),
-                    "systemConfigOwner": read_chain_cmd("systemConfigOwner", chain_id),
-                    "unsafeBlockSigner": read_chain_cmd("sequencer", chain_id),
-                },
-                "dangerousAdditionalDisputeGames": [
-                    {
-                        "respectedGameType": 0,
-                        "faultGameAbsolutePrestate": absolute_prestate,
-                        "faultGameMaxDepth": 73,
-                        "faultGameSplitDepth": 30,
-                        "faultGameClockExtension": 10800,
-                        "faultGameMaxClockDuration": 302400,
-                        "dangerouslyAllowCustomDisputeParameters": True,
-                        "vmType": vm_type,
-                        "useCustomOracle": False,
-                        "oracleMinProposalSize": 0,
-                        "oracleChallengePeriodSeconds": 0,
-                        "makeRespected": False,
-                    }
-                ],
-                "dangerousAltDAConfig": {
-                    "useAltDA": altda_args.use_altda,
-                    "daCommitmentType": altda_args.da_commitment_type,
-                    "daChallengeWindow": altda_args.da_challenge_window,
-                    "daResolveWindow": altda_args.da_resolve_window,
-                    "daBondSize": altda_args.da_bond_size,
-                },
-            }
-        )
-        for index, fork_key, activation_timestamp in hardfork_schedule:
-            if index == i:
-                intent_chain["deployOverrides"][fork_key] = (
-                    "0x%x" % activation_timestamp
-                )
-        intent["chains"].append(intent_chain)
+    intent = _build_deployment_intent(
+        optimism_args, l1_artifacts_locator, l2_artifacts_locator, altda_args
+    )
 
     intent_json = json.encode(intent)
     intent_json_artifact = utils.write_to_file(plan, intent_json, "/tmp", "intent.json")
