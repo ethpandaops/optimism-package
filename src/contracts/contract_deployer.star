@@ -20,6 +20,37 @@ CANNED_VALUES = {
 }
 
 
+def build_hardfork_schedule(chains):
+    """Build hardfork schedule from chains configuration.
+    
+    Args:
+        chains: List of chain configurations with network_params containing hardfork times
+        
+    Returns:
+        List of tuples (chain_index, fork_key, activation_timestamp) for all activated hardforks
+    """
+    hardfork_schedule = []
+    for index, chain in enumerate(chains):
+        np = chain.network_params
+
+        # rename each hardfork to the name the override expects
+        renames = (
+            ("l2GenesisFjordTimeOffset", np.fjord_time_offset),
+            ("l2GenesisGraniteTimeOffset", np.granite_time_offset),
+            ("l2GenesisHoloceneTimeOffset", np.holocene_time_offset),
+            ("l2GenesisIsthmusTimeOffset", np.isthmus_time_offset),
+            ("l2GenesisInteropTimeOffset", np.interop_time_offset),
+        )
+
+        # only include the hardforks that have been activated since
+        # toml does not support null values
+        for fork_key, activation_timestamp in renames:
+            if activation_timestamp != None:
+                hardfork_schedule.append((index, fork_key, activation_timestamp))
+    
+    return hardfork_schedule
+
+
 def _normalize_artifacts_locator(locator):
     """Transform artifact locator from 'artifact://NAME' format to (name, file_path) pair.
 
@@ -142,24 +173,7 @@ def deploy_contracts(
         run='bash /fund-script/fund.sh "{0}"'.format(l2_chain_ids),
     )
 
-    hardfork_schedule = []
-    for index, chain in enumerate(optimism_args.chains):
-        np = chain.network_params
-
-        # rename each hardfork to the name the override expects
-        renames = (
-            ("l2GenesisFjordTimeOffset", np.fjord_time_offset),
-            ("l2GenesisGraniteTimeOffset", np.granite_time_offset),
-            ("l2GenesisHoloceneTimeOffset", np.holocene_time_offset),
-            ("l2GenesisIsthmusTimeOffset", np.isthmus_time_offset),
-            ("l2GenesisInteropTimeOffset", np.interop_time_offset),
-        )
-
-        # only include the hardforks that have been activated since
-        # toml does not support null values
-        for fork_key, activation_timestamp in renames:
-            if activation_timestamp != None:
-                hardfork_schedule.append((index, fork_key, activation_timestamp))
+    hardfork_schedule = build_hardfork_schedule(optimism_args.chains)
 
     intent = {
         # TODO At the moment, we assume that if there are any superchains defined, we'll need to deploy interop contracts
