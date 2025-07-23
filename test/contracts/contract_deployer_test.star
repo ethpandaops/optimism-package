@@ -65,9 +65,9 @@ def test_chain_with_all_hardforks(plan):
 
 def test_build_superchain_roles(plan):
     primary_chain_id = "901"
-    
+
     roles = contract_deployer._build_superchain_roles(primary_chain_id)
-    
+
     expected = {
         "superchainGuardian": "`jq -r .address /network-data/l1ProxyAdmin-901.json`",
         "protocolVersionsOwner": "`jq -r .address /network-data/l1ProxyAdmin-901.json`",
@@ -83,12 +83,12 @@ def test_build_global_deploy_overrides_with_prestate(plan):
             overrides={"faultGameAbsolutePrestate": "0x123abc", "vmType": "CANNON"}
         )
     )
-    
+
     (
         absolute_prestate,
         global_overrides,
     ) = contract_deployer._build_global_deploy_overrides(optimism_args)
-    
+
     expect.eq(absolute_prestate, "0x123abc")
     expect.eq(
         global_overrides,
@@ -103,12 +103,12 @@ def test_build_global_deploy_overrides_without_prestate(plan):
     optimism_args = struct(
         op_contract_deployer_params=struct(overrides={"vmType": "CANNON"})
     )
-    
+
     (
         absolute_prestate,
         global_overrides,
     ) = contract_deployer._build_global_deploy_overrides(optimism_args)
-    
+
     expect.eq(absolute_prestate, "")
     expect.eq(global_overrides, None)
 
@@ -123,9 +123,9 @@ def test_build_hardfork_schedule_single_chain(plan):
             interop_time_offset=300,
         )
     )
-    
+
     schedule = contract_deployer._build_hardfork_schedule(chain)
-    
+
     expect.eq(
         schedule,
         [
@@ -146,9 +146,9 @@ def test_build_hardfork_schedule_single_chain_no_hardforks(plan):
             interop_time_offset=None,
         )
     )
-    
+
     schedule = contract_deployer._build_hardfork_schedule(chain)
-    
+
     expect.eq(schedule, [])
 
 
@@ -169,11 +169,11 @@ def test_build_chain_intent(plan):
         da_bond_size=1000000,
     )
     hardfork_schedule = [("l2GenesisFjordTimeOffset", 100)]
-    
+
     intent_chain = contract_deployer._build_chain_intent(
         chain, absolute_prestate, vm_type, altda_args, hardfork_schedule
     )
-    
+
     expect.eq(intent_chain["deployOverrides"]["l2BlockTime"], 2)
     expect.eq(intent_chain["deployOverrides"]["fundDevAccounts"], True)
     expect.eq(intent_chain["deployOverrides"]["l2GenesisFjordTimeOffset"], "0x64")
@@ -210,11 +210,11 @@ def test_build_chain_intent_no_hardforks(plan):
         da_bond_size=2000000,
     )
     hardfork_schedule = []
-    
+
     intent_chain = contract_deployer._build_chain_intent(
         chain, absolute_prestate, vm_type, altda_args, hardfork_schedule
     )
-    
+
     expect.eq(intent_chain["deployOverrides"]["l2BlockTime"], 1)
     expect.eq(intent_chain["deployOverrides"]["fundDevAccounts"], False)
     expect.eq(intent_chain["dangerousAdditionalDisputeGames"][0]["vmType"], "ASTERISC")
@@ -261,7 +261,7 @@ def test_build_deployment_intent_no_interop(plan):
     expect.eq(len(intent["chains"]), 1)
     expect.eq(intent["chains"][0]["deployOverrides"]["l2BlockTime"], 2)
     expect.eq(intent["chains"][0]["deployOverrides"]["fundDevAccounts"], True)
-    
+
     # Test that superchain roles are properly configured
     expect.eq(
         intent["superchainRoles"]["superchainGuardian"],
@@ -322,11 +322,13 @@ def test_build_deployment_intent_with_interop_and_prestate(plan):
 
     expect.eq(intent["useInterop"], True)
     expect.eq(len(intent["chains"]), 2)
-    
+
     # Test global deploy overrides (tests _build_global_deploy_overrides indirectly)
     expect.eq(intent["globalDeployOverrides"]["faultGameAbsolutePrestate"], "0x123")
-    expect.eq(intent["globalDeployOverrides"]["dangerouslyAllowCustomDisputeParameters"], True)
-    
+    expect.eq(
+        intent["globalDeployOverrides"]["dangerouslyAllowCustomDisputeParameters"], True
+    )
+
     # Test chain intent configuration
     expect.eq(intent["chains"][0]["deployOverrides"]["l2BlockTime"], 2)
     expect.eq(intent["chains"][0]["deployOverrides"]["fundDevAccounts"], True)
@@ -334,15 +336,26 @@ def test_build_deployment_intent_with_interop_and_prestate(plan):
         intent["chains"][0]["dangerousAdditionalDisputeGames"][0]["vmType"], "ASTERISC"
     )
     expect.eq(
-        intent["chains"][0]["dangerousAdditionalDisputeGames"][0]["faultGameAbsolutePrestate"], "0x123"
+        intent["chains"][0]["dangerousAdditionalDisputeGames"][0][
+            "faultGameAbsolutePrestate"
+        ],
+        "0x123",
     )
     expect.eq(intent["chains"][1]["dangerousAltDAConfig"]["useAltDA"], True)
-    expect.eq(intent["chains"][1]["dangerousAltDAConfig"]["daCommitmentType"], "generic")
-    
+    expect.eq(
+        intent["chains"][1]["dangerousAltDAConfig"]["daCommitmentType"], "generic"
+    )
+
     # Test hardfork schedule application (tests _build_hardfork_schedule indirectly)
-    expect.eq(intent["chains"][0]["deployOverrides"]["l2GenesisFjordTimeOffset"], "0x64")  # 100 in hex
-    expect.eq(intent["chains"][0]["deployOverrides"]["l2GenesisHoloceneTimeOffset"], "0xc8")  # 200 in hex
-    expect.eq(intent["chains"][0]["deployOverrides"]["l2GenesisInteropTimeOffset"], "0x12c")  # 300 in hex
+    expect.eq(
+        intent["chains"][0]["deployOverrides"]["l2GenesisFjordTimeOffset"], "0x64"
+    )  # 100 in hex
+    expect.eq(
+        intent["chains"][0]["deployOverrides"]["l2GenesisHoloceneTimeOffset"], "0xc8"
+    )  # 200 in hex
+    expect.eq(
+        intent["chains"][0]["deployOverrides"]["l2GenesisInteropTimeOffset"], "0x12c"
+    )  # 300 in hex
 
 
 def test_build_deployment_intent_no_global_overrides(plan):
@@ -429,14 +442,20 @@ def test_build_deployment_intent_multiple_chains_different_configs(plan):
 
     expect.eq(intent["useInterop"], True)
     expect.eq(len(intent["chains"]), 2)
-    
+
     # Test first chain configuration
     expect.eq(intent["chains"][0]["deployOverrides"]["l2BlockTime"], 3)
     expect.eq(intent["chains"][0]["deployOverrides"]["fundDevAccounts"], True)
-    expect.eq(intent["chains"][0]["deployOverrides"]["l2GenesisFjordTimeOffset"], "0x32")  # 50 in hex
-    
+    expect.eq(
+        intent["chains"][0]["deployOverrides"]["l2GenesisFjordTimeOffset"], "0x32"
+    )  # 50 in hex
+
     # Test second chain configuration
     expect.eq(intent["chains"][1]["deployOverrides"]["l2BlockTime"], 1)
     expect.eq(intent["chains"][1]["deployOverrides"]["fundDevAccounts"], False)
-    expect.eq(intent["chains"][1]["deployOverrides"]["l2GenesisGraniteTimeOffset"], "0x4b")  # 75 in hex
-    expect.eq(intent["chains"][1]["deployOverrides"]["l2GenesisInteropTimeOffset"], "0x7d")  # 125 in hex
+    expect.eq(
+        intent["chains"][1]["deployOverrides"]["l2GenesisGraniteTimeOffset"], "0x4b"
+    )  # 75 in hex
+    expect.eq(
+        intent["chains"][1]["deployOverrides"]["l2GenesisInteropTimeOffset"], "0x7d"
+    )  # 125 in hex
