@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/ethpandaops/optimism-package/compare/1.4.0...1.5.0) (2025-07-24)
+
+
+### Features
+
+* add support for `pprof` ([#352](https://github.com/ethpandaops/optimism-package/issues/352)) ([c92ebbe](https://github.com/ethpandaops/optimism-package/commit/c92ebbebef72745ab8c61749aece307509d30721))
+
+
+### Bug Fixes
+
+* **contract_deployer:** ensure hardfork configuration is respected with multiple chains ([#360](https://github.com/ethpandaops/optimism-package/issues/360)) ([bc776a6](https://github.com/ethpandaops/optimism-package/commit/bc776a61e62b422bd2fa954e3a0588d52eba3847))
+
 ## [1.4.0](https://github.com/ethpandaops/optimism-package/compare/1.3.0...1.4.0) (2025-07-16)
 
 
