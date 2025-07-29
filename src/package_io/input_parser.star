@@ -357,8 +357,8 @@ def _default_proposer_params(registry):
 def default_op_contract_deployer_params(registry):
     return {
         "image": registry.get(_registry.OP_DEPLOYER),
-        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
-        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
+        "l1_artifacts_locator": "tag://op-contracts/v4.0.0",
+        "l2_artifacts_locator": "tag://op-contracts/v4.0.0",
         "overrides": {},
     }
 

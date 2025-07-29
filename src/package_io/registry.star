@@ -66,7 +66,7 @@ _DEFAULT_IMAGES = {
     # Conductor
     OP_CONDUCTOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:v0.7.1",
     # deployer
-    OP_DEPLOYER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2",
+    OP_DEPLOYER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.2",
     # Faucet
     OP_FAUCET: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-faucet:develop",
     # conductor-ops

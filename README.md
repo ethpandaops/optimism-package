@@ -526,9 +526,9 @@ optimism_package:
   # Locators can be http(s) URLs, or point to an enclave artifact with
   # a pseudo URL artifact://NAME
   op_contract_deployer_params:
-    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.11
-    l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz
-    l2_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.2
+    l1_artifacts_locator: tag://op-contracts/v4.0.0
+    l2_artifacts_locator: tag://op-contracts/v4.0.0
 
   # The global log level that all clients should log at
   # Valid values are "error", "warn", "info", "debug", and "trace"
