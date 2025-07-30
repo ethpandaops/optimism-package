@@ -184,8 +184,6 @@ def get_service_config(
         EXECUTION_ENGINE_ENDPOINT,
         "--l2-engine-jwt-secret",
         _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--l2-provider-rpc",
-        EXECUTION_ENGINE_ENDPOINT,
         "--l2-config-file",
         "{0}/rollup-{1}.json".format(
             _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,

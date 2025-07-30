@@ -192,8 +192,6 @@ def test_l2_participant_cl_launcher_kona_node(plan):
             "http://0.0.0.0:8888",
             "--l2-engine-jwt-secret",
             "/jwt/jwtsecret",
-            "--l2-provider-rpc",
-            "http://0.0.0.0:8888",
             "--l2-config-file",
             "/network-configs/rollup-2151908.json",
             "--p2p.advertise.ip",
