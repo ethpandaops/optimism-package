@@ -35,7 +35,7 @@ PROMTAIL = "promtail"
 
 _DEFAULT_IMAGES = {
     # EL images
-    OP_GETH: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
+    OP_GETH: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1-dev.1",
     OP_RETH: "ghcr.io/paradigmxyz/op-reth:latest",
     OP_ERIGON: "testinprod/op-erigon:latest",
     OP_NETHERMIND: "nethermind/nethermind:latest",
