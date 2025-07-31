@@ -3,14 +3,8 @@
 #
 # Note: currently kona-nodes lack support for some features from the op-node such as:
 # - interop syncing
-# - interactions with an external sequencer
-# - interactions with an op-batcher
-# - external bootnode list
-#
-# To be able to properly spin out an L2 network containing kona consensus nodes, one must make sure to
-# deploy at least one `op-node` (L2 consensus node) *before* any `kona-node` - this will allow the `op-batcher` to properly boot-up.
-# Please make sure to define at least one `op-geth`/`op-node` L1/L2 couple in your network configuration before
-# defining your kona-nodes.
+# - altda
+# - safeDB
 
 _ethereum_package_cl_context = import_module(
     "github.com/ethpandaops/ethereum-package/src/cl/cl_context.star"
