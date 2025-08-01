@@ -67,14 +67,14 @@ def _get_config(
         _observability.configure_op_service_metrics(cmd, ports)
 
     env_vars = {
-        "DATADIR": "/db",
-        "DEPENDENCY_SET": "{0}/{1}".format(
+        "OP_SUPERVISOR_DATADIR": "/db",
+        "OP_SUPERVISOR_DEPENDENCY_SET": "{0}/{1}".format(
             DATA_DIR, params.superchain.dependency_set.path
         ),
-        "ROLLUP_CONFIG_PATHS": _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        "OP_SUPERVISOR_ROLLUP_CONFIG_PATHS": _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
         + "/rollup-*.json",
-        "L1_RPC": l1_config_env_vars["L1_RPC_URL"],
-        "L2_CONSENSUS_NODES": ",".join(
+        "OP_SUPERVISOR_L1_RPC": l1_config_env_vars["L1_RPC_URL"],
+        "OP_SUPERVISOR_L2_CONSENSUS_NODES": ",".join(
             [
                 _net.service_url(
                     participant.cl.service_name,
@@ -84,10 +84,10 @@ def _get_config(
                 for participant in l2_params.participants
             ]
         ),
-        "L2_CONSENSUS_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "RPC_ADDR": "0.0.0.0",
-        "RPC_PORT": str(params.ports[_net.RPC_PORT_NAME].number),
-        "RPC_ENABLE_ADMIN": "true",
+        "OP_SUPERVISOR_L2_CONSENSUS_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "OP_SUPERVISOR_RPC_ADDR": "0.0.0.0",
+        "OP_SUPERVISOR_RPC_PORT": str(params.ports[_net.RPC_PORT_NAME].number),
+        "OP_SUPERVISOR_RPC_ENABLE_ADMIN": "true",
     }
 
     # Merge in any extra_env_vars from params
