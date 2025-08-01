@@ -9,6 +9,7 @@ _DEFAULT_ARGS = {
     "superchain": None,
     "image": None,
     "extra_params": [],
+    "extra_env_vars": {},
 }
 
 _IMAGE_IDS = {

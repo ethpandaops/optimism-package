@@ -58,7 +58,6 @@ def _get_config(
     observability_helper,
 ):
     ports = _net.ports_to_port_specs(params.ports)
-    datadir = params.superchain.dependency_set.name
 
     cmd = ["kona-supervisor"] + params.extra_params
 
@@ -66,6 +65,35 @@ def _get_config(
 
     if observability_helper.enabled:
         _observability.configure_op_service_metrics(cmd, ports)
+
+    # Start with default env_vars
+    env_vars = {
+        "DATADIR": "/db",
+        "DEPENDENCY_SET": "{0}/{1}".format(
+            DATA_DIR, params.superchain.dependency_set.path
+        ),
+        "ROLLUP_CONFIG_PATHS": _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        + "/rollup-*.json",
+        "L1_RPC": l1_config_env_vars["L1_RPC_URL"],
+        "L2_CONSENSUS_NODES": ",".join(
+            [
+                _net.service_url(
+                    participant.cl.service_name,
+                    params.superchain.ports[_net.INTEROP_RPC_PORT_NAME],
+                )
+                for l2_params in l2s_params
+                for participant in l2_params.participants
+            ]
+        ),
+        "L2_CONSENSUS_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "RPC_ADDR": "0.0.0.0",
+        "RPC_PORT": str(params.ports[_net.RPC_PORT_NAME].number),
+        "RPC_ENABLE_ADMIN": "true",
+    }
+
+    # Merge in any extra_env_vars from params
+    if hasattr(params, "extra_env_vars") and params.extra_env_vars:
+        env_vars.update(params.extra_env_vars)
 
     return ServiceConfig(
         image=params.image,
@@ -76,29 +104,7 @@ def _get_config(
             _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
             _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
-        env_vars={
-            "DATADIR": "/db",
-            "DEPENDENCY_SET": "{0}/{1}".format(
-                DATA_DIR, params.superchain.dependency_set.path
-            ),
-            "ROLLUP_CONFIG_PATHS": _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
-            + "/rollup-*.json",
-            "L1_RPC": l1_config_env_vars["L1_RPC_URL"],
-            "L2_CONSENSUS_NODES": ",".join(
-                [
-                    _net.service_url(
-                        participant.cl.service_name,
-                        params.superchain.ports[_net.INTEROP_RPC_PORT_NAME],
-                    )
-                    for l2_params in l2s_params
-                    for participant in l2_params.participants
-                ]
-            ),
-            "L2_CONSENSUS_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
-            "RPC_ADDR": "0.0.0.0",
-            "RPC_PORT": str(params.ports[_net.RPC_PORT_NAME].number),
-            "RPC_ENABLE_ADMIN": "true",
-        },
+        env_vars=env_vars,
         cmd=cmd,
         private_ip_address_placeholder=_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
