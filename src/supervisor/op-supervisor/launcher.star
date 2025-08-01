@@ -93,6 +93,9 @@ def _get_config(
     # Merge in any extra_env_vars from params
     if hasattr(params, "extra_env_vars") and params.extra_env_vars:
         env_vars.update(params.extra_env_vars)
+    
+    if params.pprof_enabled:
+        _observability.configure_op_service_pprof(cmd, ports)
 
     return ServiceConfig(
         image=params.image,

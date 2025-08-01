@@ -7,6 +7,7 @@ _net = import_module("/src/util/net.star")
 
 def launch(
     plan,
+    params,
     image,
     l2s,
     observability_helper,
@@ -34,6 +35,9 @@ def launch(
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
+
+    if params.pprof_enabled:
+        observability.configure_op_service_pprof(cmd, ports)
 
     config = ServiceConfig(
         image=image,

@@ -17,6 +17,7 @@ _DEFAULT_NETWORK_PARAMS = {
     "granite_time_offset": 0,
     "holocene_time_offset": None,
     "isthmus_time_offset": None,
+    "jovian_time_offset": None,
     "interop_time_offset": None,
     "fund_dev_accounts": True,
 }

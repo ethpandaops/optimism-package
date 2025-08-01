@@ -10,6 +10,7 @@ _DEFAULT_ARGS = {
     "image": None,
     "extra_params": [],
     "extra_env_vars": {},
+    "pprof_enabled": False,
 }
 
 _IMAGE_IDS = {

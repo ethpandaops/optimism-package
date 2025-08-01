@@ -3,14 +3,8 @@
 #
 # Note: currently kona-nodes lack support for some features from the op-node such as:
 # - interop syncing
-# - interactions with an external sequencer
-# - interactions with an op-batcher
-# - external bootnode list
-#
-# To be able to properly spin out an L2 network containing kona consensus nodes, one must make sure to
-# deploy at least one `op-node` (L2 consensus node) *before* any `kona-node` - this will allow the `op-batcher` to properly boot-up.
-# Please make sure to define at least one `op-geth`/`op-node` L1/L2 couple in your network configuration before
-# defining your kona-nodes.
+# - altda
+# - safeDB
 
 _ethereum_package_cl_context = import_module(
     "github.com/ethpandaops/ethereum-package/src/cl/cl_context.star"
@@ -53,6 +47,7 @@ def launch(
     jwt_file,
     deployment_output,
     is_sequencer,
+    conductor_params,
     log_level,
     persistent,
     tolerations,
@@ -94,6 +89,7 @@ def launch(
         jwt_file=jwt_file,
         deployment_output=deployment_output,
         is_sequencer=is_sequencer,
+        conductor_params=conductor_params,
         beacon_node_identity_recipe=beacon_node_identity_recipe,
         log_level=cl_log_level,
         persistent=persistent,
@@ -143,6 +139,7 @@ def get_service_config(
     jwt_file,
     deployment_output,
     is_sequencer,
+    conductor_params,
     beacon_node_identity_recipe,
     log_level,
     persistent,
@@ -181,8 +178,6 @@ def get_service_config(
         EXECUTION_ENGINE_ENDPOINT,
         "--l2-engine-jwt-secret",
         _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--l2-provider-rpc",
-        EXECUTION_ENGINE_ENDPOINT,
         "--l2-config-file",
         "{0}/rollup-{1}.json".format(
             _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
@@ -230,15 +225,6 @@ def get_service_config(
 
     # apply customizations
 
-    if observability_helper.enabled:
-        cmd += [
-            "--metrics.enabled=true",
-            "--metrics.addr=0.0.0.0",
-            "--metrics.port={0}".format(_observability.METRICS_PORT_NUM),
-        ]
-
-        _observability.expose_metrics_port(ports)
-
     if is_sequencer:
         sequencer_private_key = _util.read_network_config_value(
             plan,
@@ -248,9 +234,20 @@ def get_service_config(
         )
 
         cmd += [
+            "--mode=sequencer",
             "--p2p.sequencer.key=" + sequencer_private_key,
-            "--sequencer.enabled",
             "--sequencer.l1-confs=2",
+        ]
+
+    if conductor_params:
+        cmd += [
+            "--conductor.rpc={0}".format(
+                _net.service_url(
+                    conductor_params.service_name,
+                    conductor_params.ports[_net.RPC_PORT_NAME],
+                )
+            ),
+            "--sequencer.stopped",
         ]
 
     if len(cl_contexts) > 0:

@@ -192,8 +192,6 @@ def test_l2_participant_cl_launcher_kona_node(plan):
             "http://0.0.0.0:8888",
             "--l2-engine-jwt-secret",
             "/jwt/jwtsecret",
-            "--l2-provider-rpc",
-            "http://0.0.0.0:8888",
             "--l2-config-file",
             "/network-configs/rollup-2151908.json",
             "--p2p.advertise.ip",
@@ -213,11 +211,8 @@ def test_l2_participant_cl_launcher_kona_node(plan):
             "--rpc.port",
             "8547",
             "--rpc.enable-admin",
-            "--metrics.enabled=true",
-            "--metrics.addr=0.0.0.0",
-            "--metrics.port=9001",
+            "--mode=sequencer",
             "--p2p.sequencer.key={}".format(sequencer_private_key_mock),
-            "--sequencer.enabled",
             "--sequencer.l1-confs=2",
             "--p2p.bootnodes",
             "enr.001,enr.002",
@@ -322,7 +317,7 @@ def test_l2_participant_cl_launcher_op_node(plan):
             "--safedb.path=/data/op-node/op-node-beacon-data",
             "--altda.enabled=false",
             "--altda.da-server=",
-            "--metrics.enabled=true",
+            "--metrics.enabled",
             "--metrics.addr=0.0.0.0",
             "--metrics.port=9001",
             "--p2p.sequencer.key={}".format(sequencer_private_key_mock),
@@ -412,46 +407,4 @@ def test_l2_participant_cl_launcher_incompatible_conductor(plan):
             observability_helper=observability_helper,
         ),
         "Node node0 on network kurtosis: hildr does not support conductor parameters",
-    )
-
-    l2s_params = _l2_input_parser.parse(
-        {
-            "network0": {
-                "participants": {
-                    "node0": {
-                        "cl": {
-                            "type": "kona-node",
-                        }
-                    }
-                }
-            }
-        },
-        registry=_default_registry,
-    )
-
-    l2_params = l2s_params[0]
-    participant_params = l2_params.participants[0]
-    cl_params = participant_params.cl
-
-    expect.fails(
-        lambda: _cl_launcher.launch(
-            plan=plan,
-            params=cl_params,
-            network_params=l2_params.network_params,
-            supervisors_params=[],
-            conductor_params=conductor_params,
-            da_params=l2_params.da_params,
-            is_sequencer=True,
-            jwt_file=_default_jwt_file,
-            deployment_output=_default_deployment_output,
-            l1_config_env_vars=_default_l1_config_env_vars,
-            log_level=_default_log_level,
-            persistent=True,
-            tolerations=[],
-            node_selectors={},
-            el_context=_default_el_context,
-            cl_contexts=_default_cl_contexts,
-            observability_helper=observability_helper,
-        ),
-        "Node node0 on network kurtosis: kona-node does not support conductor parameters",
     )
