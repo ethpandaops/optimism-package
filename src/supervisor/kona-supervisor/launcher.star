@@ -1,3 +1,4 @@
+_filter = import_module("/src/util/filter.star")
 _file = import_module("/src/util/file.star")
 _net = import_module("/src/util/net.star")
 

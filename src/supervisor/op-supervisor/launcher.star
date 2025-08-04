@@ -1,3 +1,4 @@
+_filter = import_module("/src/util/filter.star")
 _file = import_module("/src/util/file.star")
 _net = import_module("/src/util/net.star")
 
@@ -93,6 +94,8 @@ def _get_config(
     # Merge in any extra_env_vars from params
     env_vars = default_env_vars | _filter.remove_none(params.extra_env_vars or {})
 
+ms.extra_env_vars)
+    
     if params.pprof_enabled:
         _observability.configure_op_service_pprof(cmd, ports)
 
