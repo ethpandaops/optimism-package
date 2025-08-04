@@ -93,8 +93,6 @@ def _get_config(
 
     # Merge in any extra_env_vars from params
     env_vars = default_env_vars | _filter.remove_none(params.extra_env_vars or {})
-
-ms.extra_env_vars)
     
     if params.pprof_enabled:
         _observability.configure_op_service_pprof(cmd, ports)
