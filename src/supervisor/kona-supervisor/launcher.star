@@ -67,7 +67,7 @@ def _get_config(
         _observability.configure_op_service_metrics(cmd, ports)
 
     # Start with default env_vars
-    env_vars = {
+    default_env_vars = {
         "DATADIR": "/db",
         "DEPENDENCY_SET": "{0}/{1}".format(
             DATA_DIR, params.superchain.dependency_set.path
@@ -92,8 +92,7 @@ def _get_config(
     }
 
     # Merge in any extra_env_vars from params
-    if hasattr(params, "extra_env_vars") and params.extra_env_vars:
-        env_vars.update(params.extra_env_vars)
+    env_vars = default_env_vars | _filter.remove_none(params.extra_env_vars or {})
 
     return ServiceConfig(
         image=params.image,

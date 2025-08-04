@@ -66,7 +66,7 @@ def _get_config(
     if observability_helper.enabled:
         _observability.configure_op_service_metrics(cmd, ports)
 
-    env_vars = {
+    default_env_vars = {
         "OP_SUPERVISOR_DATADIR": "/db",
         "OP_SUPERVISOR_DEPENDENCY_SET": "{0}/{1}".format(
             DATA_DIR, params.superchain.dependency_set.path
@@ -91,9 +91,8 @@ def _get_config(
     }
 
     # Merge in any extra_env_vars from params
-    if hasattr(params, "extra_env_vars") and params.extra_env_vars:
-        env_vars.update(params.extra_env_vars)
-    
+    env_vars = default_env_vars | _filter.remove_none(params.extra_env_vars or {})
+
     if params.pprof_enabled:
         _observability.configure_op_service_pprof(cmd, ports)
 
