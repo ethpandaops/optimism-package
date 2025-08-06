@@ -1,3 +1,5 @@
+utils = import_module("/src/util.star")
+
 def build_config_struct(l1_rpc, l2s_params):
     # You can optionally also include the l2 consensus endpoints here
 
@@ -29,5 +31,10 @@ def build_config_struct(l1_rpc, l2s_params):
 
 def generate_config_file(plan, l1_rpc, l2s_params, file_name="builder_config.yaml"):
     cfg = build_config_struct(l1_rpc, l2s_params)
-    yaml_ish = json.encode(cfg)  # we reuse JSON because YAML parser can tolerate it
-    return plan.write_file(file_name, yaml_ish)
+    cfg_contents = json.encode(cfg)
+    return utils.write_to_file(
+        plan=plan,
+        contents=cfg_contents,
+        directory="/config",
+        file_name=file_name,
+     )
