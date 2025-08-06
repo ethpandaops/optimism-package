@@ -7,6 +7,7 @@ _ethereum_package_constants = import_module(
 
 _observability = import_module("/src/observability/observability.star")
 _prometheus = import_module("/src/observability/prometheus/prometheus_launcher.star")
+_builder_config = import_module("/src/test-sequencer/op-test-sequencer/builder_config.star")
 
 
 DATA_DIR = "/etc/test-sequencer"
@@ -67,11 +68,18 @@ def _get_config(
     if params.pprof_enabled:
         _observability.configure_op_service_pprof(cmd, ports)
 
+    builder_config_file = _builder_config.generate_config_file(
+        plan,
+        l1_rpc=l1_config_env_vars["L1_RPC_URL"],
+        l2s_params=l2s_params,
+    )
+
     return ServiceConfig(
         image=params.image,
         ports=ports,
         labels=params.labels,
         files={
+            "/config/builder_config.yaml": builder_config_file,
             _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
             _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
@@ -82,6 +90,7 @@ def _get_config(
             "OP_TEST_SEQUENCER_RPC_ADDR": "0.0.0.0",
             "OP_TEST_SEQUENCER_RPC_PORT": "8545",
             "OP_TEST_SEQUENCER_RPC_ENABLE_ADMIN": "true",
+            "OP_TEST_SEQUENCER_BUILDERS_CONFIG": "/config/builder_config.yaml",
         },
         cmd=cmd,
         private_ip_address_placeholder=_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
