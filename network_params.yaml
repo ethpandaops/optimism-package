@@ -73,7 +73,6 @@ optimism_package:
       <<: *x-supervisor
   test_sequencers:
     test_sequencer0: &x-test_sequencer
-      superchain: superchain0
     test_sequencer1:
       <<: *x-test_sequencer
 ethereum_package:
