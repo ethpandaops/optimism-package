@@ -80,7 +80,7 @@ def _get_config(
             "L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "L2_CONSENSUS_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "RPC_ADDR": "0.0.0.0",
-            "RPC_PORT": str(params.ports[_net.RPC_PORT_NAME].number),
+            "RPC_PORT": "8545",
             "RPC_ENABLE_ADMIN": "true",
         },
         cmd=cmd,
