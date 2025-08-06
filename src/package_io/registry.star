@@ -93,7 +93,7 @@ _DEFAULT_IMAGES = {
     OP_BLOCKSCOUT: "blockscout/blockscout-optimism:6.8.0",
     OP_BLOCKSCOUT_VERIFIER: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0",
     # Test Sequencer
-    OP_TEST_SEQUENCER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-test-sequencer:latest"
+    OP_TEST_SEQUENCER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-test-sequencer:develop"
 }
 
 
