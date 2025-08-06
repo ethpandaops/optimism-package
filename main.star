@@ -151,6 +151,10 @@ def run(plan, args={}):
             )
         )
 
+    plan.print("Debug")
+    plan.print(optimism_args.supervisors)
+    plan.print(optimism_args.test_sequencers)
+
     for supervisor_params in optimism_args.supervisors:
         supervisor_launcher.launch(
             plan=plan,
