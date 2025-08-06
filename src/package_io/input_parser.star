@@ -214,7 +214,7 @@ def parse_network_params(plan, registry, input_args):
 
     # configure op-test-sequencer
 
-    results["test_sequencers"] = _test_sequencer_input_parser(
+    results["test_sequencers"] = _test_sequencer_input_parser.parse(
         args=input_args.get("test_sequencers"),
         registry=registry,
     )
