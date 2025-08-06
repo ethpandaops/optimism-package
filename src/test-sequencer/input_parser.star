@@ -15,7 +15,7 @@ def parse(test_sequencer_args, registry):
     _filter.assert_keys(
         test_sequencer_args or {},
         _DEFAULT_ARGS.keys(),
-        "Invalid attributes in test sequencer configuration for " + network_name + ": {}",
+        "Invalid attributes in test sequencer configuration",
     )
 
     # We filter the None values so that we can merge dicts easily
