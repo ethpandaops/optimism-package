@@ -5,6 +5,7 @@ _l2_launcher__hack = import_module("./src/l2/launcher__hack.star")
 superchain_launcher = import_module("./src/superchain/launcher.star")
 supervisor_launcher = import_module("./src/supervisor/launcher.star")
 op_challenger_launcher = import_module("./src/challenger/op-challenger/launcher.star")
+op_test_sequencer_launcher = import_module("./src/test-sequencer/op-test-sequencer/launcher.star")
 
 faucet = import_module("./src/faucet/op-faucet/op_faucet_launcher.star")
 interop_mon = import_module("./src/interop-mon/op-interop-mon/launcher.star")
@@ -154,6 +155,17 @@ def run(plan, args={}):
         supervisor_launcher.launch(
             plan=plan,
             params=supervisor_params,
+            l1_config_env_vars=l1_config_env_vars,
+            l2s_params=optimism_args.chains,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
+            observability_helper=observability_helper,
+        )
+
+    for test_sequencer_params in optimism_args.supervisors:
+        op_test_sequencer_launcher.launch(
+            plan=plan,
+            params=test_sequencer_params,
             l1_config_env_vars=l1_config_env_vars,
             l2s_params=optimism_args.chains,
             jwt_file=jwt_file,
