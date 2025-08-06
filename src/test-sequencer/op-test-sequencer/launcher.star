@@ -20,17 +20,17 @@ def launch(
     deployment_output,
     observability_helper,
 ):
-    supervisor_l2s_params = [
-        l2_params
-        for l2_params in l2s_params
-        if l2_params.network_params.network_id in params.superchain.participants
-    ]
+#     supervisor_l2s_params = [
+#         l2_params
+#         for l2_params in l2s_params
+#         if l2_params.network_params.network_id in params.superchain.participants
+#     ]
 
     config = _get_config(
         plan=plan,
         params=params,
         l1_config_env_vars=l1_config_env_vars,
-        l2s_params=supervisor_l2s_params,
+        l2s_params=l2s_params,
         jwt_file=jwt_file,
         deployment_output=deployment_output,
         observability_helper=observability_helper,
