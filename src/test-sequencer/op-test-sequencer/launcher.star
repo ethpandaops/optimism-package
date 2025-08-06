@@ -78,16 +78,6 @@ def _get_config(
         env_vars={
             "DATADIR": "/db",
             "L1_RPC": l1_config_env_vars["L1_RPC_URL"],
-            "L2_CONSENSUS_NODES": ",".join(
-                [
-                    _net.service_url(
-                        participant.cl.service_name,
-                        params.superchain.ports[_net.INTEROP_RPC_PORT_NAME],
-                    )
-                    for l2_params in l2s_params
-                    for participant in l2_params.participants
-                ]
-            ),
             "L2_CONSENSUS_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "RPC_ADDR": "0.0.0.0",
             "RPC_PORT": str(params.ports[_net.RPC_PORT_NAME].number),
