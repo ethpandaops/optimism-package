@@ -216,7 +216,6 @@ def parse_network_params(plan, registry, input_args):
 
     results["test_sequencers"] = _test_sequencer_input_parser(
         args=input_args.get("test_sequencers"),
-        superchains=results["superchains"],
         registry=registry,
     )
 
