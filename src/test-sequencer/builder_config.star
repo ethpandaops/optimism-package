@@ -1,4 +1,3 @@
-yaml = import_module("yaml")
 utils = import_module("/src/util.star")
 
 def build_config_struct(l1_rpc, l2s_params):
