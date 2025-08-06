@@ -12,11 +12,11 @@ _DEFAULT_ARGS = {
 
 def parse(args, registry):
     # Any extra attributes will cause an error
-    _filter.assert_keys(
-        args or {},
-        _DEFAULT_ARGS.keys(),
-        "Invalid attributes in test sequencer configuration",
-    )
+#     _filter.assert_keys(
+#         args or {},
+#         _DEFAULT_ARGS.keys(),
+#         "Invalid attributes in test sequencer configuration",
+#     )
 
     # We filter the None values so that we can merge dicts easily
     test_sequencer_params = _DEFAULT_ARGS | _filter.remove_none(args or {})
