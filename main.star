@@ -162,7 +162,7 @@ def run(plan, args={}):
             observability_helper=observability_helper,
         )
 
-    for test_sequencer_params in optimism_args.supervisors:
+    for test_sequencer_params in optimism_args.test_sequencers:
         op_test_sequencer_launcher.launch(
             plan=plan,
             params=test_sequencer_params,
