@@ -70,6 +70,7 @@ def _get_config(
 
     builder_config_file = _builder_config.generate_config_file(
         plan,
+        deployment_output,
         l1_rpc=l1_config_env_vars["L1_RPC_URL"],
         l2s_params=l2s_params,
     )

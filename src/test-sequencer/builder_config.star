@@ -1,6 +1,6 @@
 utils = import_module("/src/util.star")
 
-def build_config_struct(l1_rpc, l2s_params):
+def build_config_struct(plan, deployment_output, l1_rpc, l2s_params):
     builders = {}
     committers = {}
     signers = {}
@@ -14,6 +14,13 @@ def build_config_struct(l1_rpc, l2s_params):
         publisher_id = "publisher-{}".format(network_id)
         signer_id = "signer-{}".format(network_id)
         sequencer_id = "sequencer-{}".format(network_id)
+
+        sequencer_private_key = utils.read_network_config_value(
+            plan,
+            deployment_output,
+            "sequencer-{0}".format(network_id),
+            ".privateKey",
+        )
 
         # Extract EL and CL participant info
         el_participant = l2.participants[0].el
@@ -51,7 +58,7 @@ def build_config_struct(l1_rpc, l2s_params):
         signers[signer_id] = {
             "local-key" : {
                 "chainID": network_id,
-                "raw": "0x4d8e7b6726b9f04b5ae89848cc0e3a3bb03ddfa155b8492e3f527b80f0e68cd3",
+                "raw": sequencer_private_key,
             }
         }
 
