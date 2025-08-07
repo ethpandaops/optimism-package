@@ -2,6 +2,22 @@ utils = import_module("/src/util.star")
 
 def build_config_struct(l1_rpc, l2s_params):
     # You can optionally also include the l2 consensus endpoints here
+#     builder_chain1 = {
+#         "chain_id":  {"standard": {
+#             "l1EL": l1_rpc,
+#             "l2EL": "",
+#             "l2CL": "",
+#         }}
+#     }
+#
+#     builder_chain2 = {
+#             "chain_id":  {"standard": {
+#                 "l1EL": "",
+#                 "l2EL": "",
+#                 "l2CL": "",
+#             }}
+#         }
+
     return {
         "endpoints": [],
         "builders": {"builder": {"noop": {}}},
