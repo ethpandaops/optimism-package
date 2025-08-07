@@ -51,7 +51,7 @@ def _parse_instance(test_sequencer_args, test_sequencer_name, registry):
 
     # Add ports
     test_sequencer_params["ports"] = {
-        _net.HTTP_PORT_NAME: _net.port(number=8545),
+        _net.RPC_PORT_NAME: _net.port(number=8545),
     }
 
     # Add labels
