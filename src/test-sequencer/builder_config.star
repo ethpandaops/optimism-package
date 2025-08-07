@@ -1,30 +1,81 @@
 utils = import_module("/src/util.star")
 
 def build_config_struct(l1_rpc, l2s_params):
-    # You can optionally also include the l2 consensus endpoints here
-#     builder_chain1 = {
-#         "chain_id":  {"standard": {
-#             "l1EL": l1_rpc,
-#             "l2EL": "",
-#             "l2CL": "",
-#         }}
-#     }
-#
-#     builder_chain2 = {
-#             "chain_id":  {"standard": {
-#                 "l1EL": "",
-#                 "l2EL": "",
-#                 "l2CL": "",
-#             }}
-#         }
+    builders = {}
+    committers = {}
+    signers = {}
+    publishers = {}
+    sequencers = {}
+
+    for l2 in l2s_params:
+        network_id = l2.network_params.network_id
+        builder_id = "builder-{}".format(network_id)
+        committer_id = "committer-{}".format(network_id)
+        publisher_id = "publisher-{}".format(network_id)
+        signer_id = "signer-{}".format(network_id)
+        sequencer_id = "sequencer-{}".format(network_id)
+
+        # Extract EL and CL participant info
+        el_participant = l2.participants[0].el
+        cl_participant = l2.participants[0].cl
+
+        l2_el_url = "http://{}:{}".format(
+           el_participant.service_name,
+           el_participant.ports["rpc"].number,
+        )
+        l2_cl_url = "http://{}:{}".format(
+           cl_participant.service_name,
+           cl_participant.ports["rpc"].number,
+        )
+
+        builders[builder_id] = {
+            "standard": {
+               "l1EL": l1_rpc,
+               "l2EL": l2_el_url,
+               "l2CL": l2_cl_url,
+            }
+        }
+
+        committers[committer_id] = {
+            "standard" : {
+                "rpc" : l2_cl_url,
+            }
+        }
+
+        publishers[publisher_id] = {
+            "standard" : {
+                "rpc" : l2_cl_url,
+            }
+        }
+
+        signers[signer_id] = {
+            "local-key" : {
+                "chainID": network_id,
+                "raw": "0x4d8e7b6726b9f04b5ae89848cc0e3a3bb03ddfa155b8492e3f527b80f0e68cd3",
+            }
+        }
+
+        sequencers[sequencer_id]  = {
+            "full" : {
+                "chainID": network_id,
+                "builder": builder_id,
+                "signer": signer_id,
+                "committer": committer_id,
+                "publisher": publisher_id,
+                "sequencer_conf_depth": 2,
+                "sequencer_enabled": True,
+                "sequencer_stopped": False,
+                "sequencer_max_safe_lag" : 0,
+            }
+        }
 
     return {
         "endpoints": [],
-        "builders": {"builder": {"noop": {}}},
-        "signers": {"signer": {"noop": {}}},
-        "committers": {"committer": {"noop": {}}},
-        "publishers": {"publisher": {"noop": {}}},
-        "sequencers": {"seq1":{"noop": {}}},
+        "builders": builders,
+        "signers": signers,
+        "committers": committers,
+        "publishers": publishers,
+        "sequencers": sequencers
     }
 
 
