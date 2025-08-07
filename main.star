@@ -172,8 +172,6 @@ def run(plan, args={}):
             deployment_output=deployment_output,
             observability_helper=observability_helper,
         )
-    plan.print("l2s params")
-    plan.print(optimism_args.chains)
 
     for challenger_params in optimism_args.challengers:
         op_challenger_launcher.launch(

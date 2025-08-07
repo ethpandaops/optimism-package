@@ -62,10 +62,6 @@ def build_config_struct(l1_rpc, l2s_params):
                 "signer": signer_id,
                 "committer": committer_id,
                 "publisher": publisher_id,
-                "sequencer_conf_depth": 2,
-                "sequencer_enabled": True,
-                "sequencer_stopped": False,
-                "sequencer_max_safe_lag" : 0,
             }
         }
 
