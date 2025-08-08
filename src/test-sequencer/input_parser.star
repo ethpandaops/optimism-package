@@ -10,12 +10,11 @@ _DEFAULT_ARGS = {
     "pprof_enabled": False,
 }
 
+
 def parse(args, registry):
     return _filter.remove_none(
         [
-            _parse_instance(
-                test_sequencer_args or {}, test_sequencer_name, registry
-            )
+            _parse_instance(test_sequencer_args or {}, test_sequencer_name, registry)
             for test_sequencer_name, test_sequencer_args in (args or {}).items()
         ]
     )
@@ -26,15 +25,17 @@ def _parse_instance(test_sequencer_args, test_sequencer_name, registry):
     _filter.assert_keys(
         test_sequencer_args or {},
         _DEFAULT_ARGS.keys(),
-        "Invalid attributes in test sequencer configuration"
+        "Invalid attributes in test sequencer configuration for "
         + test_sequencer_name
-        + ": {}"
+        + ": {}",
     )
 
     _id.assert_id(test_sequencer_name)
 
     # We filter the None values so that we can merge dicts easily
-    test_sequencer_params = _DEFAULT_ARGS | _filter.remove_none(test_sequencer_args or {})
+    test_sequencer_params = _DEFAULT_ARGS | _filter.remove_none(
+        test_sequencer_args or {}
+    )
 
     if not test_sequencer_params["enabled"]:
         return None
@@ -44,7 +45,7 @@ def _parse_instance(test_sequencer_args, test_sequencer_name, registry):
         _registry.OP_TEST_SEQUENCER
     )
 
-    test_sequencer_params["name"] =  test_sequencer_name
+    test_sequencer_params["name"] = test_sequencer_name
 
     # Add the service name
     test_sequencer_params["service_name"] = "op-test-sequencer-{}".format(

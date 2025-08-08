@@ -12,7 +12,7 @@ ROOT_PARAMS = [
     "persistent",
     "faucet",
     "interop_mon",
-    "test-sequencers"
+    "test-sequencers",
 ]
 
 OBSERVABILITY_PARAMS = [

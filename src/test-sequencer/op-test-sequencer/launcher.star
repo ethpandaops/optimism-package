@@ -5,7 +5,9 @@ _ethereum_package_constants = import_module(
 )
 
 _observability = import_module("/src/observability/observability.star")
-_builder_config = import_module("/src/test-sequencer/op-test-sequencer/builder_config.star")
+_builder_config = import_module(
+    "/src/test-sequencer/op-test-sequencer/builder_config.star"
+)
 
 
 def launch(

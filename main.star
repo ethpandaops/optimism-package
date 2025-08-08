@@ -5,7 +5,9 @@ _l2_launcher__hack = import_module("./src/l2/launcher__hack.star")
 superchain_launcher = import_module("./src/superchain/launcher.star")
 supervisor_launcher = import_module("./src/supervisor/launcher.star")
 op_challenger_launcher = import_module("./src/challenger/op-challenger/launcher.star")
-op_test_sequencer_launcher = import_module("./src/test-sequencer/op-test-sequencer/launcher.star")
+op_test_sequencer_launcher = import_module(
+    "./src/test-sequencer/op-test-sequencer/launcher.star"
+)
 
 faucet = import_module("./src/faucet/op-faucet/op_faucet_launcher.star")
 interop_mon = import_module("./src/interop-mon/op-interop-mon/launcher.star")

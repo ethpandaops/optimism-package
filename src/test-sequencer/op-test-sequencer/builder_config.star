@@ -1,5 +1,6 @@
 utils = import_module("/src/util.star")
 
+
 # Ref: https://github.com/ethereum-optimism/optimism/blob/f70219a759e1da31e864c0ccdc2c757689aba3ec/op-test-sequencer/sequencer/backend/work/config/static.go#L12
 def build_config_struct(plan, deployment_output, l1_rpc, l2s_params):
     builders = {}
@@ -28,43 +29,43 @@ def build_config_struct(plan, deployment_output, l1_rpc, l2s_params):
         cl_participant = l2.participants[0].cl
 
         l2_el_url = "http://{}:{}".format(
-           el_participant.service_name,
-           el_participant.ports["rpc"].number,
+            el_participant.service_name,
+            el_participant.ports["rpc"].number,
         )
         l2_cl_url = "http://{}:{}".format(
-           cl_participant.service_name,
-           cl_participant.ports["rpc"].number,
+            cl_participant.service_name,
+            cl_participant.ports["rpc"].number,
         )
 
         builders[builder_id] = {
             "standard": {
-               "l1EL": l1_rpc,
-               "l2EL": l2_el_url,
-               "l2CL": l2_cl_url,
+                "l1EL": l1_rpc,
+                "l2EL": l2_el_url,
+                "l2CL": l2_cl_url,
             }
         }
 
         committers[committer_id] = {
-            "standard" : {
-                "rpc" : l2_cl_url,
+            "standard": {
+                "rpc": l2_cl_url,
             }
         }
 
         publishers[publisher_id] = {
-            "standard" : {
-                "rpc" : l2_cl_url,
+            "standard": {
+                "rpc": l2_cl_url,
             }
         }
 
         signers[signer_id] = {
-            "local-key" : {
+            "local-key": {
                 "chainID": network_id,
                 "raw": sequencer_private_key,
             }
         }
 
-        sequencers[sequencer_id]  = {
-            "full" : {
+        sequencers[sequencer_id] = {
+            "full": {
                 "chainID": network_id,
                 "builder": builder_id,
                 "signer": signer_id,
@@ -81,11 +82,13 @@ def build_config_struct(plan, deployment_output, l1_rpc, l2s_params):
         "signers": signers,
         "committers": committers,
         "publishers": publishers,
-        "sequencers": sequencers
+        "sequencers": sequencers,
     }
 
 
-def generate_config_file(plan, deployment_output, l1_rpc, l2s_params, file_name="builder_config.json"):
+def generate_config_file(
+    plan, deployment_output, l1_rpc, l2s_params, file_name="builder_config.json"
+):
     cfg = build_config_struct(plan, deployment_output, l1_rpc, l2s_params)
     cfg_contents = json.encode(cfg)
     return utils.write_to_file(
@@ -93,4 +96,4 @@ def generate_config_file(plan, deployment_output, l1_rpc, l2s_params, file_name=
         contents=cfg_contents,
         directory="/config",
         file_name=file_name,
-     )
+    )
