@@ -50,7 +50,7 @@ _DEFAULT_IMAGES = {
     OP_BESU: "ghcr.io/optimism-java/op-besu:latest",
     OP_RBUILDER: "ghcr.io/flashbots/op-rbuilder:latest",
     # CL images
-    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
+    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.5",
     KONA_NODE: "ghcr.io/op-rs/kona/kona-node:latest",
     HILDR: "ghcr.io/optimism-java/hildr:latest",
     # Batching
