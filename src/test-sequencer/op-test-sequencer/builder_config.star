@@ -74,7 +74,8 @@ def build_config_struct(plan, deployment_output, l1_rpc, l2s_params):
             }
         }
 
-    # Todo: add sequencer for l1
+    # TODO: l1 Builder is only supported in process and not available through config
+    # Once availavle we should add L1 builder as well
 
     return {
         "endpoints": [],
