@@ -1,5 +1,6 @@
 utils = import_module("/src/util.star")
 
+# Ref: https://github.com/ethereum-optimism/optimism/blob/f70219a759e1da31e864c0ccdc2c757689aba3ec/op-test-sequencer/sequencer/backend/work/config/static.go#L12
 def build_config_struct(plan, deployment_output, l1_rpc, l2s_params):
     builders = {}
     committers = {}
@@ -84,10 +85,9 @@ def build_config_struct(plan, deployment_output, l1_rpc, l2s_params):
     }
 
 
-def generate_config_file(plan, deployment_output, l1_rpc, l2s_params, file_name="builder_config.yaml"):
+def generate_config_file(plan, deployment_output, l1_rpc, l2s_params, file_name="builder_config.json"):
     cfg = build_config_struct(plan, deployment_output, l1_rpc, l2s_params)
     cfg_contents = json.encode(cfg)
-    plan.print("Generated Config:\n" + cfg_contents)
     return utils.write_to_file(
         plan=plan,
         contents=cfg_contents,

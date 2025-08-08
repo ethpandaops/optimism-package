@@ -23,11 +23,13 @@ def parse(args, registry):
 
 def _parse_instance(test_sequencer_args, test_sequencer_name, registry):
     # Any extra attributes will cause an error
-#     _filter.assert_keys(
-#         test_sequencer_args or {},
-#         _DEFAULT_ARGS.keys(),
-#         "Invalid attributes in test sequencer configuration",
-#     )
+    _filter.assert_keys(
+        test_sequencer_args or {},
+        _DEFAULT_ARGS.keys(),
+        "Invalid attributes in test sequencer configuration",
+        + test_sequencer_name
+        + ": {}"
+    )
 
     _id.assert_id(test_sequencer_name)
 

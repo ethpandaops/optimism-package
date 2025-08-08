@@ -1,4 +1,3 @@
-_file = import_module("/src/util/file.star")
 _net = import_module("/src/util/net.star")
 
 _ethereum_package_constants = import_module(
@@ -6,11 +5,8 @@ _ethereum_package_constants = import_module(
 )
 
 _observability = import_module("/src/observability/observability.star")
-_prometheus = import_module("/src/observability/prometheus/prometheus_launcher.star")
 _builder_config = import_module("/src/test-sequencer/op-test-sequencer/builder_config.star")
 
-
-DATA_DIR = "/etc/test-sequencer"
 
 def launch(
     plan,
@@ -21,12 +17,6 @@ def launch(
     deployment_output,
     observability_helper,
 ):
-#     supervisor_l2s_params = [
-#         l2_params
-#         for l2_params in l2s_params
-#         if l2_params.network_params.network_id in params.superchain.participants
-#     ]
-
     config = _get_config(
         plan=plan,
         params=params,
@@ -89,7 +79,7 @@ def _get_config(
             "OP_TEST_SEQUENCER_RPC_ADDR": "0.0.0.0",
             "OP_TEST_SEQUENCER_RPC_PORT": "8545",
             "OP_TEST_SEQUENCER_RPC_ENABLE_ADMIN": "true",
-            "OP_TEST_SEQUENCER_BUILDERS_CONFIG": "/config/builder_config.yaml",
+            "OP_TEST_SEQUENCER_BUILDERS_CONFIG": "/config/builder_config.json",
         },
         cmd=cmd,
         private_ip_address_placeholder=_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
