@@ -26,7 +26,7 @@ def _parse_instance(test_sequencer_args, test_sequencer_name, registry):
     _filter.assert_keys(
         test_sequencer_args or {},
         _DEFAULT_ARGS.keys(),
-        "Invalid attributes in test sequencer configuration",
+        "Invalid attributes in test sequencer configuration"
         + test_sequencer_name
         + ": {}"
     )
