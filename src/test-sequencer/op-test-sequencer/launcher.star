@@ -85,8 +85,6 @@ def _get_config(
             _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         env_vars={
-            "OP_TEST_SEQUENCER_DATADIR": "/db",
-            "OP_TEST_SEQUENCER_L1_RPC": l1_config_env_vars["L1_RPC_URL"],
             "OP_TEST_SEQUENCER_RPC_JWT_SECRET": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "OP_TEST_SEQUENCER_RPC_ADDR": "0.0.0.0",
             "OP_TEST_SEQUENCER_RPC_PORT": "8545",

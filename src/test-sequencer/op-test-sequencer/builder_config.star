@@ -72,6 +72,8 @@ def build_config_struct(plan, deployment_output, l1_rpc, l2s_params):
             }
         }
 
+    # Todo: add sequencer for l1
+
     return {
         "endpoints": [],
         "builders": builders,

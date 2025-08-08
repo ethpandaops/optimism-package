@@ -125,7 +125,7 @@ def input_parser(
         challengers=results["challengers"],
         superchains=results["superchains"],
         supervisors=results["supervisors"],
-        test_sequencers=results["test_sequencers"],
+        test_sequencers=results["test-sequencers"],
         op_contract_deployer_params=struct(
             image=results["op_contract_deployer_params"]["image"],
             l1_artifacts_locator=results["op_contract_deployer_params"][
@@ -214,8 +214,8 @@ def parse_network_params(plan, registry, input_args):
 
     # configure op-test-sequencer
 
-    results["test_sequencers"] = _test_sequencer_input_parser.parse(
-        args=input_args.get("test_sequencers"),
+    results["test-sequencers"] = _test_sequencer_input_parser.parse(
+        args=input_args.get("test-sequencers"),
         registry=registry,
     )
 
