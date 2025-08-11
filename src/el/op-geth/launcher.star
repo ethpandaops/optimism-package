@@ -132,7 +132,7 @@ def get_service_config(
     cmd = [
         "geth",
         "--networkid={0}".format(network_params.network_id),
-        # "--verbosity=" + verbosity_level,
+        "--verbosity={0}".format(log_level),
         "--datadir={}".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
         "--gcmode=archive",
         "--state.scheme=hash",
@@ -141,7 +141,6 @@ def get_service_config(
         "--http.vhosts=*",
         "--http.corsdomain=*",
         "--http.api=admin,engine,net,eth,web3,debug,miner",
-        "--verbosity={0}".format(log_level),
         "--ws",
         "--ws.addr=0.0.0.0",
         "--ws.port={0}".format(ports[_net.WS_PORT_NAME].number),
