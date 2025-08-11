@@ -26,11 +26,11 @@ _EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nethermind/execution-data"
 
 
 _VERBOSITY_LEVELS = {
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "1",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "2",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "3",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "4",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "5",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "error",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "info",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -125,7 +125,7 @@ def get_service_config(
     ports = _net.ports_to_port_specs(params.ports)
 
     cmd = [
-        "--log=debug",
+        "--log={}".format(log_level),
         "--datadir={}".format(_EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
         "--Init.WebSocketsEnabled=true",
         "--JsonRpc.Enabled=true",
