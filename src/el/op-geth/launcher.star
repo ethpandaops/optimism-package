@@ -132,7 +132,7 @@ def get_service_config(
     cmd = [
         "geth",
         "--networkid={0}".format(network_params.network_id),
-        # "--verbosity=" + verbosity_level,
+        "--verbosity={0}".format(log_level),
         "--datadir={}".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
         "--gcmode=archive",
         "--state.scheme=hash",
