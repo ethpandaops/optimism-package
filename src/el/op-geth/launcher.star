@@ -141,6 +141,7 @@ def get_service_config(
         "--http.vhosts=*",
         "--http.corsdomain=*",
         "--http.api=admin,engine,net,eth,web3,debug,miner",
+        "--verbosity={0}".format(log_level),
         "--ws",
         "--ws.addr=0.0.0.0",
         "--ws.port={0}".format(ports[_net.WS_PORT_NAME].number),
