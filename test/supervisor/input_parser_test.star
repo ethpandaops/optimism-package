@@ -85,6 +85,7 @@ def test_supervisor_input_parser_default_args(plan):
         [
             struct(
                 enabled=True,
+                extra_env_vars={},
                 extra_params=[],
                 image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:v0.3.0-dev.4",
                 labels={
