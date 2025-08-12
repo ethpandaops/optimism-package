@@ -10,9 +10,21 @@ _DEFAULT_ARGS = {
 
 
 def parse(args, l2s_params):
+    # l2s_params may be a list of dicts or structs; normalize to simple dicts with .network_params
+    normalized_l2s = []
+    for c in (l2s_params or []):
+        if type(c) == "dict":
+            # ensure nested network_params is a struct-like for attribute access
+            np = c.get("network_params")
+            if type(np) == "dict":
+                np = struct(**np)
+            normalized_l2s.append(struct(network_params=np))
+        else:
+            normalized_l2s.append(c)
+
     return _filter.remove_none(
         [
-            _parse_instance(superchain_args or {}, superchain_name, l2s_params)
+            _parse_instance(superchain_args or {}, superchain_name, normalized_l2s)
             for superchain_name, superchain_args in (args or {}).items()
         ]
     )

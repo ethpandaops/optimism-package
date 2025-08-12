@@ -33,7 +33,7 @@ def parse(da_args, network_params, registry):
         return None
 
     # And default the image to the one in the registry
-    da_params["image"] = da_params["image"] or registry.get(_registry.DA_SERVER)
+    da_params["image"] = da_params.get("image") or registry.get(_registry.DA_SERVER)
 
     # Add the service name
     da_params["service_name"] = "op-da-{}-{}-{}".format(

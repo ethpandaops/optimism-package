@@ -8,6 +8,7 @@ _da_input_parser = import_module("/src/da/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
 _tx_fuzzer_input_parser = import_module("/src/tx-fuzzer/input_parser.star")
+_flashblocks_input_parser = import_module("/src/flashblocks/input_parser.star")
 
 _DEFAULT_NETWORK_PARAMS = {
     "network": "kurtosis",
@@ -31,6 +32,7 @@ _DEFAULT_ARGS = {
     "blockscout_params": None,
     "proxyd_params": None,
     "tx_fuzzer_params": None,
+    "flashblocks_websocket_proxy_params": None,
 }
 
 
@@ -114,8 +116,8 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
     l2_params["proxyd_params"] = _proxyd_input_parser.parse(
         proxyd_args=l2_params["proxyd_params"],
         network_params=l2_params["network_params"],
-        participants_params=l2_params["participants"],
         registry=registry,
+        participants_params=l2_params["participants"],
     )
 
     # We add the tx-fuzzer params
@@ -135,6 +137,13 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
     # We add the explorer params
     l2_params["blockscout_params"] = _blockscout_input_parser.parse(
         blockscout_args=l2_params["blockscout_params"],
+        network_params=l2_params["network_params"],
+        registry=registry,
+    )
+
+    # We add the flashblocks params
+    l2_params["flashblocks_websocket_proxy_params"] = _flashblocks_input_parser.parse_websocket_proxy(
+        websocket_proxy_args=l2_params["flashblocks_websocket_proxy_params"],
         network_params=l2_params["network_params"],
         registry=registry,
     )

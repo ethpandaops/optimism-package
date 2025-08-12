@@ -183,6 +183,10 @@ def get_service_config(
     # configure environment variables
 
     env_vars = dict(params.extra_env_vars)
+    env_vars.setdefault("ENABLE_FLASHBLOCKS", "true")
+    env_vars.setdefault("FLASHBLOCKS_WS_ADDR", "0.0.0.0")
+    env_vars.setdefault("FLASHBLOCKS_WS_PORT", str(params.flashblocks_ws_port))
+    env_vars.setdefault("FLASHBLOCK_BLOCK_TIME", str(params.flashblocks_block_time))
 
     # apply customizations
 

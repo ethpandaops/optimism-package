@@ -25,7 +25,17 @@ def launch(
     el_params,
     cl_params,
     observability_helper,
+    builder_el_params=None,
 ):
+    # Define websocket port for flashblocks support (only if MEV sidecar is present)
+    enable_flashblocks_ws = sidecar_context != None
+    # Allow override via params.websocket_port if provided
+    ws_port = (
+        params.websocket_port
+        if enable_flashblocks_ws and hasattr(params, "websocket_port") and params.websocket_port
+        else (8546 if enable_flashblocks_ws else None)
+    )
+    
     config = get_service_config(
         plan=plan,
         params=params,
@@ -35,7 +45,9 @@ def launch(
         deployment_output=deployment_output,
         el_params=el_params,
         cl_params=cl_params,
+        builder_el_params=builder_el_params,
         observability_helper=observability_helper,
+        ws_port=ws_port,
     )
 
     service = plan.add_service(params.service_name, config)
@@ -59,6 +71,7 @@ def launch(
             conductor_consensus_url=consensus_url,
             conductor_raft_server_id=params.service_name,
             conductor_metrics_info=[metrics_info],
+            conductor_ws_port=ws_port if ws_port else None,
         ),
     )
 
@@ -72,7 +85,9 @@ def get_service_config(
     deployment_output,
     el_params,
     cl_params,
+    builder_el_params,
     observability_helper,
+    ws_port,
 ):
     ports = _net.ports_to_port_specs(params.ports)
 
@@ -80,39 +95,47 @@ def get_service_config(
     files = {
         _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: deployment_output,
         _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER: Directory(
-            persistent_key="datadir"
+            persistent_key="datadir-{}".format(params.service_name)
         ),
     }
 
     rpc_port = params.ports[_net.RPC_PORT_NAME]
     consensus_port = params.ports[_net.CONSENSUS_PORT_NAME]
 
+    
     env_vars = {
         "OP_CONDUCTOR_CONSENSUS_ADDR": "0.0.0.0",
         "OP_CONDUCTOR_CONSENSUS_ADVERTISED": "{}:{}".format(
             params.service_name, consensus_port.number
         ),
         "OP_CONDUCTOR_CONSENSUS_PORT": str(consensus_port.number),
-        "OP_CONDUCTOR_EXECUTION_RPC": sidecar_context.rpc_http_url
-        if sidecar_context
-        else _net.service_url(
-            el_params.service_name, el_params.ports[_net.RPC_PORT_NAME]
+        "OP_CONDUCTOR_EXECUTION_RPC": (
+            sidecar_context.rpc_http_url
+            if sidecar_context and hasattr(sidecar_context, "rpc_http_url")
+            else _net.service_url(
+                el_params.service_name, el_params.ports[_net.RPC_PORT_NAME]
+            )
         ),
         "OP_CONDUCTOR_NODE_RPC": _net.service_url(
             cl_params.service_name, cl_params.ports[_net.RPC_PORT_NAME]
         ),
         "OP_CONDUCTOR_ROLLUP_BOOST_ENABLED": "true" if sidecar_context else "false",
         # This might also become a parameter
-        "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(_CONDUCTOR_HEALTH_CHECK_INTERVAL),
+        "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(
+            params.healthcheck_interval
+            if hasattr(params, "healthcheck_interval") and params.healthcheck_interval
+            else _CONDUCTOR_HEALTH_CHECK_INTERVAL
+        ),
         # This might also become a parameter
         "OP_CONDUCTOR_HEALTHCHECK_MIN_PEER_COUNT": str(
-            _CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT
+            params.healthcheck_min_peer_count
+            if hasattr(params, "healthcheck_min_peer_count") and params.healthcheck_min_peer_count != None
+            else _CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT
         ),
-        # docs recommend a 2-3x multiple of your network block time to account for temporary performance issues
-        #
-        # TODO This might be later added as a multiplier parameter if needed
         "OP_CONDUCTOR_HEALTHCHECK_UNSAFE_INTERVAL": str(
-            network_params.seconds_per_slot * 2 + 1
+            params.healthcheck_unsafe_interval
+            if hasattr(params, "healthcheck_unsafe_interval") and params.healthcheck_unsafe_interval
+            else max(600, network_params.seconds_per_slot * 10)
         ),
         "OP_CONDUCTOR_LOG_FORMAT": "logfmt",
         "OP_CONDUCTOR_LOG_LEVEL": "info",
@@ -137,12 +160,26 @@ def get_service_config(
         or "",
     }
 
+    if ws_port:
+        env_vars["OP_CONDUCTOR_WEBSOCKET_SERVER_PORT"] = str(ws_port)
+
+    if builder_el_params and hasattr(builder_el_params, "service_name"):
+        env_vars["OP_CONDUCTOR_ROLLUPBOOST_WS_URL"] = "ws://{}:{}/ws".format(
+            builder_el_params.service_name,
+            1111,
+        )
+        env_vars["OP_CONDUCTOR_ROLLUP_BOOST_ENABLED"] = "true"
+    elif sidecar_context and hasattr(sidecar_context, "rpc_http_url"):
+        ws_upstream = sidecar_context.rpc_http_url.replace("http://", "ws://")
+        env_vars["OP_CONDUCTOR_ROLLUPBOOST_WS_URL"] = ws_upstream
+        env_vars["OP_CONDUCTOR_ROLLUP_BOOST_ENABLED"] = "true"
+
     if observability_helper.enabled:
-        env_vars |= {
+        env_vars.update({
             "OP_CONDUCTOR_METRICS_ADDR": "0.0.0.0",
             "OP_CONDUCTOR_METRICS_ENABLED": "true",
             "OP_CONDUCTOR_METRICS_PORT": str(_observability.METRICS_PORT_NUM),
-        }
+        })
 
         _observability.expose_metrics_port(ports)
 

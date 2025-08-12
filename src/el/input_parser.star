@@ -19,7 +19,12 @@ _DEFAULT_ARGS = {
     "max_mem": 0,
 }
 
-_DEFAULT_BUILDER_ARGS = _DEFAULT_ARGS | {"key": None}
+_DEFAULT_BUILDER_ARGS = _DEFAULT_ARGS | {
+    "key": None,
+    # Flashblocks-related defaults for builders
+    "flashblocks_ws_port": 1111,
+    "flashblocks_block_time": 250,
+}
 
 # EL clients have a type property that maps to an image
 _IMAGE_IDS = {

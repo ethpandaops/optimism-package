@@ -31,7 +31,7 @@ def parse(tx_fuzzer_args, network_params, registry):
         return None
 
     # And default the image to the one in the registry
-    tx_fuzzer_params["image"] = tx_fuzzer_params["image"] or registry.get(
+    tx_fuzzer_params["image"] = tx_fuzzer_params.get("image") or registry.get(
         _registry.TX_FUZZER
     )
 

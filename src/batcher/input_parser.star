@@ -24,7 +24,7 @@ def parse(batcher_args, network_params, registry):
     batcher_params = _DEFAULT_ARGS | _filter.remove_none(batcher_args or {})
 
     # And default the image to the one in the registry
-    batcher_params["image"] = batcher_params["image"] or registry.get(
+    batcher_params["image"] = batcher_params.get("image") or registry.get(
         _registry.OP_BATCHER
     )
 

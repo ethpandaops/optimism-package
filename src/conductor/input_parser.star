@@ -11,6 +11,11 @@ _DEFAULT_ARGS = {
     "paused": False,
     "bootstrap": False,
     "pprof_enabled": False,
+    # Optional overrides
+    "websocket_port": None,
+    "healthcheck_interval": None,
+    "healthcheck_min_peer_count": None,
+    "healthcheck_unsafe_interval": None,
 }
 
 
@@ -32,14 +37,14 @@ def parse(
         + ": {}",
     )
 
-    # We filter the None values so that we can merge dicts easily
+    # Merge with defaults first
     conductor_params = _DEFAULT_ARGS | _filter.remove_none(conductor_args or {})
 
     if not conductor_params["enabled"]:
         return None
 
     # And default the image to the one in the registry
-    conductor_params["image"] = conductor_params["image"] or registry.get(
+    conductor_params["image"] = conductor_params.get("image") or registry.get(
         _registry.OP_CONDUCTOR
     )
 
@@ -62,5 +67,8 @@ def parse(
         "op.network.participant.name": participant_name,
         "op.conductor.type": "op-conductor",
     }
+
+    # Drop None-valued optional fields to keep output minimal AFTER all defaults are applied
+    conductor_params = _filter.remove_none(conductor_params)
 
     return struct(**conductor_params)

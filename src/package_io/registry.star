@@ -31,6 +31,8 @@ ROLLUP_BOOST = "rollup-boost"
 DA_SERVER = "da-server"
 TX_FUZZER = "tx-fuzzer"
 
+FLASHBLOCKS_WEBSOCKET_PROXY = "flashblocks-websocket-proxy"
+
 DEPLOYMENT_UTILS = "deployment-utils"
 
 PROMETHEUS = "prometheus"
@@ -82,6 +84,8 @@ _DEFAULT_IMAGES = {
     DA_SERVER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
     # Tx Fuzzer
     TX_FUZZER: "ethpandaops/tx-fuzz:master",
+    # Flashblocks
+    FLASHBLOCKS_WEBSOCKET_PROXY: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/flashblocks-websocket-proxy:latest",
     # utils
     DEPLOYMENT_UTILS: "mslipper/deployment-utils:latest",
     # observability
