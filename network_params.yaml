@@ -71,6 +71,9 @@ optimism_package:
       superchain: superchain0
     supervisor1:
       <<: *x-supervisor
+  test-sequencers:
+    sequencer0:
+      enabled: true
 ethereum_package:
   participants:
   - el_type: geth
