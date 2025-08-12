@@ -101,6 +101,7 @@ def test_l2_participant_el_launcher_op_besu(plan):
             "--sync-mode=FULL",
             "--bonsai-limit-trie-logs-enabled=false",
             "--version-compatibility-protection=false",
+            "--logging=INFO",
             "--metrics",
             "--metrics.addr=0.0.0.0",
             "--metrics.port=9001",
@@ -181,7 +182,7 @@ def test_l2_participant_el_launcher_op_erigon(plan):
     expect.eq(
         service_config.cmd,
         [
-            "erigon init --datadir=/data/op-erigon/execution-data /network-configs/genesis-2151908.json && erigon --datadir=/data/op-erigon/execution-data --networkid=2151908 --http --http.port=8545 --http.addr=0.0.0.0 --http.vhosts=* --http.corsdomain=* --http.api=admin,engine,net,eth,web3,debug,miner --ws --ws.port=8546 --allow-insecure-unlock --authrpc.port=8551 --authrpc.addr=0.0.0.0 --authrpc.vhosts=* --authrpc.jwtsecret=/jwt/jwtsecret --nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER --rpc.allow-unprotected-txs --port=30303 --metrics --metrics.addr=0.0.0.0 --metrics.port=9001 --bootnodes=enode:001"
+            "erigon init --datadir=/data/op-erigon/execution-data /network-configs/genesis-2151908.json && erigon --datadir=/data/op-erigon/execution-data --networkid=2151908 --http --http.port=8545 --http.addr=0.0.0.0 --http.vhosts=* --http.corsdomain=* --http.api=admin,engine,net,eth,web3,debug,miner --ws --ws.port=8546 --allow-insecure-unlock --authrpc.port=8551 --authrpc.addr=0.0.0.0 --authrpc.vhosts=* --authrpc.jwtsecret=/jwt/jwtsecret --nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER --rpc.allow-unprotected-txs --port=30303 --verbosity=3 --metrics --metrics.addr=0.0.0.0 --metrics.port=9001 --bootnodes=enode:001"
         ],
     )
     expect.eq(
@@ -258,7 +259,7 @@ def test_l2_participant_el_launcher_op_geth(plan):
     expect.eq(
         service_config.cmd,
         [
-            "geth init --datadir=/data/geth/execution-data --state.scheme=hash /network-configs/genesis-2151908.json && geth --networkid=2151908 --datadir=/data/geth/execution-data --gcmode=archive --state.scheme=hash --http --http.addr=0.0.0.0 --http.vhosts=* --http.corsdomain=* --http.api=admin,engine,net,eth,web3,debug,miner --ws --ws.addr=0.0.0.0 --ws.port=8546 --ws.api=admin,engine,net,eth,web3,debug,miner --ws.origins=* --allow-insecure-unlock --authrpc.port=8551 --authrpc.addr=0.0.0.0 --authrpc.vhosts=* --authrpc.jwtsecret=/jwt/jwtsecret --syncmode=full --nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER --rpc.allow-unprotected-txs --discovery.port=30303 --port=30303 --metrics --metrics.addr=0.0.0.0 --metrics.port=9001 --bootnodes=enode:001"
+            "geth init --datadir=/data/geth/execution-data --state.scheme=hash /network-configs/genesis-2151908.json && geth --networkid=2151908 --verbosity=3 --datadir=/data/geth/execution-data --gcmode=archive --state.scheme=hash --http --http.addr=0.0.0.0 --http.vhosts=* --http.corsdomain=* --http.api=admin,engine,net,eth,web3,debug,miner --ws --ws.addr=0.0.0.0 --ws.port=8546 --ws.api=admin,engine,net,eth,web3,debug,miner --ws.origins=* --allow-insecure-unlock --authrpc.port=8551 --authrpc.addr=0.0.0.0 --authrpc.vhosts=* --authrpc.jwtsecret=/jwt/jwtsecret --syncmode=full --nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER --rpc.allow-unprotected-txs --discovery.port=30303 --port=30303 --metrics --metrics.addr=0.0.0.0 --metrics.port=9001 --bootnodes=enode:001"
         ],
     )
     expect.eq(
@@ -335,7 +336,7 @@ def test_l2_participant_el_launcher_op_nethermind(plan):
     expect.eq(
         service_config.cmd,
         [
-            "--log=debug",
+            "--log=info",
             "--datadir=/data/nethermind/execution-data",
             "--Init.WebSocketsEnabled=true",
             "--JsonRpc.Enabled=true",
