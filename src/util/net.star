@@ -39,3 +39,15 @@ def service_url(service_name, service_port):
     return "{}://{}:{}".format(
         service_port.application_protocol, service_name, service_port.number
     )
+
+
+# Creates a localhost URL for external access (placeholder for post-processing)
+def localhost_url(service_name, service_port):
+    return "{}://127.0.0.1:{}".format(
+        service_port.application_protocol, service_port.number
+    )
+
+
+# Creates a localhost address for external access (placeholder for post-processing)
+def localhost_address(service_name, service_port):
+    return "127.0.0.1:{}".format(service_port.number)
