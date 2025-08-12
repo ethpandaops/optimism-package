@@ -59,9 +59,11 @@ def external_l1_network_params_input_parser(plan, input_args):
 def input_parser(
     plan,
     input_args,
-    registry=_registry.Registry(images={
-        _registry.OP_CONDUCTOR_OPS: "op-conductor-ops:devnet",
-    }),
+    registry=_registry.Registry(
+        images={
+            _registry.OP_CONDUCTOR_OPS: "op-conductor-ops:devnet",
+        }
+    ),
 ):
     sanity_check.sanity_check(plan, input_args)
     results = parse_network_params(plan, registry, input_args)

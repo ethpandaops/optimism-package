@@ -5,6 +5,7 @@ _ethereum_package_constants = import_module(
 
 _net = import_module("/src/util/net.star")
 
+
 def launch(
     plan,
     params,
@@ -49,8 +50,7 @@ def get_service_config(
     for conductor_context in conductors_contexts:
         # Use conductor RPC port + /ws; the conductor serves WS on the same port
         ws_url = "ws://{}:{}/ws".format(
-            conductor_context.service_name,
-            conductor_context.conductor_rpc_port
+            conductor_context.service_name, conductor_context.conductor_rpc_port
         )
         upstream_urls.append(ws_url)
 
@@ -75,4 +75,4 @@ def get_service_config(
         env_vars=config_map_env,
         labels=params.labels,
         private_ip_address_placeholder=_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-    ) 
+    )

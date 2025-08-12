@@ -182,7 +182,9 @@ def test_conductor_config_data_generation_multiple_participants(plan):
                 ),
                 "conductor_raft_address": "{0}:{1}".format(
                     participant_params.conductor_params.service_name,
-                    participant_params.conductor_params.ports[_net.CONSENSUS_PORT_NAME].number,
+                    participant_params.conductor_params.ports[
+                        _net.CONSENSUS_PORT_NAME
+                    ].number,
                 ),
             }
             for participant_params in participants_params
@@ -199,9 +201,18 @@ def test_conductor_config_data_generation_multiple_participants(plan):
         expect.eq(service_name in config_data["sequencers"], True)
 
         sequencer_config = config_data["sequencers"][service_name]
-        expect.eq(sequencer_config["cl_rpc_url"], "http://op-cl-2151909-multi-chain-node{}:8547".format(i))
-        expect.eq(sequencer_config["conductor_rpc_url"], "http://op-conductor-2151909-multi-chain-node{}:8547".format(i))
-        expect.eq(sequencer_config["conductor_raft_address"], "op-conductor-2151909-multi-chain-node{}:50050".format(i))
+        expect.eq(
+            sequencer_config["cl_rpc_url"],
+            "http://op-cl-2151909-multi-chain-node{}:8547".format(i),
+        )
+        expect.eq(
+            sequencer_config["conductor_rpc_url"],
+            "http://op-conductor-2151909-multi-chain-node{}:8547".format(i),
+        )
+        expect.eq(
+            sequencer_config["conductor_raft_address"],
+            "op-conductor-2151909-multi-chain-node{}:50050".format(i),
+        )
 
 
 def test_conductor_config_data_with_different_ports(plan):

@@ -16,24 +16,28 @@ _DEFAULT_WEBSOCKET_PROXY_ARGS = {
 }
 
 
-def parse_websocket_proxy(
-    websocket_proxy_args, network_params, registry
-):
+def parse_websocket_proxy(websocket_proxy_args, network_params, registry):
     network_id = network_params.network_id
     network_name = network_params.name
 
     _filter.assert_keys(
         websocket_proxy_args or {},
         _DEFAULT_WEBSOCKET_PROXY_ARGS.keys(),
-        "Invalid attributes in flashblocks websocket proxy configuration for network {}".format(network_name),
+        "Invalid attributes in flashblocks websocket proxy configuration for network {}".format(
+            network_name
+        ),
     )
 
-    websocket_proxy_params = _DEFAULT_WEBSOCKET_PROXY_ARGS | _filter.remove_none(websocket_proxy_args or {})
+    websocket_proxy_params = _DEFAULT_WEBSOCKET_PROXY_ARGS | _filter.remove_none(
+        websocket_proxy_args or {}
+    )
 
     if not websocket_proxy_params["enabled"]:
         return None
 
-    websocket_proxy_params["image"] = websocket_proxy_params["image"] or registry.get(_registry.FLASHBLOCKS_WEBSOCKET_PROXY)
+    websocket_proxy_params["image"] = websocket_proxy_params["image"] or registry.get(
+        _registry.FLASHBLOCKS_WEBSOCKET_PROXY
+    )
 
     websocket_proxy_params["service_name"] = "flashblocks-websocket-proxy-{}-{}".format(
         network_id, network_name

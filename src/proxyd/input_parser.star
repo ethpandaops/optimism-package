@@ -37,9 +37,7 @@ def parse(proxyd_args, network_params, registry, participants_params=None):
     # Add replica URLs (EL RPC URLs, proxy targets) if participants are provided
     if participants_params != None:
         proxyd_params["replicas"] = {
-            p.name: _net.service_url(
-                p.el.service_name, p.el.ports[_net.RPC_PORT_NAME]
-            )
+            p.name: _net.service_url(p.el.service_name, p.el.ports[_net.RPC_PORT_NAME])
             for p in participants_params
         }
 

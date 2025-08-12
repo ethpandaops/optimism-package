@@ -7,7 +7,9 @@ _tx_fuzzer_launcher = import_module("/src/tx-fuzzer/launcher.star")
 _op_conductor_ops_launcher = import_module(
     "/src/conductor/op-conductor-ops/launcher.star"
 )
-_flashblocks_websocket_proxy_launcher = import_module("/src/flashblocks/flashblocks-websocket-proxy/launcher.star")
+_flashblocks_websocket_proxy_launcher = import_module(
+    "/src/flashblocks/flashblocks-websocket-proxy/launcher.star"
+)
 
 _selectors = import_module("./selectors.star")
 _util = import_module("/src/util.star")
@@ -43,10 +45,12 @@ def launch(
 
     # Collect conductor contexts for flashblocks proxy
     conductor_contexts = []
-    
+
     # Only process participants that were actually launched (not flashblocks participants)
     # The original_launcher_output__hack.participants contains only the regular participants
-    for index_hack, launched_participant in enumerate(original_launcher_output__hack.participants):
+    for index_hack, launched_participant in enumerate(
+        original_launcher_output__hack.participants
+    ):
         participant_name = launched_participant.name
         participant_log_prefix = "{}: Participant {}".format(
             network_log_prefix, participant_name
@@ -76,7 +80,7 @@ def launch(
             observability_helper=observability_helper,
             log_prefix=participant_log_prefix,
         )
-        
+
         # Collect conductor contexts for flashblocks proxy
         if conductor_context:
             conductor_contexts.append(conductor_context.context)
@@ -387,9 +391,9 @@ def _launch_conductor_maybe(
                 log_prefix, participant_params.conductor_params.service_name
             )
         )
-        
+
         return conductor_result
-    
+
     return None
 
 
@@ -451,34 +455,46 @@ def _launch_flashblocks_participants(
     log_prefix,
 ):
     if not flashblocks_websocket_proxy_context:
-        plan.print("{}: No flashblocks websocket proxy available, skipping flashblocks participants".format(log_prefix))
+        plan.print(
+            "{}: No flashblocks websocket proxy available, skipping flashblocks participants".format(
+                log_prefix
+            )
+        )
         return
 
     websocket_url = flashblocks_websocket_proxy_context.context.ws_url + "/ws"
-    
+
     # Get the flashblocks participants that were deferred from the original launch
     flashblocks_participants = original_launcher_output__hack.flashblocks_participants
-    
+
     if not flashblocks_participants:
         plan.print("{}: No flashblocks participants to launch".format(log_prefix))
         return
 
-    plan.print("{}: Launching {} flashblocks participants with websocket URL: {}".format(
-        log_prefix, len(flashblocks_participants), websocket_url
-    ))
+    plan.print(
+        "{}: Launching {} flashblocks participants with websocket URL: {}".format(
+            log_prefix, len(flashblocks_participants), websocket_url
+        )
+    )
 
-    _el_launcher = import_module("/src/el/launcher.star") 
+    _el_launcher = import_module("/src/el/launcher.star")
     _cl_launcher = import_module("/src/cl/launcher.star")
     _selectors = import_module("./selectors.star")
-    
-    get_sequencer_params_for = _selectors.create_get_sequencer_params_for(params.participants)
 
-    bootnode_contexts = [p.el.context for p in original_launcher_output__hack.participants]
+    get_sequencer_params_for = _selectors.create_get_sequencer_params_for(
+        params.participants
+    )
+
+    bootnode_contexts = [
+        p.el.context for p in original_launcher_output__hack.participants
+    ]
     cl_contexts = [p.cl.context for p in original_launcher_output__hack.participants]
 
     for participant_params in flashblocks_participants:
         participant_name = participant_params.name
-        participant_log_prefix = "{}: Flashblocks Participant {}".format(log_prefix, participant_name)
+        participant_log_prefix = "{}: Flashblocks Participant {}".format(
+            log_prefix, participant_name
+        )
 
         # Only op-reth supports flashblocks
         if participant_params.el.type != "op-reth":
@@ -489,12 +505,22 @@ def _launch_flashblocks_participants(
             )
             continue
 
-        plan.print("{}: Launching with flashblocks websocket URL".format(participant_log_prefix))
+        plan.print(
+            "{}: Launching with flashblocks websocket URL".format(
+                participant_log_prefix
+            )
+        )
 
         is_sequencer = _selectors.is_sequencer(participant_params)
-        sequencer_params = None if is_sequencer else get_sequencer_params_for(participant_params)
+        sequencer_params = (
+            None if is_sequencer else get_sequencer_params_for(participant_params)
+        )
 
-        plan.print("{}: Launching EL ({}) with flashblocks".format(participant_log_prefix, participant_params.el.type))
+        plan.print(
+            "{}: Launching EL ({}) with flashblocks".format(
+                participant_log_prefix, participant_params.el.type
+            )
+        )
 
         el = _el_launcher.launch(
             plan=plan,
@@ -533,10 +559,15 @@ def _launch_flashblocks_participants(
             log_prefix=participant_log_prefix,
         )
 
-        plan.print("{}: Launching CL ({})".format(participant_log_prefix, participant_params.cl.type))
+        plan.print(
+            "{}: Launching CL ({})".format(
+                participant_log_prefix, participant_params.cl.type
+            )
+        )
 
         el_context_for_cl = (
-            sidecar_and_builders.sidecar.context if sidecar_and_builders and sidecar_and_builders.sidecar
+            sidecar_and_builders.sidecar.context
+            if sidecar_and_builders and sidecar_and_builders.sidecar
             else el.context
         )
 
@@ -560,10 +591,16 @@ def _launch_flashblocks_participants(
             observability_helper=observability_helper,
         )
 
-        mev_status = "with MEV (rollup-boost)" if sidecar_and_builders and sidecar_and_builders.sidecar else "without MEV"
-        plan.print("{}: Successfully launched with --websocket-url={} {}".format(
-            participant_log_prefix, websocket_url, mev_status
-        ))
+        mev_status = (
+            "with MEV (rollup-boost)"
+            if sidecar_and_builders and sidecar_and_builders.sidecar
+            else "without MEV"
+        )
+        plan.print(
+            "{}: Successfully launched with --websocket-url={} {}".format(
+                participant_log_prefix, websocket_url, mev_status
+            )
+        )
 
         bootnode_contexts.append(el.context)
         cl_contexts.append(cl.context)
@@ -589,15 +626,19 @@ def _launch_flashblocks_sidecar_maybe(
     log_prefix,
 ):
     """Launch MEV sidecar (rollup-boost + rbuilder) for flashblocks participants if configured."""
-    
-    _el_launcher = import_module("/src/el/launcher.star") 
+
+    _el_launcher = import_module("/src/el/launcher.star")
     _cl_launcher = import_module("/src/cl/launcher.star")
     _rollup_boost_launcher = import_module("/src/mev/rollup-boost/launcher.star")
     _selectors = import_module("./selectors.star")
-    
+
     mev_params = participant_params.mev_params
     if not mev_params:
-        plan.print("{}: MEV/rollup-boost not enabled, skipping sidecar launch".format(log_prefix))
+        plan.print(
+            "{}: MEV/rollup-boost not enabled, skipping sidecar launch".format(
+                log_prefix
+            )
+        )
         return None
 
     if not is_sequencer:
@@ -646,7 +687,9 @@ def _launch_flashblocks_sidecar_maybe(
             ip_addr=mev_params.builder_host,
             engine_rpc_port_num=mev_params.builder_port,
             rpc_port_num=mev_params.builder_port,
-            rpc_http_url="http://{}:{}".format(mev_params.builder_host, mev_params.builder_port),
+            rpc_http_url="http://{}:{}".format(
+                mev_params.builder_host, mev_params.builder_port
+            ),
             client_name="external-builder",
         )
         if is_external_builder
@@ -700,7 +743,7 @@ def _launch_flashblocks_sidecar(
 ):
     """Launch the rollup-boost sidecar for flashblocks participants."""
     _rollup_boost_launcher = import_module("/src/mev/rollup-boost/launcher.star")
-    
+
     if mev_params.type == "rollup-boost":
         return _rollup_boost_launcher.launch(
             plan=plan,

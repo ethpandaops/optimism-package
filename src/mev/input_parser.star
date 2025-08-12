@@ -16,7 +16,9 @@ _IMAGE_IDS = {
 }
 
 
-def parse(mev_args, network_params, registry, participant_name=None, participant_index=None):
+def parse(
+    mev_args, network_params, registry, participant_name=None, participant_index=None
+):
     network_id = network_params.network_id
     network_name = network_params.name
 

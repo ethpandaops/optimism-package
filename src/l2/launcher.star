@@ -52,7 +52,7 @@ def launch(
     # Separate participants into those that need flashblocks and those that don't
     regular_participants = []
     flashblocks_participants = []
-    
+
     for participant_params in params.participants:
         if participant_params.use_flashblocks:
             flashblocks_participants.append(participant_params)

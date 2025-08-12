@@ -32,10 +32,12 @@ def launch(
     # Allow override via params.websocket_port if provided
     ws_port = (
         params.websocket_port
-        if enable_flashblocks_ws and hasattr(params, "websocket_port") and params.websocket_port
+        if enable_flashblocks_ws
+        and hasattr(params, "websocket_port")
+        and params.websocket_port
         else (8546 if enable_flashblocks_ws else None)
     )
-    
+
     config = get_service_config(
         plan=plan,
         params=params,
@@ -102,7 +104,6 @@ def get_service_config(
     rpc_port = params.ports[_net.RPC_PORT_NAME]
     consensus_port = params.ports[_net.CONSENSUS_PORT_NAME]
 
-    
     env_vars = {
         "OP_CONDUCTOR_CONSENSUS_ADDR": "0.0.0.0",
         "OP_CONDUCTOR_CONSENSUS_ADVERTISED": "{}:{}".format(
@@ -129,12 +130,14 @@ def get_service_config(
         # This might also become a parameter
         "OP_CONDUCTOR_HEALTHCHECK_MIN_PEER_COUNT": str(
             params.healthcheck_min_peer_count
-            if hasattr(params, "healthcheck_min_peer_count") and params.healthcheck_min_peer_count != None
+            if hasattr(params, "healthcheck_min_peer_count")
+            and params.healthcheck_min_peer_count != None
             else _CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT
         ),
         "OP_CONDUCTOR_HEALTHCHECK_UNSAFE_INTERVAL": str(
             params.healthcheck_unsafe_interval
-            if hasattr(params, "healthcheck_unsafe_interval") and params.healthcheck_unsafe_interval
+            if hasattr(params, "healthcheck_unsafe_interval")
+            and params.healthcheck_unsafe_interval
             else max(600, network_params.seconds_per_slot * 10)
         ),
         "OP_CONDUCTOR_LOG_FORMAT": "logfmt",
@@ -175,11 +178,13 @@ def get_service_config(
         env_vars["OP_CONDUCTOR_ROLLUP_BOOST_ENABLED"] = "true"
 
     if observability_helper.enabled:
-        env_vars.update({
-            "OP_CONDUCTOR_METRICS_ADDR": "0.0.0.0",
-            "OP_CONDUCTOR_METRICS_ENABLED": "true",
-            "OP_CONDUCTOR_METRICS_PORT": str(_observability.METRICS_PORT_NUM),
-        })
+        env_vars.update(
+            {
+                "OP_CONDUCTOR_METRICS_ADDR": "0.0.0.0",
+                "OP_CONDUCTOR_METRICS_ENABLED": "true",
+                "OP_CONDUCTOR_METRICS_PORT": str(_observability.METRICS_PORT_NUM),
+            }
+        )
 
         _observability.expose_metrics_port(ports)
 
