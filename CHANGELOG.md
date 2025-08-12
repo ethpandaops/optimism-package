@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.5.0](https://github.com/ethpandaops/optimism-package/compare/1.4.0...1.5.0) (2025-08-12)
+
+
+### Features
+
+* Add Jovian support ([#361](https://github.com/ethpandaops/optimism-package/issues/361)) ([e154939](https://github.com/ethpandaops/optimism-package/commit/e1549392e2fb5cca90f1763747e1c204ae285b1c))
+* add support for `pprof` ([#352](https://github.com/ethpandaops/optimism-package/issues/352)) ([c92ebbe](https://github.com/ethpandaops/optimism-package/commit/c92ebbebef72745ab8c61749aece307509d30721))
+* added support for `op-test-sequencer` ([#368](https://github.com/ethpandaops/optimism-package/issues/368)) ([d69cd46](https://github.com/ethpandaops/optimism-package/commit/d69cd463030e0e43df18e60c9038de4ac1293569))
+* adds `extra_env_vars` support ([#366](https://github.com/ethpandaops/optimism-package/issues/366)) ([b763c23](https://github.com/ethpandaops/optimism-package/commit/b763c239ddba6b6ab8fb0b3c790a697a8765b53c))
+* **kona:** update kurtosis package to be compatible with kona's RC ([#364](https://github.com/ethpandaops/optimism-package/issues/364)) ([ad6700a](https://github.com/ethpandaops/optimism-package/commit/ad6700a9ab0665fff1840e3e5a197b9bc0682517))
+
+
+### Bug Fixes
+
+* **contract_deployer:** ensure hardfork configuration is respected with multiple chains ([#360](https://github.com/ethpandaops/optimism-package/issues/360)) ([bc776a6](https://github.com/ethpandaops/optimism-package/commit/bc776a61e62b422bd2fa954e3a0588d52eba3847))
+* EL log levels ([#369](https://github.com/ethpandaops/optimism-package/issues/369)) ([219d5f9](https://github.com/ethpandaops/optimism-package/commit/219d5f9e104951d0ef6ed9586f9f6baa0ecbd980))
+
 ## [1.4.0](https://github.com/ethpandaops/optimism-package/compare/1.3.0...1.4.0) (2025-07-16)
 
 
