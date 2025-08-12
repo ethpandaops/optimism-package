@@ -12,12 +12,18 @@ OP_NODE = "op-node"
 KONA_NODE = "kona-node"
 HILDR = "hildr"
 
+OP_SUPERVISOR = "op-supervisor"
+KONA_SUPERVISOR = "kona-supervisor"
+
 OP_BATCHER = "op-batcher"
 OP_CHALLENGER = "op-challenger"
-OP_SUPERVISOR = "op-supervisor"
 OP_PROPOSER = "op-proposer"
+OP_CONDUCTOR = "op-conductor"
 OP_DEPLOYER = "op-deployer"
 OP_FAUCET = "op-faucet"
+OP_CONDUCTOR_OPS = "op-conductor-ops"
+OP_INTEROP_MON = "op-interop-mon"
+OP_TEST_SEQUENCER = "op-test-sequencer"
 
 PROXYD = "proxyd"
 
@@ -32,6 +38,9 @@ GRAFANA = "grafana"
 LOKI = "loki"
 PROMTAIL = "promtail"
 
+OP_BLOCKSCOUT = "op-blockscout"
+OP_BLOCKSCOUT_VERIFIER = "op-blockscout-verifier"
+
 
 _DEFAULT_IMAGES = {
     # EL images
@@ -42,25 +51,31 @@ _DEFAULT_IMAGES = {
     OP_BESU: "ghcr.io/optimism-java/op-besu:latest",
     OP_RBUILDER: "ghcr.io/flashbots/op-rbuilder:latest",
     # CL images
-    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
     KONA_NODE: "ghcr.io/op-rs/kona/kona-node:latest",
     HILDR: "ghcr.io/optimism-java/hildr:latest",
     # Batching
-    OP_BATCHER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
+    OP_BATCHER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.14.0",
     # Challenger
-    OP_CHALLENGER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
-    # Supervisor
-    OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
+    OP_CHALLENGER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:v1.5.1",
+    # op-supervisor
+    OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:v0.3.0-dev.4",
+    # kona-supervisor
+    KONA_SUPERVISOR: "ghcr.io/op-rs/kona/kona-supervisor:latest",
     # Proposer
-    OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
+    OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:v1.10.0",
+    # Conductor
+    OP_CONDUCTOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:v0.7.1",
     # deployer
     OP_DEPLOYER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2",
     # Faucet
-    # TODO: update to use a versioned image when available
-    # For now, we'll need users to pass the image explicitly
-    OP_FAUCET: "",
+    OP_FAUCET: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-faucet:develop",
+    # conductor-ops
+    OP_CONDUCTOR_OPS: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor-ops:v0.0.2",
+    # Interop Monitor
+    OP_INTEROP_MON: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-interop-mon:latest",
     # Proxyd
-    PROXYD: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.2",
+    PROXYD: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.5",
     # Sidecar
     ROLLUP_BOOST: "flashbots/rollup-boost:latest",
     # DA Server
@@ -74,6 +89,11 @@ _DEFAULT_IMAGES = {
     GRAFANA: "grafana/grafana:11.5.0",
     LOKI: "grafana/loki:3.3.2",
     PROMTAIL: "grafana/promtail:3.3.2",
+    # Explorers
+    OP_BLOCKSCOUT: "blockscout/blockscout-optimism:6.8.0",
+    OP_BLOCKSCOUT_VERIFIER: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0",
+    # Test Sequencer
+    OP_TEST_SEQUENCER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-test-sequencer:develop",
 }
 
 

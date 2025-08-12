@@ -22,14 +22,12 @@ def launch(
     plan,
     params,
     network_params,
-    el_contexts,
     observability_helper,
 ):
     config_artifact_name = create_config_artifact(
         plan=plan,
         params=params,
         network_params=network_params,
-        el_contexts=el_contexts,
         observability_helper=observability_helper,
     )
 
@@ -53,7 +51,6 @@ def create_config_artifact(
     plan,
     params,
     network_params,
-    el_contexts,
     observability_helper,
 ):
     config_template = read_file(_CONFIG_TEMPLATE_FILEPATH)
@@ -65,10 +62,7 @@ def create_config_artifact(
             "enabled": observability_helper.enabled,
             "port": _METRICS_PORT_NUM,
         },
-        "Replicas": {
-            "{0}-{1}".format(el_context.client_name, num): el_context.rpc_http_url
-            for num, el_context in enumerate(el_contexts)
-        },
+        "Replicas": params.replicas,
     }
 
     return plan.render_templates(
@@ -98,7 +92,10 @@ def get_service_config(
     # apply customizations
 
     if observability_helper.enabled:
-        _observability.expose_metrics_port(ports, port_num=_METRICS_PORT_NUM)
+        _observability.expose_http_port(ports, "metrics", _METRICS_PORT_NUM)
+
+    if params.pprof_enabled:
+        _observability.configure_op_service_pprof(cmd, ports)
 
     return ServiceConfig(
         image=params.image,

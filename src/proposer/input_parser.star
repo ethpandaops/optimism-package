@@ -7,6 +7,7 @@ _DEFAULT_ARGS = {
     "extra_params": [],
     "game_type": 1,
     "proposal_interval": "10m",
+    "pprof_enabled": False,
 }
 
 
@@ -42,7 +43,7 @@ def parse(proposer_args, network_params, registry):
     # Add labels
     proposer_params["labels"] = {
         "op.kind": "proposer",
-        "op.network.id": network_id,
+        "op.network.id": str(network_id),
     }
 
     return struct(**proposer_params)

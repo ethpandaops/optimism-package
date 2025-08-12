@@ -23,17 +23,17 @@ DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-proposer/op-proposer-data"
 def launch(
     plan,
     params,
-    cl_context,
+    sequencers_params,
     l1_config_env_vars,
     gs_proposer_private_key,
     game_factory_address,
     network_params,
     observability_helper,
 ):
-    config = get_proposer_config(
+    config = get_service_config(
         plan=plan,
         params=params,
-        cl_context=cl_context,
+        sequencers_params=sequencers_params,
         l1_config_env_vars=l1_config_env_vars,
         gs_proposer_private_key=gs_proposer_private_key,
         game_factory_address=game_factory_address,
@@ -49,11 +49,10 @@ def launch(
     return struct(service=service)
 
 
-def get_proposer_config(
+def get_service_config(
     plan,
     params,
-    # TODO Replace with predefined service names & ports from the parsed network params
-    cl_context,
+    sequencers_params,
     l1_config_env_vars,
     gs_proposer_private_key,
     game_factory_address,
@@ -65,7 +64,21 @@ def get_proposer_config(
         "op-proposer",
         "--poll-interval=12s",
         "--rpc.port={}".format(params.ports[_net.HTTP_PORT_NAME].number),
-        "--rollup-rpc={}".format(cl_context.beacon_http_url),
+        "--rollup-rpc={}".format(
+            ",".join(
+                [
+                    _net.service_url(
+                        s.conductor_params.service_name,
+                        s.conductor_params.ports[_net.RPC_PORT_NAME],
+                    )
+                    if s.conductor_params
+                    else _net.service_url(
+                        s.cl.service_name, s.cl.ports[_net.RPC_PORT_NAME]
+                    )
+                    for s in sequencers_params
+                ]
+            ),
+        ),
         "--game-factory-address={}".format(game_factory_address),
         "--private-key={}".format(gs_proposer_private_key),
         "--l1-eth-rpc={}".format(l1_config_env_vars["L1_RPC_URL"]),
@@ -79,6 +92,9 @@ def get_proposer_config(
 
     if observability_helper.enabled:
         observability.configure_op_service_metrics(cmd, ports)
+
+    if params.pprof_enabled:
+        observability.configure_op_service_pprof(cmd, ports)
 
     return ServiceConfig(
         image=params.image,

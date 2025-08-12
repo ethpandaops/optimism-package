@@ -1,8 +1,17 @@
 optimism_package:
   chains:
-    - participants:
-        - el_type: op-geth
-        - el_type: op-nethermind
-          cl_type: op-node
-        - el_type: op-nethermind
-          cl_type: hildr
+    chain0:
+      participants:
+        node0:
+          el:
+            type: op-geth
+        node1:
+          el:
+            type: op-nethermind
+          cl:
+            type: op-node
+        node2:
+          el:
+            type: op-nethermind
+          cl:
+            type: hildr

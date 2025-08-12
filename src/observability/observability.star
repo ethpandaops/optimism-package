@@ -25,6 +25,9 @@ METRICS_INFO_URL_KEY = "url"
 METRICS_INFO_PATH_KEY = "path"
 METRICS_INFO_ADDITIONAL_CONFIG_KEY = "config"
 
+PPROF_PORT_ID = "pprof"
+PPROF_PORT_NUM = 6060
+
 
 def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
     if not helper.enabled:
@@ -38,7 +41,7 @@ def new_metrics_info(helper, service, metrics_path=METRICS_PATH):
     return metrics_info
 
 
-def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NUM):
+def expose_http_port(ports, port_id, port_num):
     ports[port_id] = ethereum_package_shared_utils.new_port_spec(
         port_num,
         ethereum_package_shared_utils.TCP_PROTOCOL,
@@ -46,7 +49,24 @@ def expose_metrics_port(ports, port_id=METRICS_PORT_ID, port_num=METRICS_PORT_NU
     )
 
 
-# configures the CLI flags and ports for a service using the standard op-service setup
+def expose_metrics_port(ports):
+    expose_http_port(
+        ports,
+        METRICS_PORT_ID,
+        METRICS_PORT_NUM,
+    )
+
+
+def expose_pprof_port(ports):
+    expose_http_port(
+        ports,
+        PPROF_PORT_ID,
+        PPROF_PORT_NUM,
+    )
+
+
+# configures the CLI flags and ports for a service using the standard op-service setup.
+# Note: kona services use identical metrics args.
 def configure_op_service_metrics(cmd, ports):
     cmd += [
         "--metrics.enabled",
@@ -55,6 +75,24 @@ def configure_op_service_metrics(cmd, ports):
     ]
 
     expose_metrics_port(ports)
+
+
+def configure_op_service_pprof(cmd, ports):
+    cmd += [
+        "--pprof.enabled",
+        "--pprof.addr=0.0.0.0",
+        "--pprof.port={0}".format(PPROF_PORT_NUM),
+    ]
+
+    expose_pprof_port(ports)
+
+
+def configure_op_service_pprof_with_env(env_vars, ports):
+    env_vars["OP_PPROF_ENABLED"] = "true"
+    env_vars["OP_PPROF_ADDR"] = "0.0.0.0"
+    env_vars["OP_PPROF_PORT"] = str(PPROF_PORT_NUM)
+
+    expose_pprof_port(ports)
 
 
 def make_helper(observability_params):
@@ -85,6 +123,7 @@ def new_metrics_job(
     }
 
 
+# Note: kona services use identical metrics registration.
 def register_op_service_metrics_job(helper, service, network_name=None):
     register_service_metrics_job(
         helper,

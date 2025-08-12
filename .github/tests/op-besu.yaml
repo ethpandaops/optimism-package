@@ -1,7 +1,12 @@
 optimism_package:
   chains:
-    - participants:
-        - el_type: op-besu
-          cl_type: op-node
-        - el_type: op-besu
-          cl_type: hildr
+    chain0:
+      participants:
+        - el:
+            type: op-besu
+          cl:
+            type: op-node
+        - el:
+            type: op-besu
+          cl:
+            type: hildr

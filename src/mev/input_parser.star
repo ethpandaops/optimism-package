@@ -3,6 +3,7 @@ _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
 _DEFAULT_ARGS = {
+    "enabled": False,
     "image": None,
     # At the moment we only support rollup-boost
     "type": "rollup-boost",
@@ -15,25 +16,31 @@ _IMAGE_IDS = {
 }
 
 
-def parse(mev_args, network_params, registry):
+def parse(mev_args, network_params, participant_name, participant_index, registry):
     network_id = network_params.network_id
     network_name = network_params.name
+
+    # This string keep repeating in the error messages
+    mev_log_string = "{} on network {}".format(participant_name, network_name)
 
     # Any extra attributes will cause an error
     _filter.assert_keys(
         mev_args or {},
         _DEFAULT_ARGS.keys(),
-        "Invalid attributes in mev configuration for " + network_name + ": {}",
+        "Invalid attributes in MEV configuration for " + mev_log_string + ": {}",
     )
 
     # We filter the None values so that we can merge dicts easily
     mev_params = _DEFAULT_ARGS | _filter.remove_none(mev_args or {})
 
+    if not mev_params["enabled"]:
+        return None
+
     # Now we check that we either have none or both of builder_host & builder_port
     if mev_params["builder_host"] and not mev_params["builder_port"]:
-        fail("Missing builder_port in mev configuration for {}".format(network_name))
+        fail("Missing builder_port in MEV configuration for {}".format(mev_log_string))
     elif not mev_params["builder_host"] and mev_params["builder_port"]:
-        fail("Missing builder_host in mev configuration for {}".format(network_name))
+        fail("Missing builder_host in MEV configuration for {}".format(mev_log_string))
 
     # And default the image to the one in the registry
     mev_params["image"] = mev_params["image"] or _default_image(
@@ -41,15 +48,17 @@ def parse(mev_args, network_params, registry):
     )
 
     # Add the service name
-    mev_params["service_name"] = "op-mev-{}-{}-{}".format(
-        mev_params["type"], network_id, network_name
+    mev_params["service_name"] = "op-mev-{}-{}-{}-{}".format(
+        mev_params["type"], network_id, network_name, participant_name
     )
 
     # Add a bunch of labels
     mev_params["labels"] = {
         "op.kind": "mev",
-        "op.network.id": network_id,
+        "op.network.id": str(network_id),
         "op.mev.type": mev_params["type"],
+        "op.network.participant.index": str(participant_index),
+        "op.network.participant.name": participant_name,
     }
 
     # Add ports
@@ -60,8 +69,8 @@ def parse(mev_args, network_params, registry):
     return struct(**mev_params)
 
 
-def _default_image(participant_type, registry):
-    if participant_type in _IMAGE_IDS:
-        return registry.get(_IMAGE_IDS[participant_type])
+def _default_image(mev_type, registry):
+    if mev_type in _IMAGE_IDS:
+        return registry.get(_IMAGE_IDS[mev_type])
     else:
-        fail("Invalid MEV type: {}".format(participant_type))
+        fail("Invalid MEV type: {}".format(mev_type))

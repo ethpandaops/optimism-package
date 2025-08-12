@@ -4,26 +4,27 @@ _id = import_module("/src/util/id.star")
 
 _DEFAULT_ARGS = {
     "enabled": True,
-    "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
+    "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:v1.5.1",
     "extra_params": [],
     "participants": "*",
     "cannon_prestate_path": "",
     "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
     "cannon_trace_types": [],
     "datadir": "/data/op-challenger/op-challenger-data",
+    "pprof_enabled": False,
 }
 
 
-def parse(args, chains):
+def parse(args, l2s_params):
     return _filter.remove_none(
         [
-            _parse_instance(challenger_args or {}, challenger_name, chains)
+            _parse_instance(challenger_args or {}, challenger_name, l2s_params)
             for challenger_name, challenger_args in (args or {}).items()
         ]
     )
 
 
-def _parse_instance(challenger_args, challenger_name, chains):
+def _parse_instance(challenger_args, challenger_name, l2s_params):
     # Any extra attributes will cause an error
     _filter.assert_keys(
         challenger_args,
@@ -43,7 +44,7 @@ def _parse_instance(challenger_args, challenger_name, chains):
         return None
 
     # We expand the list of participants since we support a special "*" value to include all networks
-    network_ids = [c["network_params"]["network_id"] for c in chains]
+    network_ids = [c.network_params.network_id for c in l2s_params]
     challenger_params["participants"] = _expansion.expand_asterisc(
         challenger_params["participants"],
         network_ids,
@@ -61,6 +62,11 @@ def _parse_instance(challenger_args, challenger_name, chains):
         challenger_name,
         "-".join([str(p) for p in challenger_params["participants"]]),
     )
+
+    challenger_params["labels"] = {
+        "op.kind": "challenger",
+        "op.network.id": "-".join([str(network_id) for network_id in network_ids]),
+    }
 
     # Now we make sure to cover the prestate arg combinations
     #

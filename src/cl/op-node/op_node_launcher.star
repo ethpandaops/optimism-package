@@ -64,6 +64,7 @@ def launch(
     launcher,
     service_name,
     participant,
+    conductor_params,
     global_log_level,
     persistent,
     tolerations,
@@ -97,6 +98,7 @@ def launch(
         launcher=launcher,
         service_name=service_name,
         participant=participant,
+        conductor_params=conductor_params,
         log_level=log_level,
         persistent=persistent,
         tolerations=tolerations,
@@ -142,6 +144,7 @@ def get_beacon_config(
     launcher,
     service_name,
     participant,
+    conductor_params,
     log_level,
     persistent,
     tolerations,
@@ -184,14 +187,25 @@ def get_beacon_config(
         "--p2p.listen.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--p2p.listen.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--safedb.path={0}".format(BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER),
-        "--altda.enabled=" + str(da_server_context.enabled),
-        "--altda.da-server=" + da_server_context.http_url,
+        "--altda.enabled={}".format("true" if da_server_context else "false"),
+        "--altda.da-server={}".format(
+            da_server_context.http_url if da_server_context else ""
+        ),
     ]
+
+    supervisor_params = _filter.first(supervisors_params)
 
     # configure files
 
     files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: Directory(
+            artifact_names=[
+                launcher.deployment_output,
+                supervisor_params.superchain.dependency_set.name,
+            ]
+        )
+        if supervisor_params
+        else launcher.deployment_output,
         ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
@@ -212,15 +226,11 @@ def get_beacon_config(
     # apply customizations
 
     if observability_helper.enabled:
-        cmd += [
-            "--metrics.enabled=true",
-            "--metrics.addr=0.0.0.0",
-            "--metrics.port={0}".format(observability.METRICS_PORT_NUM),
-        ]
+        observability.configure_op_service_metrics(cmd, ports)
 
-        observability.expose_metrics_port(ports)
+    if params.pprof_enabled:
+        observability.configure_op_service_pprof(cmd, ports)
 
-    supervisor_params = _filter.first(supervisors_params)
     if supervisor_params:
         interop_rpc_port = supervisor_params.superchain.ports[
             _net.INTEROP_RPC_PORT_NAME
@@ -232,6 +242,10 @@ def get_beacon_config(
                 "OP_NODE_INTEROP_RPC_ADDR": "0.0.0.0",
                 "OP_NODE_INTEROP_RPC_PORT": str(interop_rpc_port.number),
                 "OP_NODE_INTEROP_JWT_SECRET": ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+                "OP_NODE_INTEROP_DEPENDENCY_SET": "{0}/{1}".format(
+                    ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+                    supervisor_params.superchain.dependency_set.path,
+                ),
             }
         )
 
@@ -247,6 +261,18 @@ def get_beacon_config(
             "--p2p.sequencer.key=" + sequencer_private_key,
             "--sequencer.enabled",
             "--sequencer.l1-confs=2",
+        ]
+
+    if conductor_params:
+        cmd += [
+            "--conductor.enabled=true",
+            "--conductor.rpc={0}".format(
+                _net.service_url(
+                    conductor_params.service_name,
+                    conductor_params.ports[_net.RPC_PORT_NAME],
+                )
+            ),
+            "--sequencer.stopped=true",
         ]
 
     if len(existing_cl_clients) > 0:

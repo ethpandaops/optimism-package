@@ -7,23 +7,31 @@ optimism_package:
     supervisor-1:
       <<: *x-supervisor
   chains:
-    - participants:
-      - el_type: op-geth
-        cl_type: op-node
+    interop-1:
+      participants:
+        node0:
+          el:
+            type: op-geth
+          cl:
+            type: op-node
       network_params:
         network: "interop"
         network_id: "2151908"
-        name: "interop-1"
         holocene_time_offset: 0
+        isthmus_time_offset: 0
+        jovian_time_offset: 0
         interop_time_offset: 0
         fund_dev_accounts: true
-    - participants:
-      - el_type: op-geth
-        cl_type: op-node
+    interop-2:
+      participants:
+        node0:
+          el:
+            type: op-geth
+          cl:
+            type: op-node
       network_params:
         network: "interop"
         network_id: "2151909"
-        name: "interop-2"
         holocene_time_offset: 0
         interop_time_offset: 0
         fund_dev_accounts: true

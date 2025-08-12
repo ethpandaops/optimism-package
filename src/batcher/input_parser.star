@@ -5,6 +5,7 @@ _registry = import_module("/src/package_io/registry.star")
 _DEFAULT_ARGS = {
     "image": None,
     "extra_params": [],
+    "pprof_enabled": False,
 }
 
 
@@ -38,7 +39,7 @@ def parse(batcher_args, network_params, registry):
     # Add labels
     batcher_params["labels"] = {
         "op.kind": "batcher",
-        "op.network.id": network_id,
+        "op.network.id": str(network_id),
     }
 
     return struct(**batcher_params)
