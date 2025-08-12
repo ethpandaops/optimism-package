@@ -152,6 +152,7 @@ def get_service_config(
         ),
         "--rpc.allow-unprotected-txs",
         "--port={0}".format(ports[_net.TCP_DISCOVERY_PORT_NAME].number),
+        "--verbosity={0}".format(log_level),
     ]
 
     # configure files

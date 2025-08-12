@@ -18,6 +18,8 @@ optimism_package:
         network: "interop"
         network_id: "2151908"
         holocene_time_offset: 0
+        isthmus_time_offset: 0
+        jovian_time_offset: 0
         interop_time_offset: 0
         fund_dev_accounts: true
     interop-2:

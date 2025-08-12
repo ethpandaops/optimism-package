@@ -8,6 +8,7 @@ def test_empty_hardforks_single_chain(plan):
             granite_time_offset=None,
             holocene_time_offset=None,
             isthmus_time_offset=None,
+            jovian_time_offset=None,
             interop_time_offset=None,
         )
     )
@@ -22,6 +23,7 @@ def test_single_chain_with_hardforks(plan):
             granite_time_offset=None,
             holocene_time_offset=20,
             isthmus_time_offset=None,
+            jovian_time_offset=None,
             interop_time_offset=40,
         )
     )
@@ -45,7 +47,8 @@ def test_chain_with_all_hardforks(plan):
             granite_time_offset=100,
             holocene_time_offset=200,
             isthmus_time_offset=300,
-            interop_time_offset=400,
+            jovian_time_offset=400,
+            interop_time_offset=500,
         )
     )
 
@@ -58,7 +61,8 @@ def test_chain_with_all_hardforks(plan):
             ("l2GenesisGraniteTimeOffset", 100),
             ("l2GenesisHoloceneTimeOffset", 200),
             ("l2GenesisIsthmusTimeOffset", 300),
-            ("l2GenesisInteropTimeOffset", 400),
+            ("l2GenesisJovianTimeOffset", 400),
+            ("l2GenesisInteropTimeOffset", 500),
         ],
     )
 
@@ -120,6 +124,7 @@ def test_build_hardfork_schedule_single_chain(plan):
             granite_time_offset=None,
             holocene_time_offset=200,
             isthmus_time_offset=None,
+            jovian_time_offset=None,
             interop_time_offset=300,
         )
     )
@@ -143,6 +148,7 @@ def test_build_hardfork_schedule_single_chain_no_hardforks(plan):
             granite_time_offset=None,
             holocene_time_offset=None,
             isthmus_time_offset=None,
+            jovian_time_offset=None,
             interop_time_offset=None,
         )
     )
@@ -235,6 +241,7 @@ def test_build_deployment_intent_no_interop(plan):
                     granite_time_offset=None,
                     holocene_time_offset=None,
                     isthmus_time_offset=None,
+                    jovian_time_offset=None,
                     interop_time_offset=None,
                 )
             )
@@ -286,6 +293,7 @@ def test_build_deployment_intent_with_interop_and_prestate(plan):
                     granite_time_offset=None,
                     holocene_time_offset=200,
                     isthmus_time_offset=None,
+                    jovian_time_offset=None,
                     interop_time_offset=300,
                 )
             ),
@@ -298,6 +306,7 @@ def test_build_deployment_intent_with_interop_and_prestate(plan):
                     granite_time_offset=None,
                     holocene_time_offset=None,
                     isthmus_time_offset=None,
+                    jovian_time_offset=None,
                     interop_time_offset=None,
                 )
             ),
@@ -371,6 +380,7 @@ def test_build_deployment_intent_no_global_overrides(plan):
                     granite_time_offset=None,
                     holocene_time_offset=None,
                     isthmus_time_offset=None,
+                    jovian_time_offset=None,
                     interop_time_offset=None,
                 )
             )
@@ -408,6 +418,7 @@ def test_build_deployment_intent_multiple_chains_different_configs(plan):
                     granite_time_offset=None,
                     holocene_time_offset=None,
                     isthmus_time_offset=None,
+                    jovian_time_offset=None,
                     interop_time_offset=None,
                 )
             ),
@@ -420,6 +431,7 @@ def test_build_deployment_intent_multiple_chains_different_configs(plan):
                     granite_time_offset=75,
                     holocene_time_offset=None,
                     isthmus_time_offset=None,
+                    jovian_time_offset=None,
                     interop_time_offset=125,
                 )
             ),

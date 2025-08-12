@@ -25,11 +25,11 @@ _observability = import_module("../../observability/observability.star")
 _EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
 _VERBOSITY_LEVELS = {
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "1",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "2",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "3",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "4",
-    _ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "5",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "ERROR",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "WARN",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "INFO",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
+    _ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
 }
 
 
@@ -160,6 +160,7 @@ def get_service_config(
         "--sync-mode=FULL",
         "--bonsai-limit-trie-logs-enabled=false",
         "--version-compatibility-protection=false",
+        "--logging={0}".format(log_level),
     ]
 
     # configure files

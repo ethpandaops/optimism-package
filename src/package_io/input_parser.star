@@ -18,6 +18,7 @@ _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
 _supervisor_input_parser = import_module("/src/supervisor/input_parser.star")
 _tx_fuzzer_parser = import_module("/src/tx-fuzzer/input_parser.star")
 _interop_mon_input_parser = import_module("/src/interop-mon/input_parser.star")
+_test_sequencer_input_parser = import_module("/src/test-sequencer/input_parser.star")
 
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
@@ -124,6 +125,7 @@ def input_parser(
         challengers=results["challengers"],
         superchains=results["superchains"],
         supervisors=results["supervisors"],
+        test_sequencers=results["test-sequencers"],
         op_contract_deployer_params=struct(
             image=results["op_contract_deployer_params"]["image"],
             l1_artifacts_locator=results["op_contract_deployer_params"][
@@ -207,6 +209,13 @@ def parse_network_params(plan, registry, input_args):
     results["supervisors"] = _supervisor_input_parser.parse(
         args=input_args.get("supervisors"),
         superchains=results["superchains"],
+        registry=registry,
+    )
+
+    # configure op-test-sequencer
+
+    results["test-sequencers"] = _test_sequencer_input_parser.parse(
+        args=input_args.get("test-sequencers"),
         registry=registry,
     )
 
@@ -325,6 +334,7 @@ def default_network_params():
         "granite_time_offset": 0,
         "holocene_time_offset": None,
         "isthmus_time_offset": None,
+        "jovian_time_offset": None,
         "interop_time_offset": None,
         "fund_dev_accounts": True,
     }

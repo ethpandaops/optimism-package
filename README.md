@@ -204,7 +204,7 @@ optimism_package:
       participants:
         # Nodes are keyed by their name
         node0:
-          # EL(Execution Layer) Specific flags 
+          # EL(Execution Layer) Specific flags
           el:
             # The type of EL client that should be started
             # Valid values are:
@@ -353,7 +353,7 @@ optimism_package:
             # Builder secret key used by op-rbuilder to sign transactions
             # Defaults to None - not used
             key: ""
-          
+
           cl_builder:
             # The type of builder CL client that should be started
             # Valid values are:
@@ -401,6 +401,11 @@ optimism_package:
         # Defaults to None - not activated - decimal value
         # Offset is in seconds
         isthmus_time_offset: ""
+
+        # Jovian fork
+        # Defaults to None - not activated - decimal value
+        # Offset is in seconds
+        jovian_time_offset: ""
 
         # Interop fork
         # Defaults to None - not activated - decimal value
@@ -484,7 +489,7 @@ optimism_package:
         enabled: false
         image: "blockscout/blockscout-optimism:6.8.0"
         verifier_image: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
-        
+
 
   challengers:
     my-challenger:
