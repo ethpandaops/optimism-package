@@ -2,45 +2,32 @@ ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
 
+_ethereum_package_shared_utils = import_module(
+    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
+)
+
+_batcher_input_parser = import_module("/src/batcher/input_parser.star")
+_blockscout_input_parser = import_module("/src/blockscout/input_parser.star")
+_da_input_parser = import_module("/src/da/input_parser.star")
+_challenger_input_parser = import_module("/src/challenger/input_parser.star")
+_l2_input_parser = import_module("/src/l2/input_parser.star")
+_mev_input_parser = import_module("/src/mev/input_parser.star")
+_superchain_input_parser = import_module("/src/superchain/input_parser.star")
+_proposer_input_parser = import_module("/src/proposer/input_parser.star")
+_proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
+_supervisor_input_parser = import_module("/src/supervisor/input_parser.star")
+_tx_fuzzer_parser = import_module("/src/tx-fuzzer/input_parser.star")
+_interop_mon_input_parser = import_module("/src/interop-mon/input_parser.star")
+_test_sequencer_input_parser = import_module("/src/test-sequencer/input_parser.star")
+
 constants = import_module("../package_io/constants.star")
 sanity_check = import_module("./sanity_check.star")
+_registry = import_module("./registry.star")
 
-DEFAULT_EL_IMAGES = {
-    "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
-    "op-reth": "ghcr.io/paradigmxyz/op-reth:latest",
-    "op-erigon": "testinprod/op-erigon:latest",
-    "op-nethermind": "nethermind/nethermind:latest",
-    "op-besu": "ghcr.io/optimism-java/op-besu:latest",
-    "op-rbuilder": "ghcr.io/flashbots/op-rbuilder:latest",
-}
+_net = import_module("/src/util/net.star")
 
-DEFAULT_CL_IMAGES = {
-    "op-node": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
-    "hildr": "ghcr.io/optimism-java/hildr:latest",
-}
-
-DEFAULT_BATCHER_IMAGES = {
-    "op-batcher": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
-}
-
-DEFAULT_CHALLENGER_IMAGES = {
-    "op-challenger": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:develop",
-}
-
-DEFAULT_SUPERVISOR_IMAGES = {
-    "op-supervisor": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:develop",
-}
-
-DEFAULT_PROPOSER_IMAGES = {
-    "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
-}
-
-DEFAULT_SIDECAR_IMAGES = {
-    "rollup-boost": "flashbots/rollup-boost:latest",
-}
 
 DEFAULT_DA_SERVER_PARAMS = {
-    "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
     "cmd": [
         "da-server",  # uses keccak commitments by default
         # We use the file storage backend instead of s3 for simplicity.
@@ -53,7 +40,6 @@ DEFAULT_DA_SERVER_PARAMS = {
         "--log.level=debug",
     ],
 }
-
 
 DEFAULT_ADDITIONAL_SERVICES = []
 
@@ -70,9 +56,13 @@ def external_l1_network_params_input_parser(plan, input_args):
     )
 
 
-def input_parser(plan, input_args):
+def input_parser(
+    plan,
+    input_args,
+    registry=_registry.Registry(),
+):
     sanity_check.sanity_check(plan, input_args)
-    results = parse_network_params(plan, input_args)
+    results = parse_network_params(plan, registry, input_args)
 
     return struct(
         observability=struct(
@@ -116,16 +106,11 @@ def input_parser(plan, input_args):
                 max_mem=results["observability"]["grafana_params"]["max_mem"],
             ),
         ),
-        interop=struct(
-            enabled=results["interop"]["enabled"],
-            supervisor_params=struct(
-                image=results["interop"]["supervisor_params"]["image"],
-                dependency_set=results["interop"]["supervisor_params"][
-                    "dependency_set"
-                ],
-                extra_params=results["interop"]["supervisor_params"]["extra_params"],
-            ),
+        faucet=struct(
+            enabled=results["faucet"]["enabled"],
+            image=results["faucet"]["image"],
         ),
+        interop_mon=results["interop_mon"],
         altda_deploy_config=struct(
             use_altda=results["altda_deploy_config"]["use_altda"],
             da_commitment_type=results["altda_deploy_config"]["da_commitment_type"],
@@ -136,126 +121,11 @@ def input_parser(plan, input_args):
                 "da_resolver_refund_percentage"
             ],
         ),
-        chains=[
-            struct(
-                participants=[
-                    struct(
-                        el_type=participant["el_type"],
-                        el_image=participant["el_image"],
-                        el_log_level=participant["el_log_level"],
-                        el_extra_env_vars=participant["el_extra_env_vars"],
-                        el_extra_labels=participant["el_extra_labels"],
-                        el_extra_params=participant["el_extra_params"],
-                        el_tolerations=participant["el_tolerations"],
-                        el_volume_size=participant["el_volume_size"],
-                        el_min_cpu=participant["el_min_cpu"],
-                        el_max_cpu=participant["el_max_cpu"],
-                        el_min_mem=participant["el_min_mem"],
-                        el_max_mem=participant["el_max_mem"],
-                        cl_type=participant["cl_type"],
-                        cl_image=participant["cl_image"],
-                        cl_log_level=participant["cl_log_level"],
-                        cl_extra_env_vars=participant["cl_extra_env_vars"],
-                        cl_extra_labels=participant["cl_extra_labels"],
-                        cl_extra_params=participant["cl_extra_params"],
-                        cl_tolerations=participant["cl_tolerations"],
-                        cl_volume_size=participant["cl_volume_size"],
-                        cl_min_cpu=participant["cl_min_cpu"],
-                        cl_max_cpu=participant["cl_max_cpu"],
-                        cl_min_mem=participant["cl_min_mem"],
-                        cl_max_mem=participant["cl_max_mem"],
-                        el_builder_type=participant["el_builder_type"],
-                        el_builder_image=participant["el_builder_image"],
-                        el_builder_key=participant["el_builder_key"],
-                        el_builder_log_level=participant["el_builder_log_level"],
-                        el_builder_extra_env_vars=participant[
-                            "el_builder_extra_env_vars"
-                        ],
-                        el_builder_extra_labels=participant["el_builder_extra_labels"],
-                        el_builder_extra_params=participant["el_builder_extra_params"],
-                        el_builder_tolerations=participant["el_builder_tolerations"],
-                        el_builder_volume_size=participant["el_builder_volume_size"],
-                        el_builder_min_cpu=participant["el_builder_min_cpu"],
-                        el_builder_max_cpu=participant["el_builder_max_cpu"],
-                        el_builder_min_mem=participant["el_builder_min_mem"],
-                        el_builder_max_mem=participant["el_builder_max_mem"],
-                        cl_builder_type=participant["cl_builder_type"],
-                        cl_builder_image=participant["cl_builder_image"],
-                        cl_builder_log_level=participant["cl_builder_log_level"],
-                        cl_builder_extra_env_vars=participant[
-                            "cl_builder_extra_env_vars"
-                        ],
-                        cl_builder_extra_labels=participant["cl_builder_extra_labels"],
-                        cl_builder_extra_params=participant["cl_builder_extra_params"],
-                        cl_builder_tolerations=participant["cl_builder_tolerations"],
-                        cl_builder_volume_size=participant["cl_builder_volume_size"],
-                        cl_builder_min_cpu=participant["cl_builder_min_cpu"],
-                        cl_builder_max_cpu=participant["cl_builder_max_cpu"],
-                        cl_builder_min_mem=participant["cl_builder_min_mem"],
-                        cl_builder_max_mem=participant["cl_builder_max_mem"],
-                        node_selectors=participant["node_selectors"],
-                        tolerations=participant["tolerations"],
-                        count=participant["count"],
-                    )
-                    for participant in result["participants"]
-                ],
-                network_params=struct(
-                    network=result["network_params"]["network"],
-                    network_id=result["network_params"]["network_id"],
-                    seconds_per_slot=result["network_params"]["seconds_per_slot"],
-                    name=result["network_params"]["name"],
-                    fjord_time_offset=result["network_params"]["fjord_time_offset"],
-                    granite_time_offset=result["network_params"]["granite_time_offset"],
-                    holocene_time_offset=result["network_params"][
-                        "holocene_time_offset"
-                    ],
-                    isthmus_time_offset=result["network_params"]["isthmus_time_offset"],
-                    interop_time_offset=result["network_params"]["interop_time_offset"],
-                    fund_dev_accounts=result["network_params"]["fund_dev_accounts"],
-                ),
-                proxyd_params=struct(
-                    image=result["proxyd_params"]["image"],
-                    tag=result["proxyd_params"]["tag"],
-                    extra_params=result["proxyd_params"]["extra_params"],
-                ),
-                batcher_params=struct(
-                    image=result["batcher_params"]["image"],
-                    extra_params=result["batcher_params"]["extra_params"],
-                ),
-                challenger_params=struct(
-                    enabled=result["challenger_params"]["enabled"],
-                    image=result["challenger_params"]["image"],
-                    extra_params=result["challenger_params"]["extra_params"],
-                    cannon_prestate_path=result["challenger_params"][
-                        "cannon_prestate_path"
-                    ],
-                    cannon_prestates_url=result["challenger_params"][
-                        "cannon_prestates_url"
-                    ],
-                    cannon_trace_types=result["challenger_params"][
-                        "cannon_trace_types"
-                    ],
-                ),
-                proposer_params=struct(
-                    image=result["proposer_params"]["image"],
-                    extra_params=result["proposer_params"]["extra_params"],
-                    game_type=result["proposer_params"]["game_type"],
-                    proposal_interval=result["proposer_params"]["proposal_interval"],
-                ),
-                mev_params=struct(
-                    rollup_boost_image=result["mev_params"]["rollup_boost_image"],
-                    builder_host=result["mev_params"]["builder_host"],
-                    builder_port=result["mev_params"]["builder_port"],
-                ),
-                da_server_params=struct(
-                    enabled=result["da_server_params"]["enabled"],
-                    image=result["da_server_params"]["image"],
-                    cmd=result["da_server_params"]["cmd"],
-                ),
-                additional_services=result["additional_services"],
-            )
-            for result in results["chains"]
-        ],
+        chains=results["chains"],
+        challengers=results["challengers"],
+        superchains=results["superchains"],
+        supervisors=results["supervisors"],
+        test_sequencers=results["test-sequencers"],
         op_contract_deployer_params=struct(
             image=results["op_contract_deployer_params"]["image"],
             l1_artifacts_locator=results["op_contract_deployer_params"][
@@ -264,9 +134,7 @@ def input_parser(plan, input_args):
             l2_artifacts_locator=results["op_contract_deployer_params"][
                 "l2_artifacts_locator"
             ],
-            global_deploy_overrides=results["op_contract_deployer_params"][
-                "global_deploy_overrides"
-            ],
+            overrides=results["op_contract_deployer_params"]["overrides"],
         ),
         global_log_level=results["global_log_level"],
         global_node_selectors=results["global_node_selectors"],
@@ -275,42 +143,42 @@ def input_parser(plan, input_args):
     )
 
 
-def parse_network_params(plan, input_args):
+def parse_network_params(plan, registry, input_args):
     results = {}
+    network_params = default_network_params()
 
     # configure observability
 
     results["observability"] = default_observability_params()
     results["observability"].update(input_args.get("observability", {}))
 
-    results["observability"]["prometheus_params"] = default_prometheus_params()
+    results["faucet"] = _default_faucet_params(registry)
+    results["faucet"].update(input_args.get("faucet", {}))
+
+    results["interop_mon"] = _interop_mon_input_parser.parse(
+        args=input_args.get("interop_mon", {}),
+        network_params=struct(**network_params),
+        registry=registry,
+    )
+
+    results["observability"]["prometheus_params"] = default_prometheus_params(registry)
     results["observability"]["prometheus_params"].update(
         input_args.get("observability", {}).get("prometheus_params", {})
     )
 
-    results["observability"]["loki_params"] = default_loki_params()
+    results["observability"]["loki_params"] = default_loki_params(registry)
     results["observability"]["loki_params"].update(
         input_args.get("observability", {}).get("loki_params", {})
     )
 
-    results["observability"]["promtail_params"] = default_promtail_params()
+    results["observability"]["promtail_params"] = default_promtail_params(registry)
     results["observability"]["promtail_params"].update(
         input_args.get("observability", {}).get("promtail_params", {})
     )
 
-    results["observability"]["grafana_params"] = default_grafana_params()
+    results["observability"]["grafana_params"] = default_grafana_params(registry)
     results["observability"]["grafana_params"].update(
         input_args.get("observability", {}).get("grafana_params", {})
-    )
-
-    # configure interop
-
-    results["interop"] = default_interop_params()
-    results["interop"].update(input_args.get("interop", {}))
-
-    results["interop"]["supervisor_params"] = default_supervisor_params()
-    results["interop"]["supervisor_params"].update(
-        input_args.get("interop", {}).get("supervisor_params", {})
     )
 
     # configure altda
@@ -320,119 +188,42 @@ def parse_network_params(plan, input_args):
 
     # configure chains
 
-    chains = []
+    results["chains"] = _l2_input_parser.parse(
+        args=input_args.get("chains"), registry=registry
+    )
 
-    seen_names = {}
-    seen_network_ids = {}
-    for chain in input_args.get("chains", default_chains()):
-        network_params = default_network_params()
-        network_params.update(chain.get("network_params", {}))
+    # configure superchains
 
-        proxyd_params = default_proxyd_params()
-        proxyd_params.update(chain.get("proxyd_params", {}))
+    results["superchains"] = _superchain_input_parser.parse(
+        args=input_args.get("superchains"), l2s_params=results["chains"]
+    )
 
-        batcher_params = default_batcher_params()
-        batcher_params.update(chain.get("batcher_params", {}))
+    # configure op-challenger
 
-        proposer_params = default_proposer_params()
-        proposer_params.update(chain.get("proposer_params", {}))
+    results["challengers"] = _challenger_input_parser.parse(
+        args=input_args.get("challengers"), l2s_params=results["chains"]
+    )
 
-        challenger_params = default_challenger_params()
-        challenger_params.update(chain.get("challenger_params", {}))
+    # configure op-supervisor
 
-        mev_params = default_mev_params()
-        mev_params.update(chain.get("mev_params", {}))
-        da_server_params = default_da_server_params()
-        da_server_params.update(chain.get("da_server_params", {}))
+    results["supervisors"] = _supervisor_input_parser.parse(
+        args=input_args.get("supervisors"),
+        superchains=results["superchains"],
+        registry=registry,
+    )
 
-        network_name = network_params["name"]
-        network_id = network_params["network_id"]
+    # configure op-test-sequencer
 
-        if network_name in seen_names:
-            fail("Network name {0} is duplicated".format(network_name))
-
-        if network_id in seen_network_ids:
-            fail("Network id {0} is duplicated".format(network_id))
-
-        participants = []
-        for i, p in enumerate(chain.get("participants", [default_participant()])):
-            participant = default_participant()
-            participant.update(p)
-
-            el_type = participant["el_type"]
-            cl_type = participant["cl_type"]
-            el_image = participant["el_image"]
-            if el_image == "":
-                default_image = DEFAULT_EL_IMAGES.get(el_type, "")
-                if default_image == "":
-                    fail(
-                        "{0} received an empty image name and we don't have a default for it".format(
-                            el_type
-                        )
-                    )
-                participant["el_image"] = default_image
-
-            cl_image = participant["cl_image"]
-            if cl_image == "":
-                default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
-                if default_image == "":
-                    fail(
-                        "{0} received an empty image name and we don't have a default for it".format(
-                            cl_type
-                        )
-                    )
-                participant["cl_image"] = default_image
-
-            el_builder_type = participant["el_builder_type"]
-            el_builder_image = participant["el_builder_image"]
-            if el_builder_image == "":
-                default_image = DEFAULT_EL_IMAGES.get(el_builder_type, "")
-                if default_image == "":
-                    fail(
-                        "{0} received an empty image name and we don't have a default for it".format(
-                            el_builder_type
-                        )
-                    )
-                participant["el_builder_image"] = default_image
-
-            cl_builder_type = participant["cl_builder_type"]
-            cl_builder_image = participant["cl_builder_image"]
-            if cl_builder_image == "":
-                default_image = DEFAULT_CL_IMAGES.get(cl_builder_type, "")
-                if default_image == "":
-                    fail(
-                        "{0} received an empty image name and we don't have a default for it".format(
-                            cl_builder_type
-                        )
-                    )
-                participant["cl_builder_image"] = default_image
-
-            for _ in range(0, participant["count"]):
-                participant_copy = ethereum_package_input_parser.deep_copy_participant(
-                    participant
-                )
-                participants.append(participant_copy)
-
-        result = {
-            "participants": participants,
-            "network_params": network_params,
-            "proxyd_params": proxyd_params,
-            "batcher_params": batcher_params,
-            "challenger_params": challenger_params,
-            "proposer_params": proposer_params,
-            "mev_params": mev_params,
-            "da_server_params": da_server_params,
-            "additional_services": chain.get(
-                "additional_services", DEFAULT_ADDITIONAL_SERVICES
-            ),
-        }
-        chains.append(result)
-
-    results["chains"] = chains
+    results["test-sequencers"] = _test_sequencer_input_parser.parse(
+        args=input_args.get("test-sequencers"),
+        registry=registry,
+    )
 
     # configure op-deployer
 
-    results["op_contract_deployer_params"] = default_op_contract_deployer_params()
+    results["op_contract_deployer_params"] = default_op_contract_deployer_params(
+        registry
+    )
     results["op_contract_deployer_params"].update(
         input_args.get("op_contract_deployer_params", {})
     )
@@ -459,9 +250,16 @@ def default_observability_params():
     }
 
 
-def default_prometheus_params():
+def _default_faucet_params(registry):
     return {
-        "image": "prom/prometheus:v3.1.0",
+        "enabled": False,
+        "image": registry.get(_registry.OP_FAUCET),
+    }
+
+
+def default_prometheus_params(registry):
+    return {
+        "image": registry.get(_registry.PROMETHEUS),
         "storage_tsdb_retention_time": "1d",
         "storage_tsdb_retention_size": "512MB",
         "min_cpu": 10,
@@ -471,11 +269,13 @@ def default_prometheus_params():
     }
 
 
-def default_grafana_params():
+def default_grafana_params(registry):
     return {
-        "image": "grafana/grafana:11.5.0",
+        "image": registry.get(_registry.GRAFANA),
         "dashboard_sources": [
-            "github.com/ethereum-optimism/grafana-dashboards-public/resources"
+            "github.com/ethereum-optimism/grafana-dashboards-public/resources",
+            "github.com/op-rs/kona/docker/recipes/kona-node/grafana",
+            "github.com/paradigmxyz/reth/etc/grafana",
         ],
         "min_cpu": 10,
         "max_cpu": 1000,
@@ -484,9 +284,9 @@ def default_grafana_params():
     }
 
 
-def default_loki_params():
+def default_loki_params(registry):
     return {
-        "image": "grafana/loki:3.3.2",
+        "image": registry.get(_registry.LOKI),
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,
@@ -494,19 +294,13 @@ def default_loki_params():
     }
 
 
-def default_promtail_params():
+def default_promtail_params(registry):
     return {
-        "image": "grafana/promtail:3.3.2",
+        "image": registry.get(_registry.PROMTAIL),
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,
         "max_mem": 2048,
-    }
-
-
-def default_interop_params():
-    return {
-        "enabled": False,
     }
 
 
@@ -521,36 +315,13 @@ def default_altda_deploy_config():
     }
 
 
-def default_supervisor_params():
-    return {
-        "image": DEFAULT_SUPERVISOR_IMAGES["op-supervisor"],
-        "dependency_set": "",
-        "extra_params": [],
-    }
-
-
 def default_mev_params():
     return {
-        "rollup_boost_image": "",
+        "image": "",
+        "type": "rollup-boost",
         "builder_host": "",
         "builder_port": "",
     }
-
-
-def default_chains():
-    return [
-        {
-            "participants": [default_participant()],
-            "network_params": default_network_params(),
-            "proxyd_params": default_proxyd_params(),
-            "batcher_params": default_batcher_params(),
-            "proposer_params": default_proposer_params(),
-            "challenger_params": default_challenger_params(),
-            "mev_params": default_mev_params(),
-            "da_server_params": default_da_server_params(),
-            "additional_services": DEFAULT_ADDITIONAL_SERVICES,
-        }
-    ]
 
 
 def default_network_params():
@@ -563,115 +334,41 @@ def default_network_params():
         "granite_time_offset": 0,
         "holocene_time_offset": None,
         "isthmus_time_offset": None,
+        "jovian_time_offset": None,
         "interop_time_offset": None,
         "fund_dev_accounts": True,
     }
 
 
-def default_batcher_params():
+def _default_batcher_params(registry):
     return {
-        "image": DEFAULT_BATCHER_IMAGES["op-batcher"],
+        "image": registry.get(_registry.OP_BATCHER),
         "extra_params": [],
     }
 
 
-def default_proxyd_params():
+def _default_proxyd_params(registry):
     return {
-        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd",
-        "tag": "v4.14.2",
+        "image": registry.get(_registry.PROXYD),
         "extra_params": [],
     }
 
 
-def default_challenger_params():
+def _default_proposer_params(registry):
     return {
-        "enabled": True,
-        "image": DEFAULT_CHALLENGER_IMAGES["op-challenger"],
-        "extra_params": [],
-        "cannon_prestate_path": "",
-        "cannon_prestates_url": "https://storage.googleapis.com/oplabs-network-data/proofs/op-program/cannon",
-        "cannon_trace_types": ["cannon", "permissioned"],
-    }
-
-
-def default_proposer_params():
-    return {
-        "image": DEFAULT_PROPOSER_IMAGES["op-proposer"],
+        "image": registry.get(_registry.OP_PROPOSER),
         "extra_params": [],
         "game_type": 1,
         "proposal_interval": "10m",
     }
 
 
-def default_participant():
+def default_op_contract_deployer_params(registry):
     return {
-        "el_type": "op-geth",
-        "el_image": "",
-        "el_log_level": "",
-        "el_extra_env_vars": {},
-        "el_extra_labels": {},
-        "el_extra_params": [],
-        "el_tolerations": [],
-        "el_volume_size": 0,
-        "el_min_cpu": 0,
-        "el_max_cpu": 0,
-        "el_min_mem": 0,
-        "el_max_mem": 0,
-        "cl_type": "op-node",
-        "cl_image": "",
-        "cl_log_level": "",
-        "cl_extra_env_vars": {},
-        "cl_extra_labels": {},
-        "cl_extra_params": [],
-        "cl_tolerations": [],
-        "cl_volume_size": 0,
-        "cl_min_cpu": 0,
-        "cl_max_cpu": 0,
-        "cl_min_mem": 0,
-        "cl_max_mem": 0,
-        "el_builder_type": "op-geth",
-        "el_builder_image": "",
-        "el_builder_key": "",
-        "el_builder_log_level": "",
-        "el_builder_extra_env_vars": {},
-        "el_builder_extra_labels": {},
-        "el_builder_extra_params": [],
-        "el_builder_tolerations": [],
-        "el_builder_volume_size": 0,
-        "el_builder_min_cpu": 0,
-        "el_builder_max_cpu": 0,
-        "el_builder_min_mem": 0,
-        "el_builder_max_mem": 0,
-        "cl_builder_type": "op-node",
-        "cl_builder_image": "",
-        "cl_builder_log_level": "",
-        "cl_builder_extra_env_vars": {},
-        "cl_builder_extra_labels": {},
-        "cl_builder_extra_params": [],
-        "cl_builder_tolerations": [],
-        "cl_builder_volume_size": 0,
-        "cl_builder_min_cpu": 0,
-        "cl_builder_max_cpu": 0,
-        "cl_builder_min_mem": 0,
-        "cl_builder_max_mem": 0,
-        "node_selectors": {},
-        "tolerations": [],
-        "count": 1,
-    }
-
-
-def default_op_contract_deployer_global_deploy_overrides():
-    return {
-        "faultGameAbsolutePrestate": "",
-    }
-
-
-def default_op_contract_deployer_params():
-    return {
-        "image": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.12",
-        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz",
-        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-fffcbb0ebf7f83311791534a41e65ef90df47797f9ca8f86941452f597f7128c.tar.gz",
-        "global_deploy_overrides": default_op_contract_deployer_global_deploy_overrides(),
+        "image": registry.get(_registry.OP_DEPLOYER),
+        "l1_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
+        "l2_artifacts_locator": "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz",
+        "overrides": {},
     }
 
 
@@ -680,7 +377,7 @@ def default_ethereum_package_network_params():
         "participants": [
             {
                 "el_type": "geth",
-                "cl_type": "teku",
+                "cl_type": "lighthouse",
             }
         ],
         "network_params": {
@@ -701,9 +398,20 @@ def default_ethereum_package_network_params():
     }
 
 
-def default_da_server_params():
+def default_da_server_params(registry):
     return {
         "enabled": False,
-        "image": DEFAULT_DA_SERVER_PARAMS["image"],
-        "cmd": DEFAULT_DA_SERVER_PARAMS["cmd"],
+        "image": registry.get(_registry.DA_SERVER),
+    }
+
+
+def default_tx_fuzzer_params(registry):
+    return {
+        "enabled": False,
+        "image": registry.get(_registry.TX_FUZZER),
+        "extra_params": [],
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_memory": 20,
+        "max_memory": 300,
     }

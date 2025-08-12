@@ -27,21 +27,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Setup Kurtosis
-        run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-          kurtosis analytics disable
+      - name: Install mise
+        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
 
       - name: Run Starlark
-        id: test_execution
-        run: |
-          if [ "${{ matrix.file_name }}" != "./.github/tests/mix-with-tools-mev.yaml" ]; then
-            kurtosis run ${{ github.workspace }} --verbosity detailed --args-file ${{ matrix.file_name }} || echo "TEST_FAILED=true" >> $GITHUB_ENV
-          else
-            echo "Skipping ./.github/tests/mix-with-tools-mev.yaml"
-          fi
+        run: kurtosis run ${{ github.workspace }} --verbosity detailed --args-file ${{ matrix.file_name }} || echo "TEST_FAILED=true" >> $GITHUB_ENV
         continue-on-error: true  # Don't fail the entire job
 
       - name: Check if Discord Webhook is Set
@@ -70,12 +60,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Setup Kurtosis
-        run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-          kurtosis analytics disable
+      - name: Install mise
+        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
 
       - name: Deploy L1
         run: kurtosis run --enclave test --args-file ./.github/tests/external-l1/ethereum.yaml github.com/ethpandaops/ethereum-package
