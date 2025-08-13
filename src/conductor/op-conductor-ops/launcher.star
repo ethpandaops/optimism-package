@@ -28,17 +28,6 @@ def launch(
         participants_params=participants_params,
     )
 
-    # Ensure conductors are paused before bootstrapping to satisfy op-conductor-ops preconditions
-    _run_op_conductor_ops_command(
-        plan=plan,
-        cmd="pause {}".format(l2_params.network_params.name),
-        config_artifact=config_artifact,
-        description="Pause conductors for network {} using op-conductor-ops".format(
-            l2_params.network_params.name
-        ),
-        registry=registry,
-    )
-
     _run_op_conductor_ops_command(
         plan=plan,
         cmd="bootstrap-cluster {}".format(l2_params.network_params.name),

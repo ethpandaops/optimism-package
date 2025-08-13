@@ -271,9 +271,8 @@ def get_service_config(
                     conductor_params.ports[_net.RPC_PORT_NAME],
                 )
             ),
+            "--sequencer.stopped=true",
         ]
-        if not is_sequencer:
-            cmd.append("--sequencer.stopped=true")
 
     if len(cl_contexts) > 0:
         cmd.append(

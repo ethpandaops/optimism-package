@@ -13,9 +13,9 @@ _DEFAULT_ARGS = {
     "pprof_enabled": False,
     # Optional overrides
     "websocket_port": None,
-    "healthcheck_interval": None,
-    "healthcheck_min_peer_count": None,
-    "healthcheck_unsafe_interval": None,
+    "healthcheck_interval": 2,
+    "healthcheck_min_peer_count": 1,
+    "healthcheck_unsafe_interval": 5,
 }
 
 
@@ -44,7 +44,7 @@ def parse(
         return None
 
     # And default the image to the one in the registry
-    conductor_params["image"] = conductor_params.get("image") or registry.get(
+    conductor_params["image"] = conductor_params["image"] or registry.get(
         _registry.OP_CONDUCTOR
     )
 
@@ -67,8 +67,5 @@ def parse(
         "op.network.participant.name": participant_name,
         "op.conductor.type": "op-conductor",
     }
-
-    # Drop None-valued optional fields to keep output minimal AFTER all defaults are applied
-    conductor_params = _filter.remove_none(conductor_params)
 
     return struct(**conductor_params)

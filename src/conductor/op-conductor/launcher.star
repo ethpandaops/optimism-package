@@ -11,9 +11,6 @@ _net = import_module("/src/util/net.star")
 
 _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-conductor/op-conductor"
 
-_CONDUCTOR_HEALTH_CHECK_INTERVAL = 2
-_CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT = 1
-
 
 def launch(
     plan,
@@ -73,7 +70,7 @@ def launch(
             conductor_consensus_url=consensus_url,
             conductor_raft_server_id=params.service_name,
             conductor_metrics_info=[metrics_info],
-            conductor_ws_port=ws_port if ws_port else None,
+            conductor_ws_port=ws_port,
         ),
     )
 
@@ -112,7 +109,7 @@ def get_service_config(
         "OP_CONDUCTOR_CONSENSUS_PORT": str(consensus_port.number),
         "OP_CONDUCTOR_EXECUTION_RPC": (
             sidecar_context.rpc_http_url
-            if sidecar_context and hasattr(sidecar_context, "rpc_http_url")
+            if sidecar_context
             else _net.service_url(
                 el_params.service_name, el_params.ports[_net.RPC_PORT_NAME]
             )
@@ -121,24 +118,12 @@ def get_service_config(
             cl_params.service_name, cl_params.ports[_net.RPC_PORT_NAME]
         ),
         "OP_CONDUCTOR_ROLLUP_BOOST_ENABLED": "true" if sidecar_context else "false",
-        # This might also become a parameter
-        "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(
-            params.healthcheck_interval
-            if hasattr(params, "healthcheck_interval") and params.healthcheck_interval
-            else _CONDUCTOR_HEALTH_CHECK_INTERVAL
-        ),
-        # This might also become a parameter
+        "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(params.healthcheck_interval),
         "OP_CONDUCTOR_HEALTHCHECK_MIN_PEER_COUNT": str(
             params.healthcheck_min_peer_count
-            if hasattr(params, "healthcheck_min_peer_count")
-            and params.healthcheck_min_peer_count != None
-            else _CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT
         ),
         "OP_CONDUCTOR_HEALTHCHECK_UNSAFE_INTERVAL": str(
             params.healthcheck_unsafe_interval
-            if hasattr(params, "healthcheck_unsafe_interval")
-            and params.healthcheck_unsafe_interval
-            else max(600, network_params.seconds_per_slot * 10)
         ),
         "OP_CONDUCTOR_LOG_FORMAT": "logfmt",
         "OP_CONDUCTOR_LOG_LEVEL": "info",

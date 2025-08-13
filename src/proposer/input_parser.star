@@ -26,7 +26,7 @@ def parse(proposer_args, network_params, registry):
     proposer_params = _DEFAULT_ARGS | _filter.remove_none(proposer_args or {})
 
     # And default the image to the one in the registry
-    proposer_params["image"] = proposer_params.get("image") or registry.get(
+    proposer_params["image"] = proposer_params["image"] or registry.get(
         _registry.OP_PROPOSER
     )
 
