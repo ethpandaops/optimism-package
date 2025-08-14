@@ -101,6 +101,46 @@ def run(plan, args={}):
         plan.print("Waiting for L1 to start up")
         wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
 
+    # EXPERIMENT
+    # 
+    # Deploy an l1 with a single node and the lowest blocktime we can get
+
+    plan.print("Deploying a ghost L1")
+
+    ghost_l1 = ethereum_package.run(plan, {
+        "network_params": {
+            "seconds_per_slot": 1
+        }
+    })
+
+    all_ghost_l1_participants = ghost_l1.all_participants
+    ghost_l1_network_params = ghost_l1.network_params
+    ghost_l1_network_id = ghost_l1.network_id
+    ghost_l1_rpc_url = all_ghost_l1_participants[0].el_context.rpc_http_url
+    ghost_l1_priv_key = ghost_l1.pre_funded_accounts[
+        12
+    ].private_key  # reserved for L2 contract deployers
+    ghost_l1_config_env_vars = get_l1_config(
+        all_ghost_l1_participants, ghost_l1_network_params, ghost_l1_network_id
+    )
+    plan.print("Waiting for ghost L1 to start up")
+    wait_for_sync.wait_for_startup(plan, ghost_l1_config_env_vars)
+
+    plan.print("Deployed a ghost L1")
+    plan.print("Deploying contracts on ghost L1")
+
+    ghost_deployment_output = contract_deployer.deploy_contracts(
+        plan,
+        ghost_l1_priv_key,
+        ghost_l1_config_env_vars,
+        optimism_args,
+        "local",
+        altda_deploy_config,
+    )
+
+    plan.print("Deployed contracts on ghost L1")
+    plan.print("Deploying contracts on real L1")
+
     deployment_output = contract_deployer.deploy_contracts(
         plan,
         l1_priv_key,
@@ -109,6 +149,8 @@ def run(plan, args={}):
         l1_network,
         altda_deploy_config,
     )
+
+    plan.print("Deployed contracts on real L1")
 
     jwt_file = plan.upload_files(
         src=ethereum_package_static_files.JWT_PATH_FILEPATH,
