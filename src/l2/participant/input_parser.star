@@ -17,6 +17,7 @@ _DEFAULT_ARGS = {
     "sequencer": None,
     "mev_params": None,
     "conductor_params": None,
+    "use_flashblocks": False,
 }
 
 
@@ -127,9 +128,9 @@ def _parse_instance(
     mev_params = _mev_input_parser.parse(
         mev_args=participant_params["mev_params"],
         network_params=network_params,
+        registry=registry,
         participant_name=participant_name,
         participant_index=participant_index,
-        registry=registry,
     )
 
     # We add the conductor
@@ -178,6 +179,7 @@ def _parse_instance(
         sequencer=sequencer,
         mev_params=mev_params,
         conductor_params=conductor_params,
+        use_flashblocks=participant_params["use_flashblocks"],
     )
 
 
@@ -265,6 +267,7 @@ def _apply_sequencers(participants_params, network_params):
             else p.sequencer or default_sequencer,
             mev_params=p.mev_params,
             conductor_params=p.conductor_params,
+            use_flashblocks=p.use_flashblocks,
         )
         for p in participants_params
     ]

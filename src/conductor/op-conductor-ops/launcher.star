@@ -28,6 +28,17 @@ def launch(
         participants_params=participants_params,
     )
 
+    # Ensure conductors are paused before bootstrapping
+    _run_op_conductor_ops_command(
+        plan=plan,
+        cmd="pause {}".format(l2_params.network_params.name),
+        config_artifact=config_artifact,
+        description="Pause conductors for network {} using op-conductor-ops".format(
+            l2_params.network_params.name
+        ),
+        registry=registry,
+    )
+
     _run_op_conductor_ops_command(
         plan=plan,
         cmd="bootstrap-cluster {}".format(l2_params.network_params.name),
@@ -69,6 +80,11 @@ def _run_op_conductor_ops_command(
             "CONDUCTOR_CONFIG": "{}/{}".format(
                 _CONFIG_DIRPATH_ON_SERVICE, _CONFIG_FILENAME
             ),
+            # Increase timeouts to reduce false negatives during bootstrap on slow starts
+            "BOOTSTRAP_SEQUENCER_START_TIMEOUT": "900",
+            "BOOTSTRAP_SEQUENCER_HEALTHY_TIMEOUT": "900",
+            # Use a conservative HTTP timeout on RPC calls so failures emit logs
+            "CONDUCTOR_HTTP_TIMEOUT": "5",
         },
         wait=None,
     )

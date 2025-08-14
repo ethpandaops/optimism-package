@@ -11,6 +11,11 @@ _DEFAULT_ARGS = {
     "paused": False,
     "bootstrap": False,
     "pprof_enabled": False,
+    # Optional overrides
+    "websocket_port": None,
+    "healthcheck_interval": 2,
+    "healthcheck_min_peer_count": 1,
+    "healthcheck_unsafe_interval": 5,
 }
 
 
@@ -32,7 +37,7 @@ def parse(
         + ": {}",
     )
 
-    # We filter the None values so that we can merge dicts easily
+    # Merge with defaults first
     conductor_params = _DEFAULT_ARGS | _filter.remove_none(conductor_args or {})
 
     if not conductor_params["enabled"]:

@@ -50,6 +50,7 @@ def launch(
     bootnode_contexts,
     observability_helper,
     supervisors_params,
+    websocket_url=None,
 ):
     el_log_level = _ethereum_package_input_parser.get_client_log_level_or_default(
         params.log_level, log_level, _VERBOSITY_LEVELS
@@ -78,6 +79,7 @@ def launch(
         bootnode_contexts=bootnode_contexts,
         observability_helper=observability_helper,
         supervisors_params=supervisors_params,
+        websocket_url=websocket_url,
     )
 
     service = plan.add_service(params.service_name, config)
@@ -125,43 +127,59 @@ def get_service_config(
     bootnode_contexts,
     observability_helper,
     supervisors_params,
+    websocket_url=None,
 ):
     ports = _net.ports_to_port_specs(params.ports)
 
-    cmd = [
-        "node",
-        "-{0}".format(log_level),
-        "--datadir={}".format(_EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
-        "--chain={0}".format(
-            network_params.network
-            if network_params.network in _ethereum_package_constants.PUBLIC_NETWORKS
-            else _ethereum_package_constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/genesis-{0}.json".format(network_params.network_id)
-        ),
-        "--http",
-        "--http.port={0}".format(ports[_net.RPC_PORT_NAME].number),
-        "--http.addr=0.0.0.0",
-        "--http.corsdomain=*",
-        # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
-        #  that users should NOT store private information in these Kurtosis nodes!
-        "--http.api=admin,net,eth,web3,debug,trace",
-        "--ws",
-        "--ws.addr=0.0.0.0",
-        "--ws.port={0}".format(ports[_net.WS_PORT_NAME].number),
-        "--ws.api=net,eth",
-        "--ws.origins=*",
-        "--nat=extip:{}".format(
-            _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
-        ),
-        "--authrpc.port={0}".format(ports[_net.ENGINE_RPC_PORT_NAME].number),
-        "--authrpc.jwtsecret={}".format(
-            _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER
-        ),
-        "--authrpc.addr=0.0.0.0",
-        "--discovery.port={0}".format(ports[_net.TCP_DISCOVERY_PORT_NAME].number),
-        "--port={0}".format(ports[_net.TCP_DISCOVERY_PORT_NAME].number),
-        "--rpc.eth-proof-window=302400",
-    ]
+    # Use different command based on image type
+    if "base-reth-node" in params.image:
+        # Flashblocks-enabled image uses '/app/base-reth-node'
+        cmd = [
+            "/app/base-reth-node",
+            "node",
+            "-{0}".format(log_level),
+        ]
+    else:
+        # Standard op-reth image uses just 'node'
+        cmd = [
+            "node",
+            "-{0}".format(log_level),
+        ]
+
+    cmd.extend(
+        [
+            "--datadir={}".format(_EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
+            "--chain={0}".format(
+                network_params.network
+                if network_params.network in _ethereum_package_constants.PUBLIC_NETWORKS
+                else _ethereum_package_constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+                + "/genesis-{0}.json".format(network_params.network_id)
+            ),
+            "--http",
+            "--http.port={0}".format(ports[_net.RPC_PORT_NAME].number),
+            "--http.addr=0.0.0.0",
+            "--http.corsdomain=*",
+            # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
+            #  that users should NOT store private information in these Kurtosis nodes!
+            "--http.api=admin,net,eth,web3,debug,trace",
+            "--ws",
+            "--ws.addr=0.0.0.0",
+            "--ws.port={0}".format(ports[_net.WS_PORT_NAME].number),
+            "--ws.api=net,eth",
+            "--ws.origins=*",
+            "--nat=extip:{}".format(
+                _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
+            ),
+            "--authrpc.port={0}".format(ports[_net.ENGINE_RPC_PORT_NAME].number),
+            "--authrpc.jwtsecret={}".format(
+                _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER
+            ),
+            "--authrpc.addr=0.0.0.0",
+            "--discovery.port={0}".format(ports[_net.TCP_DISCOVERY_PORT_NAME].number),
+            "--port={0}".format(ports[_net.TCP_DISCOVERY_PORT_NAME].number),
+            "--rpc.eth-proof-window=302400",
+        ]
+    )
 
     # configure files
 
@@ -179,6 +197,12 @@ def get_service_config(
                 _constants.EL_TYPE.op_reth + "_volume_size"
             ],
         )
+
+    # Add flashblocks websocket URL flag if provided (single append)
+    if websocket_url:
+        # Ensure the URL uses ws:// scheme, not http://
+        scheme_fixed_url = websocket_url.replace("http://", "ws://")
+        cmd.append("--websocket-url={}".format(scheme_fixed_url))
 
     # configure environment variables
 

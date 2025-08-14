@@ -61,3 +61,59 @@ def test_net_service_url(plan):
         _net.service_url(service_name="local", service_port=wss_port_spec),
         "wss://local:9999",
     )
+
+
+def test_net_localhost_url(plan):
+    http_port = _net.port(number=8547)
+    http_port_spec = _net.port_to_port_spec(http_port)
+    expect.eq(
+        _net.localhost_url(service_name="op-conductor-service", service_port=http_port),
+        "http://127.0.0.1:8547",
+    )
+    expect.eq(
+        _net.localhost_url(
+            service_name="op-conductor-service", service_port=http_port_spec
+        ),
+        "http://127.0.0.1:8547",
+    )
+
+    wss_port = _net.port(number=8546, application_protocol="wss")
+    wss_port_spec = _net.port_to_port_spec(wss_port)
+    expect.eq(
+        _net.localhost_url(service_name="op-node-service", service_port=wss_port),
+        "wss://127.0.0.1:8546",
+    )
+    expect.eq(
+        _net.localhost_url(service_name="op-node-service", service_port=wss_port_spec),
+        "wss://127.0.0.1:8546",
+    )
+
+
+def test_net_localhost_address(plan):
+    consensus_port = _net.port(number=50050)
+    consensus_port_spec = _net.port_to_port_spec(consensus_port)
+    expect.eq(
+        _net.localhost_address(
+            service_name="op-conductor-service", service_port=consensus_port
+        ),
+        "127.0.0.1:50050",
+    )
+    expect.eq(
+        _net.localhost_address(
+            service_name="op-conductor-service", service_port=consensus_port_spec
+        ),
+        "127.0.0.1:50050",
+    )
+
+    rpc_port = _net.port(number=8547)
+    rpc_port_spec = _net.port_to_port_spec(rpc_port)
+    expect.eq(
+        _net.localhost_address(service_name="op-node-service", service_port=rpc_port),
+        "127.0.0.1:8547",
+    )
+    expect.eq(
+        _net.localhost_address(
+            service_name="op-node-service", service_port=rpc_port_spec
+        ),
+        "127.0.0.1:8547",
+    )

@@ -16,7 +16,9 @@ _IMAGE_IDS = {
 }
 
 
-def parse(mev_args, network_params, participant_name, participant_index, registry):
+def parse(
+    mev_args, network_params, registry, participant_name=None, participant_index=None
+):
     network_id = network_params.network_id
     network_name = network_params.name
 
@@ -48,8 +50,14 @@ def parse(mev_args, network_params, participant_name, participant_index, registr
     )
 
     # Add the service name
-    mev_params["service_name"] = "op-mev-{}-{}-{}-{}".format(
-        mev_params["type"], network_id, network_name, participant_name
+    # Service name optionally includes participant name when available
+    base_service_name = "op-mev-{}-{}-{}".format(
+        mev_params["type"], network_id, network_name
+    )
+    mev_params["service_name"] = (
+        base_service_name
+        if participant_name == None or participant_name == ""
+        else base_service_name + "-" + participant_name
     )
 
     # Add a bunch of labels
@@ -57,9 +65,12 @@ def parse(mev_args, network_params, participant_name, participant_index, registr
         "op.kind": "mev",
         "op.network.id": str(network_id),
         "op.mev.type": mev_params["type"],
-        "op.network.participant.index": str(participant_index),
-        "op.network.participant.name": participant_name,
     }
+
+    if participant_index != None:
+        mev_params["labels"]["op.network.participant.index"] = str(participant_index)
+    if participant_name != None:
+        mev_params["labels"]["op.network.participant.name"] = participant_name
 
     # Add ports
     mev_params["ports"] = {

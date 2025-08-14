@@ -176,8 +176,27 @@ def sanity_check(plan, optimism_config):
 
     chains = optimism_config.get("chains", {})
 
-    if type(chains) != "dict":
-        fail("Invalid input_args type, expected dict, got {}".format(type(chains)))
+    chains_type = type(chains)
+    if chains_type != "dict" and chains_type != "list":
+        fail(
+            "Invalid input_args type for 'chains', expected dict or list, got {}".format(
+                chains_type
+            )
+        )
+
+    for category in [
+        "challengers",
+        "supervisors",
+        "superchains",
+    ]:
+        value = optimism_config.get(category, {})
+        value_type = type(value)
+        if value_type != "dict" and value_type != "list":
+            fail(
+                "Invalid input_args type for '{0}', expected dict or list, got {1}".format(
+                    category, value_type
+                )
+            )
 
         # If everything passes, print a message
 

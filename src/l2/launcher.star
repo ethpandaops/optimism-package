@@ -49,7 +49,18 @@ def launch(
         params.participants
     )
 
+    # Separate participants into those that need flashblocks and those that don't
+    regular_participants = []
+    flashblocks_participants = []
+
     for participant_params in params.participants:
+        if participant_params.use_flashblocks:
+            flashblocks_participants.append(participant_params)
+        else:
+            regular_participants.append(participant_params)
+
+    # Launch regular participants first
+    for participant_params in regular_participants:
         participant_name = participant_params.name
         participant_log_prefix = "{}: Participant {}".format(
             network_log_prefix, participant_name
@@ -95,6 +106,7 @@ def launch(
             bootnode_contexts=bootnode_contexts,
             observability_helper=observability_helper,
             supervisors_params=supervisors_params,
+            websocket_url=None,
         )
 
         cl_contexts = [p.cl.context for p in participants]
@@ -171,6 +183,7 @@ def launch(
         network_id=network_params.network_id,
         participants=participants,
         da=da,
+        flashblocks_participants=flashblocks_participants,
     )
 
 

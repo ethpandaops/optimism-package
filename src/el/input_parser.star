@@ -19,7 +19,12 @@ _DEFAULT_ARGS = {
     "max_mem": 0,
 }
 
-_DEFAULT_BUILDER_ARGS = _DEFAULT_ARGS | {"key": None}
+_DEFAULT_BUILDER_ARGS = _DEFAULT_ARGS | {
+    "key": None,
+    # Flashblocks-related defaults for builders
+    "flashblocks_ws_port": 1111,
+    "flashblocks_block_time": 250,
+}
 
 # EL clients have a type property that maps to an image
 _IMAGE_IDS = {
@@ -105,6 +110,9 @@ def _parse(
         "op.network.participant.name": participant_name,
         "op.el.type": el_params["type"],
     }
+    # Normalize labels for builders so downstream tooling discovers Flashblocks builders
+    if el_kind == "elbuilder" and el_params["type"] == "op-rbuilder":
+        el_params["labels"]["op.kind"] = "rbuilder"
 
     # We register the RPC port on the EL
     el_params["ports"] = {

@@ -9,7 +9,7 @@ _DEFAULT_ARGS = {
 }
 
 
-def parse(proxyd_args, network_params, participants_params, registry):
+def parse(proxyd_args, network_params, registry, participants_params=None):
     network_id = network_params.network_id
     network_name = network_params.name
 
@@ -34,11 +34,12 @@ def parse(proxyd_args, network_params, participants_params, registry):
         _net.HTTP_PORT_NAME: _net.port(number=8080),
     }
 
-    # Add replica URLs (EL RPC URLs, proxy targets)
-    proxyd_params["replicas"] = {
-        p.name: _net.service_url(p.el.service_name, p.el.ports[_net.RPC_PORT_NAME])
-        for p in participants_params
-    }
+    # Add replica URLs (EL RPC URLs, proxy targets) if participants are provided
+    if participants_params != None:
+        proxyd_params["replicas"] = {
+            p.name: _net.service_url(p.el.service_name, p.el.ports[_net.RPC_PORT_NAME])
+            for p in participants_params
+        }
 
     # Add labels
     proxyd_params["labels"] = {
