@@ -109,7 +109,8 @@ def run(plan, args={}):
 
     ghost_l1 = ethereum_package.run(plan, {
         "network_params": {
-            "seconds_per_slot": 1
+            "seconds_per_slot": 1,
+            "network_id": 1111111111,
         }
     })
 
