@@ -3,6 +3,6 @@ description: |
   # Optimism Package
   This is a Kurtosis package for deploying an Optimism Rollup
 replace:
-  github.com/ethpandaops/ethereum-package: github.com/ethpandaops/ethereum-package@83830d44823767af65eda7dfe6b26c87c536c4cf
+  github.com/ethpandaops/ethereum-package: github.com/janjakubnanista/ethereum-package@d58379802cf231fb86cb90469267d4f33e06a4c0
   github.com/kurtosis-tech/prometheus-package: github.com/kurtosis-tech/prometheus-package@f5ce159aec728898e3deb827f6b921f8ecfc527f
   github.com/kurtosis-tech/postgres-package: github.com/kurtosis-tech/postgres-package@2d363be1bc42524f6b0575cac0bbc0fd194ae173
