@@ -110,6 +110,9 @@ def _parse(
         "op.network.participant.name": participant_name,
         "op.el.type": el_params["type"],
     }
+    # Normalize labels for builders so downstream tooling discovers Flashblocks builders
+    if el_kind == "elbuilder" and el_params["type"] == "op-rbuilder":
+        el_params["labels"]["op.kind"] = "rbuilder"
 
     # We register the RPC port on the EL
     el_params["ports"] = {

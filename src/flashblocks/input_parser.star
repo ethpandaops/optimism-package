@@ -55,7 +55,7 @@ def parse_websocket_proxy(websocket_proxy_args, network_params, registry):
         }
 
     default_labels = {
-        "op.kind": "flashblocks",
+        "op.kind": "flashblocks-websocket-proxy",
         "op.network.id": str(network_id),
         "op.service.type": "websocket-proxy",
     }
