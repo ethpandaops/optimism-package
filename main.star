@@ -136,6 +136,7 @@ def run(plan, args={}):
         optimism_args,
         "local",
         altda_deploy_config,
+        key="--ghost"
     )
 
     plan.print("Deployed contracts on ghost L1")
