@@ -158,6 +158,14 @@ def get_service_config(
     tcp_discovery_port_number = params.ports[_net.TCP_DISCOVERY_PORT_NAME].number
     udp_discovery_port_number = params.ports[_net.UDP_DISCOVERY_PORT_NAME].number
 
+    # kona-node does not support conductor; fail fast if provided
+    if conductor_params:
+        fail(
+            "Node {} on network {}: kona-node does not support conductor parameters".format(
+                params.name, network_params.network
+            )
+        )
+
     cmd = [
         "--l2-chain-id",
         str(network_params.network_id),

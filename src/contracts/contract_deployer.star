@@ -82,14 +82,18 @@ def _build_hardfork_schedule(chain):
     """
     np = chain.network_params
 
+    # Safely read possibly-missing attributes from network_params
+    def _get_attr(obj, name):
+        return getattr(obj, name, None)
+
     # rename each hardfork to the name the override expects
     renames = (
-        ("l2GenesisFjordTimeOffset", np.fjord_time_offset),
-        ("l2GenesisGraniteTimeOffset", np.granite_time_offset),
-        ("l2GenesisHoloceneTimeOffset", np.holocene_time_offset),
-        ("l2GenesisIsthmusTimeOffset", np.isthmus_time_offset),
-        ("l2GenesisJovianTimeOffset", np.jovian_time_offset),
-        ("l2GenesisInteropTimeOffset", np.interop_time_offset),
+        ("l2GenesisFjordTimeOffset", _get_attr(np, "fjord_time_offset")),
+        ("l2GenesisGraniteTimeOffset", _get_attr(np, "granite_time_offset")),
+        ("l2GenesisHoloceneTimeOffset", _get_attr(np, "holocene_time_offset")),
+        ("l2GenesisIsthmusTimeOffset", _get_attr(np, "isthmus_time_offset")),
+        ("l2GenesisJovianTimeOffset", _get_attr(np, "jovian_time_offset")),
+        ("l2GenesisInteropTimeOffset", _get_attr(np, "interop_time_offset")),
     )
 
     # only include the hardforks that have been activated since
