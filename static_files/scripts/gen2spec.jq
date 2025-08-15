@@ -58,17 +58,19 @@ def optimism:
   {
     "Optimism": {
         "params": {
-          "regolithTimestamp": .config.cancunTime|to_hex,
-          "bedrockBlockNumber": .config.londonBlock|to_hex,
-          "canyonTimestamp": .config.shanghaiTime|to_hex,
-          "ecotoneTimestamp": .config.cancunTime|to_hex,
+          "bedrockBlockNumber": .config.bedrockBlock|to_hex,
+          "regolithTimestamp": .config.regolithTime|to_hex,
+          "canyonTimestamp": .config.canyonTime|to_hex,
+          "ecotoneTimestamp": .config.ecotoneTime|to_hex,
           "fjordTimestamp": .config.fjordTime|to_hex,
           "graniteTimestamp": .config.graniteTime|to_hex,
           "holoceneTimestamp": .config.holoceneTime|to_hex,
           "isthmusTimestamp": .config.isthmusTime|to_hex,
+          "jovianTimestamp": .config.jovianTime|to_hex,
+          "interopTimestamp": .config.interopTime|to_hex,
           "l1FeeRecipient": "0x420000000000000000000000000000000000001A",
           "l1BlockAddress": "0x4200000000000000000000000000000000000015",
-          "canyonBaseFeeChangeDenominator": "250"
+          "canyonBaseFeeChangeDenominator": .config.optimism.eip1559DenominatorCanyon
         }
     }
   }
@@ -76,7 +78,12 @@ def optimism:
 
 def taiko:
   {
-    "Taiko": {}
+    "Taiko": {
+      "ontakeTransition": .config.ontakeBlock|to_hex,
+      "pacayaTransition": .config.pacayaBlock|to_hex,
+      "useSurgeGasPriceOracle": .config.useSurgeGasPriceOracle,
+      "taikoL2Address": "0x\(.config.chainId)0000000000000000000000000000010001"
+    }
   }
 ;
 
@@ -94,17 +101,17 @@ def clique:
 {
   "version": "1",
   "engine": (if .config.optimism != null then optimism elif .config.taiko != null then taiko elif .config.clique != null then clique else ethash end),
-  "params": {
+  "params": ({
     # Tangerine Whistle
     "eip150Transition": "0x0",
 
     # Spurious Dragon
+    "eip155Transition": "0x0",
     "eip160Transition": "0x0",
     "eip161abcTransition": "0x0",
     "eip161dTransition": "0x0",
-    "eip155Transition": "0x0",
-    "maxCodeSizeTransition": "0x0",
     "maxCodeSize": "0x6000",
+    "maxCodeSizeTransition": "0x0",
     "maximumExtraDataSize": "0x20",
 
     # Byzantium
@@ -140,13 +147,13 @@ def clique:
     "eip1559Transition": .config.londonBlock|to_hex,
     "eip1559ElasticityMultiplier": .config.optimism.eip1559Elasticity|to_hex,
     "eip1559BaseFeeMaxChangeDenominator": .config.optimism.eip1559Denominator|to_hex,
+    "eip3198Transition": .config.londonBlock|to_hex,
     "eip3238Transition": .config.londonBlock|to_hex,
     "eip3529Transition": .config.londonBlock|to_hex,
     "eip3541Transition": .config.londonBlock|to_hex,
-    "eip3198Transition": .config.londonBlock|to_hex,
 
     # Merge
-    "MergeForkIdTransition": .config.mergeForkBlock|to_hex,
+    "mergeForkIdTransition": .config.mergeForkBlock|to_hex,
 
     # Shanghai
     "eip3651TransitionTimestamp": .config.shanghaiTime|to_hex,
@@ -155,9 +162,9 @@ def clique:
     "eip4895TransitionTimestamp": .config.shanghaiTime|to_hex,
 
     # Cancun
-    "eip4844TransitionTimestamp": .config.cancunTime|to_hex,
-    "eip4788TransitionTimestamp": .config.cancunTime|to_hex,
     "eip1153TransitionTimestamp": .config.cancunTime|to_hex,
+    "eip4788TransitionTimestamp": .config.cancunTime|to_hex,
+    "eip4844TransitionTimestamp": .config.cancunTime|to_hex,
     "eip5656TransitionTimestamp": .config.cancunTime|to_hex,
     "eip6780TransitionTimestamp": .config.cancunTime|to_hex,
 
@@ -167,10 +174,41 @@ def clique:
     "opHoloceneTransitionTimestamp": .config.holoceneTime|to_hex,
     "opIsthmusTransitionTimestamp": .config.isthmusTime|to_hex,
 
-    #Prague
+    # Prague
+    "eip2537TransitionTimestamp": (.config.isthmusTime // .config.pragueTime)|to_hex,
+    "eip2935TransitionTimestamp": (.config.isthmusTime // .config.pragueTime)|to_hex,
+    "eip6110TransitionTimestamp": (.config.isthmusTime // .config.pragueTime)|to_hex,
+    "eip7623TransitionTimestamp": (.config.isthmusTime // .config.pragueTime)|to_hex,
+    "eip7702TransitionTimestamp": (.config.isthmusTime // .config.pragueTime)|to_hex,
+  } + if .config.optimism != null then { 
+    "eip7685TransitionTimestamp": .config.isthmusTime|to_hex,
+  } else {
+    "eip7002TransitionTimestamp": .config.pragueTime|to_hex,
+    "eip7251TransitionTimestamp": .config.pragueTime|to_hex,
+  } end + {
+    "depositContractAddress": .config.depositContractAddress,
+
+    "blobSchedule" : (if .config.blobSchedule then ((
+      (.config as $c | ["cancun", "prague", "osaka", "amsterdam", "bpo1", "bpo2", "bpo3", "bpo4", "bpo5"]
+      | map({ timestamp: $c[. + "Time"] } + $c.blobSchedule[.]))
+    )
+    | reverse
+    | unique_by(.timestamp)
+    | map(select(length > 1))
+    ) else null end),
+
+    # Osaka
+    "eip7594TransitionTimestamp": .config.osakaTime|to_hex,
+    "eip7823TransitionTimestamp": .config.osakaTime|to_hex,
+    "eip7825TransitionTimestamp": .config.osakaTime|to_hex,
+    "eip7883TransitionTimestamp": .config.osakaTime|to_hex,
+    "eip7918TransitionTimestamp": .config.osakaTime|to_hex,
+    "eip7934TransitionTimestamp": .config.osakaTime|to_hex,
+    "eip7939TransitionTimestamp": .config.osakaTime|to_hex,
+    "eip7951TransitionTimestamp": .config.osakaTime|to_hex,
 
     # Fee collector
-    "feeCollector":  (if .config.optimism != null then "0x4200000000000000000000000000000000000019" elif .config.taiko != null then "0x\(.config.chainId)0000000000000000000000000000010001" else null end),
+    "feeCollector":  (if .config.optimism != null then "0x4200000000000000000000000000000000000019" elif .config.taiko != null then .config.feeCollector // "0x\(.config.chainId)0000000000000000000000000000010001" else null end),
     "eip1559FeeCollectorTransition": (if .config.optimism != null or .config.taiko != null then .config.londonBlock|to_hex else null end),
 
     # Other chain parameters
@@ -181,8 +219,7 @@ def clique:
 
     "eip1559BaseFeeMinValueTransition": .config.ontakeBlock|to_hex,
     "eip1559BaseFeeMinValue": (if .config.ontakeBlock then "0x86ff51" else null end),
-    "ontakeTransition": .config.ontakeBlock|to_hex,
-  },
+  }),
   "genesis": {
     "seal": {
       "ethereum":{
