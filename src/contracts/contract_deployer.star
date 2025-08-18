@@ -391,10 +391,8 @@ def deploy_contracts(
         description="Apply L2 contract deployments",
         image=optimism_args.op_contract_deployer_params.image,
         env_vars={
-            "PRIVATE_KEY": str(priv_key),
             "DEPLOYER_CACHE_DIR": "/var/cache/op-deployer",
-        }
-        | l1_config_env_vars,
+        },
         store=[
             StoreSpec(
                 src="/network-data",
