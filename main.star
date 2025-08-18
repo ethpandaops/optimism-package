@@ -69,17 +69,17 @@ def run(plan, args={}):
 
     plan.print("Deploying a ghost L1")
 
-    ghost_l1 = plan.add_service(
-        name = "l1-ghost",
-        description = "Starting ghost L1",
-        config = ServiceConfig(
-            image = "ghcr.io/foundry-rs/foundry:latest",
-            cmd = ["anvil", "--chain-id=1111111111", "--port=8545", "--host=0.0.0.0"],
-            ports = {
-                _net.RPC_PORT_NAME: PortSpec(number=8545)
-            }
-        )
-    )
+    # ghost_l1 = plan.add_service(
+    #     name = "l1-ghost",
+    #     description = "Starting ghost L1",
+    #     config = ServiceConfig(
+    #         image = "ghcr.io/foundry-rs/foundry:latest",
+    #         cmd = ["anvil", "--chain-id=1111111111", "--port=8545", "--host=0.0.0.0"],
+    #         ports = {
+    #             _net.RPC_PORT_NAME: PortSpec(number=8545)
+    #         }
+    #     )
+    # )
 
     # ghost_ethereum_args = ethereum_args | {}
     # ghost_ethereum_args["participants"] = [{"el_type": "geth"}]
