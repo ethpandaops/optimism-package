@@ -71,7 +71,7 @@ def run(plan, args={}):
 
     ghost_ethereum_args = ethereum_args | {}
     ghost_ethereum_args["participants"] = [{"el_type": "geth"}]
-    ghost_ethereum_args["network_params"] = {
+    ghost_ethereum_args["network_params"] = ethereum_args.get("network_params") | {
         "seconds_per_slot": 1,
         "network_id": "1111111111",
     }
