@@ -371,7 +371,7 @@ def deploy_contracts(
     )
 
     apply_cmds = [
-        "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data",
+        "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data --deployment-target genesis",
     ]
     for chain in optimism_args.chains:
         network_id = chain.network_params.network_id

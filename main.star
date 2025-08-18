@@ -69,38 +69,56 @@ def run(plan, args={}):
 
     plan.print("Deploying a ghost L1")
 
-    ghost_ethereum_args = ethereum_args | {}
-    ghost_ethereum_args["participants"] = [{"el_type": "geth"}]
-    ghost_ethereum_args["network_params"] = ethereum_args.get("network_params") | {
-        "seconds_per_slot": 1,
-        "network_id": "1111111111",
-    }
-
-    ghost_l1 = ethereum_package.run(
-        plan,
-        ghost_ethereum_args,
+    ghost_l1 = plan.add_service(
+        name = "ghost_l1",
+        description = "Starting ghost L1",
+        config = ServiceConfig(
+            image = "ghcr.io/ethpandaops/anvil:latest",
+            cmd = ["anvil", "--chain-id", "1111111111"],
+            ports = {
+                [_net.RPC_PORT_NAME]: PortSpec(number=8545)
+            }
+        )
     )
 
-    all_ghost_l1_participants = ghost_l1.all_participants
-    ghost_l1_network_params = ghost_l1.network_params
-    ghost_l1_network_id = ghost_l1.network_id
-    ghost_l1_rpc_url = all_ghost_l1_participants[0].el_context.rpc_http_url
-    ghost_l1_priv_key = ghost_l1.pre_funded_accounts[
-        12
-    ].private_key  # reserved for L2 contract deployers
-    ghost_l1_config_env_vars = get_l1_config(
-        all_ghost_l1_participants, ghost_l1_network_params, ghost_l1_network_id
-    )
-    plan.print("Waiting for ghost L1 to start up")
-    wait_for_sync.wait_for_startup(plan, ghost_l1_config_env_vars)
+    # ghost_ethereum_args = ethereum_args | {}
+    # ghost_ethereum_args["participants"] = [{"el_type": "geth"}]
+    # ghost_ethereum_args["network_params"] = ethereum_args.get("network_params") | {
+    #     "seconds_per_slot": 1,
+    #     "network_id": "1111111111",
+    # }
 
-    plan.print("Deployed a ghost L1")
+    # ghost_l1 = ethereum_package.run(
+    #     plan,
+    #     ghost_ethereum_args,
+    # )
+
+    # all_ghost_l1_participants = ghost_l1.all_participants
+    # ghost_l1_network_params = ghost_l1.network_params
+    # ghost_l1_network_id = ghost_l1.network_id
+    # ghost_l1_rpc_url = all_ghost_l1_participants[0].el_context.rpc_http_url
+    # ghost_l1_priv_key = ghost_l1.pre_funded_accounts[
+    #     12
+    # ].private_key  # reserved for L2 contract deployers
+    # ghost_l1_config_env_vars = get_l1_config(
+    #     all_ghost_l1_participants, ghost_l1_network_params, ghost_l1_network_id
+    # )
+    # plan.print("Waiting for ghost L1 to start up")
+    # wait_for_sync.wait_for_startup(plan, ghost_l1_config_env_vars)
+
+    # plan.print("Deployed a ghost L1")
     plan.print("Deploying contracts on ghost L1")
 
     ghost_deployment_output = contract_deployer.deploy_contracts(
         plan,
-        ghost_l1_priv_key,
-        ghost_l1_config_env_vars,
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", # Private key for "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        {
+            "L1_RPC_KIND": "standard",
+            "L1_RPC_URL": _net.service_url("ghost_l1", _net.port(number=8545)),
+            "CL_RPC_URL": "AAAAAAAAAAA",
+            "L1_WS_URL": "AAAAAAAAAAA",
+            "L1_CHAIN_ID": "1111111111",
+        },
         optimism_args,
         "local",
         altda_deploy_config,
