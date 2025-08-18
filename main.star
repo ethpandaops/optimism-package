@@ -119,19 +119,10 @@ def run(plan, args={}):
     #     # Valid values are of the following types: (ExecRecipe)
     #     # MANDATORY
     #     recipe = exec_recipe,
-        
-    #     # If the recipe returns a code that does not belong on this list, this instruction will fail.
-    #     # OPTIONAL (Defaults to [0])
-    #     acceptable_codes = [0, 1], # Here both 0 and 1 are valid codes that we want to accept and not fail the instruction
-        
-    #     # If False, instruction will never fail based on code (acceptable_codes will be ignored).
-    #     # You can chain this call with assert to check codes after request is done.
-    #     # OPTIONAL (Defaults to False)
-    #     skip_code_check = False,
 
     #     # A human friendly description for the end user of the package
     #     # OPTIONAL (Default: Executing command on service 'SERVICE_NAME')
-    #     description = "executing a command"
+    #     description = "Dumping ghost L1 storage"
 
     # )
 
