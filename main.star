@@ -74,9 +74,9 @@ def run(plan, args={}):
         description = "Starting ghost L1",
         config = ServiceConfig(
             image = "ghcr.io/ethpandaops/anvil:latest",
-            cmd = " ".join(["anvil", "--chain-id", "1111111111"]),
+            cmd = ["anvil", "--chain-id", "1111111111"],
             ports = {
-                [_net.RPC_PORT_NAME]: PortSpec(number=8545)
+                _net.RPC_PORT_NAME: PortSpec(number=8545)
             }
         )
     )
