@@ -76,7 +76,7 @@ def run(plan, args={}):
             image = "ghcr.io/foundry-rs/foundry:stable",
             cmd = ["anvil", "--chain-id=1111111111", "--port=8545", "--host=0.0.0.0"],
             ports = {
-                _net.RPC_PORT_NAME: PortSpec(number=8545)
+                _net.RPC_PORT_NAME: PortSpec(number=8545, wait = "30s")
             }
         )
     )
