@@ -64,20 +64,21 @@ def run(plan, args={}):
     observability_helper = observability.make_helper(observability_params)
 
     # EXPERIMENT
-    # 
+    #
     # Deploy an l1 with a single node and the lowest blocktime we can get
 
     plan.print("Deploying a ghost L1")
 
-    ghost_l1 = ethereum_package.run(plan, {
-        "participants": [
-            "el_type": "geth"
-        ],
-        "network_params": {
-            "seconds_per_slot": 1,
-            "network_id": "1111111111",
-        }
-    })
+    ghost_l1 = ethereum_package.run(
+        plan,
+        {
+            "participants": [{"el_type": "geth"}],
+            "network_params": {
+                "seconds_per_slot": 1,
+                "network_id": "1111111111",
+            },
+        },
+    )
 
     all_ghost_l1_participants = ghost_l1.all_participants
     ghost_l1_network_params = ghost_l1.network_params
@@ -102,7 +103,7 @@ def run(plan, args={}):
         optimism_args,
         "local",
         altda_deploy_config,
-        key="--ghost"
+        key="--ghost",
     )
 
     # exec_recipe = ExecRecipe(
@@ -114,7 +115,7 @@ def run(plan, args={}):
     #     # If it does not, a validation error will be thrown
     #     # MANDATORY
     #     service_name = "my-service",
-        
+
     #     # The recipe that will determine the exec to be performed.
     #     # Valid values are of the following types: (ExecRecipe)
     #     # MANDATORY
@@ -126,15 +127,15 @@ def run(plan, args={}):
 
     # )
 
-    # 
+    #
     # FIXME Get the L1 state
-    # 
+    #
     # Retrieve storage contents from an EVM address using web3.py
     # This script fetches all storage slots for a given contract address and formats them for genesis insertion
 
     # Now tear down the ghost L1
     for s in plan.get_services():
-        plan.remove_service(name = s.name)
+        plan.remove_service(name=s.name)
 
     # Deploy the L1
     l1_network = ""
