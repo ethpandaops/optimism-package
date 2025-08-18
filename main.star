@@ -137,186 +137,186 @@ def run(plan, args={}):
     for s in plan.get_services():
         plan.remove_service(name=s.name)
 
-    # Deploy the L1
-    l1_network = ""
-    if external_l1_args:
-        plan.print("Using external L1")
-        plan.print(external_l1_args)
+    # # Deploy the L1
+    # l1_network = ""
+    # if external_l1_args:
+    #     plan.print("Using external L1")
+    #     plan.print(external_l1_args)
 
-        l1_rpc_url = external_l1_args.el_rpc_url
-        l1_priv_key = external_l1_args.priv_key
+    #     l1_rpc_url = external_l1_args.el_rpc_url
+    #     l1_priv_key = external_l1_args.priv_key
 
-        l1_config_env_vars = {
-            "L1_RPC_KIND": external_l1_args.rpc_kind,
-            "L1_RPC_URL": l1_rpc_url,
-            "CL_RPC_URL": external_l1_args.cl_rpc_url,
-            "L1_WS_URL": external_l1_args.el_ws_url,
-            "L1_CHAIN_ID": external_l1_args.network_id,
-        }
+    #     l1_config_env_vars = {
+    #         "L1_RPC_KIND": external_l1_args.rpc_kind,
+    #         "L1_RPC_URL": l1_rpc_url,
+    #         "CL_RPC_URL": external_l1_args.cl_rpc_url,
+    #         "L1_WS_URL": external_l1_args.el_ws_url,
+    #         "L1_CHAIN_ID": external_l1_args.network_id,
+    #     }
 
-        plan.print("Waiting for network to sync")
-        wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
-    else:
-        plan.print("Deploying a local L1")
-        l1 = ethereum_package.run(plan, ethereum_args)
-        plan.print(l1.network_params)
-        # Get L1 info
-        all_l1_participants = l1.all_participants
-        l1_network = "local"
-        l1_network_params = l1.network_params
-        l1_network_id = l1.network_id
-        l1_rpc_url = all_l1_participants[0].el_context.rpc_http_url
-        l1_priv_key = l1.pre_funded_accounts[
-            12
-        ].private_key  # reserved for L2 contract deployers
-        l1_config_env_vars = get_l1_config(
-            all_l1_participants, l1_network_params, l1_network_id
-        )
-        plan.print("Waiting for L1 to start up")
-        wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
+    #     plan.print("Waiting for network to sync")
+    #     wait_for_sync.wait_for_sync(plan, l1_config_env_vars)
+    # else:
+    #     plan.print("Deploying a local L1")
+    #     l1 = ethereum_package.run(plan, ethereum_args)
+    #     plan.print(l1.network_params)
+    #     # Get L1 info
+    #     all_l1_participants = l1.all_participants
+    #     l1_network = "local"
+    #     l1_network_params = l1.network_params
+    #     l1_network_id = l1.network_id
+    #     l1_rpc_url = all_l1_participants[0].el_context.rpc_http_url
+    #     l1_priv_key = l1.pre_funded_accounts[
+    #         12
+    #     ].private_key  # reserved for L2 contract deployers
+    #     l1_config_env_vars = get_l1_config(
+    #         all_l1_participants, l1_network_params, l1_network_id
+    #     )
+    #     plan.print("Waiting for L1 to start up")
+    #     wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
 
-    plan.print("Deployed contracts on ghost L1")
-    plan.print("Deploying contracts on real L1")
+    # plan.print("Deployed contracts on ghost L1")
+    # plan.print("Deploying contracts on real L1")
 
-    deployment_output = contract_deployer.deploy_contracts(
-        plan,
-        l1_priv_key,
-        l1_config_env_vars,
-        optimism_args,
-        l1_network,
-        altda_deploy_config,
-    )
+    # deployment_output = contract_deployer.deploy_contracts(
+    #     plan,
+    #     l1_priv_key,
+    #     l1_config_env_vars,
+    #     optimism_args,
+    #     l1_network,
+    #     altda_deploy_config,
+    # )
 
-    plan.print("Deployed contracts on real L1")
+    # plan.print("Deployed contracts on real L1")
 
-    jwt_file = plan.upload_files(
-        src=ethereum_package_static_files.JWT_PATH_FILEPATH,
-        name="op_jwt_file",
-    )
+    # jwt_file = plan.upload_files(
+    #     src=ethereum_package_static_files.JWT_PATH_FILEPATH,
+    #     name="op_jwt_file",
+    # )
 
-    # TODO We need to create the dependency sets before we launch the chains since
-    # e.g. op-node now depends on the artifacts to be present
-    #
-    # This can easily turn into another dependency cycle which means we might have to introduce yet another layer
-    # of execution whose sole purpose is to create required artifacts
-    for superchain_params in optimism_args.superchains:
-        superchain_launcher.launch(
-            plan=plan,
-            params=superchain_params,
-        )
+    # # TODO We need to create the dependency sets before we launch the chains since
+    # # e.g. op-node now depends on the artifacts to be present
+    # #
+    # # This can easily turn into another dependency cycle which means we might have to introduce yet another layer
+    # # of execution whose sole purpose is to create required artifacts
+    # for superchain_params in optimism_args.superchains:
+    #     superchain_launcher.launch(
+    #         plan=plan,
+    #         params=superchain_params,
+    #     )
 
-    l2s = []
-    for l2_params in optimism_args.chains:
-        # We filter out the supervisors applicable to this network
-        l2_supervisors_params = [
-            supervisor_params
-            for supervisor_params in optimism_args.supervisors
-            if l2_params.network_params.network_id
-            in supervisor_params.superchain.participants
-        ]
+    # l2s = []
+    # for l2_params in optimism_args.chains:
+    #     # We filter out the supervisors applicable to this network
+    #     l2_supervisors_params = [
+    #         supervisor_params
+    #         for supervisor_params in optimism_args.supervisors
+    #         if l2_params.network_params.network_id
+    #         in supervisor_params.superchain.participants
+    #     ]
 
-        l2s.append(
-            _l2_launcher.launch(
-                plan=plan,
-                params=l2_params,
-                supervisors_params=l2_supervisors_params,
-                jwt_file=jwt_file,
-                l1_config_env_vars=l1_config_env_vars,
-                deployment_output=deployment_output,
-                node_selectors=global_node_selectors,
-                observability_helper=observability_helper,
-                l1_rpc_url=l1_rpc_url,
-                log_level=global_log_level,
-                tolerations=global_tolerations,
-                persistent=persistent,
-            )
-        )
+    #     l2s.append(
+    #         _l2_launcher.launch(
+    #             plan=plan,
+    #             params=l2_params,
+    #             supervisors_params=l2_supervisors_params,
+    #             jwt_file=jwt_file,
+    #             l1_config_env_vars=l1_config_env_vars,
+    #             deployment_output=deployment_output,
+    #             node_selectors=global_node_selectors,
+    #             observability_helper=observability_helper,
+    #             l1_rpc_url=l1_rpc_url,
+    #             log_level=global_log_level,
+    #             tolerations=global_tolerations,
+    #             persistent=persistent,
+    #         )
+    #     )
 
-    for supervisor_params in optimism_args.supervisors:
-        supervisor_launcher.launch(
-            plan=plan,
-            params=supervisor_params,
-            l1_config_env_vars=l1_config_env_vars,
-            l2s_params=optimism_args.chains,
-            jwt_file=jwt_file,
-            deployment_output=deployment_output,
-            observability_helper=observability_helper,
-        )
+    # for supervisor_params in optimism_args.supervisors:
+    #     supervisor_launcher.launch(
+    #         plan=plan,
+    #         params=supervisor_params,
+    #         l1_config_env_vars=l1_config_env_vars,
+    #         l2s_params=optimism_args.chains,
+    #         jwt_file=jwt_file,
+    #         deployment_output=deployment_output,
+    #         observability_helper=observability_helper,
+    #     )
 
-    for test_sequencer_params in optimism_args.test_sequencers:
-        op_test_sequencer_launcher.launch(
-            plan=plan,
-            params=test_sequencer_params,
-            l1_config_env_vars=l1_config_env_vars,
-            l2s_params=optimism_args.chains,
-            jwt_file=jwt_file,
-            deployment_output=deployment_output,
-            observability_helper=observability_helper,
-        )
+    # for test_sequencer_params in optimism_args.test_sequencers:
+    #     op_test_sequencer_launcher.launch(
+    #         plan=plan,
+    #         params=test_sequencer_params,
+    #         l1_config_env_vars=l1_config_env_vars,
+    #         l2s_params=optimism_args.chains,
+    #         jwt_file=jwt_file,
+    #         deployment_output=deployment_output,
+    #         observability_helper=observability_helper,
+    #     )
 
-    for challenger_params in optimism_args.challengers:
-        op_challenger_launcher.launch(
-            plan=plan,
-            params=challenger_params,
-            l2s_params=optimism_args.chains,
-            supervisors_params=optimism_args.supervisors,
-            l1_config_env_vars=l1_config_env_vars,
-            deployment_output=deployment_output,
-            observability_helper=observability_helper,
-        )
+    # for challenger_params in optimism_args.challengers:
+    #     op_challenger_launcher.launch(
+    #         plan=plan,
+    #         params=challenger_params,
+    #         l2s_params=optimism_args.chains,
+    #         supervisors_params=optimism_args.supervisors,
+    #         l1_config_env_vars=l1_config_env_vars,
+    #         deployment_output=deployment_output,
+    #         observability_helper=observability_helper,
+    #     )
 
-    for index, l2_params in enumerate(optimism_args.chains):
-        # We filter out the supervisors applicable to this network
-        l2_supervisors_params = [
-            supervisor_params
-            for supervisor_params in optimism_args.supervisors
-            if l2_params.network_params.network_id
-            in supervisor_params.superchain.participants
-        ]
+    # for index, l2_params in enumerate(optimism_args.chains):
+    #     # We filter out the supervisors applicable to this network
+    #     l2_supervisors_params = [
+    #         supervisor_params
+    #         for supervisor_params in optimism_args.supervisors
+    #         if l2_params.network_params.network_id
+    #         in supervisor_params.superchain.participants
+    #     ]
 
-        original_launcher_output__hack = l2s[index]
+    #     original_launcher_output__hack = l2s[index]
 
-        _l2_launcher__hack.launch(
-            original_launcher_output__hack=original_launcher_output__hack,
-            plan=plan,
-            params=l2_params,
-            supervisors_params=l2_supervisors_params,
-            jwt_file=jwt_file,
-            l1_config_env_vars=l1_config_env_vars,
-            deployment_output=deployment_output,
-            node_selectors=global_node_selectors,
-            observability_helper=observability_helper,
-            l1_rpc_url=l1_rpc_url,
-            log_level=global_log_level,
-            tolerations=global_tolerations,
-            persistent=persistent,
-            registry=registry,
-        )
+    #     _l2_launcher__hack.launch(
+    #         original_launcher_output__hack=original_launcher_output__hack,
+    #         plan=plan,
+    #         params=l2_params,
+    #         supervisors_params=l2_supervisors_params,
+    #         jwt_file=jwt_file,
+    #         l1_config_env_vars=l1_config_env_vars,
+    #         deployment_output=deployment_output,
+    #         node_selectors=global_node_selectors,
+    #         observability_helper=observability_helper,
+    #         l1_rpc_url=l1_rpc_url,
+    #         log_level=global_log_level,
+    #         tolerations=global_tolerations,
+    #         persistent=persistent,
+    #         registry=registry,
+    #     )
 
-    if optimism_args.faucet.enabled:
-        _install_faucet(
-            plan=plan,
-            registry=registry,
-            faucet_params=optimism_args.faucet,
-            l1_config_env_vars=l1_config_env_vars,
-            l1_priv_key=l1_priv_key,
-            deployment_output=deployment_output,
-            l2s=l2s,
-        )
+    # if optimism_args.faucet.enabled:
+    #     _install_faucet(
+    #         plan=plan,
+    #         registry=registry,
+    #         faucet_params=optimism_args.faucet,
+    #         l1_config_env_vars=l1_config_env_vars,
+    #         l1_priv_key=l1_priv_key,
+    #         deployment_output=deployment_output,
+    #         l2s=l2s,
+    #     )
 
-    # Launch interop monitoring
-    if optimism_args.interop_mon and optimism_args.interop_mon.enabled:
-        interop_mon.launch(
-            plan=plan,
-            params=optimism_args.interop_mon,
-            image=optimism_args.interop_mon.image,
-            l2s=l2s,
-            observability_helper=observability_helper,
-        )
+    # # Launch interop monitoring
+    # if optimism_args.interop_mon and optimism_args.interop_mon.enabled:
+    #     interop_mon.launch(
+    #         plan=plan,
+    #         params=optimism_args.interop_mon,
+    #         image=optimism_args.interop_mon.image,
+    #         l2s=l2s,
+    #         observability_helper=observability_helper,
+    #     )
 
-    observability.launch(
-        plan, observability_helper, global_node_selectors, observability_params
-    )
+    # observability.launch(
+    #     plan, observability_helper, global_node_selectors, observability_params
+    # )
 
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):
