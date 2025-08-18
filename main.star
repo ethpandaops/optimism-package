@@ -74,7 +74,7 @@ def run(plan, args={}):
         description = "Starting ghost L1",
         config = ServiceConfig(
             image = "ghcr.io/foundry-rs/foundry:stable",
-            entrypoint = "anvil",
+            entrypoint = ["anvil"],
             cmd = ["--chain-id=1111111111", "--port=8545", "--host 0.0.0.0"],
             ports = {
                 _net.RPC_PORT_NAME: PortSpec(number=8545, wait = "30s")
