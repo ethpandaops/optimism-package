@@ -29,6 +29,7 @@ _DEFAULT_ARGS = {
     "proposer_params": None,
     "batcher_params": None,
     "blockscout_params": None,
+    "signer_params": None,
     "proxyd_params": None,
     "tx_fuzzer_params": None,
 }
@@ -115,6 +116,13 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
         proxyd_args=l2_params["proxyd_params"],
         network_params=l2_params["network_params"],
         participants_params=l2_params["participants"],
+        registry=registry,
+    )
+
+    # We add the signer params
+    l2_params["signer_params"] = _signer_input_parser.parse(
+        signer_args=l2_params["signer_params"],
+        network_params=l2_params["network_params"],
         registry=registry,
     )
 
