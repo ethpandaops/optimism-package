@@ -70,7 +70,7 @@ def run(plan, args={}):
     plan.print("Deploying a ghost L1")
 
     ghost_l1 = plan.add_service(
-        name = "ghost_l1",
+        name = "l1-ghost",
         description = "Starting ghost L1",
         config = ServiceConfig(
             image = "ghcr.io/ethpandaops/anvil:latest",
@@ -114,7 +114,7 @@ def run(plan, args={}):
         "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", # Private key for "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         {
             "L1_RPC_KIND": "standard",
-            "L1_RPC_URL": _net.service_url("ghost_l1", _net.port(number=8545)),
+            "L1_RPC_URL": _net.service_url("l1-ghost", _net.port(number=8545)),
             "CL_RPC_URL": "AAAAAAAAAAA",
             "L1_WS_URL": "AAAAAAAAAAA",
             "L1_CHAIN_ID": "1111111111",
