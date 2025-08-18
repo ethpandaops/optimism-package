@@ -262,7 +262,7 @@ def _build_deployment_intent(
 
 
 def deploy_contracts(
-    plan, priv_key, l1_config_env_vars, optimism_args, l1_network, altda_args
+    plan, priv_key, l1_config_env_vars, optimism_args, l1_network, altda_args, key=""
 ):
     l2_chain_ids_list = [
         str(chain.network_params.network_id) for chain in optimism_args.chains
@@ -277,7 +277,7 @@ def deploy_contracts(
         store=[
             StoreSpec(
                 src="/network-data",
-                name="op-deployer-configs",
+                name="op-deployer-configs{}".format(key),
             )
         ],
         run=" && ".join(
@@ -303,7 +303,7 @@ def deploy_contracts(
 
     fund_script_artifact = plan.upload_files(
         src=FUND_SCRIPT_FILEPATH,
-        name="op-deployer-fund-script",
+        name="op-deployer-fund-script{}".format(key),
     )
 
     plan.run_sh(
@@ -322,7 +322,7 @@ def deploy_contracts(
         store=[
             StoreSpec(
                 src="/network-data",
-                name="op-deployer-configs",
+                name="op-deployer-configs{}".format(key),
             )
         ],
         files={
@@ -340,13 +340,13 @@ def deploy_contracts(
     intent_json_artifact = utils.write_to_file(plan, intent_json, "/tmp", "intent.json")
 
     op_deployer_configure = plan.run_sh(
-        name="op-deployer-configure",
+        name="op-deployer-configure{}".format(key),
         description="Configure L2 contract deployments",
         image=utils.DEPLOYMENT_UTILS_IMAGE,
         store=[
             StoreSpec(
                 src="/network-data",
-                name="op-deployer-configs",
+                name="op-deployer-configs{}".format(key),
             )
         ],
         files={
@@ -371,7 +371,7 @@ def deploy_contracts(
     )
 
     apply_cmds = [
-        "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data",
+        "op-deployer apply --workdir /network-data --deployment-target genesis",
     ]
     for chain in optimism_args.chains:
         network_id = chain.network_params.network_id
@@ -391,14 +391,12 @@ def deploy_contracts(
         description="Apply L2 contract deployments",
         image=optimism_args.op_contract_deployer_params.image,
         env_vars={
-            "PRIVATE_KEY": str(priv_key),
             "DEPLOYER_CACHE_DIR": "/var/cache/op-deployer",
-        }
-        | l1_config_env_vars,
+        },
         store=[
             StoreSpec(
                 src="/network-data",
-                name="op-deployer-configs",
+                name="op-deployer-configs{}".format(key),
             )
         ],
         files={
@@ -417,7 +415,7 @@ def deploy_contracts(
             store=[
                 StoreSpec(
                     src="/network-data",
-                    name="op-deployer-configs",
+                    name="op-deployer-configs{}".format(key),
                 )
             ],
             files={
