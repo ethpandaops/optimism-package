@@ -78,6 +78,9 @@ def run(plan, args={}):
             cmd = ["--chain-id=1111111111", "--port=8545", "--host 0.0.0.0"],
             ports = {
                 _net.RPC_PORT_NAME: PortSpec(number=8545, wait = "30s")
+            },
+            env_vars = {
+                "ANVIL_IP_ADDR": "0.0.0.0"
             }
         )
     )
