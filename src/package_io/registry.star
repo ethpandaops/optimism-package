@@ -23,6 +23,7 @@ OP_DEPLOYER = "op-deployer"
 OP_FAUCET = "op-faucet"
 OP_CONDUCTOR_OPS = "op-conductor-ops"
 OP_INTEROP_MON = "op-interop-mon"
+OP_SIGNER = "op-signer"
 OP_TEST_SEQUENCER = "op-test-sequencer"
 
 PROXYD = "proxyd"
@@ -92,6 +93,8 @@ _DEFAULT_IMAGES = {
     # Explorers
     OP_BLOCKSCOUT: "blockscout/blockscout-optimism:6.8.0",
     OP_BLOCKSCOUT_VERIFIER: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0",
+    # Signer
+    OP_SIGNER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-signer:v1.3.1",
     # Test Sequencer
     OP_TEST_SEQUENCER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-test-sequencer:develop",
 }
