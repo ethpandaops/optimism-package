@@ -50,6 +50,7 @@ def test_signer_input_parser_default_args(plan):
             enabled=True,
             image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-signer:v1.3.1",
             service_name="signer-1000-my-l2",
+            ports={_net.HTTP_PORT_NAME: _net.port(number=8545)},
             labels={
                 "op.kind": "signer",
                 "op.network.id": "1000",
@@ -74,6 +75,7 @@ def test_signer_input_parser_custom_params(plan):
             enabled=True,
             image="signer:brightest",
             service_name="signer-1000-my-l2",
+            ports={_net.HTTP_PORT_NAME: _net.port(number=8545)},
             labels={
                 "op.kind": "signer",
                 "op.network.id": "1000",

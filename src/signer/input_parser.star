@@ -31,6 +31,9 @@ def parse(signer_args, network_params, registry):
     # Add the service name
     signer_params["service_name"] = "signer-{}-{}".format(network_id, network_name)
 
+    # Add ports
+    signer_params["ports"] = {_net.HTTP_PORT_NAME: _net.port(number=8545)}
+
     # Add labels
     signer_params["labels"] = {
         "op.kind": "signer",
