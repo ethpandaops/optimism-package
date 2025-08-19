@@ -7,6 +7,7 @@ _blockscout_input_parser = import_module("/src/blockscout/input_parser.star")
 _da_input_parser = import_module("/src/da/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
+_signer_input_parser = import_module("/src/signer/input_parser.star")
 _tx_fuzzer_input_parser = import_module("/src/tx-fuzzer/input_parser.star")
 
 _DEFAULT_NETWORK_PARAMS = {
