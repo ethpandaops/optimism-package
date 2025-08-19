@@ -129,6 +129,8 @@ def test_l2_input_parser_defaults(plan):
                 proxyd_params=_default_proxyd_params,
                 # DA is disabled by default
                 da_params=None,
+                # signer is disabled by default
+                signer_params=None,
                 # tx fuzzer is disabled by default
                 tx_fuzzer_params=None,
                 # Blockscout is disabled by default
@@ -162,6 +164,8 @@ def test_l2_input_parser_defaults(plan):
                 proxyd_params=parsed_proxyd_params,
                 # DA is disabled by default
                 da_params=None,
+                # signer is disabled by default
+                signer_params=None,
                 # tx fuzzer is disabled by default
                 tx_fuzzer_params=None,
                 # Blockscout is disabled by default
