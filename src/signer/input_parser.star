@@ -26,7 +26,7 @@ def parse(signer_args, network_params, registry):
         return None
 
     # And default the image to the one in the registry
-    signer_params["image"] = signer_params["image"] or registry.get(_registry.PROXYD)
+    signer_params["image"] = signer_params["image"] or registry.get(_registry.OP_SIGNER)
 
     # Add the service name
     signer_params["service_name"] = "signer-{}-{}".format(network_id, network_name)
