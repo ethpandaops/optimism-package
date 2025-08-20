@@ -1,0 +1,6 @@
+provider: LOCAL
+auth:
+  {{ range $index, $client := .Clients }}
+  - name: {{ $client.hostname }}
+    key: {{ $client.private_key }}
+  {{ end }}
