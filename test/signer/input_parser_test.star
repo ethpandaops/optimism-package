@@ -48,7 +48,7 @@ def test_signer_input_parser_default_args(plan):
         ),
         struct(
             enabled=True,
-            image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-signer:v1.3.1",
+            image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-signer:v1.5.0",
             service_name="signer-1000-my-l2",
             ports={_net.HTTP_PORT_NAME: _net.port(number=8545)},
             labels={
