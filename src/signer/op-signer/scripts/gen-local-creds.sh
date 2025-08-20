@@ -1,16 +1,16 @@
 #!/usr/bin/env sh
 
+#
+# This script is based on https://github.com/ethereum-optimism/infra/blob/main/op-signer/gen-local-creds.sh
+# with small adjustments to fit to our use case
+#
+
 set -euo pipefail
 
-if [ -z "$TLS_DIR" ]; then
+if [ -z "${TLS_DIR-}" ]; then
     SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
     TLS_DIR="$SCRIPT_DIR/tls"
 fi
-
-OPENSSL_IMAGE="alpine/openssl:3.3.3"
-
-USER_UID=$(id -u)
-USER_GID=$(id -g)
 
 CERT_ORG_NAME="OP-Signer Local Org"
 MOD_LENGTH=2048
@@ -24,34 +24,12 @@ CLIENT_TLS_CERT="tls.crt"
 CLIENT_PRIVATE_KEY="ec_private.pem"
 CLIENT_OPENSSL_CNF="openssl.cnf"
 
-# Check if we should use Docker (default to true if not set)
-USE_DOCKER=${OP_SIGNER_GEN_TLS_DOCKER:-true}
-
-# Helper function to run openssl commands
-run_openssl() {
-    if [ "$USE_DOCKER" = "true" ]; then
-        docker run --rm \
-            -v "$TLS_DIR:$TLS_DIR" \
-            -u "$USER_UID:$USER_GID" \
-            "$OPENSSL_IMAGE" "$@"
-    else
-        # Check if openssl is available locally
-        if ! command -v openssl &> /dev/null; then
-            echo "Error: OpenSSL is not installed locally. Please install OpenSSL or use Docker by setting OP_SIGNER_GEN_TLS_DOCKER=true"
-            exit 1
-        fi
-        openssl "$@"
-    fi
-}
-
 generate_ca() {
-    local force="$1"
-    [ "$force" = "true" ] || [ ! -f "$CA_CERT" ] || return 0
-
     echo
     echo "Generating CA..."
 
-    run_openssl req -newkey "rsa:$MOD_LENGTH" \
+    openssl req \
+        -newkey "rsa:$MOD_LENGTH" \
         -new -nodes -x509 \
         -days 365 \
         -sha256 \
@@ -72,7 +50,13 @@ generate_client_tls() {
     
     # Generate client key
     echo "Generating client key..."
-    run_openssl genrsa -out "$clientDir/$CLIENT_TLS_KEY" "$MOD_LENGTH"
+    openssl genrsa -out "$clientDir/$CLIENT_TLS_KEY" "$MOD_LENGTH"
+
+    # Since we are in a testing environment, we are not so strict about file permissions
+    # 
+    # Allowing the private key to be readable by all users
+    # makes the integration with op-signer easier
+    chmod 644 "$clientDir/$CLIENT_TLS_KEY"
 
     local confFile="$clientDir/$CLIENT_OPENSSL_CNF"
     
@@ -85,7 +69,9 @@ subjectAltName=DNS:$hostname
 EOF
     
     echo "Generating client certificate signing request..."
-    run_openssl req -new -key "$clientDir/$CLIENT_TLS_KEY" \
+    openssl req \
+        -new \
+        -key "$clientDir/$CLIENT_TLS_KEY" \
         -sha256 \
         -out "$clientDir/$CLIENT_TLS_CSR" \
         -subj "/O=$CERT_ORG_NAME/CN=$hostname" \
@@ -93,7 +79,9 @@ EOF
         -config "$confFile"
     
     echo "Generating client certificate..."
-    run_openssl x509 -req -in "$clientDir/$CLIENT_TLS_CSR" \
+    openssl x509 \
+        -req \
+        -in "$clientDir/$CLIENT_TLS_CSR" \
         -sha256 \
         -CA "$CA_CERT" \
         -CAkey "$CA_KEY" \
@@ -106,11 +94,18 @@ EOF
 
 generate_client_signing_key() {
     local hostname="$1"
+
     echo
     echo "Generating private key for $hostname..."
+    
     local clientDir="$TLS_DIR/$hostname"
     mkdir -p "$clientDir"
-    run_openssl ecparam -name secp256k1 -genkey -noout -param_enc explicit \
+    
+    openssl ecparam \
+        -name secp256k1 \
+        -genkey \
+        -noout \
+        -param_enc explicit \
         -out "$clientDir/$CLIENT_PRIVATE_KEY"
 }
 
@@ -148,12 +143,7 @@ fi
 TARGET="$1"; shift
 
 echo "----------------------------------------"
-echo "!!!! DO NOT USE IN PRODUCTION !!!!!"
-echo "This script is meant for development/testing ONLY."
-echo "Generating credentials..."
-echo
-echo "Target: $TARGET"
-echo "Using Docker: $USE_DOCKER"
+echo "Generating credentials for $TARGET"
 echo "----------------------------------------"
 
 mkdir -p "$TLS_DIR"
@@ -184,6 +174,5 @@ case "$TARGET" in
 esac
 
 echo "----------------------------------------"
-echo
 echo "Credentials generated successfully."
 echo "----------------------------------------"
