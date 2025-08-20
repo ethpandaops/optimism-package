@@ -33,6 +33,7 @@ DA_SERVER = "da-server"
 TX_FUZZER = "tx-fuzzer"
 
 DEPLOYMENT_UTILS = "deployment-utils"
+OPENSSL = "openssl"
 
 PROMETHEUS = "prometheus"
 GRAFANA = "grafana"
@@ -85,6 +86,7 @@ _DEFAULT_IMAGES = {
     TX_FUZZER: "ethpandaops/tx-fuzz:master",
     # utils
     DEPLOYMENT_UTILS: "mslipper/deployment-utils:latest",
+    OPENSSL: "alpine/openssl:3.5.1",
     # observability
     PROMETHEUS: "prom/prometheus:v3.1.0",
     GRAFANA: "grafana/grafana:11.5.0",
@@ -94,7 +96,7 @@ _DEFAULT_IMAGES = {
     OP_BLOCKSCOUT: "blockscout/blockscout-optimism:6.8.0",
     OP_BLOCKSCOUT_VERIFIER: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0",
     # Signer
-    OP_SIGNER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-signer:v1.3.1",
+    OP_SIGNER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-signer:v1.5.0",
     # Test Sequencer
     OP_TEST_SEQUENCER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-test-sequencer:develop",
 }
