@@ -1,6 +1,6 @@
 constants = import_module("./package_io/constants.star")
 
-DEPLOYMENT_UTILS_IMAGE = "mslipper/deployment-utils:latest"
+DEPLOYMENT_UTILS_IMAGE = "mslipper/deployment-utils@sha256:4506b112e4261014329152b161997129e7ca577f39c85e59cfdfdcb47ab7b5cf"
 
 
 def read_network_config_value(plan, network_config_file, json_file, json_path):

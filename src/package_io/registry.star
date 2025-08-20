@@ -49,16 +49,16 @@ OP_BLOCKSCOUT_VERIFIER = "op-blockscout-verifier"
 
 _DEFAULT_IMAGES = {
     # EL images
-    OP_GETH: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
-    OP_RETH: "ghcr.io/paradigmxyz/op-reth:latest",
-    OP_ERIGON: "testinprod/op-erigon:latest",
-    OP_NETHERMIND: "nethermind/nethermind:latest",
-    OP_BESU: "ghcr.io/optimism-java/op-besu:latest",
+    OP_GETH: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
+    OP_RETH: "ghcr.io/paradigmxyz/op-reth:v1.6.0",
+    OP_ERIGON: "testinprod/op-erigon:v2.61.3-0.9.5",
+    OP_NETHERMIND: "nethermind/nethermind:1.32.4",
+    OP_BESU: "ghcr.io/optimism-java/op-besu:v0.2.2",
     OP_RBUILDER: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/op-rbuilder:13a16d5",
     # CL images
     OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
-    KONA_NODE: "ghcr.io/op-rs/kona/kona-node:latest",
-    HILDR: "ghcr.io/optimism-java/hildr:latest",
+    KONA_NODE: "ghcr.io/op-rs/kona/kona-node:1.0.0-rc.1",
+    HILDR: "ghcr.io/optimism-java/hildr:v0.4.5",
     # Batching
     OP_BATCHER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.14.0",
     # Challenger
@@ -66,7 +66,7 @@ _DEFAULT_IMAGES = {
     # op-supervisor
     OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:v0.3.0-dev.4",
     # kona-supervisor
-    KONA_SUPERVISOR: "ghcr.io/op-rs/kona/kona-supervisor:latest",
+    KONA_SUPERVISOR: "ghcr.io/op-rs/kona/kona-supervisor@sha256:98afd250010201573fb61490f3eb9ea131186f84d532ef9a0018c6382a1c0b45",
     # Proposer
     OP_PROPOSER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:v1.10.0",
     # Conductor
@@ -78,20 +78,20 @@ _DEFAULT_IMAGES = {
     # conductor-ops
     OP_CONDUCTOR_OPS: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor-ops:v0.0.2",
     # Interop Monitor
-    OP_INTEROP_MON: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-interop-mon:latest",
+    OP_INTEROP_MON: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-interop-mon:v0.0.1",
     # Proxyd
     PROXYD: "us-docker.pkg.dev/oplabs-tools-artifacts/images/proxyd:v4.14.5",
     # Sidecar
-    ROLLUP_BOOST: "flashbots/rollup-boost:latest",
+    ROLLUP_BOOST: "flashbots/rollup-boost:0.7.4",
     # DA Server
-    DA_SERVER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
+    DA_SERVER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:v0.1.0",
     # Tx Fuzzer
     TX_FUZZER: "ethpandaops/tx-fuzz:master",
     # Flashblocks
     FLASHBLOCKS_WEBSOCKET_PROXY: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/flashblocks-websocket-proxy:v1.0.0",
     FLASHBLOCKS_RPC: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/base-reth-node:v0.1.0",
     # utils
-    DEPLOYMENT_UTILS: "mslipper/deployment-utils:latest",
+    DEPLOYMENT_UTILS: "mslipper/deployment-utils@sha256:4506b112e4261014329152b161997129e7ca577f39c85e59cfdfdcb47ab7b5cf",
     OPENSSL: "alpine/openssl:3.5.1",
     # observability
     PROMETHEUS: "prom/prometheus:v3.1.0",
