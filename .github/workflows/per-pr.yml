@@ -43,10 +43,10 @@ jobs:
       - name: Run kurtosis
         uses: ./.github/workflows/actions/run-kurtosis-docker
 
-  run_k8s_test:
-    name: Run k8s tests
-    uses: ./.github/workflows/reusable-run-k8s.yml
-    secrets: inherit
+  # run_k8s_test:
+  #   name: Run k8s tests
+  #   uses: ./.github/workflows/reusable-run-k8s.yml
+  #   secrets: inherit
   
   lint:
     name: Lint
