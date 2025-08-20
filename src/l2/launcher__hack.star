@@ -72,12 +72,28 @@ def launch(
     # We get a list of sequencers to be used with batcher & proposer
     sequencers_params = _selectors.get_sequencers_params(params.participants)
 
+    # We'll need batcher private key for the batcher as well as for the signer
+    batcher_private_key = _util.read_network_config_value(
+        plan,
+        deployment_output,
+        "batcher-{0}".format(network_params.network_id),
+        ".privateKey",
+    )
+
+    # We'll need proposer private key for the proposer as well as for the signer
+    proposer_private_key = _util.read_network_config_value(
+        plan,
+        deployment_output,
+        "proposer-{0}".format(network_params.network_id),
+        ".privateKey",
+    )
+
     _launch_batcher(
         plan=plan,
         batcher_params=params.batcher_params,
         network_params=network_params,
         sequencers_params=sequencers_params,
-        deployment_output=deployment_output,
+        private_key=batcher_private_key,
         l1_config_env_vars=l1_config_env_vars,
         da_server_context=original_launcher_output__hack.da.context
         if original_launcher_output__hack.da
@@ -92,6 +108,7 @@ def launch(
         network_params=network_params,
         sequencers_params=sequencers_params,
         deployment_output=deployment_output,
+        private_key=proposer_private_key,
         l1_config_env_vars=l1_config_env_vars,
         log_prefix=network_log_prefix,
         observability_helper=observability_helper,
@@ -190,7 +207,7 @@ def _launch_batcher(
     batcher_params,
     sequencers_params,
     network_params,
-    deployment_output,
+    private_key,
     l1_config_env_vars,
     observability_helper,
     da_server_context,
@@ -198,19 +215,12 @@ def _launch_batcher(
 ):
     plan.print("{}: Launching batcher".format(log_prefix))
 
-    batcher_key = _util.read_network_config_value(
-        plan,
-        deployment_output,
-        "batcher-{0}".format(network_params.network_id),
-        ".privateKey",
-    )
-
     return _op_batcher_launcher.launch(
         plan=plan,
         params=batcher_params,
         sequencers_params=sequencers_params,
         l1_config_env_vars=l1_config_env_vars,
-        gs_batcher_private_key=batcher_key,
+        gs_batcher_private_key=private_key,
         network_params=network_params,
         observability_helper=observability_helper,
         da_server_context=da_server_context,
@@ -225,6 +235,7 @@ def _launch_proposer(
     network_params,
     sequencers_params,
     deployment_output,
+    private_key,
     l1_config_env_vars,
     observability_helper,
     log_prefix,
@@ -243,19 +254,12 @@ def _launch_proposer(
         ),
     )
 
-    proposer_key = _util.read_network_config_value(
-        plan,
-        deployment_output,
-        "proposer-{0}".format(network_params.network_id),
-        ".privateKey",
-    )
-
     _op_proposer_launcher.launch(
         plan=plan,
         params=proposer_params,
         sequencers_params=sequencers_params,
         l1_config_env_vars=l1_config_env_vars,
-        gs_proposer_private_key=proposer_key,
+        gs_proposer_private_key=private_key,
         game_factory_address=game_factory_address,
         network_params=network_params,
         observability_helper=observability_helper,
