@@ -82,6 +82,7 @@ ethereum_package:
   network_params:
     preset: minimal
     genesis_delay: 5
+    seconds_per_slot: 1
     additional_preloaded_contracts: '
       {
         "0x4e59b44847b379578588920cA78FbF26c0B4956C": {
