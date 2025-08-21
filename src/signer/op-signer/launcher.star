@@ -2,7 +2,6 @@ _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-_file = import_module("/src/util/file.star")
 _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
@@ -56,7 +55,6 @@ def launch(plan, params, network_params, clients, registry):
         network_params=network_params,
         clients=clients,
         private_keys=private_keys,
-        script_artifacts=script_artifacts,
     )
 
     config = get_service_config(
@@ -148,7 +146,7 @@ def _create_credentials(plan, params, hosts, script_artifacts, registry):
 
 
 def _create_signer_config(
-    plan, params, network_params, clients, private_keys, script_artifacts
+    plan, params, network_params, clients, private_keys
 ):
     config_artifact_template = read_file("./templates/config.yaml.tmpl")
     config_file_name = "config.yaml"
