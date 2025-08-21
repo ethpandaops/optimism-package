@@ -30,12 +30,7 @@ def launch(plan, params, network_params, clients, registry):
         # To get the credentials for the signer as well as the other clients, we'll append the signer to the clients map
         #
         # We only need to do this for the credentials since the signer itself does not need a private key file
-        clients=clients
-        | {
-            params.service_name: {
-                "hostname": params.service_name,
-            }
-        },
+        hosts=[client.hostname for client in clients] + [params.service_name],
         script_artifacts=script_artifacts,
         registry=registry,
     )
@@ -101,11 +96,11 @@ def get_service_config(plan, params, credentials, private_keys, config):
             ),
             "OP_SIGNER_TLS_CERT": "{}/{}".format(
                 _SIGNER_CREDENTIALS_DIR,
-                credentials.clients[params.service_name].tls.crt,
+                credentials.hosts[params.service_name].tls.crt,
             ),
             "OP_SIGNER_TLS_KEY": "{}/{}".format(
                 _SIGNER_CREDENTIALS_DIR,
-                credentials.clients[params.service_name].tls.key,
+                credentials.hosts[params.service_name].tls.key,
             ),
             "OP_SIGNER_RPC_PORT": str(params.ports[_net.HTTP_PORT_NAME].number),
             "OP_SIGNER_SERVICE_CONFIG": "{}/{}".format(
@@ -117,14 +112,11 @@ def get_service_config(plan, params, credentials, private_keys, config):
 
 
 # This function generates the credentials to be used for communication between the signer and the clients
-def _create_credentials(plan, params, clients, script_artifacts, registry):
-    # We need to generate the client credentials for all the services
-    client_hostnames = [client.hostname for client in clients]
-
+def _create_credentials(plan, params, hosts, script_artifacts, registry):
     generate_credentials = plan.run_sh(
         name="{}--gen-creds".format(params.service_name),
         description="Generate local credentials for op-signer",
-        run="/scripts/gen-local-creds.sh all {}".format(" ".join(client_hostnames)),
+        run="/scripts/gen-local-creds.sh all {}".format(" ".join(hosts)),
         image=registry.get(_registry.OPENSSL),
         files={"/scripts": script_artifacts},
         env_vars={
@@ -143,14 +135,14 @@ def _create_credentials(plan, params, clients, script_artifacts, registry):
         artifact=generate_credentials.files_artifacts[0],
         # As well as the relative paths to all the files within it
         ca=struct(crt="ca.crt", key="ca.key"),
-        clients={
-            client_hostname: struct(
+        hostnames={
+            hostname: struct(
                 tls=struct(
-                    crt="{}/tls.crt".format(client_hostname),
-                    key="{}/tls.key".format(client_hostname),
+                    crt="{}/tls.crt".format(hostname),
+                    key="{}/tls.key".format(hostname),
                 )
             )
-            for client_hostname in client_hostnames
+            for hostname in hosts
         },
     )
 
