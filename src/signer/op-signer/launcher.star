@@ -135,7 +135,7 @@ def _create_credentials(plan, params, hosts, script_artifacts, registry):
         artifact=generate_credentials.files_artifacts[0],
         # As well as the relative paths to all the files within it
         ca=struct(crt="ca.crt", key="ca.key"),
-        hostnames={
+        hosts={
             hostname: struct(
                 tls=struct(
                     crt="{}/tls.crt".format(hostname),
