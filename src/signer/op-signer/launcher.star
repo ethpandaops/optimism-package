@@ -114,7 +114,7 @@ def get_service_config(plan, params, credentials, private_keys, config):
 # This function generates the credentials to be used for communication between the signer and the clients
 def _create_credentials(plan, params, hosts, script_artifacts, registry):
     generate_credentials = plan.run_sh(
-        name="{}--gen-creds".format(params.service_name),
+        name="{}-gen-creds".format(params.service_name),
         description="Generate local credentials for op-signer",
         run="/scripts/gen-local-creds.sh all {}".format(" ".join(hosts)),
         image=registry.get(_registry.OPENSSL),
@@ -203,7 +203,7 @@ def _create_private_key(plan, params, client, script_artifacts, registry):
     key_file_path = "/tmp/{}".format(key_file_name)
 
     convert_private_key = plan.run_sh(
-        name="{}--convert-private-key--{}".format(params.service_name, client.hostname),
+        name="{}-convert-pk-{}".format(params.service_name, client.hostname),
         description="Convert private key for {} to PEM format".format(client.hostname),
         run="/scripts/convert-private-key.sh {} > {}".format(
             client.private_key, key_file_path
