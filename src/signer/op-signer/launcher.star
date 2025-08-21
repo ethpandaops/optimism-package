@@ -203,7 +203,7 @@ def _create_private_key(plan, params, client, script_artifacts, registry):
     key_file_path = "/tmp/{}".format(key_file_name)
 
     convert_private_key = plan.run_sh(
-        name="{}-convert-pk-{}".format(params.service_name, client.hostname),
+        name="{}-convert-pk".format(client.hostname),
         description="Convert private key for {} to PEM format".format(client.hostname),
         run="/scripts/convert-private-key.sh {} > {}".format(
             client.private_key, key_file_path
