@@ -145,9 +145,7 @@ def _create_credentials(plan, params, hosts, script_artifacts, registry):
     )
 
 
-def _create_signer_config(
-    plan, params, network_params, clients, private_keys
-):
+def _create_signer_config(plan, params, network_params, clients, private_keys):
     config_artifact_template = read_file("./templates/config.yaml.tmpl")
     config_file_name = "config.yaml"
 
