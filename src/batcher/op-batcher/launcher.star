@@ -7,12 +7,12 @@ ethereum_package_constants = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
-util = import_module("../../util.star")
 
 observability = import_module("../../observability/observability.star")
 prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
 
 _net = import_module("/src/util/net.star")
+_util = import_module("../../util.star")
 
 #
 #  ---------------------------------- Batcher client -------------------------------------
@@ -24,20 +24,24 @@ def launch(
     plan,
     params,
     sequencers_params,
+    deployment_output,
     l1_config_env_vars,
     gs_batcher_private_key,
     network_params,
     observability_helper,
     da_server_context,
+    signer_context,
 ):
     config = get_service_config(
         plan=plan,
         params=params,
         sequencers_params=sequencers_params,
+        deployment_output=deployment_output,
         l1_config_env_vars=l1_config_env_vars,
         gs_batcher_private_key=gs_batcher_private_key,
         observability_helper=observability_helper,
         da_server_context=da_server_context,
+        signer_context=signer_context,
     )
 
     service = plan.add_service(params.service_name, config)
@@ -53,10 +57,12 @@ def get_service_config(
     plan,
     params,
     sequencers_params,
+    deployment_output,
     l1_config_env_vars,
     gs_batcher_private_key,
     observability_helper,
     da_server_context,
+    signer_context,
 ):
     ports = _net.ports_to_port_specs(params.ports)
 
@@ -115,6 +121,31 @@ def get_service_config(
         # This leads to sending POST requests to /put instead of /put/<keccak256(data)>
         "--altda.da-service",
     ] + params.extra_params
+
+    if signer_context:
+        batcher_address = _util.read_network_config_value(
+            plan,
+            deployment_output,
+            params.service_name,
+            ".address",
+        )
+
+        cmd = cmd + [
+            "--signer.tls.ca={}".format(signer_context.credentials.ca.crt),
+            "--signer.tls.cert={}".format(
+                signer_context.credentials.hosts[params.service_name].tls.crt
+            ),
+            "--signer.tls.key={}".format(
+                signer_context.credentials.hosts[params.service_name].tls.key
+            ),
+            "--signer.endpoint={}".format(
+                _net.service_url(
+                    signer_context.service.ip_address,
+                    signer_context.service.ports[_net.HTTP_PORT_NAME],
+                )
+            ),
+            "--signer.address={}".format(batcher_address),
+        ]
 
     # apply customizations
 
