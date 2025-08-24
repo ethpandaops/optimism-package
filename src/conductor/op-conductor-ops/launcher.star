@@ -32,7 +32,7 @@ def launch(
         plan=plan,
         cmd="bootstrap-cluster {}".format(l2_params.network_params.name),
         config_artifact=config_artifact,
-        description="Bootstrap conductors for network {} using op-conductor-ops".format(
+        description="Bootstrap conductors for network {} using op-conductor-ops, this operation may take a while to complete. Please check the task logs for progress.".format(
             l2_params.network_params.name
         ),
         registry=registry,

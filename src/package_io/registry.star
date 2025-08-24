@@ -54,7 +54,7 @@ _DEFAULT_IMAGES = {
     OP_ERIGON: "testinprod/op-erigon:latest",
     OP_NETHERMIND: "nethermind/nethermind:latest",
     OP_BESU: "ghcr.io/optimism-java/op-besu:latest",
-    OP_RBUILDER: "ghcr.io/flashbots/op-rbuilder:latest",
+    OP_RBUILDER: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/op-rbuilder:13a16d5",
     # CL images
     OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
     KONA_NODE: "ghcr.io/op-rs/kona/kona-node:latest",

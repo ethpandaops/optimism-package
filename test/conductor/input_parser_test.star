@@ -68,6 +68,13 @@ def test_conductor_input_parser_default_args_enabled(plan):
         paused=False,
         bootstrap=False,
         pprof_enabled=False,
+        websocket_enabled=False,
+        healthcheck_interval=2,
+        healthcheck_min_peer_count=1,
+        raft_heartbeat_timeout="900ms",
+        raft_lease_timeout="550ms",
+        raft_snapshot_threshold=1024,
+        raft_trailing_logs=3600,
     )
 
     expect.eq(
@@ -121,6 +128,13 @@ def test_conductor_input_parser_custom_params(plan):
             paused=False,
             bootstrap=False,
             pprof_enabled=False,
+            websocket_enabled=False,
+            healthcheck_interval=2,
+            healthcheck_min_peer_count=1,
+            raft_heartbeat_timeout="900ms",
+            raft_lease_timeout="550ms",
+            raft_snapshot_threshold=1024,
+            raft_trailing_logs=3600,
         ),
     )
 
@@ -145,3 +159,50 @@ def test_conductor_input_parser_custom_registry(plan):
         registry=registry,
     )
     expect.eq(parsed.image, "conductor:oldest")
+
+
+def test_conductor_input_parser_websocket_enabled(plan):
+    parsed = _input_parser.parse(
+        conductor_args={
+            "enabled": True,
+            "websocket_enabled": True,
+        },
+        network_params=_default_network_params,
+        participant_index=_default_participant_index,
+        participant_name=_default_participant_name,
+        registry=_default_registry,
+    )
+
+    expect.eq(
+        parsed,
+        struct(
+            enabled=True,
+            extra_params=[],
+            image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-conductor:v0.7.1",
+            labels={
+                "op.kind": "conductor",
+                "op.network.id": "1000",
+                "op.network.participant.index": "0",
+                "op.network.participant.name": "node0",
+                "op.conductor.type": "op-conductor",
+            },
+            ports={
+                _net.RPC_PORT_NAME: _net.port(number=8547),
+                _net.CONSENSUS_PORT_NAME: _net.port(number=50050),
+                _net.WS_PORT_NAME: _net.port(number=8546, application_protocol="ws"),
+            },
+            service_name="op-conductor-1000-my-l2-node0",
+            admin=True,
+            proxy=True,
+            paused=False,
+            bootstrap=False,
+            pprof_enabled=False,
+            websocket_enabled=True,
+            healthcheck_interval=2,
+            healthcheck_min_peer_count=1,
+            raft_heartbeat_timeout="900ms",
+            raft_lease_timeout="550ms",
+            raft_snapshot_threshold=1024,
+            raft_trailing_logs=3600,
+        ),
+    )

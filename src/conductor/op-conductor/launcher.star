@@ -24,6 +24,7 @@ def launch(
     deployment_output,
     el_params,
     cl_params,
+    el_builder_params,
     observability_helper,
 ):
     config = get_service_config(
@@ -35,6 +36,7 @@ def launch(
         deployment_output=deployment_output,
         el_params=el_params,
         cl_params=cl_params,
+        el_builder_params=el_builder_params,
         observability_helper=observability_helper,
     )
 
@@ -59,6 +61,9 @@ def launch(
             conductor_consensus_url=consensus_url,
             conductor_raft_server_id=params.service_name,
             conductor_metrics_info=[metrics_info],
+            conductor_ws_port=params.ports[_net.WS_PORT_NAME].number
+            if params.websocket_enabled
+            else None,
         ),
     )
 
@@ -72,6 +77,7 @@ def get_service_config(
     deployment_output,
     el_params,
     cl_params,
+    el_builder_params,
     observability_helper,
 ):
     ports = _net.ports_to_port_specs(params.ports)
@@ -101,12 +107,11 @@ def get_service_config(
         "OP_CONDUCTOR_NODE_RPC": _net.service_url(
             cl_params.service_name, cl_params.ports[_net.RPC_PORT_NAME]
         ),
+        # Will fail if we don't have a builder_el
         "OP_CONDUCTOR_ROLLUP_BOOST_ENABLED": "true" if sidecar_context else "false",
-        # This might also become a parameter
-        "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(_CONDUCTOR_HEALTH_CHECK_INTERVAL),
-        # This might also become a parameter
+        "OP_CONDUCTOR_HEALTHCHECK_INTERVAL": str(params.healthcheck_interval),
         "OP_CONDUCTOR_HEALTHCHECK_MIN_PEER_COUNT": str(
-            _CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT
+            params.healthcheck_min_peer_count
         ),
         # docs recommend a 2-3x multiple of your network block time to account for temporary performance issues
         #
@@ -124,6 +129,10 @@ def get_service_config(
         "OP_CONDUCTOR_RAFT_BOOTSTRAP": "true" if params.bootstrap else "false",
         "OP_CONDUCTOR_RAFT_SERVER_ID": params.service_name,
         "OP_CONDUCTOR_RAFT_STORAGE_DIR": _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "OP_CONDUCTOR_RAFT_SNAPSHOT_THRESHOLD": str(params.raft_snapshot_threshold),
+        "OP_CONDUCTOR_RAFT_HEARTBEAT_TIMEOUT": params.raft_heartbeat_timeout,
+        "OP_CONDUCTOR_RAFT_LEASE_TIMEOUT": params.raft_lease_timeout,
+        "OP_CONDUCTOR_RAFT_TRAILING_LOGS": str(params.raft_trailing_logs),
         "OP_CONDUCTOR_RPC_ADDR": "0.0.0.0",
         "OP_CONDUCTOR_RPC_PORT": str(rpc_port.number),
         "OP_CONDUCTOR_RPC_ENABLE_ADMIN": "true" if params.admin else "false",
@@ -136,6 +145,31 @@ def get_service_config(
         )
         or "",
     }
+
+    if params.websocket_enabled:
+        env_vars |= {
+            "OP_CONDUCTOR_WEBSOCKET_SERVER_PORT": str(
+                params.ports[_net.WS_PORT_NAME].number
+            ),
+        }
+
+    # OP_CONDUCTOR_EXECUTION_RPC points to rollup boost
+    # But the OP_CONDUCTOR_ROLLUPBOOST_WS_URL points at the builder_el
+    # We can't base ourselves only on el_builder_params as conductor
+    # Will try to connect anyways if the url is set, no matter if
+    # rollup boost is enabled or not
+    if el_builder_params and sidecar_context:
+        # Need to craft the ws url manually because we're using ethereum-package's el_context
+        rpc_ws_url = (
+            _net.service_url(
+                el_builder_params.service_name,
+                el_builder_params.ports[_net.FLASHBLOCKS_WS_PORT_NAME],
+            )
+            + "/ws"
+        )
+        env_vars |= {
+            "OP_CONDUCTOR_ROLLUPBOOST_WS_URL": rpc_ws_url,
+        }
 
     if observability_helper.enabled:
         env_vars |= {

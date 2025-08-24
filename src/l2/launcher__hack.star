@@ -63,6 +63,7 @@ def launch(
             if original_launcher_output__hack.participants[index_hack].sidecar
             else None,
             deployment_output=deployment_output,
+            el_builder_params=params.participants[index_hack].el_builder,
             observability_helper=observability_helper,
             log_prefix=participant_log_prefix,
         )
@@ -344,6 +345,7 @@ def _launch_conductor_maybe(
     supervisors_params,
     sidecar_context,
     deployment_output,
+    el_builder_params,
     observability_helper,
     log_prefix,
 ):
@@ -370,6 +372,7 @@ def _launch_conductor_maybe(
             deployment_output=deployment_output,
             el_params=participant_params.el,
             cl_params=participant_params.cl,
+            el_builder_params=participant_params.el_builder,
             observability_helper=observability_helper,
         )
 
