@@ -24,7 +24,7 @@ def launch(
     deployment_output,
     el_params,
     cl_params,
-    builder_el_params,
+    el_builder_params,
     observability_helper,
 ):
     config = get_service_config(
@@ -36,7 +36,7 @@ def launch(
         deployment_output=deployment_output,
         el_params=el_params,
         cl_params=cl_params,
-        builder_el_params=builder_el_params,
+        el_builder_params=el_builder_params,
         observability_helper=observability_helper,
     )
 
@@ -77,7 +77,7 @@ def get_service_config(
     deployment_output,
     el_params,
     cl_params,
-    builder_el_params,
+    el_builder_params,
     observability_helper,
 ):
     ports = _net.ports_to_port_specs(params.ports)
@@ -155,15 +155,15 @@ def get_service_config(
 
     # OP_CONDUCTOR_EXECUTION_RPC points to rollup boost
     # But the OP_CONDUCTOR_ROLLUPBOOST_WS_URL points at the builder_el
-    # We can't base ourselves only on builder_el_params as conductor
+    # We can't base ourselves only on el_builder_params as conductor
     # Will try to connect anyways if the url is set, no matter if
     # rollup boost is enabled or not
-    if builder_el_params and sidecar_context:
+    if el_builder_params and sidecar_context:
         # Need to craft the ws url manually because we're using ethereum-package's el_context
         rpc_ws_url = (
             _net.service_url(
-                builder_el_params.service_name,
-                builder_el_params.ports[_net.FLASHBLOCKS_WS_PORT_NAME],
+                el_builder_params.service_name,
+                el_builder_params.ports[_net.FLASHBLOCKS_WS_PORT_NAME],
             )
             + "/ws"
         )

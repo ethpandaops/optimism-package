@@ -52,8 +52,8 @@ _default_observability_helper = _observability.make_helper(
 )
 
 
-def test_op_conductor_launcher_with_builder_el_params(plan):
-    builder_el_params = struct(
+def test_op_conductor_launcher_with_el_builder_params(plan):
+    el_builder_params = struct(
         service_name="op-elbuilder-1000-node0",
         ports={
             _net.FLASHBLOCKS_WS_PORT_NAME: _net.port(
@@ -74,14 +74,14 @@ def test_op_conductor_launcher_with_builder_el_params(plan):
         deployment_output="deployment_output",
         el_params=_default_el_params,
         cl_params=_default_cl_params,
-        builder_el_params=builder_el_params,
+        el_builder_params=el_builder_params,
         observability_helper=_default_observability_helper,
     )
 
     expect.eq(service_config.image, _default_params.image)
     expect.eq(service_config.labels, _default_params.labels)
 
-    # Check that builder_el_params integration works when sidecar_context is present
+    # Check that el_builder_params integration works when sidecar_context is present
     expect.eq(
         service_config.env_vars["OP_CONDUCTOR_ROLLUPBOOST_WS_URL"],
         "ws://op-elbuilder-1000-node0:1111/ws",
@@ -89,7 +89,7 @@ def test_op_conductor_launcher_with_builder_el_params(plan):
     expect.eq(service_config.env_vars["OP_CONDUCTOR_ROLLUP_BOOST_ENABLED"], "true")
 
 
-def test_op_conductor_launcher_without_builder_el_params(plan):
+def test_op_conductor_launcher_without_el_builder_params(plan):
     service_config = launcher.get_service_config(
         plan=plan,
         params=_default_params,
@@ -99,13 +99,13 @@ def test_op_conductor_launcher_without_builder_el_params(plan):
         deployment_output="deployment_output",
         el_params=_default_el_params,
         cl_params=_default_cl_params,
-        builder_el_params=None,
+        el_builder_params=None,
         observability_helper=_default_observability_helper,
     )
 
     expect.eq(service_config.image, _default_params.image)
 
-    # Check that builder_el_params integration is not present
+    # Check that el_builder_params integration is not present
     expect.fails(
         lambda: service_config.env_vars["OP_CONDUCTOR_ROLLUPBOOST_WS_URL"],
         'key "OP_CONDUCTOR_ROLLUPBOOST_WS_URL" not in dict',
@@ -113,8 +113,8 @@ def test_op_conductor_launcher_without_builder_el_params(plan):
     expect.eq(service_config.env_vars["OP_CONDUCTOR_ROLLUP_BOOST_ENABLED"], "false")
 
 
-def test_op_conductor_launcher_with_builder_el_params_no_sidecar(plan):
-    builder_el_params = struct(
+def test_op_conductor_launcher_with_el_builder_params_no_sidecar(plan):
+    el_builder_params = struct(
         service_name="op-elbuilder-1000-node0",
         ports={
             _net.FLASHBLOCKS_WS_PORT_NAME: _net.port(
@@ -132,14 +132,14 @@ def test_op_conductor_launcher_with_builder_el_params_no_sidecar(plan):
         deployment_output="deployment_output",
         el_params=_default_el_params,
         cl_params=_default_cl_params,
-        builder_el_params=builder_el_params,
+        el_builder_params=el_builder_params,
         observability_helper=_default_observability_helper,
     )
 
     expect.eq(service_config.image, _default_params.image)
     expect.eq(service_config.labels, _default_params.labels)
 
-    # Check that builder_el_params integration is not present without sidecar_context
+    # Check that el_builder_params integration is not present without sidecar_context
     expect.fails(
         lambda: service_config.env_vars["OP_CONDUCTOR_ROLLUPBOOST_WS_URL"],
         'key "OP_CONDUCTOR_ROLLUPBOOST_WS_URL" not in dict',
