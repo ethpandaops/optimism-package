@@ -32,6 +32,9 @@ ROLLUP_BOOST = "rollup-boost"
 DA_SERVER = "da-server"
 TX_FUZZER = "tx-fuzzer"
 
+FLASHBLOCKS_WEBSOCKET_PROXY = "flashblocks-websocket-proxy"
+FLASHBLOCKS_RPC = "flashblocks-rpc"
+
 DEPLOYMENT_UTILS = "deployment-utils"
 OPENSSL = "openssl"
 
@@ -84,6 +87,9 @@ _DEFAULT_IMAGES = {
     DA_SERVER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
     # Tx Fuzzer
     TX_FUZZER: "ethpandaops/tx-fuzz:master",
+    # Flashblocks
+    FLASHBLOCKS_WEBSOCKET_PROXY: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/flashblocks-websocket-proxy:v1.0.0",
+    FLASHBLOCKS_RPC: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/base-reth-node:v0.1.0",
     # utils
     DEPLOYMENT_UTILS: "mslipper/deployment-utils:latest",
     OPENSSL: "alpine/openssl:3.5.1",
