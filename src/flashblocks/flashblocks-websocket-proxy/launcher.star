@@ -21,13 +21,6 @@ def launch(
 
     service = plan.add_service(params.service_name, config)
 
-    ws_port = params.ports[_net.WS_PORT_NAME]
-    ws_url = _net.service_url(
-        params.service_name, PortSpec(number=ws_port.number, application_protocol="ws")
-    )
-
-    metrics_info = _observability.new_metrics_info(observability_helper, service)
-
     return struct(service=service)
 
 
