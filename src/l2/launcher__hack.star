@@ -8,6 +8,10 @@ _tx_fuzzer_launcher = import_module("/src/tx-fuzzer/launcher.star")
 _op_conductor_ops_launcher = import_module(
     "/src/conductor/op-conductor-ops/launcher.star"
 )
+_flashblocks_websocket_proxy_launcher = import_module(
+    "/src/flashblocks/flashblocks-websocket-proxy/launcher.star"
+)
+_el_launcher = import_module("/src/el/launcher.star")
 
 _selectors = import_module("./selectors.star")
 _util = import_module("/src/util.star")
@@ -377,3 +381,93 @@ def _launch_conductor_maybe(
                 log_prefix, participant_params.conductor_params.service_name
             )
         )
+
+
+def _launch_flashblocks_websocket_proxy_maybe(
+    plan,
+    params,
+    participants_params,
+    observability_helper,
+    log_prefix,
+):
+    websocket_proxy_params = params.flashblocks_websocket_proxy_params
+
+    if not websocket_proxy_params:
+        plan.print("{}: No flashblocks websocket proxy to launch".format(log_prefix))
+        return None
+
+    plan.print(
+        "{}: Launching flashblocks websocket proxy {}".format(
+            log_prefix, websocket_proxy_params.service_name
+        )
+    )
+
+    conductors_params = [
+        p.conductor_params for p in participants_params if p.conductor_params
+    ]
+
+    _flashblocks_websocket_proxy_launcher.launch(
+        plan=plan,
+        params=websocket_proxy_params,
+        conductors_params=conductors_params,
+        observability_helper=observability_helper,
+    )
+
+    plan.print(
+        "{}: Successfully launched flashblocks websocket proxy {}".format(
+            log_prefix, websocket_proxy_params.service_name
+        )
+    )
+
+
+def _launch_flashblocks_rpc_websocket_proxy_maybe(
+    plan,
+    params,
+    flashblocks_websocket_proxy_params,
+    observability_helper,
+    log_prefix,
+    jwt_file,
+    deployment_output,
+    log_level,
+    persistent,
+    tolerations,
+    node_selectors,
+    supervisors_params,
+    participants,
+):
+    if not params.flashblocks_rpc_params:
+        plan.print("{}: No flashblocks RPC proxy to launch".format(log_prefix))
+        return None
+
+    flashblocks_rpc_params = params.flashblocks_rpc_params
+
+    plan.print(
+        "{}: Launching flashblocks RPC proxy {}".format(
+            log_prefix, flashblocks_rpc_params.service_name
+        )
+    )
+
+    bootnode_contexts = [p.el.context for p in participants]
+
+    _el_launcher.launch(
+        plan=plan,
+        params=flashblocks_rpc_params,
+        network_params=params.network_params,
+        sequencer_params=None,
+        jwt_file=jwt_file,
+        deployment_output=deployment_output,
+        log_level=log_level,
+        persistent=persistent,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        bootnode_contexts=bootnode_contexts,
+        observability_helper=observability_helper,
+        supervisors_params=supervisors_params,
+        websocket_proxy_params=flashblocks_websocket_proxy_params,
+    )
+
+    plan.print(
+        "{}: Successfully launched flashblocks RPC proxy {}".format(
+            log_prefix, flashblocks_rpc_params.service_name
+        )
+    )
