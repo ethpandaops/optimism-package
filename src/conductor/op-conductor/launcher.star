@@ -43,10 +43,10 @@ def launch(
     service = plan.add_service(params.service_name, config)
 
     rpc_port = params.ports[_net.RPC_PORT_NAME]
-    rpc_url = _net.service_url(service.ip_address, rpc_port)
+    rpc_url = _net.service_url(params.service_name, rpc_port)
 
     consensus_port = params.ports[_net.CONSENSUS_PORT_NAME]
-    consensus_url = _net.service_url(service.ip_address, consensus_port)
+    consensus_url = _net.service_url(params.service_name, consensus_port)
 
     metrics_info = _observability.new_metrics_info(observability_helper, service)
 
