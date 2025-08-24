@@ -46,7 +46,7 @@ def launch(
             network_log_prefix, participant_name
         )
 
-        plan.print("{}: Launching".format(participant_log_prefix))
+        plan.print("{}: Launching conductor".format(participant_log_prefix))
 
         _launch_conductor_maybe(
             plan=plan,
@@ -59,6 +59,7 @@ def launch(
             if original_launcher_output__hack.participants[index_hack].sidecar
             else None,
             deployment_output=deployment_output,
+            builder_el_params=params.participants[index_hack].el_builder,
             observability_helper=observability_helper,
             log_prefix=participant_log_prefix,
         )
@@ -340,6 +341,7 @@ def _launch_conductor_maybe(
     supervisors_params,
     sidecar_context,
     deployment_output,
+    builder_el_params,
     observability_helper,
     log_prefix,
 ):
@@ -366,6 +368,7 @@ def _launch_conductor_maybe(
             deployment_output=deployment_output,
             el_params=participant_params.el,
             cl_params=participant_params.cl,
+            builder_el_params=participant_params.el_builder,
             observability_helper=observability_helper,
         )
 
