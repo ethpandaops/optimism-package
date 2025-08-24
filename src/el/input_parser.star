@@ -19,7 +19,13 @@ _DEFAULT_ARGS = {
     "max_mem": 0,
 }
 
-_DEFAULT_BUILDER_ARGS = _DEFAULT_ARGS | {"key": None}
+_DEFAULT_FLASHBLOCKS_WS_PORT = 1111
+
+_DEFAULT_BUILDER_ARGS = _DEFAULT_ARGS | {
+    "key": None,
+    # Flashblocks-related defaults for builders
+    "flashblocks_miliseconds_per_slot": 250,
+}
 
 # EL clients have a type property that maps to an image
 _IMAGE_IDS = {
@@ -47,7 +53,7 @@ def parse(el_args, participant_name, participant_index, network_params, registry
 def parse_builder(
     el_args, participant_name, participant_index, network_params, registry
 ):
-    return _parse(
+    el_params = _parse(
         el_args=el_args,
         default_args=_DEFAULT_BUILDER_ARGS,
         participant_name=participant_name,
@@ -56,6 +62,10 @@ def parse_builder(
         registry=registry,
         el_kind="elbuilder",
     )
+    el_params.ports[_net.FLASHBLOCKS_WS_PORT_NAME] = _net.port(
+        number=_DEFAULT_FLASHBLOCKS_WS_PORT, application_protocol="ws"
+    )
+    return el_params
 
 
 def _parse(
@@ -109,7 +119,7 @@ def _parse(
     # We register the RPC port on the EL
     el_params["ports"] = {
         _net.RPC_PORT_NAME: _net.port(number=8545),
-        _net.WS_PORT_NAME: _net.port(number=8546),
+        _net.WS_PORT_NAME: _net.port(number=8546, application_protocol="ws"),
         _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
         _net.UDP_DISCOVERY_PORT_NAME: _net.port(number=30303, transport_protocol="UDP"),
         _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),

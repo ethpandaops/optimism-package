@@ -123,7 +123,9 @@ def test_l2_participant_input_parser_defaults(plan):
                     },
                     ports={
                         _net.RPC_PORT_NAME: _net.port(number=8545),
-                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.WS_PORT_NAME: _net.port(
+                            number=8546, application_protocol="ws"
+                        ),
                         _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
                         _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=30303, transport_protocol="UDP"
@@ -146,14 +148,20 @@ def test_l2_participant_input_parser_defaults(plan):
                     },
                     ports={
                         _net.RPC_PORT_NAME: _net.port(number=8545),
-                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.WS_PORT_NAME: _net.port(
+                            number=8546, application_protocol="ws"
+                        ),
                         _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
                         _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=30303, transport_protocol="UDP"
                         ),
                         _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
+                        _net.FLASHBLOCKS_WS_PORT_NAME: _net.port(
+                            number=1111, application_protocol="ws"
+                        ),
                     },
                     key=None,
+                    flashblocks_miliseconds_per_slot=250,
                     **_shared_defaults,
                 ),
                 mev_params=None,
@@ -220,7 +228,9 @@ def test_l2_participant_input_parser_defaults(plan):
                     },
                     ports={
                         _net.RPC_PORT_NAME: _net.port(number=8545),
-                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.WS_PORT_NAME: _net.port(
+                            number=8546, application_protocol="ws"
+                        ),
                         _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
                         _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=30303, transport_protocol="UDP"
@@ -243,14 +253,20 @@ def test_l2_participant_input_parser_defaults(plan):
                     },
                     ports={
                         _net.RPC_PORT_NAME: _net.port(number=8545),
-                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.WS_PORT_NAME: _net.port(
+                            number=8546, application_protocol="ws"
+                        ),
                         _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
                         _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=30303, transport_protocol="UDP"
                         ),
                         _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
+                        _net.FLASHBLOCKS_WS_PORT_NAME: _net.port(
+                            number=1111, application_protocol="ws"
+                        ),
                     },
                     key=None,
+                    flashblocks_miliseconds_per_slot=250,
                     **_shared_defaults,
                 ),
                 mev_params=None,
