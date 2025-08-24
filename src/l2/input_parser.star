@@ -33,6 +33,8 @@ _DEFAULT_ARGS = {
     "signer_params": None,
     "proxyd_params": None,
     "tx_fuzzer_params": None,
+    "flashblocks_websocket_proxy_params": None,
+    "flashblocks_rpc_params": None,
 }
 
 
