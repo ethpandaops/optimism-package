@@ -140,7 +140,7 @@ def get_service_config(
             ),
             "--signer.endpoint={}".format(
                 _net.service_url(
-                    signer_context.service.ip_address,
+                    signer_context.service.hostname,
                     signer_context.service.ports[_net.HTTP_PORT_NAME],
                 )
             ),
