@@ -24,7 +24,7 @@ _DEFAULT_FLASHBLOCKS_WS_PORT = 1111
 _DEFAULT_BUILDER_ARGS = _DEFAULT_ARGS | {
     "key": None,
     # Flashblocks-related defaults for builders
-    "flashblocks_miliseconds_per_slot": 250,
+    "flashblocks_ms_per_slot": 250,
 }
 
 # EL clients have a type property that maps to an image

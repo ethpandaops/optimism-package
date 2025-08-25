@@ -97,7 +97,6 @@ def launch(
 
     return struct(
         service=service,
-        # TODO: Would be nice to return the ws_url
         context=_ethereum_package_el_context.new_el_context(
             client_name="op-rbuilder",
             enode=enode,
@@ -168,7 +167,7 @@ def get_service_config(
             params.ports[_net.FLASHBLOCKS_WS_PORT_NAME].number
         ),
         "--flashblocks.addr={}".format("0.0.0.0"),
-        "--flashblocks.block-time={}".format(params.flashblocks_miliseconds_per_slot),
+        "--flashblocks.block-time={}".format(params.flashblocks_ms_per_slot),
     ]
 
     # configure files

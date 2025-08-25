@@ -1,4 +1,6 @@
-_input_parser = import_module("/src/flashblocks/input_parser.star")
+_input_parser = import_module(
+    "/src/flashblocks/flashblocks-websocket-proxy/input_parser.star"
+)
 _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
