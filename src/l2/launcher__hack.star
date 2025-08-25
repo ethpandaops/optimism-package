@@ -94,7 +94,7 @@ def launch(
         ".privateKey",
     )
 
-    _launch_signer_maybe(
+    signer_context = _launch_signer_maybe(
         plan=plan,
         signer_params=params.signer_params,
         network_params=network_params,
@@ -118,10 +118,12 @@ def launch(
         network_params=network_params,
         sequencers_params=sequencers_params,
         private_key=batcher_private_key,
+        deployment_output=deployment_output,
         l1_config_env_vars=l1_config_env_vars,
         da_server_context=original_launcher_output__hack.da.context
         if original_launcher_output__hack.da
         else None,
+        signer_context=signer_context,
         observability_helper=observability_helper,
         log_prefix=network_log_prefix,
     )
@@ -249,9 +251,11 @@ def _launch_batcher(
     sequencers_params,
     network_params,
     private_key,
+    deployment_output,
     l1_config_env_vars,
     observability_helper,
     da_server_context,
+    signer_context,
     log_prefix,
 ):
     plan.print("{}: Launching batcher".format(log_prefix))
@@ -260,11 +264,13 @@ def _launch_batcher(
         plan=plan,
         params=batcher_params,
         sequencers_params=sequencers_params,
+        deployment_output=deployment_output,
         l1_config_env_vars=l1_config_env_vars,
         gs_batcher_private_key=private_key,
         network_params=network_params,
         observability_helper=observability_helper,
         da_server_context=da_server_context,
+        signer_context=signer_context,
     )
 
     plan.print("{}: Successfully launched batcher".format(log_prefix))
