@@ -50,16 +50,6 @@ def test_proposer_launcher_launch_without_signer(plan):
     proposer_params = l2_params.proposer_params
     sequencers_params = _selectors.get_sequencers_params(l2_params.participants)
 
-    # plan,
-    # params,
-    # sequencers_params,
-    # l1_config_env_vars,
-    # gs_proposer_private_key,
-    # game_factory_address,
-    # network_params,
-    # observability_helper,
-    # signer_context,
-
     _op_proposer_launcher.launch(
         plan=plan,
         params=proposer_params,
