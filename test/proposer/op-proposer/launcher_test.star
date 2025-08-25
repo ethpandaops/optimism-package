@@ -118,7 +118,7 @@ def test_proposer_launcher_launch_with_signer(plan):
     # We create a mock context for the signer since things like its IP, the value references to the uploaded files etc cannot easily be injected
     signer_context = struct(
         service=struct(
-            ip_address="7.7.7.7",
+            hostname="signer-signer-signer",
             ports={
                 _net.HTTP_PORT_NAME: PortSpec(number=8545, application_protocol="http"),
             },
@@ -172,7 +172,7 @@ def test_proposer_launcher_launch_with_signer(plan):
             "--signer.tls.ca=ca.crt",
             "--signer.tls.cert=tls.crt",
             "--signer.tls.key=tls.key",
-            "--signer.endpoint=http://7.7.7.7:8545",
+            "--signer.endpoint=http://signer-signer-signer:8545",
             "--signer.address=0xbac4e5",
             "--metrics.enabled",
             "--metrics.addr=0.0.0.0",
