@@ -169,7 +169,7 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
 
     # We add the flashblocks RPC params
     l2_params["flashblocks_rpc_params"] = _flashblocks_rpc_input_parser.parse(
-        rpc_args=l2_params["flashblocks_rpc_params"],
+        el_args=l2_params["flashblocks_rpc_params"],
         network_params=l2_params["network_params"],
         registry=registry,
     )
