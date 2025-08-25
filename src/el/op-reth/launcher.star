@@ -50,6 +50,7 @@ def launch(
     bootnode_contexts,
     observability_helper,
     supervisors_params,
+    websocket_proxy_params,
 ):
     el_log_level = _ethereum_package_input_parser.get_client_log_level_or_default(
         params.log_level, log_level, _VERBOSITY_LEVELS
@@ -78,6 +79,7 @@ def launch(
         bootnode_contexts=bootnode_contexts,
         observability_helper=observability_helper,
         supervisors_params=supervisors_params,
+        websocket_proxy_params=websocket_proxy_params,
     )
 
     service = plan.add_service(params.service_name, config)
@@ -125,6 +127,7 @@ def get_service_config(
     bootnode_contexts,
     observability_helper,
     supervisors_params,
+    websocket_proxy_params,
 ):
     ports = _net.ports_to_port_specs(params.ports)
 
@@ -144,11 +147,11 @@ def get_service_config(
         "--http.corsdomain=*",
         # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
         #  that users should NOT store private information in these Kurtosis nodes!
-        "--http.api=admin,net,eth,web3,debug,trace",
+        "--http.api=admin,net,eth,web3,debug,trace,txpool,miner",
         "--ws",
         "--ws.addr=0.0.0.0",
         "--ws.port={0}".format(ports[_net.WS_PORT_NAME].number),
-        "--ws.api=net,eth",
+        "--ws.api=net,eth,web3,debug,txpool,miner",
         "--ws.origins=*",
         "--nat=extip:{}".format(
             _ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
@@ -197,6 +200,16 @@ def get_service_config(
                 _net.service_url(
                     sequencer_params.el.service_name,
                     sequencer_params.el.ports[_net.RPC_PORT_NAME],
+                )
+            )
+        )
+
+    if websocket_proxy_params:
+        cmd.append(
+            "--websocket-url={}".format(
+                _net.service_url(
+                    websocket_proxy_params.service_name,
+                    websocket_proxy_params.ports[_net.WS_PORT_NAME],
                 )
             )
         )

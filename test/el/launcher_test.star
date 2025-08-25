@@ -6,6 +6,7 @@ _l2_input_parser = import_module("/src/l2/input_parser.star")
 _observability = import_module("/src/observability/observability.star")
 _registry = import_module("/src/package_io/registry.star")
 _util = import_module("/src/util.star")
+_net = import_module("/src/util/net.star")
 
 _el_launcher = import_module("/src/el/launcher.star")
 
@@ -451,6 +452,10 @@ def test_l2_participant_el_launcher_op_rbuilder(plan):
             "--discovery.port=30303",
             "--port=30303",
             "--rpc.eth-proof-window=302400",
+            "--flashblocks.enabled",
+            "--flashblocks.port=1111",
+            "--flashblocks.addr=0.0.0.0",
+            "--flashblocks.block-time=250",
             "--metrics=0.0.0.0:9001",
             "--bootnodes=enode:001",
             "--rollup.builder-secret-key=secret key",
@@ -538,11 +543,11 @@ def test_l2_participant_el_launcher_op_reth(plan):
             "--http.port=8545",
             "--http.addr=0.0.0.0",
             "--http.corsdomain=*",
-            "--http.api=admin,net,eth,web3,debug,trace",
+            "--http.api=admin,net,eth,web3,debug,trace,txpool,miner",
             "--ws",
             "--ws.addr=0.0.0.0",
             "--ws.port=8546",
-            "--ws.api=net,eth",
+            "--ws.api=net,eth,web3,debug,txpool,miner",
             "--ws.origins=*",
             "--nat=extip:KURTOSIS_IP_ADDR_PLACEHOLDER",
             "--authrpc.port=8551",
@@ -572,4 +577,82 @@ def test_l2_participant_el_launcher_op_reth(plan):
     expect.eq(
         service_config.files["/jwt"].artifact_names,
         [_default_jwt_file],
+    )
+
+
+def test_l2_participant_el_launcher_op_reth_with_websocket_proxy(plan):
+    # We'll need the observability params from the legacy parser
+    legacy_params = _input_parser.input_parser(
+        plan=plan,
+        input_args={},
+    )
+    observability_helper = _observability.make_helper(legacy_params.observability)
+
+    l2s_params = _l2_input_parser.parse(
+        {
+            "network0": {
+                "participants": {
+                    "node0": {
+                        "el": {
+                            "type": "op-reth",
+                        }
+                    }
+                }
+            }
+        },
+        registry=_default_registry,
+    )
+
+    l2_params = l2s_params[0]
+    participant_params = l2_params.participants[0]
+    el_params = participant_params.el
+
+    websocket_proxy_params = struct(
+        service_name="flashblocks-websocket-proxy-1000-my-l2",
+        ports={
+            _net.WS_PORT_NAME: _net.port(number=8545, application_protocol="ws"),
+        },
+    )
+
+    sequencer_private_key_mock = "sequencer_private_key"
+    kurtosistest.mock(_util, "read_network_config_value").mock_return_value(
+        sequencer_private_key_mock
+    )
+
+    result = _el_launcher.launch(
+        plan=plan,
+        params=el_params,
+        network_params=l2_params.network_params,
+        supervisors_params=[],
+        sequencer_params=None,
+        jwt_file=_default_jwt_file,
+        deployment_output=_default_deployment_output,
+        bootnode_contexts=_default_bootnode_contexts,
+        log_level=_default_log_level,
+        persistent=True,
+        tolerations=[],
+        node_selectors={},
+        observability_helper=observability_helper,
+        websocket_proxy_params=websocket_proxy_params,
+    )
+
+    service = plan.get_service(el_params.service_name)
+    service_config = kurtosistest.get_service_config(el_params.service_name)
+
+    # Check that websocket proxy integration works
+    cmd = service_config.cmd
+    expect.eq(cmd[0], "node")
+    expect.eq(cmd[1], "-vvv")
+
+    # Check that websocket-url flag is present
+    websocket_url_flag = None
+    for i, arg in enumerate(cmd):
+        if arg.startswith("--websocket-url="):
+            websocket_url_flag = arg
+            break
+
+    expect.ne(websocket_url_flag, None)
+    expect.eq(
+        websocket_url_flag,
+        "--websocket-url=ws://flashblocks-websocket-proxy-1000-my-l2:8545",
     )

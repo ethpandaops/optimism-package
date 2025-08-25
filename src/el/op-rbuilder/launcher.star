@@ -161,6 +161,13 @@ def get_service_config(
         "--discovery.port={0}".format(ports[_net.TCP_DISCOVERY_PORT_NAME].number),
         "--port={0}".format(ports[_net.TCP_DISCOVERY_PORT_NAME].number),
         "--rpc.eth-proof-window=302400",
+        # Flashblocks command line arguments
+        "--flashblocks.enabled",
+        "--flashblocks.port={}".format(
+            params.ports[_net.FLASHBLOCKS_WS_PORT_NAME].number
+        ),
+        "--flashblocks.addr={}".format("0.0.0.0"),
+        "--flashblocks.block-time={}".format(params.flashblocks_ms_per_slot),
     ]
 
     # configure files

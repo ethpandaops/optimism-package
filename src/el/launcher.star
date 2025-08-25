@@ -122,6 +122,7 @@ def launch(
             bootnode_contexts=bootnode_contexts,
             observability_helper=observability_helper,
             supervisors_params=supervisors_params,
+            websocket_proxy_params=websocket_proxy_params,
         )
     else:
         # This should never happen since we asserted that the type is valid in the input parser
