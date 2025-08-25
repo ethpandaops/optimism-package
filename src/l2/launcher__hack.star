@@ -3,10 +3,15 @@ _op_batcher_launcher = import_module("/src/batcher/op-batcher/launcher.star")
 _op_conductor_launcher = import_module("/src/conductor/op-conductor/launcher.star")
 _op_proposer_launcher = import_module("/src/proposer/op-proposer/launcher.star")
 _proxyd_launcher = import_module("/src/proxyd/launcher.star")
+_op_signer_launcher = import_module("/src/signer/op-signer/launcher.star")
 _tx_fuzzer_launcher = import_module("/src/tx-fuzzer/launcher.star")
 _op_conductor_ops_launcher = import_module(
     "/src/conductor/op-conductor-ops/launcher.star"
 )
+_flashblocks_websocket_proxy_launcher = import_module(
+    "/src/flashblocks/flashblocks-websocket-proxy/launcher.star"
+)
+_el_launcher = import_module("/src/el/launcher.star")
 
 _selectors = import_module("./selectors.star")
 _util = import_module("/src/util.star")
@@ -58,6 +63,7 @@ def launch(
             if original_launcher_output__hack.participants[index_hack].sidecar
             else None,
             deployment_output=deployment_output,
+            el_builder_params=params.participants[index_hack].el_builder,
             observability_helper=observability_helper,
             log_prefix=participant_log_prefix,
         )
@@ -88,16 +94,36 @@ def launch(
         ".privateKey",
     )
 
+    signer_context = _launch_signer_maybe(
+        plan=plan,
+        signer_params=params.signer_params,
+        network_params=network_params,
+        clients=[
+            struct(
+                hostname=params.batcher_params.service_name,
+                private_key=batcher_private_key,
+            ),
+            struct(
+                hostname=params.proposer_params.service_name,
+                private_key=proposer_private_key,
+            ),
+        ],
+        registry=registry,
+        log_prefix=network_log_prefix,
+    )
+
     _launch_batcher(
         plan=plan,
         batcher_params=params.batcher_params,
         network_params=network_params,
         sequencers_params=sequencers_params,
         private_key=batcher_private_key,
+        deployment_output=deployment_output,
         l1_config_env_vars=l1_config_env_vars,
         da_server_context=original_launcher_output__hack.da.context
         if original_launcher_output__hack.da
         else None,
+        signer_context=signer_context,
         observability_helper=observability_helper,
         log_prefix=network_log_prefix,
     )
@@ -202,15 +228,34 @@ def _launch_proxyd_maybe(
         plan.print("{}: Successfully launched proxyd".format(log_prefix))
 
 
+def _launch_signer_maybe(
+    plan, signer_params, network_params, clients, registry, log_prefix
+):
+    if signer_params:
+        plan.print("{}: Launching signer".format(log_prefix))
+
+        _op_signer_launcher.launch(
+            plan=plan,
+            params=signer_params,
+            network_params=network_params,
+            clients=clients,
+            registry=registry,
+        )
+
+        plan.print("{}: Successfully launched signer".format(log_prefix))
+
+
 def _launch_batcher(
     plan,
     batcher_params,
     sequencers_params,
     network_params,
     private_key,
+    deployment_output,
     l1_config_env_vars,
     observability_helper,
     da_server_context,
+    signer_context,
     log_prefix,
 ):
     plan.print("{}: Launching batcher".format(log_prefix))
@@ -219,11 +264,13 @@ def _launch_batcher(
         plan=plan,
         params=batcher_params,
         sequencers_params=sequencers_params,
+        deployment_output=deployment_output,
         l1_config_env_vars=l1_config_env_vars,
         gs_batcher_private_key=private_key,
         network_params=network_params,
         observability_helper=observability_helper,
         da_server_context=da_server_context,
+        signer_context=signer_context,
     )
 
     plan.print("{}: Successfully launched batcher".format(log_prefix))
@@ -304,6 +351,7 @@ def _launch_conductor_maybe(
     supervisors_params,
     sidecar_context,
     deployment_output,
+    el_builder_params,
     observability_helper,
     log_prefix,
 ):
@@ -330,6 +378,7 @@ def _launch_conductor_maybe(
             deployment_output=deployment_output,
             el_params=participant_params.el,
             cl_params=participant_params.cl,
+            el_builder_params=participant_params.el_builder,
             observability_helper=observability_helper,
         )
 
@@ -338,3 +387,93 @@ def _launch_conductor_maybe(
                 log_prefix, participant_params.conductor_params.service_name
             )
         )
+
+
+def _launch_flashblocks_websocket_proxy_maybe(
+    plan,
+    params,
+    participants_params,
+    observability_helper,
+    log_prefix,
+):
+    websocket_proxy_params = params.flashblocks_websocket_proxy_params
+
+    if not websocket_proxy_params:
+        plan.print("{}: No flashblocks websocket proxy to launch".format(log_prefix))
+        return None
+
+    plan.print(
+        "{}: Launching flashblocks websocket proxy {}".format(
+            log_prefix, websocket_proxy_params.service_name
+        )
+    )
+
+    conductors_params = [
+        p.conductor_params for p in participants_params if p.conductor_params
+    ]
+
+    _flashblocks_websocket_proxy_launcher.launch(
+        plan=plan,
+        params=websocket_proxy_params,
+        conductors_params=conductors_params,
+        observability_helper=observability_helper,
+    )
+
+    plan.print(
+        "{}: Successfully launched flashblocks websocket proxy {}".format(
+            log_prefix, websocket_proxy_params.service_name
+        )
+    )
+
+
+def _launch_flashblocks_rpc_websocket_proxy_maybe(
+    plan,
+    params,
+    flashblocks_websocket_proxy_params,
+    observability_helper,
+    log_prefix,
+    jwt_file,
+    deployment_output,
+    log_level,
+    persistent,
+    tolerations,
+    node_selectors,
+    supervisors_params,
+    participants,
+):
+    if not params.flashblocks_rpc_params:
+        plan.print("{}: No flashblocks RPC proxy to launch".format(log_prefix))
+        return None
+
+    flashblocks_rpc_params = params.flashblocks_rpc_params
+
+    plan.print(
+        "{}: Launching flashblocks RPC proxy {}".format(
+            log_prefix, flashblocks_rpc_params.service_name
+        )
+    )
+
+    bootnode_contexts = [p.el.context for p in participants]
+
+    _el_launcher.launch(
+        plan=plan,
+        params=flashblocks_rpc_params,
+        network_params=params.network_params,
+        sequencer_params=None,
+        jwt_file=jwt_file,
+        deployment_output=deployment_output,
+        log_level=log_level,
+        persistent=persistent,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        bootnode_contexts=bootnode_contexts,
+        observability_helper=observability_helper,
+        supervisors_params=supervisors_params,
+        websocket_proxy_params=flashblocks_websocket_proxy_params,
+    )
+
+    plan.print(
+        "{}: Successfully launched flashblocks RPC proxy {}".format(
+            log_prefix, flashblocks_rpc_params.service_name
+        )
+    )

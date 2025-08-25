@@ -23,6 +23,7 @@ def launch(
     bootnode_contexts,
     observability_helper,
     supervisors_params,
+    websocket_proxy_params=None,
 ):
     el = None
 

@@ -308,6 +308,13 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
             paused=False,
             bootstrap=False,
             pprof_enabled=False,
+            websocket_enabled=False,
+            healthcheck_interval=2,
+            healthcheck_min_peer_count=1,
+            raft_heartbeat_timeout="900ms",
+            raft_lease_timeout="550ms",
+            raft_snapshot_threshold=1024,
+            raft_trailing_logs=3600,
         ),
     )
 

@@ -32,6 +32,9 @@ ROLLUP_BOOST = "rollup-boost"
 DA_SERVER = "da-server"
 TX_FUZZER = "tx-fuzzer"
 
+FLASHBLOCKS_WEBSOCKET_PROXY = "flashblocks-websocket-proxy"
+FLASHBLOCKS_RPC = "flashblocks-rpc"
+
 DEPLOYMENT_UTILS = "deployment-utils"
 OPENSSL = "openssl"
 
@@ -51,7 +54,7 @@ _DEFAULT_IMAGES = {
     OP_ERIGON: "testinprod/op-erigon:latest",
     OP_NETHERMIND: "nethermind/nethermind:latest",
     OP_BESU: "ghcr.io/optimism-java/op-besu:latest",
-    OP_RBUILDER: "ghcr.io/flashbots/op-rbuilder:latest",
+    OP_RBUILDER: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/op-rbuilder:13a16d5",
     # CL images
     OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
     KONA_NODE: "ghcr.io/op-rs/kona/kona-node:latest",
@@ -84,6 +87,9 @@ _DEFAULT_IMAGES = {
     DA_SERVER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
     # Tx Fuzzer
     TX_FUZZER: "ethpandaops/tx-fuzz:master",
+    # Flashblocks
+    FLASHBLOCKS_WEBSOCKET_PROXY: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/flashblocks-websocket-proxy:v1.0.0",
+    FLASHBLOCKS_RPC: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/base-reth-node:v0.1.0",
     # utils
     DEPLOYMENT_UTILS: "mslipper/deployment-utils:latest",
     OPENSSL: "alpine/openssl:3.5.1",

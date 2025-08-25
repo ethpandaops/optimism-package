@@ -135,6 +135,9 @@ def test_l2_input_parser_defaults(plan):
                 tx_fuzzer_params=None,
                 # Blockscout is disabled by default
                 blockscout_params=None,
+                # Flashblocks are disabled by default
+                flashblocks_rpc_params=None,
+                flashblocks_websocket_proxy_params=None,
             )
         ],
     )
@@ -170,6 +173,9 @@ def test_l2_input_parser_defaults(plan):
                 tx_fuzzer_params=None,
                 # Blockscout is disabled by default
                 blockscout_params=None,
+                # Flashblocks are disabled by default
+                flashblocks_rpc_params=None,
+                flashblocks_websocket_proxy_params=None,
             )
         ],
     )

@@ -46,6 +46,8 @@ optimism_package:
       batcher_params:
         pprof_enabled: true
         extra_params: []
+      signer_params:
+        enabled: true
       blockscout_params:
         enabled: true
       tx_fuzzer_params:
