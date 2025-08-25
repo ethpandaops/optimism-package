@@ -54,7 +54,7 @@ def test_flashblocks_input_parser_default_args(plan):
 def test_flashblocks_input_parser_enabled_default_args(plan):
     _default_params = struct(
         enabled=True,
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/flashblocks-websocket-proxy:v1.0.0",
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/flashblocks-websocket-proxy:v0.7.4",
         global_connections_limit=100,
         log_format="text",
         log_level="info",

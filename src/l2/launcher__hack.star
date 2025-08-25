@@ -171,6 +171,30 @@ def launch(
         log_prefix=network_log_prefix,
     )
 
+    _launch_flashblocks_websocket_proxy_maybe(
+        plan=plan,
+        params=params,
+        participants_params=params.participants,
+        observability_helper=observability_helper,
+        log_prefix=network_log_prefix,
+    )
+
+    _launch_flashblocks_rpc_websocket_proxy_maybe(
+        plan=plan,
+        params=params,
+        flashblocks_websocket_proxy_params=params.flashblocks_websocket_proxy_params,
+        observability_helper=observability_helper,
+        log_prefix=network_log_prefix,
+        jwt_file=jwt_file,
+        deployment_output=deployment_output,
+        log_level=log_level,
+        persistent=persistent,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        supervisors_params=supervisors_params,
+        participants=original_launcher_output__hack.participants,
+    )
+
     network_id_as_hex = _util.to_hex_chain_id(network_params.network_id)
     l1_bridge_address = _util.read_network_config_value(
         plan,

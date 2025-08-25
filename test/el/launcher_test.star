@@ -644,15 +644,6 @@ def test_l2_participant_el_launcher_op_reth_with_websocket_proxy(plan):
     expect.eq(cmd[0], "node")
     expect.eq(cmd[1], "-vvv")
 
-    # Check that websocket-url flag is present
-    websocket_url_flag = None
-    for i, arg in enumerate(cmd):
-        if arg.startswith("--websocket-url="):
-            websocket_url_flag = arg
-            break
-
-    expect.ne(websocket_url_flag, None)
-    expect.eq(
-        websocket_url_flag,
-        "--websocket-url=ws://flashblocks-websocket-proxy-1000-my-l2:8545",
+    expect.true(
+        "--websocket-url=ws://flashblocks-websocket-proxy-1000-my-l2:8545" in cmd,
     )

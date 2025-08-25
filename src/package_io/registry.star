@@ -54,7 +54,7 @@ _DEFAULT_IMAGES = {
     OP_ERIGON: "testinprod/op-erigon:v2.61.3-0.9.5",
     OP_NETHERMIND: "nethermind/nethermind:1.32.4",
     OP_BESU: "ghcr.io/optimism-java/op-besu:v0.2.2",
-    OP_RBUILDER: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/op-rbuilder:13a16d5",
+    OP_RBUILDER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-rbuilder:sha-0ec0644",
     # CL images
     OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
     KONA_NODE: "ghcr.io/op-rs/kona/kona-node:1.0.0-rc.1",
@@ -88,8 +88,8 @@ _DEFAULT_IMAGES = {
     # Tx Fuzzer
     TX_FUZZER: "ethpandaops/tx-fuzz:master",
     # Flashblocks
-    FLASHBLOCKS_WEBSOCKET_PROXY: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/flashblocks-websocket-proxy:v1.0.0",
-    FLASHBLOCKS_RPC: "us-docker.pkg.dev/oplabs-tools-artifacts/dev-images/base-reth-node:v0.1.0",
+    FLASHBLOCKS_WEBSOCKET_PROXY: "us-docker.pkg.dev/oplabs-tools-artifacts/images/flashblocks-websocket-proxy:v0.7.4",
+    FLASHBLOCKS_RPC: "us-docker.pkg.dev/oplabs-tools-artifacts/images/base-reth-node:sha-b7ac2c1",
     # utils
     DEPLOYMENT_UTILS: "mslipper/deployment-utils@sha256:4506b112e4261014329152b161997129e7ca577f39c85e59cfdfdcb47ab7b5cf",
     OPENSSL: "alpine/openssl:3.5.1",
