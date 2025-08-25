@@ -27,6 +27,7 @@ def test_flashblocks_rpc_input_parser_default_args(plan):
         None,
     )
 
+
 def test_flashblocks_rpc_input_parser_custom_registry(plan):
     custom_registry = _registry.Registry(
         {_registry.FLASHBLOCKS_RPC: "custom-registry:latest"}
@@ -81,7 +82,9 @@ def test_flashblocks_rpc_input_parser_el_parameters_supported(plan):
     expect.eq(parsed.extra_env_vars, {"CUSTOM_VAR": "value"})
     expect.eq(parsed.extra_labels, {"custom.label": "test"})
     expect.eq(parsed.node_selectors, {"node-type": "gpu"})
-    expect.eq(parsed.tolerations, [{"key": "gpu", "operator": "Equal", "value": "true"}])
+    expect.eq(
+        parsed.tolerations, [{"key": "gpu", "operator": "Equal", "value": "true"}]
+    )
     expect.eq(parsed.volume_size, 100)
 
     # Verify the service structure is correct
