@@ -1,6 +1,6 @@
 registry = import_module("/src/package_io/registry.star")
 
-DEFAULT_OP_GETH = "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest"
+DEFAULT_OP_GETH = "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1"
 DEFAULT_OP_NODE = "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4"
 
 

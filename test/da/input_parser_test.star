@@ -57,7 +57,7 @@ def test_da_input_parser_default_args(plan):
 def test_da_input_parser_enabled_default_args(plan):
     _default_params = struct(
         enabled=True,
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:v0.1.0",
         cmd=[
             "da-server",
             "--file.path=/home",

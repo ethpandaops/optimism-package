@@ -49,7 +49,7 @@ def test_mev_input_parser_invalid_builder_params(plan):
 def test_mev_input_parser_default_args(plan):
     _default_params = struct(
         enabled=True,
-        image="flashbots/rollup-boost:latest",
+        image="flashbots/rollup-boost:0.7.4",
         type="rollup-boost",
         builder_host=None,
         builder_port=None,

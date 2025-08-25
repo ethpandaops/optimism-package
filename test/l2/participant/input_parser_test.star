@@ -113,7 +113,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     name="node0",
                     type="op-geth",
                     service_name="op-el-1000-node0-op-geth",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
                     labels={
                         "op.kind": "el",
                         "op.network.id": "1000",
@@ -135,7 +135,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 el_builder=struct(
                     name="node0",
                     type="op-geth",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
                     service_name="op-elbuilder-1000-node0-op-geth",
                     labels={
                         "op.kind": "elbuilder",
@@ -209,7 +209,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 el=struct(
                     name="node1",
                     type="op-geth",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
                     service_name="op-el-1000-node1-op-geth",
                     labels={
                         "op.kind": "el",
@@ -232,7 +232,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 el_builder=struct(
                     name="node1",
                     type="op-geth",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
                     service_name="op-elbuilder-1000-node1-op-geth",
                     labels={
                         "op.kind": "elbuilder",
