@@ -136,8 +136,9 @@ def launch(
         deployment_output=deployment_output,
         private_key=proposer_private_key,
         l1_config_env_vars=l1_config_env_vars,
-        log_prefix=network_log_prefix,
         observability_helper=observability_helper,
+        signer_context=signer_context,
+        log_prefix=network_log_prefix,
     )
 
     _launch_proxyd_maybe(
@@ -285,6 +286,7 @@ def _launch_proposer(
     private_key,
     l1_config_env_vars,
     observability_helper,
+    signer_context,
     log_prefix,
 ):
     plan.print(
@@ -305,10 +307,12 @@ def _launch_proposer(
         plan=plan,
         params=proposer_params,
         sequencers_params=sequencers_params,
+        deployment_output=deployment_output,
         l1_config_env_vars=l1_config_env_vars,
         gs_proposer_private_key=private_key,
         game_factory_address=game_factory_address,
         network_params=network_params,
+        signer_context=signer_context,
         observability_helper=observability_helper,
     )
 

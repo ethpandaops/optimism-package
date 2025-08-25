@@ -184,7 +184,7 @@ def test_l2_input_parser_defaults(plan):
 def test_l2_input_parser_da_defaults(plan):
     _default_da_params = struct(
         enabled=True,
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:v0.1.0",
         cmd=[
             "da-server",
             "--file.path=/home",

@@ -1,48 +1,40 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
-)
-
-ethereum_package_constants = import_module(
+_ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-constants = import_module("../../package_io/constants.star")
-util = import_module("../../util.star")
-
-observability = import_module("../../observability/observability.star")
-prometheus = import_module("../../observability/prometheus/prometheus_launcher.star")
+_observability = import_module("../../observability/observability.star")
 
 _net = import_module("/src/util/net.star")
-
-#
-#  ---------------------------------- Batcher client -------------------------------------
-# The Docker container runs as the "op-proposer" user so we can't write to root
-DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-proposer/op-proposer-data"
+_util = import_module("../../util.star")
 
 
 def launch(
     plan,
     params,
     sequencers_params,
+    deployment_output,
     l1_config_env_vars,
     gs_proposer_private_key,
     game_factory_address,
     network_params,
     observability_helper,
+    signer_context,
 ):
     config = get_service_config(
         plan=plan,
         params=params,
         sequencers_params=sequencers_params,
+        deployment_output=deployment_output,
         l1_config_env_vars=l1_config_env_vars,
         gs_proposer_private_key=gs_proposer_private_key,
         game_factory_address=game_factory_address,
         observability_helper=observability_helper,
+        signer_context=signer_context,
     )
 
     service = plan.add_service(params.service_name, config)
 
-    observability.register_op_service_metrics_job(
+    _observability.register_op_service_metrics_job(
         observability_helper, service, network_params.network
     )
 
@@ -53,10 +45,12 @@ def get_service_config(
     plan,
     params,
     sequencers_params,
+    deployment_output,
     l1_config_env_vars,
     gs_proposer_private_key,
     game_factory_address,
     observability_helper,
+    signer_context,
 ):
     ports = _net.ports_to_port_specs(params.ports)
 
@@ -88,18 +82,43 @@ def get_service_config(
         "--wait-node-sync=true",
     ] + params.extra_params
 
+    if signer_context:
+        proposer_address = _util.read_network_config_value(
+            plan,
+            deployment_output,
+            params.service_name,
+            ".address",
+        )
+
+        cmd = cmd + [
+            "--signer.tls.ca={}".format(signer_context.credentials.ca.crt),
+            "--signer.tls.cert={}".format(
+                signer_context.credentials.hosts[params.service_name].tls.crt
+            ),
+            "--signer.tls.key={}".format(
+                signer_context.credentials.hosts[params.service_name].tls.key
+            ),
+            "--signer.endpoint={}".format(
+                _net.service_url(
+                    signer_context.service.hostname,
+                    signer_context.service.ports[_net.HTTP_PORT_NAME],
+                )
+            ),
+            "--signer.address={}".format(proposer_address),
+        ]
+
     # apply customizations
 
     if observability_helper.enabled:
-        observability.configure_op_service_metrics(cmd, ports)
+        _observability.configure_op_service_metrics(cmd, ports)
 
     if params.pprof_enabled:
-        observability.configure_op_service_pprof(cmd, ports)
+        _observability.configure_op_service_pprof(cmd, ports)
 
     return ServiceConfig(
         image=params.image,
         ports=ports,
         cmd=cmd,
         labels=params.labels,
-        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=_ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )
