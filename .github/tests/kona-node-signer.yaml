@@ -1,0 +1,53 @@
+optimism_package:
+  chains:
+    opkurtosis:
+      participants:
+        node0:
+          sequencer: true
+          el:
+            type: op-geth
+          cl:
+            type: op-node
+            log_level: debug
+        node1:
+          sequencer: false
+          el:
+            type: op-geth
+          cl:
+            type: kona-node
+            log_level: debug
+      signer_params:
+        enabled: true
+      network_params:
+        network: "konatosis"
+        network_id: "2151909"
+        seconds_per_slot: 2
+        fjord_time_offset: 0
+        granite_time_offset: 0
+        fund_dev_accounts: true
+  op_contract_deployer_params:
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.0-rc.2
+    l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz
+    l2_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz
+  global_log_level: "info"
+  global_node_selectors: {}
+  global_tolerations: []
+  persistent: false
+ethereum_package:
+  participants:
+  - el_type: geth
+    cl_type: lighthouse
+    cl_image: "ethpandaops/lighthouse:stable-e21198c"
+  network_params:
+    preset: minimal
+    genesis_delay: 5
+    additional_preloaded_contracts: '
+      {
+        "0x4e59b44847b379578588920cA78FbF26c0B4956C": {
+          "balance": "0ETH",
+          "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
+          "storage": {},
+          "nonce": "1"
+        }
+      }
+    '
