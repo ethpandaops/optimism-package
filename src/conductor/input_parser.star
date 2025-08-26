@@ -13,7 +13,7 @@ _DEFAULT_ARGS = {
     "pprof_enabled": False,
     "websocket_enabled": False,
     # Optional overrides
-    "healthcheck_interval": 2,
+    "healthcheck_interval": None,
     "healthcheck_min_peer_count": 1,
     "raft_snapshot_threshold": 1024,
     "raft_heartbeat_timeout": "900ms",
@@ -54,6 +54,13 @@ def parse(
     # Add the service name
     conductor_params["service_name"] = "op-conductor-{}-{}-{}".format(
         network_id, network_name, participant_name
+    )
+
+    # Default the healthcheck interval to the recommended value
+    conductor_params["healthcheck_interval"] = (
+        int(conductor_params["healthcheck_interval"])
+        if conductor_params["healthcheck_interval"]
+        else 2 * network_params.seconds_per_slot + 1
     )
 
     # Add ports
