@@ -199,7 +199,7 @@ def test_conductor_input_parser_websocket_enabled(plan):
             bootstrap=False,
             pprof_enabled=False,
             websocket_enabled=True,
-            healthcheck_interval=2,
+            healthcheck_interval=5,
             healthcheck_min_peer_count=1,
             raft_heartbeat_timeout="900ms",
             raft_lease_timeout="550ms",
