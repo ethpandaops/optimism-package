@@ -21,6 +21,7 @@ _default_network_params = struct(
     network="kurtosis",
     network_id=1000,
     name="network0",
+    seconds_per_slot=2
 )
 _default_deployment_output = "{}"
 

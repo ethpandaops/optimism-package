@@ -6,6 +6,7 @@ _registry = import_module("/src/package_io/registry.star")
 _default_network_params = struct(
     network_id=1000,
     name="my-l2",
+    seconds_per_slot=2
 )
 _default_registry = _registry.Registry()
 

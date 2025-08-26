@@ -55,7 +55,6 @@ def launch(
             plan=plan,
             participant_params=participant_params,
             network_params=network_params,
-            supervisors_params=supervisors_params,
             sidecar_context=original_launcher_output__hack.participants[
                 index_hack
             ].sidecar.context
@@ -340,7 +339,6 @@ def _launch_conductor_maybe(
     plan,
     participant_params,
     network_params,
-    supervisors_params,
     sidecar_context,
     deployment_output,
     el_builder_params,
@@ -365,7 +363,6 @@ def _launch_conductor_maybe(
             plan=plan,
             params=participant_params.conductor_params,
             network_params=network_params,
-            supervisors_params=supervisors_params,
             sidecar_context=sidecar_context,
             deployment_output=deployment_output,
             el_params=participant_params.el,
