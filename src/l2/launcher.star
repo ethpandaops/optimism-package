@@ -1,6 +1,7 @@
 _cl_launcher = import_module("/src/cl/launcher.star")
 _el_launcher = import_module("/src/el/launcher.star")
 _da_server_launcher = import_module("/src/da/da-server/launcher.star")
+_op_signer_launcher = import_module("/src/signer/op-signer/launcher.star")
 _rollup_boost_launcher = import_module("/src/mev/rollup-boost/launcher.star")
 
 _selectors = import_module("./selectors.star")
@@ -21,6 +22,7 @@ def launch(
     tolerations,
     node_selectors,
     observability_helper,
+    registry,
 ):
     network_params = params.network_params
     network_name = network_params.name
@@ -34,6 +36,54 @@ def launch(
 
     da = _launch_da_maybe(
         plan=plan, da_params=params.da_params, log_prefix=network_log_prefix
+    )
+
+    # We'll need batcher private key for the batcher as well as for the signer
+    batcher_private_key = _util.read_network_config_value(
+        plan,
+        deployment_output,
+        "batcher-{0}".format(network_params.network_id),
+        ".privateKey",
+    )
+
+    # We'll need proposer private key for the proposer as well as for the signer
+    proposer_private_key = _util.read_network_config_value(
+        plan,
+        deployment_output,
+        "proposer-{0}".format(network_params.network_id),
+        ".privateKey",
+    )
+
+    sequencer_private_key = _util.read_network_config_value(
+        plan,
+        deployment_output,
+        "sequencer-{0}".format(network_params.network_id),
+        ".privateKey",
+    )
+
+    signer = _launch_signer_maybe(
+        plan=plan,
+        signer_params=params.signer_params,
+        network_params=network_params,
+        clients=[
+            struct(
+                hostname=params.batcher_params.service_name,
+                private_key=batcher_private_key,
+            ),
+            struct(
+                hostname=params.proposer_params.service_name,
+                private_key=proposer_private_key,
+            ),
+        ]
+        + [
+            struct(
+                hostname=participant_params.cl.service_name,
+                private_key=sequencer_private_key,
+            )
+            for participant_params in params.participants
+        ],
+        registry=registry,
+        log_prefix=network_log_prefix,
     )
 
     #
@@ -146,6 +196,7 @@ def launch(
             if sidecar_and_builders and sidecar_and_builders.el_builder
             else el.context,
             cl_contexts=cl_contexts,
+            signer_context=signer,
             jwt_file=jwt_file,
             deployment_output=deployment_output,
             l1_config_env_vars=l1_config_env_vars,
@@ -171,6 +222,7 @@ def launch(
         network_id=network_params.network_id,
         participants=participants,
         da=da,
+        signer=signer,
     )
 
 
@@ -323,3 +375,20 @@ def _launch_sidecar(
         )
     else:
         fail("Invalid MEV type: {}".format(mev_params.type))
+
+
+def _launch_signer_maybe(
+    plan, signer_params, network_params, clients, registry, log_prefix
+):
+    if signer_params:
+        plan.print("{}: Launching signer".format(log_prefix))
+
+        _op_signer_launcher.launch(
+            plan=plan,
+            params=signer_params,
+            network_params=network_params,
+            clients=clients,
+            registry=registry,
+        )
+
+        plan.print("{}: Successfully launched signer".format(log_prefix))

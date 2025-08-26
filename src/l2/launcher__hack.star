@@ -3,7 +3,6 @@ _op_batcher_launcher = import_module("/src/batcher/op-batcher/launcher.star")
 _op_conductor_launcher = import_module("/src/conductor/op-conductor/launcher.star")
 _op_proposer_launcher = import_module("/src/proposer/op-proposer/launcher.star")
 _proxyd_launcher = import_module("/src/proxyd/launcher.star")
-_op_signer_launcher = import_module("/src/signer/op-signer/launcher.star")
 _tx_fuzzer_launcher = import_module("/src/tx-fuzzer/launcher.star")
 _op_conductor_ops_launcher = import_module(
     "/src/conductor/op-conductor-ops/launcher.star"
@@ -94,24 +93,6 @@ def launch(
         ".privateKey",
     )
 
-    signer_context = _launch_signer_maybe(
-        plan=plan,
-        signer_params=params.signer_params,
-        network_params=network_params,
-        clients=[
-            struct(
-                hostname=params.batcher_params.service_name,
-                private_key=batcher_private_key,
-            ),
-            struct(
-                hostname=params.proposer_params.service_name,
-                private_key=proposer_private_key,
-            ),
-        ],
-        registry=registry,
-        log_prefix=network_log_prefix,
-    )
-
     _launch_batcher(
         plan=plan,
         batcher_params=params.batcher_params,
@@ -123,7 +104,7 @@ def launch(
         da_server_context=original_launcher_output__hack.da.context
         if original_launcher_output__hack.da
         else None,
-        signer_context=signer_context,
+        signer_context=original_launcher_output__hack.signer,
         observability_helper=observability_helper,
         log_prefix=network_log_prefix,
     )
@@ -137,7 +118,7 @@ def launch(
         private_key=proposer_private_key,
         l1_config_env_vars=l1_config_env_vars,
         observability_helper=observability_helper,
-        signer_context=signer_context,
+        signer_context=original_launcher_output__hack.signer,
         log_prefix=network_log_prefix,
     )
 
@@ -251,23 +232,6 @@ def _launch_proxyd_maybe(
         )
 
         plan.print("{}: Successfully launched proxyd".format(log_prefix))
-
-
-def _launch_signer_maybe(
-    plan, signer_params, network_params, clients, registry, log_prefix
-):
-    if signer_params:
-        plan.print("{}: Launching signer".format(log_prefix))
-
-        _op_signer_launcher.launch(
-            plan=plan,
-            params=signer_params,
-            network_params=network_params,
-            clients=clients,
-            registry=registry,
-        )
-
-        plan.print("{}: Successfully launched signer".format(log_prefix))
 
 
 def _launch_batcher(
