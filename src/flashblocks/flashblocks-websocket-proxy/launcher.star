@@ -34,13 +34,15 @@ def get_service_config(
 
     upstream_urls = []
     for conductor_params in conductors_params:
-        upstream_urls.append(
-            _net.service_url(
-                conductor_params.service_name,
-                conductor_params.ports[_net.WS_PORT_NAME],
+        if conductor_params.websocket_enabled:
+            # Flashblocks-enabled conductors have a websocket port exposed
+            upstream_urls.append(
+                _net.service_url(
+                    conductor_params.service_name,
+                    conductor_params.ports[_net.WS_PORT_NAME],
+                )
+                + "/ws"
             )
-            + "/ws"
-        )
 
     env_vars = {
         "GLOBAL_CONNECTIONS_LIMIT": str(params.global_connections_limit),

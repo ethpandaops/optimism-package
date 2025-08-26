@@ -11,9 +11,6 @@ _net = import_module("/src/util/net.star")
 
 _CONDUCTOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-conductor/op-conductor"
 
-_CONDUCTOR_HEALTH_CHECK_INTERVAL = 2
-_CONDUCTOR_HEALTH_CHECK_MIN_PEER_COUNT = 1
-
 
 def launch(
     plan,
