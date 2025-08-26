@@ -7,9 +7,6 @@ inputs:
   enclave:
     description: "Kurtosis enclave name"
     default: "devnet"
-  artifact-key:
-    description: "Unique key for logs artifact upload"
-    default: ""
 
 runs:
   using: "composite"
@@ -32,9 +29,15 @@ runs:
       if: ${{ always() }}
       run: kurtosis dump ./.kurtosis-dump
 
+    - name: Create log artifact key
+      if: ${{ always() }}
+      shell: bash
+      id: create-artifact-key
+      run: echo "artifact-key=$(echo "${{ inputs.args-file || 'no-args' }}" | tr '/.' '__')" >> $GITHUB_OUTPUT
+
     - name: Store kurtosis logs
       if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
-        name: kurtosis-dump-${{ inputs.enclave }}${{ inputs.artifact-key && format('-{0}', inputs.artifact-key) || '' }}
+        name: kurtosis-dump-${{ inputs.enclave }}-${{ steps.create-artifact-key.outputs.artifact-key }}
         path: ./.kurtosis-dump/enclaves/
