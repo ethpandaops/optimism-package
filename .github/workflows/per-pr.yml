@@ -15,7 +15,8 @@ jobs:
         file_name:
           [
             "./network_params.yaml",
-            "./.github/tests/kona-node-signer.yaml"
+            "./.github/tests/kona-node-signer.yaml",
+            "./.github/tests/op-deployer-042.yaml",
           ]
     runs-on: ubuntu-latest
     steps:
