@@ -3,10 +3,7 @@ input_parser = import_module("/src/l2/participant/input_parser.star")
 _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
-_default_network_params = struct(
-    network_id=1000,
-    name="my-l2",
-)
+_default_network_params = struct(network_id=1000, name="my-l2", seconds_per_slot=2)
 _default_registry = _registry.Registry()
 
 _shared_defaults = {
@@ -325,7 +322,7 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
             bootstrap=False,
             pprof_enabled=False,
             websocket_enabled=False,
-            healthcheck_interval=2,
+            healthcheck_interval=5,
             healthcheck_min_peer_count=1,
             raft_heartbeat_timeout="900ms",
             raft_lease_timeout="550ms",
