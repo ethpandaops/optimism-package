@@ -150,6 +150,7 @@ def run(plan, args={}):
                 log_level=global_log_level,
                 tolerations=global_tolerations,
                 persistent=persistent,
+                registry=registry,
             )
         )
 
