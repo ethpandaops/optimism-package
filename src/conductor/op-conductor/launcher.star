@@ -16,7 +16,6 @@ def launch(
     plan,
     params,
     network_params,
-    supervisors_params,
     sidecar_context,
     deployment_output,
     el_params,
@@ -28,7 +27,6 @@ def launch(
         plan=plan,
         params=params,
         network_params=network_params,
-        supervisors_params=supervisors_params,
         sidecar_context=sidecar_context,
         deployment_output=deployment_output,
         el_params=el_params,
@@ -69,7 +67,6 @@ def get_service_config(
     plan,
     params,
     network_params,
-    supervisors_params,
     sidecar_context,
     deployment_output,
     el_params,
@@ -134,13 +131,6 @@ def get_service_config(
         "OP_CONDUCTOR_RPC_PORT": str(rpc_port.number),
         "OP_CONDUCTOR_RPC_ENABLE_ADMIN": "true" if params.admin else "false",
         "OP_CONDUCTOR_RPC_ENABLE_PROXY": "true" if params.proxy else "false",
-        "OP_CONDUCTOR_SUPERVISOR_RPC": _filter.first(
-            [
-                _net.service_url(s.service_name, s.ports[_net.RPC_PORT_NAME])
-                for s in supervisors_params
-            ]
-        )
-        or "",
     }
 
     if params.websocket_enabled:

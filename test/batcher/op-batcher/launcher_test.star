@@ -18,9 +18,7 @@ _default_l1_config_env_vars = {
     "L1_RPC_KIND": "very.kind",
 }
 _default_network_params = struct(
-    network="kurtosis",
-    network_id=1000,
-    name="network0",
+    network="kurtosis", network_id=1000, name="network0", seconds_per_slot=2
 )
 _default_deployment_output = "{}"
 
