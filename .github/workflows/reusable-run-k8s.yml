@@ -10,7 +10,6 @@ jobs:
         payload:
           - { name: "single", file: "./.github/tests/single_l2.yaml" }
           - { name: "network-params", file: "./network_params.yaml" }
-          - { name: "network-params-flashblocks", file: "./network_params_flashblocks.yaml" }
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
