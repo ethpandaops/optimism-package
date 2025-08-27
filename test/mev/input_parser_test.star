@@ -53,6 +53,8 @@ def test_mev_input_parser_default_args(plan):
         type="rollup-boost",
         builder_host=None,
         builder_port=None,
+        builder_timeout="1000",
+        l2_timeout="1000",
         service_name="op-mev-rollup-boost-1000-my-l2-node0",
         labels={
             "op.kind": "mev",
@@ -62,7 +64,8 @@ def test_mev_input_parser_default_args(plan):
             "op.mev.type": "rollup-boost",
         },
         ports={
-            _net.RPC_PORT_NAME: _net.port(number=8541),
+            _net.RPC_PORT_NAME: _net.port(number=8551),
+            _net.WS_PORT_NAME: _net.port(number=1112, application_protocol="ws"),
         },
     )
 
@@ -139,6 +142,8 @@ def test_mev_input_parser_custom_params(plan):
             type="rollup-boost",
             builder_host="localhost",
             builder_port=8080,
+            builder_timeout="1000",
+            l2_timeout="1000",
             service_name="op-mev-rollup-boost-1000-my-l2-node0",
             labels={
                 "op.kind": "mev",
@@ -148,7 +153,8 @@ def test_mev_input_parser_custom_params(plan):
                 "op.mev.type": "rollup-boost",
             },
             ports={
-                _net.RPC_PORT_NAME: _net.port(number=8541),
+                _net.RPC_PORT_NAME: _net.port(number=8551),
+                _net.WS_PORT_NAME: _net.port(number=1112, application_protocol="ws"),
             },
         ),
     )

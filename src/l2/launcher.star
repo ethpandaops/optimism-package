@@ -193,9 +193,7 @@ def launch(
             supervisors_params=supervisors_params,
             conductor_params=participant_params.conductor_params,
             is_sequencer=is_sequencer,
-            el_context=sidecar_and_builders.el_builder.context
-            if sidecar_and_builders and sidecar_and_builders.el_builder
-            else el.context,
+            el_context=el.context,
             cl_contexts=cl_contexts,
             signer_context=signer,
             jwt_file=jwt_file,
@@ -330,6 +328,7 @@ def _launch_sidecar_maybe(
         sequencer_context=el_context,
         builder_context=el_builder_context,
         jwt_file=jwt_file,
+        observability_helper=observability_helper,
     )
 
     cl_builder = (
@@ -365,7 +364,13 @@ def _launch_sidecar_maybe(
 
 
 def _launch_sidecar(
-    plan, mev_params, network_params, sequencer_context, builder_context, jwt_file
+    plan,
+    mev_params,
+    network_params,
+    sequencer_context,
+    builder_context,
+    jwt_file,
+    observability_helper,
 ):
     if mev_params.type == "rollup-boost":
         return _rollup_boost_launcher.launch(
@@ -375,6 +380,7 @@ def _launch_sidecar(
             sequencer_context=sequencer_context,
             builder_context=builder_context,
             jwt_file=jwt_file,
+            observability_helper=observability_helper,
         )
     else:
         fail("Invalid MEV type: {}".format(mev_params.type))

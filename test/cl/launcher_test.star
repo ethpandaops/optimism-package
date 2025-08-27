@@ -25,6 +25,7 @@ _default_el_context = struct(
     ip_addr="0.0.0.0",
     engine_rpc_port_num=8888,
     rpc_port_num=9999,
+    service_name="0.0.0.0",
 )
 _default_cl_contexts = [struct(enr="enr.001"), struct(enr="enr.002")]
 

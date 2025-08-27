@@ -9,6 +9,8 @@ _DEFAULT_ARGS = {
     "type": "rollup-boost",
     "builder_host": None,
     "builder_port": None,
+    "builder_timeout": "1000",
+    "l2_timeout": "1000",
 }
 
 _IMAGE_IDS = {
@@ -63,7 +65,8 @@ def parse(mev_args, network_params, participant_name, participant_index, registr
 
     # Add ports
     mev_params["ports"] = {
-        _net.RPC_PORT_NAME: _net.port(number=8541),
+        _net.RPC_PORT_NAME: _net.port(number=8551),
+        _net.WS_PORT_NAME: _net.port(number=1112, application_protocol="ws"),
     }
 
     return struct(**mev_params)
