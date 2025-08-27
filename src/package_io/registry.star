@@ -49,14 +49,14 @@ OP_BLOCKSCOUT_VERIFIER = "op-blockscout-verifier"
 
 _DEFAULT_IMAGES = {
     # EL images
-    OP_GETH: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
+    OP_GETH: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1-rc.1@sha256:796b5bb67ff5986ea8b280914447ae8e3fedc9b167f5a65c366ea99c5839903e",
     OP_RETH: "ghcr.io/paradigmxyz/op-reth:v1.6.0",
     OP_ERIGON: "testinprod/op-erigon:v2.61.3-0.9.5",
     OP_NETHERMIND: "nethermind/nethermind:1.32.4",
     OP_BESU: "ghcr.io/optimism-java/op-besu:v0.2.2",
     OP_RBUILDER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-rbuilder:sha-0ec0644",
     # CL images
-    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
+    OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.5-rc.1@sha256:0ae0fe51989a85db6e653f26ad1d3bd52091f6857e799507fc601e59cad0ef50",
     KONA_NODE: "ghcr.io/op-rs/kona/kona-node:1.0.0-rc.1",
     HILDR: "ghcr.io/optimism-java/hildr:v0.4.5",
     # Batching

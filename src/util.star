@@ -1,4 +1,5 @@
 constants = import_module("./package_io/constants.star")
+_net = import_module("./util/net.star")
 
 DEPLOYMENT_UTILS_IMAGE = "mslipper/deployment-utils@sha256:4506b112e4261014329152b161997129e7ca577f39c85e59cfdfdcb47ab7b5cf"
 
@@ -124,13 +125,20 @@ def make_service_ws_url(service, port_id=constants.WS_PORT_ID):
 
 def make_execution_engine_url(el_context):
     return make_http_url(
-        el_context.ip_addr,
+        el_context.service_name,
         el_context.engine_rpc_port_num,
     )
 
 
 def make_execution_rpc_url(el_context):
     return make_http_url(
-        el_context.ip_addr,
+        el_context.service_name,
         el_context.rpc_port_num,
+    )
+
+
+def make_cl_beacon_url(cl_context):
+    return make_http_url(
+        cl_context.beacon_service_name,
+        cl_context.http_port,
     )
