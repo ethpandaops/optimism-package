@@ -30,7 +30,7 @@ def wait_for_startup(plan, l1_config_env_vars):
         description="Wait for L1 to start up - can take up to 2 minutes",
         image=utils.DEPLOYMENT_UTILS_IMAGE,
         env_vars=l1_config_env_vars,
-        run="while true; do sleep 5; echo 'L1 Chain is starting up'; if [ \"$(curl -s $CL_RPC_URL/eth/v1/beacon/headers/ | jq -r '.data[0].header.message.slot')\" != \"0\" ]; then echo 'L1 Chain has started!'; break; fi; done",
+        run="while true; do sleep 5; echo 'L1 Chain is starting up'; SLOT=$(curl -fs $CL_RPC_URL/eth/v1/beacon/headers/ | jq -r '.data[0].header.message.slot // \"0\"'); if [ \"$SLOT\" -gt 0 ]; then echo 'L1 Chain has started!'; break; fi; done",
         wait="300s",
     )
 
