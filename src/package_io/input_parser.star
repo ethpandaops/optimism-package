@@ -372,12 +372,13 @@ def default_op_contract_deployer_params(registry):
     }
 
 
-def default_ethereum_package_network_params():
+def default_ethereum_package_network_params(registry):
     return {
         "participants": [
             {
                 "el_type": "geth",
                 "cl_type": "lighthouse",
+                "cl_image": registry.get(_registry.LIGHTHOUSE),
             }
         ],
         "network_params": {
