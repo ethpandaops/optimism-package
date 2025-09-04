@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.5.0](https://github.com/ethpandaops/optimism-package/compare/1.4.0...1.5.0) (2025-09-04)
+
+
+### Features
+
+* Add Jovian support ([#361](https://github.com/ethpandaops/optimism-package/issues/361)) ([e154939](https://github.com/ethpandaops/optimism-package/commit/e1549392e2fb5cca90f1763747e1c204ae285b1c))
+* add support for `pprof` ([#352](https://github.com/ethpandaops/optimism-package/issues/352)) ([c92ebbe](https://github.com/ethpandaops/optimism-package/commit/c92ebbebef72745ab8c61749aece307509d30721))
+* added support for `op-test-sequencer` ([#368](https://github.com/ethpandaops/optimism-package/issues/368)) ([d69cd46](https://github.com/ethpandaops/optimism-package/commit/d69cd463030e0e43df18e60c9038de4ac1293569))
+* adds `extra_env_vars` support ([#366](https://github.com/ethpandaops/optimism-package/issues/366)) ([b763c23](https://github.com/ethpandaops/optimism-package/commit/b763c239ddba6b6ab8fb0b3c790a697a8765b53c))
+* **flashblocks:** 1/N flashblocks-web-proxy and flashblocks-rpc ([#383](https://github.com/ethpandaops/optimism-package/issues/383)) ([c8fc880](https://github.com/ethpandaops/optimism-package/commit/c8fc8803b5f64f3b6bc49511dada2b26a2684cdd))
+* **flashblocks:** 2/N conductor websocket and flashblocks changes ([#385](https://github.com/ethpandaops/optimism-package/issues/385)) ([448e08d](https://github.com/ethpandaops/optimism-package/commit/448e08de48917d2c41255775744328d43da475a2))
+* **flashblocks:** 3/N flashblocks rpc and reth changes ([#386](https://github.com/ethpandaops/optimism-package/issues/386)) ([c35e007](https://github.com/ethpandaops/optimism-package/commit/c35e0079032e68cae7d7046fda02bf9abe0ae528))
+* **flashblocks:** 4/N enable flashblocks ([#370](https://github.com/ethpandaops/optimism-package/issues/370)) ([0b3b83c](https://github.com/ethpandaops/optimism-package/commit/0b3b83c3c7a98c3fb683f457bd361237feaef8c8))
+* **kona:** update kurtosis package to be compatible with kona's RC ([#364](https://github.com/ethpandaops/optimism-package/issues/364)) ([ad6700a](https://github.com/ethpandaops/optimism-package/commit/ad6700a9ab0665fff1840e3e5a197b9bc0682517))
+* op-signer: Add & update images [2/N] ([#374](https://github.com/ethpandaops/optimism-package/issues/374)) ([8ce4a3b](https://github.com/ethpandaops/optimism-package/commit/8ce4a3b36418f903468f40af766c0ce53df210df))
+* op-signer: Add script for generating local credentials [4/N] ([#376](https://github.com/ethpandaops/optimism-package/issues/376)) ([7bd848e](https://github.com/ethpandaops/optimism-package/commit/7bd848ea87331061262132f6a4d12ff72fd06d83))
+* op-signer: Connect the signer [7/N] ([#381](https://github.com/ethpandaops/optimism-package/issues/381)) ([a1c8113](https://github.com/ethpandaops/optimism-package/commit/a1c81133ad5a9fcdea5a85fb976b2816baedf3d7))
+* op-signer: Connect the signer to the proposer [8/N] ([#387](https://github.com/ethpandaops/optimism-package/issues/387)) ([ec0cadf](https://github.com/ethpandaops/optimism-package/commit/ec0cadf130aaeaf464a798cdcf01f5d075ebc56a))
+* op-signer: Connect to sequencers [9/N] ([#389](https://github.com/ethpandaops/optimism-package/issues/389)) ([bc45808](https://github.com/ethpandaops/optimism-package/commit/bc45808471094de92211af83c3b809577e75f572))
+* op-signer: Input parser [1/N] ([#372](https://github.com/ethpandaops/optimism-package/issues/372)) ([35d6ffb](https://github.com/ethpandaops/optimism-package/commit/35d6ffb88ffb150409b410903da7cfedc5bd734f))
+* op-signer: Launcher [6/N] ([#380](https://github.com/ethpandaops/optimism-package/issues/380)) ([cd09586](https://github.com/ethpandaops/optimism-package/commit/cd09586117e3e24133fbbb75c6782654a98202e7))
+* op-signer: Necessary script adjustments [5/N] ([#379](https://github.com/ethpandaops/optimism-package/issues/379)) ([a5823a4](https://github.com/ethpandaops/optimism-package/commit/a5823a4805c7445b89767a78fc9b917ae3d76cff))
+* op-signer: Pull private keys for batcher & proposer out of their launchers [3/N] ([#375](https://github.com/ethpandaops/optimism-package/issues/375)) ([533985b](https://github.com/ethpandaops/optimism-package/commit/533985b79ff41154e7497b137c66f150a5f4a348))
+
+
+### Bug Fixes
+
+* **contract_deployer:** ensure hardfork configuration is respected with multiple chains ([#360](https://github.com/ethpandaops/optimism-package/issues/360)) ([bc776a6](https://github.com/ethpandaops/optimism-package/commit/bc776a61e62b422bd2fa954e3a0588d52eba3847))
+* EL log levels ([#369](https://github.com/ethpandaops/optimism-package/issues/369)) ([219d5f9](https://github.com/ethpandaops/optimism-package/commit/219d5f9e104951d0ef6ed9586f9f6baa0ecbd980))
+* **kurtosis:** pin to 1.10.3 ([#396](https://github.com/ethpandaops/optimism-package/issues/396)) ([3648298](https://github.com/ethpandaops/optimism-package/commit/364829819c759d39bee4d693d127f2cd8c2859d8))
+* make cl startup healthcheck more robust ([#395](https://github.com/ethpandaops/optimism-package/issues/395)) ([84cd096](https://github.com/ethpandaops/optimism-package/commit/84cd0961fcce613558d7b260d8751a3ace533d31))
+
 ## [1.4.0](https://github.com/ethpandaops/optimism-package/compare/1.3.0...1.4.0) (2025-07-16)
 
 
