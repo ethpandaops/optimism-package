@@ -11,6 +11,7 @@ OP_RBUILDER = "op-rbuilder"
 OP_NODE = "op-node"
 KONA_NODE = "kona-node"
 HILDR = "hildr"
+LIGHTHOUSE = "lighthouse"
 
 OP_SUPERVISOR = "op-supervisor"
 KONA_SUPERVISOR = "kona-supervisor"
@@ -59,6 +60,7 @@ _DEFAULT_IMAGES = {
     OP_NODE: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
     KONA_NODE: "ghcr.io/op-rs/kona/kona-node:1.0.0-rc.1",
     HILDR: "ghcr.io/optimism-java/hildr:v0.4.5",
+    LIGHTHOUSE: "ethpandaops/lighthouse:stable-e21198c",
     # Batching
     OP_BATCHER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.14.0",
     # Challenger
