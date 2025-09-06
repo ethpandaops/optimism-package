@@ -31,13 +31,15 @@ def launch(
         if l2_params.network_params.network_id in params.superchain.participants
     ]
 
-    sv2_config = _generate_sv2_config(plan, params, supervisor_l2s_params, l1_config_env_vars)
+    sv2_config = _generate_sv2_config(
+        plan, params, supervisor_l2s_params, l1_config_env_vars
+    )
 
     # Create SV2 config file artifact with proper chain data
     # Use write_to_file since Starlark templates can't handle complex JSON structures
     chains_json = []
     for chain in sv2_config.config["chains"]:
-        chain_json = '''{
+        chain_json = """{
   "l1_rpc": "%s",
   "beacon_addr": "%s",
   "l2_authrpc": "%s",
@@ -46,7 +48,7 @@ def launch(
   "rollup_config": "%s",
   "user_rpc_listen_addr": "%s",
   "user_rpc_port": %d
-}''' % (
+}""" % (
             chain["l1_rpc"],
             chain["beacon_addr"],
             chain["l2_authrpc"],
@@ -54,21 +56,20 @@ def launch(
             chain["jwt_secret"],
             chain["rollup_config"],
             chain["user_rpc_listen_addr"],
-            chain["user_rpc_port"]
+            chain["user_rpc_port"],
         )
         chains_json.append(chain_json)
 
-    sv2_json_content = '''{
+    sv2_json_content = """{
   "chains": [
 %s
   ]
-}''' % ",\n".join(chains_json)
+}""" % ",\n".join(
+        chains_json
+    )
 
     sv2_config_file = _util.write_to_file(
-        plan=plan,
-        contents=sv2_json_content,
-        directory="/tmp",
-        file_name="sv2.json"
+        plan=plan, contents=sv2_json_content, directory="/tmp", file_name="sv2.json"
     )
 
     # Need to add all the ports
@@ -90,7 +91,9 @@ def launch(
 
     service = plan.add_service(params.service_name, config)
 
-    return struct(service=service, l2s=supervisor_l2s_params, config_per_network=sv2_config)
+    return struct(
+        service=service, l2s=supervisor_l2s_params, config_per_network=sv2_config
+    )
 
 
 def _get_config(
@@ -113,15 +116,15 @@ def _get_config(
         "--sv2.data-dir={}".format(DATA_DIR),
         "--poll.interval=1s",
         "--confirm.depth=15",
-        #"--log-level=debug",
+        # "--log-level=debug",
     ] + params.extra_params
 
-    #if params.opnode_proxy:
+    # if params.opnode_proxy:
     cmd.append("--proxy.opnode")
 
     env_vars = {
         "SV2_SEQUENCER_ENABLED": "true",
-        "SV2_L1_SCOPE": "safe", # safe/unsafe/finalized
+        "SV2_L1_SCOPE": "safe",  # safe/unsafe/finalized
     }
 
     # apply customizations
@@ -153,21 +156,27 @@ def _generate_sv2_config(plan, params, l2s_params, l1_config_env_vars):
     # l2s_params is a list of L2 parameter objects, iterate over each one
     for l2_param in l2s_params:
         for participant in l2_param.participants:
-            participant_key = "{}-{}".format(l2_param.network_params.network_id, participant.name)
-            plan.print("User RPC port for participant {}: {}".format(participant_key, user_rpc_port))
+            participant_key = "{}-{}".format(
+                l2_param.network_params.network_id, participant.name
+            )
+            plan.print(
+                "User RPC port for participant {}: {}".format(
+                    participant_key, user_rpc_port
+                )
+            )
             ports_per_chain[participant_key] = "{}".format(user_rpc_port)
             # Build chain config for SV2
             chain_cfg = {
                 "l1_rpc": l1_config_env_vars["L1_RPC_URL"],
                 "beacon_addr": l1_config_env_vars["CL_RPC_URL"],
                 "l2_authrpc": _net.service_url(
-                                participant.el.service_name,
-                                participant.el.ports[_net.ENGINE_RPC_PORT_NAME],
-                            ),
+                    participant.el.service_name,
+                    participant.el.ports[_net.ENGINE_RPC_PORT_NAME],
+                ),
                 "l2_userrpc": _net.service_url(
-                                participant.el.service_name,
-                                participant.el.ports[_net.RPC_PORT_NAME],
-                            ),
+                    participant.el.service_name,
+                    participant.el.ports[_net.RPC_PORT_NAME],
+                ),
                 "jwt_secret": _ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
                 "rollup_config": _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
                 + "/rollup-{}.json".format(l2_param.network_params.network_id),
@@ -184,7 +193,7 @@ def _generate_sv2_config(plan, params, l2s_params, l1_config_env_vars):
     config = {
         "chains": sv2_chains,
     }
-    
+
     return struct(
         config=config,
         ports_per_participant=ports_per_chain,

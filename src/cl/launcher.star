@@ -2,7 +2,9 @@ _observability = import_module("/src/observability/observability.star")
 _hildr_launcher = import_module("/src/cl/hildr/launcher.star")
 _kona_node_launcher = import_module("/src/cl/kona-node/launcher.star")
 _op_node_launcher = import_module("/src/cl/op-node/launcher.star")
-_op_supervisor_v2_node_launcher = import_module("/src/cl/op-supervisor-v2-node/launcher.star")
+_op_supervisor_v2_node_launcher = import_module(
+    "/src/cl/op-supervisor-v2-node/launcher.star"
+)
 
 _filter = import_module("/src/util/filter.star")
 

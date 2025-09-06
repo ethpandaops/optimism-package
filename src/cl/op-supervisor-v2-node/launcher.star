@@ -34,6 +34,7 @@ VERBOSITY_LEVELS = {
 # This is a fake node that we don't launch
 # We are using op-supervisor-v2 virtual op-node instead
 
+
 def launch(
     plan,
     params,
@@ -54,9 +55,10 @@ def launch(
     observability_helper,
     supervisor_context,
 ):
-
     participant_key = "{}-{}".format(network_params.network_id, params.name)
-    virtual_node_rpc_port = supervisor_context.config_per_network.ports_per_participant[participant_key]
+    virtual_node_rpc_port = supervisor_context.config_per_network.ports_per_participant[
+        participant_key
+    ]
     virtual_node_port_id = "rpc-v2-{}".format(virtual_node_rpc_port)
     beacon_node_identity_recipe = PostHttpRequestRecipe(
         endpoint="/",

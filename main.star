@@ -121,7 +121,9 @@ def run(plan, args={}):
     # Launch SV2 supervisors first
     for supervisor_params in optimism_args.supervisors:
         if supervisor_params.type == "op-supervisor-v2":
-            plan.print("Launching SV2 supervisor {}".format(supervisor_params.service_name))
+            plan.print(
+                "Launching SV2 supervisor {}".format(supervisor_params.service_name)
+            )
             # Only launch one SV2 supervisor
             if sv2_context != None:
                 fail("Only one SV2 supervisor can be launched")
