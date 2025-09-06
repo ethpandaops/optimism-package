@@ -32,6 +32,8 @@ def launch(
     node_selectors,
     observability_helper,
     registry,
+    # TODO: Add flashblocks support for SV2
+    sv2_context=None,
 ):
     network_params = params.network_params
     network_name = network_params.name

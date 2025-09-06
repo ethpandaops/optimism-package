@@ -15,6 +15,7 @@ _DEFAULT_ARGS = {
 
 _IMAGE_IDS = {
     "op-supervisor": _registry.OP_SUPERVISOR,
+    "op-supervisor-v2": _registry.OP_SUPERVISOR_V2,
     "kona-supervisor": _registry.KONA_SUPERVISOR,
 }
 

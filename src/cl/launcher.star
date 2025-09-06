@@ -2,6 +2,7 @@ _observability = import_module("/src/observability/observability.star")
 _hildr_launcher = import_module("/src/cl/hildr/launcher.star")
 _kona_node_launcher = import_module("/src/cl/kona-node/launcher.star")
 _op_node_launcher = import_module("/src/cl/op-node/launcher.star")
+_op_supervisor_v2_node_launcher = import_module("/src/cl/op-supervisor-v2-node/launcher.star")
 
 _filter = import_module("/src/util/filter.star")
 
@@ -25,6 +26,7 @@ def launch(
     tolerations,
     node_selectors,
     observability_helper,
+    supervisor_context=None,
 ):
     cl = None
 
@@ -90,6 +92,27 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             observability_helper=observability_helper,
+        )
+    elif params.type == "op-supervisor-v2-node":
+        cl = _op_supervisor_v2_node_launcher.launch(
+            plan=plan,
+            params=params,
+            network_params=network_params,
+            da_params=da_params,
+            supervisors_params=supervisors_params,
+            conductor_params=conductor_params,
+            is_sequencer=is_sequencer,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
+            el_context=el_context,
+            cl_contexts=cl_contexts,
+            l1_config_env_vars=l1_config_env_vars,
+            log_level=log_level,
+            persistent=persistent,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            observability_helper=observability_helper,
+            supervisor_context=supervisor_context,
         )
 
     # Register metrics

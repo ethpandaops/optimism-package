@@ -1,4 +1,5 @@
 op_supervisor_launcher = import_module("./op-supervisor/launcher.star")
+op_supervisor_v2_launcher = import_module("./op-supervisor-v2/launcher.star")
 kona_supervisor_launcher = import_module("./kona-supervisor/launcher.star")
 
 
@@ -25,6 +26,16 @@ def launch(
         )
     elif supervisor_type == "kona-supervisor":
         return kona_supervisor_launcher.launch(
+            plan=plan,
+            params=params,
+            l1_config_env_vars=l1_config_env_vars,
+            l2s_params=l2s_params,
+            jwt_file=jwt_file,
+            deployment_output=deployment_output,
+            observability_helper=observability_helper,
+        )
+    elif supervisor_type == "op-supervisor-v2":
+        return op_supervisor_v2_launcher.launch(
             plan=plan,
             params=params,
             l1_config_env_vars=l1_config_env_vars,

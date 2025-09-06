@@ -117,6 +117,24 @@ def run(plan, args={}):
         name="op_jwt_file",
     )
 
+    sv2_context = None
+    # Launch SV2 supervisors first
+    for supervisor_params in optimism_args.supervisors:
+        if supervisor_params.type == "op-supervisor-v2":
+            plan.print("Launching SV2 supervisor {}".format(supervisor_params.service_name))
+            # Only launch one SV2 supervisor
+            if sv2_context != None:
+                fail("Only one SV2 supervisor can be launched")
+            sv2_context = supervisor_launcher.launch(
+                plan=plan,
+                params=supervisor_params,
+                l1_config_env_vars=l1_config_env_vars,
+                l2s_params=optimism_args.chains,
+                jwt_file=jwt_file,
+                deployment_output=deployment_output,
+                observability_helper=observability_helper,
+            )
+
     # TODO We need to create the dependency sets before we launch the chains since
     # e.g. op-node now depends on the artifacts to be present
     #
@@ -153,19 +171,21 @@ def run(plan, args={}):
                 tolerations=global_tolerations,
                 persistent=persistent,
                 registry=registry,
+                sv2_context=sv2_context,
             )
         )
 
     for supervisor_params in optimism_args.supervisors:
-        supervisor_launcher.launch(
-            plan=plan,
-            params=supervisor_params,
-            l1_config_env_vars=l1_config_env_vars,
-            l2s_params=optimism_args.chains,
-            jwt_file=jwt_file,
-            deployment_output=deployment_output,
-            observability_helper=observability_helper,
-        )
+        if supervisor_params.type != "op-supervisor-v2":
+            supervisor_launcher.launch(
+                plan=plan,
+                params=supervisor_params,
+                l1_config_env_vars=l1_config_env_vars,
+                l2s_params=optimism_args.chains,
+                jwt_file=jwt_file,
+                deployment_output=deployment_output,
+                observability_helper=observability_helper,
+            )
 
     for test_sequencer_params in optimism_args.test_sequencers:
         op_test_sequencer_launcher.launch(
@@ -215,6 +235,7 @@ def run(plan, args={}):
             tolerations=global_tolerations,
             persistent=persistent,
             registry=registry,
+            sv2_context=sv2_context,
         )
 
     if optimism_args.faucet.enabled:
