@@ -14,6 +14,7 @@ HILDR = "hildr"
 LIGHTHOUSE = "lighthouse"
 
 OP_SUPERVISOR = "op-supervisor"
+OP_SUPERVISOR_V2 = "op-supervisor-v2"
 KONA_SUPERVISOR = "kona-supervisor"
 
 OP_BATCHER = "op-batcher"
@@ -67,6 +68,8 @@ _DEFAULT_IMAGES = {
     OP_CHALLENGER: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-challenger:v1.5.1",
     # op-supervisor
     OP_SUPERVISOR: "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-supervisor:v0.3.0-dev.4",
+    # op-supervisor-v2
+    OP_SUPERVISOR_V2: "op-supervisor-v2:devnet",
     # kona-supervisor
     KONA_SUPERVISOR: "ghcr.io/op-rs/kona/kona-supervisor@sha256:98afd250010201573fb61490f3eb9ea131186f84d532ef9a0018c6382a1c0b45",
     # Proposer

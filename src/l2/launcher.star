@@ -23,6 +23,7 @@ def launch(
     node_selectors,
     observability_helper,
     registry,
+    sv2_context=None,
 ):
     network_params = params.network_params
     network_name = network_params.name
@@ -206,6 +207,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             observability_helper=observability_helper,
+            supervisor_context=sv2_context,
         )
 
         # Add the EL/CL pair to the list of launched participants
