@@ -1,13 +1,14 @@
 _ethereum_package_cl_context = import_module(
     "github.com/ethpandaops/ethereum-package/src/cl/cl_context.star"
 )
-
 _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
-
 _ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
+)
+_ethereum_package_shared_utils = import_module(
+    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
 
 _constants = import_module("../../package_io/constants.star")
@@ -59,7 +60,7 @@ def launch(
         node_selectors,
     )
 
-    cl_tolerations = _ethereum_package_input_parser.get_client_tolerations(
+    cl_tolerations = _ethereum_package_shared_utils.get_tolerations(
         params.tolerations, [], tolerations
     )
 
