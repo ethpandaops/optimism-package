@@ -47,7 +47,7 @@ def run(plan, args={}):
     else:
         if "network_params" not in ethereum_args:
             ethereum_args.update(
-                input_parser.default_ethereum_package_network_params(registry)
+                input_parser.default_ethereum_package_network_params()
             )
 
     optimism_args = input_parser.input_parser(
