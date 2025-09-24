@@ -1,0 +1,11 @@
+optimism_package:
+  chains:
+    chain0:
+      participants:
+        node0:
+          el:
+            type: op-geth
+          cl:
+            type: op-node
+      batcher_params:
+        max_channel_duration: 10

@@ -106,7 +106,7 @@ def get_service_config(
         "--rpc.addr=0.0.0.0",
         "--rpc.port={}".format(params.ports[_net.HTTP_PORT_NAME].number),
         "--rpc.enable-admin",
-        "--max-channel-duration=1",
+        "--max-channel-duration={}".format(params.max_channel_duration),
         "--l1-eth-rpc={}".format(l1_config_env_vars["L1_RPC_URL"]),
         "--private-key={}".format(gs_batcher_private_key),
         # da commitments currently have to be sent as calldata to the batcher inbox

@@ -13,12 +13,14 @@ jobs:
   run_with_args:
     name: Run kurtosis with arguments
     strategy:
+      fail-fast: false
       matrix:
         file_name:
           [
             "./network_params.yaml",
             "./.github/tests/kona-node-signer.yaml",
             "./.github/tests/op-deployer-042.yaml",
+            "./.github/tests/custom.yaml",
           ]
     runs-on: ubuntu-latest
     steps:

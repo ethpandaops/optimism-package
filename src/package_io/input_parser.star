@@ -344,6 +344,7 @@ def _default_batcher_params(registry):
     return {
         "image": registry.get(_registry.OP_BATCHER),
         "extra_params": [],
+        "max_channel_duration": 1,
     }
 
 
