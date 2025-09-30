@@ -3,6 +3,7 @@ _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
 _DEFAULT_ARGS = {
+    "enabled": True,
     "image": None,
     "extra_params": [],
     "game_type": 1,

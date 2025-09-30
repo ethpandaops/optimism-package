@@ -85,6 +85,7 @@ def test_l2_input_parser_defaults(plan):
     )
 
     _default_proposer_params = struct(
+        enabled=True,
         extra_params=[],
         game_type=1,
         image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:v1.10.0",

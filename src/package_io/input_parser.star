@@ -357,6 +357,7 @@ def _default_proxyd_params(registry):
 
 def _default_proposer_params(registry):
     return {
+        "enabled": True,
         "image": registry.get(_registry.OP_PROPOSER),
         "extra_params": [],
         "game_type": 1,

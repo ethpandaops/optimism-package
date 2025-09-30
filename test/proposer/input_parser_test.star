@@ -20,6 +20,7 @@ def test_proposer_input_parser_extra_attrbutes(plan):
 
 def test_proposer_input_parser_default_args(plan):
     _default_params = struct(
+        enabled=True,
         extra_params=[],
         game_type=1,
         image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:v1.10.0",
@@ -56,6 +57,7 @@ def test_proposer_input_parser_default_args(plan):
     expect.eq(
         input_parser.parse(
             {
+                "enabled": None,
                 "image": None,
                 "extra_params": None,
                 "game_type": None,
@@ -71,6 +73,7 @@ def test_proposer_input_parser_default_args(plan):
 def test_proposer_input_parser_custom_params(plan):
     parsed = input_parser.parse(
         {
+            "enabled": False,
             "image": "op-proposer:brightest",
             "extra_params": ["--hola"],
             "game_type": 7,
@@ -83,6 +86,7 @@ def test_proposer_input_parser_custom_params(plan):
     expect.eq(
         parsed,
         struct(
+            enabled=False,
             extra_params=["--hola"],
             game_type=7,
             image="op-proposer:brightest",

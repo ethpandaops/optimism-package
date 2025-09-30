@@ -20,6 +20,10 @@ def launch(
     observability_helper,
     signer_context,
 ):
+    if not params.enabled:
+        plan.print("Skipping proposer deployment as it is disabled")
+        return None
+
     config = get_service_config(
         plan=plan,
         params=params,
