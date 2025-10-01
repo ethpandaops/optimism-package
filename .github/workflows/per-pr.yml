@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [overlay/main]
+    branches:
+      - overlay/main
+      - overlay/antithesis
   pull_request:
 
 concurrency:
