@@ -114,7 +114,7 @@ def test_l2_participant_el_launcher_op_besu(plan):
         {
             "op.kind": "el",
             "op.network.id": "2151908",
-            "op.network.participant.index": "0",
+            "op.network.participant.index": "1",
             "op.network.participant.name": "node0",
             "op.el.type": "op-besu",
         },
@@ -191,7 +191,7 @@ def test_l2_participant_el_launcher_op_erigon(plan):
         {
             "op.kind": "el",
             "op.network.id": "2151908",
-            "op.network.participant.index": "0",
+            "op.network.participant.index": "1",
             "op.network.participant.name": "node0",
             "op.el.type": "op-erigon",
         },
@@ -268,7 +268,7 @@ def test_l2_participant_el_launcher_op_geth(plan):
         {
             "op.kind": "el",
             "op.network.id": "2151908",
-            "op.network.participant.index": "0",
+            "op.network.participant.index": "1",
             "op.network.participant.name": "node0",
             "op.el.type": "op-geth",
         },
@@ -364,7 +364,7 @@ def test_l2_participant_el_launcher_op_nethermind(plan):
         {
             "op.kind": "el",
             "op.network.id": "2151908",
-            "op.network.participant.index": "0",
+            "op.network.participant.index": "1",
             "op.network.participant.name": "node0",
             "op.el.type": "op-nethermind",
         },
@@ -466,7 +466,7 @@ def test_l2_participant_el_launcher_op_rbuilder(plan):
         {
             "op.kind": "elbuilder",
             "op.network.id": "2151908",
-            "op.network.participant.index": "0",
+            "op.network.participant.index": "1",
             "op.network.participant.name": "node0",
             "op.el.type": "op-rbuilder",
         },
@@ -565,7 +565,7 @@ def test_l2_participant_el_launcher_op_reth(plan):
         {
             "op.kind": "el",
             "op.network.id": "2151908",
-            "op.network.participant.index": "0",
+            "op.network.participant.index": "1",
             "op.network.participant.name": "node0",
             "op.el.type": "op-reth",
         },

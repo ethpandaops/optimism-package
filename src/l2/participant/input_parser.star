@@ -21,7 +21,7 @@ _DEFAULT_ARGS = {
 
 
 def parse(args, network_params, registry):
-    participant_index_generator = _id.autoincrement(initial=0)
+    participant_index_generator = _id.autoincrement(initial=1)
 
     participants_params = _filter.remove_none(
         [
@@ -151,6 +151,7 @@ def _parse_instance(
             participant_index=participant_index,
             network_params=network_params,
             registry=registry,
+            cl_args=participant_params["cl"],
         ),
         el_builder=_el_input_parser.parse_builder(
             el_args=participant_params["el_builder"],
@@ -165,6 +166,7 @@ def _parse_instance(
             participant_index=participant_index,
             network_params=network_params,
             registry=registry,
+            el_args=participant_params["el"],
         ),
         cl_builder=_cl_input_parser.parse_builder(
             cl_args=participant_params["cl_builder"],

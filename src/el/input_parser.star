@@ -38,7 +38,9 @@ _IMAGE_IDS = {
 }
 
 
-def parse(el_args, participant_name, participant_index, network_params, registry):
+def parse(
+    el_args, participant_name, participant_index, network_params, registry, cl_args={}
+):
     return _parse(
         el_args=el_args,
         default_args=_DEFAULT_ARGS,
@@ -47,6 +49,7 @@ def parse(el_args, participant_name, participant_index, network_params, registry
         network_params=network_params,
         registry=registry,
         el_kind="el",
+        cl_args=cl_args,
     )
 
 
@@ -76,6 +79,7 @@ def _parse(
     network_params,
     registry,
     el_kind,
+    cl_args={},
 ):
     network_id = network_params.network_id
     network_name = network_params.name
@@ -94,6 +98,7 @@ def _parse(
     # We filter the None values so that we can merge dicts easily
     # and merge the config with the defaults
     el_params = default_args | _filter.remove_none(el_args or {})
+    cl_params = {"type": "op-node"} | _filter.remove_none(cl_args or {})
 
     # We default the image to the one in the registry
     #
@@ -104,7 +109,10 @@ def _parse(
 
     el_params["name"] = participant_name
     el_params["service_name"] = "op-{}-{}-{}-{}".format(
-        el_kind, network_id, participant_name, el_params["type"]
+        el_kind,
+        participant_index,
+        el_params["type"],
+        cl_params["type"],
     )
 
     # Draft of what the labels could look like

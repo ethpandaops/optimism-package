@@ -30,7 +30,7 @@ def test_multiple_chains(plan):
     ]
     expect.eq(
         cl_service_names,
-        ["op-cl-1000-node0-op-node", "op-cl-2000-node0-op-node"],
+        ["op-cl-1-op-node-op-geth"],
     )
 
     el_service_names = [
@@ -38,7 +38,7 @@ def test_multiple_chains(plan):
     ]
     expect.eq(
         el_service_names,
-        ["op-el-1000-node0-op-geth", "op-el-2000-node0-op-geth"],
+        ["op-el-1-op-geth-op-node"],
     )
 
 
@@ -71,7 +71,7 @@ def test_multiple_chains_with_flashblocks(plan):
     flashblocks_rpc_service_names = [
         service.name
         for service in services
-        if service.name.startswith("op-el-1000-flashblocks-rpc")
+        if service.name.startswith("op-el-0-op-reth")
     ]
     expect.eq(len(flashblocks_rpc_service_names), 1)
 

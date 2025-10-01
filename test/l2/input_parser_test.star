@@ -112,7 +112,7 @@ def test_l2_input_parser_defaults(plan):
             "op.kind": "proxyd",
             "op.network.id": "2151908",
         },
-        replicas={"node0": "http://op-el-2151908-node0-op-geth:8545"},
+        replicas={"node0": "http://op-el-1-op-geth-op-node:8545"},
         pprof_enabled=False,
     )
 
