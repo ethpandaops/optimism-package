@@ -21,6 +21,13 @@ runs:
         echo '{}' > predeployed_allocs.json
         kurtosis files upload --name predeployed_allocs.json ${{ inputs.enclave }} predeployed_allocs.json
 
+    - name: Download OP artifacts (only for custom.yaml)
+      shell: bash
+      if: ${{ inputs.args-file == './.github/tests/custom.yaml' }}
+      run: |
+        export OP_LOCATOR_ARCHIVE="https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-02024c5a26c16fc1a5c716fff1c46b5bf7f23890d431bb554ddbad60971211d4.tar.gz"
+        curl -L "${OP_LOCATOR_ARCHIVE}" -o ./static_files/fileserver/$(basename ${OP_LOCATOR_ARCHIVE})
+
     - name: Start enclave ${{ inputs.enclave }}
       shell: bash
       run: kurtosis run . ${{ inputs.args-file && format('--args-file={0}', inputs.args-file) || '' }} --enclave=${{ inputs.enclave }} --verbosity detailed

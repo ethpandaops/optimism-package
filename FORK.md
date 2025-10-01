@@ -8,6 +8,7 @@
 ## Policy
 - [`main`](https://github.com/agglayer/optimism-package/tree/main): Tracks `upstream/main` exactly, without modifications.
 - [`overlay/main`](https://github.com/agglayer/optimism-package/tree/overlay/main): Contains our patch stack on top of `upstream/main` — this is where all fork-specific changes live.
+- [`overlay/antithesis`](https://github.com/agglayer/optimism-package/tree/overlay/antithesis): Contains antithesis-related patches on top of `overlay/main`.
 
 ## Patch Stack
 
@@ -25,3 +26,9 @@
 | 03 | ci: disable k8s tests | ci | Disable kubernetes tests in ci |
 | 02 | ci: run tests when pushing commits to `overlay/main` | ci | Run ci tests when pushing commits to `overlay/main` for validation purposes |
 | 01 | chore: update `kurtosis.yml` | kurtosis | Update `kurtosis.yml` to ensure this package is usable |
+
+Some patches apply only to [Antithesis](https://antithesis.com/) environments.
+
+| # | Title | Scope | Notes |
+|---|-------|-------|-------|
+| 01 | feat: serve op artifacts locally | op artifacts | Serve OP artifacts from a local file server to avoid external pulls |

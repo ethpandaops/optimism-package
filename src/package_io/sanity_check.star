@@ -77,6 +77,7 @@ OP_CONTRACT_DEPLOYER_PARAMS = [
     "image",
     "l1_artifacts_locator",
     "l2_artifacts_locator",
+    "locator_local_archive_path",
     "overrides",
 ]
 
