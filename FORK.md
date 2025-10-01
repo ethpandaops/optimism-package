@@ -31,4 +31,5 @@ Some patches apply only to [Antithesis](https://antithesis.com/) environments.
 
 | # | Title | Scope | Notes |
 |---|-------|-------|-------|
+| 02 | ci: run tests on `overlay/antithesis` | ci | Run ci tests when pushing commits to `overlay/antithesis` for validation purposes |
 | 01 | feat: serve op artifacts locally | op artifacts | Serve OP artifacts from a local file server to avoid external pulls |
