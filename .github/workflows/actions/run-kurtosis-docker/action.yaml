@@ -11,6 +11,16 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Create enclave ${{ inputs.enclave }}
+      shell: bash
+      run: kurtosis enclave add --name ${{ inputs.enclave }}
+    
+    - name: Upload the predeployed_allocs.json file
+      shell: bash
+      run: |
+        echo '{}' > predeployed_allocs.json
+        kurtosis files upload --name predeployed_allocs.json ${{ inputs.enclave }} predeployed_allocs.json
+
     - name: Start enclave ${{ inputs.enclave }}
       shell: bash
       run: kurtosis run . ${{ inputs.args-file && format('--args-file={0}', inputs.args-file) || '' }} --enclave=${{ inputs.enclave }} --verbosity detailed
