@@ -125,6 +125,9 @@ def new_metrics_job(
 
 # Note: kona services use identical metrics registration.
 def register_op_service_metrics_job(helper, service, network_name=None):
+    if not helper.enabled:
+        return
+
     register_service_metrics_job(
         helper,
         service_name=service.name,

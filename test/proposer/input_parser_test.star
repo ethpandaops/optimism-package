@@ -28,7 +28,7 @@ def test_proposer_input_parser_default_args(plan):
             _net.HTTP_PORT_NAME: _net.port(number=8560),
         },
         proposal_interval="10m",
-        service_name="op-proposer-1000-my-l2",
+        service_name="op-proposer-my-l2",
         labels={
             "op.kind": "proposer",
             "op.network.id": "1000",
@@ -94,7 +94,7 @@ def test_proposer_input_parser_custom_params(plan):
                 _net.HTTP_PORT_NAME: _net.port(number=8560),
             },
             proposal_interval="3h",
-            service_name="op-proposer-1000-my-l2",
+            service_name="op-proposer-my-l2",
             labels={
                 "op.kind": "proposer",
                 "op.network.id": "1000",

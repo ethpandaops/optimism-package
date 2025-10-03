@@ -30,7 +30,7 @@ def test_multiple_chains(plan):
     ]
     expect.eq(
         cl_service_names,
-        ["op-cl-1-op-node-op-geth"],
+        ["op-cl-1-op-node-op-geth-nopekurtosis", "op-cl-1-op-node-op-geth-opkurtosis"],
     )
 
     el_service_names = [
@@ -38,7 +38,7 @@ def test_multiple_chains(plan):
     ]
     expect.eq(
         el_service_names,
-        ["op-el-1-op-geth-op-node"],
+        ["op-el-1-op-geth-op-node-nopekurtosis", "op-el-1-op-geth-op-node-opkurtosis"],
     )
 
 

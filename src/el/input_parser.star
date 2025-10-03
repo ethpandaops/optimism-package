@@ -108,11 +108,12 @@ def _parse(
     )
 
     el_params["name"] = participant_name
-    el_params["service_name"] = "op-{}-{}-{}-{}".format(
+    el_params["service_name"] = "op-{}-{}-{}-{}-{}".format(
         el_kind,
         participant_index,
         el_params["type"],
         cl_params["type"],
+        network_name,
     )
 
     # Draft of what the labels could look like

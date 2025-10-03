@@ -1,11 +1,17 @@
 optimism_package:
   chains:
-    chain0:
+    "001":
       participants:
-        node0:
+        "node1":
           el:
             type: op-geth
           cl:
             type: op-node
       batcher_params:
         max_channel_duration: 10
+  op_contract_deployer_params:
+    image: europe-west2-docker.pkg.dev/prj-polygonlabs-devtools-dev/public/op-deployer:v0.4.2-cdk
+    l1_artifacts_locator: tag://op-contracts/v4.0.0
+    l2_artifacts_locator: tag://op-contracts/v4.0.0
+  observability:
+    enabled: false

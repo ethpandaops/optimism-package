@@ -67,8 +67,8 @@ def test_batcher_launcher_launch_without_conductor(plan):
         service_config.cmd,
         [
             "op-batcher",
-            "--l2-eth-rpc=http://op-el-1-op-geth-op-node:8545,http://op-el-2-op-geth-op-node:8545",
-            "--rollup-rpc=http://op-cl-1-op-node-op-geth:8547,http://op-cl-2-op-node-op-geth:8547",
+            "--l2-eth-rpc=http://op-el-1-op-geth-op-node-network0:8545,http://op-el-2-op-geth-op-node-network0:8545",
+            "--rollup-rpc=http://op-cl-1-op-node-op-geth-network0:8547,http://op-cl-2-op-node-op-geth-network0:8547",
             "--poll-interval=1s",
             "--sub-safety-margin=6",
             "--num-confirmations=1",
@@ -135,8 +135,8 @@ def test_batcher_launcher_launch_with_conductor(plan):
         service_config.cmd,
         [
             "op-batcher",
-            "--l2-eth-rpc=http://op-el-1-op-geth-op-node:8545,http://op-conductor-2151908-network0-node1:8547",
-            "--rollup-rpc=http://op-cl-1-op-node-op-geth:8547,http://op-conductor-2151908-network0-node1:8547",
+            "--l2-eth-rpc=http://op-el-1-op-geth-op-node-network0:8545,http://op-conductor-2151908-network0-node1:8547",
+            "--rollup-rpc=http://op-cl-1-op-node-op-geth-network0:8547,http://op-conductor-2151908-network0-node1:8547",
             "--poll-interval=1s",
             "--sub-safety-margin=6",
             "--num-confirmations=1",
@@ -232,8 +232,8 @@ def test_batcher_launcher_launch_with_signer(plan):
         service_config.cmd,
         [
             "op-batcher",
-            "--l2-eth-rpc=http://op-el-1-op-geth-op-node:8545,http://op-el-2-op-geth-op-node:8545",
-            "--rollup-rpc=http://op-cl-1-op-node-op-geth:8547,http://op-cl-2-op-node-op-geth:8547",
+            "--l2-eth-rpc=http://op-el-1-op-geth-op-node-network0:8545,http://op-el-2-op-geth-op-node-network0:8545",
+            "--rollup-rpc=http://op-cl-1-op-node-op-geth-network0:8547,http://op-cl-2-op-node-op-geth-network0:8547",
             "--poll-interval=1s",
             "--sub-safety-margin=6",
             "--num-confirmations=1",

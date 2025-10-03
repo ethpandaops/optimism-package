@@ -1,0 +1,48 @@
+optimism_package:
+  chains:
+    001:
+      participants:
+        node1:
+          el:
+            type: op-geth
+          cl:
+            type: op-node
+      batcher_params:
+        max_channel_duration: 10
+  op_contract_deployer_params:
+    image: europe-west2-docker.pkg.dev/prj-polygonlabs-devtools-dev/public/op-deployer:v0.4.2-cdk
+    l1_artifacts_locator: tag://op-contracts/v4.0.0
+    l2_artifacts_locator: tag://op-contracts/v4.0.0
+  observability:
+    enabled: false
+
+ethereum_package:
+  participants:
+    - el_type: geth
+      el_image: ethereum/client-go:v1.16.4
+      cl_type: lighthouse
+      cl_image: sigp/lighthouse:v8.0.0-rc.0
+      supernode: true # required for fulu hf if perfect peerDAS is not enabled
+  network_params:
+    preset: minimal
+    seconds_per_slot: 2
+    genesis_delay: 5
+    additional_preloaded_contracts: '
+      {
+        "0x4e59b44847b379578588920cA78FbF26c0B4956C": {
+          "balance": "0ETH",
+          "code": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3",
+          "storage": {},
+          "nonce": "1"
+        }
+      }'
+
+    # Ethereum hard fork configurations.
+    # Supported fork epochs are documented in `static_files/genesis-generation-config/el-cl/values.env.tmpl` in the
+    # ethereum package repository.
+    altair_fork_epoch: 0
+    bellatrix_fork_epoch: 0
+    capella_fork_epoch: 0
+    deneb_fork_epoch: 0
+    electra_fork_epoch: 0
+    fulu_fork_epoch: 3 # enabling the fulu hard fork before would result in the op-chain deployment tx (26193342 gas) being reverted because it exceeds the tx gas limit (16777216 gas) set by the fulu hard fork; setting it to 3 means the fulu hard fork will be activated after 3*8*2=48 seconds (3 epochs of 8 slots of 2 seconds each in the case of the minimal preset), which should be enough time for the op-chain to be deployed.

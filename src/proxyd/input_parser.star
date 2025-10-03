@@ -27,7 +27,7 @@ def parse(proxyd_args, network_params, participants_params, registry):
     proxyd_params["image"] = proxyd_params["image"] or registry.get(_registry.PROXYD)
 
     # Add the service name
-    proxyd_params["service_name"] = "proxyd-{}-{}".format(network_id, network_name)
+    proxyd_params["service_name"] = "proxyd-{}".format(network_name)
 
     # Add ports
     proxyd_params["ports"] = {

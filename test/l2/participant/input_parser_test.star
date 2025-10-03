@@ -66,7 +66,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     type="op-node",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
                     name="node0",
-                    service_name="op-cl-1-op-node-op-geth",
+                    service_name="op-cl-1-op-node-op-geth-my-l2",
                     labels={
                         "op.kind": "cl",
                         "op.network.id": "1000",
@@ -88,7 +88,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     name="node0",
                     type="op-node",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
-                    service_name="op-clbuilder-1-op-node-op-geth",
+                    service_name="op-clbuilder-1-op-node-op-geth-my-l2",
                     labels={
                         "op.kind": "clbuilder",
                         "op.network.id": "1000",
@@ -109,7 +109,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 el=struct(
                     name="node0",
                     type="op-geth",
-                    service_name="op-el-1-op-geth-op-node",
+                    service_name="op-el-1-op-geth-op-node-my-l2",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
                     labels={
                         "op.kind": "el",
@@ -135,7 +135,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     name="node0",
                     type="op-geth",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
-                    service_name="op-elbuilder-1-op-geth-op-node",
+                    service_name="op-elbuilder-1-op-geth-op-node-my-l2",
                     labels={
                         "op.kind": "elbuilder",
                         "op.network.id": "1000",
@@ -171,7 +171,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     name="node1",
                     type="op-node",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
-                    service_name="op-cl-2-op-node-op-geth",
+                    service_name="op-cl-2-op-node-op-geth-my-l2",
                     labels={
                         "op.kind": "cl",
                         "op.network.id": "1000",
@@ -193,7 +193,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     name="node1",
                     type="op-node",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4",
-                    service_name="op-clbuilder-2-op-node-op-geth",
+                    service_name="op-clbuilder-2-op-node-op-geth-my-l2",
                     labels={
                         "op.kind": "clbuilder",
                         "op.network.id": "1000",
@@ -215,7 +215,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     name="node1",
                     type="op-geth",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
-                    service_name="op-el-2-op-geth-op-node",
+                    service_name="op-el-2-op-geth-op-node-my-l2",
                     labels={
                         "op.kind": "el",
                         "op.network.id": "1000",
@@ -240,7 +240,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     name="node1",
                     type="op-geth",
                     image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
-                    service_name="op-elbuilder-2-op-geth-op-node",
+                    service_name="op-elbuilder-2-op-geth-op-node-my-l2",
                     labels={
                         "op.kind": "elbuilder",
                         "op.network.id": "1000",

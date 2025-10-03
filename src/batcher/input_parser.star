@@ -30,7 +30,7 @@ def parse(batcher_args, network_params, registry):
     )
 
     # Add the service name
-    batcher_params["service_name"] = "op-batcher-{}-{}".format(network_id, network_name)
+    batcher_params["service_name"] = "op-batcher-{}".format(network_name)
 
     # Add ports
     batcher_params["ports"] = {

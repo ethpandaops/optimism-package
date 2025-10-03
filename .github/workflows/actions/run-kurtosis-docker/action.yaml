@@ -18,8 +18,8 @@ runs:
     - name: Upload the predeployed_allocs.json file
       shell: bash
       run: |
-        echo '{}' > predeployed_allocs.json
-        kurtosis files upload --name predeployed_allocs.json ${{ inputs.enclave }} predeployed_allocs.json
+        echo '{}' > predeployed_allocs.json # dummy file
+        kurtosis files upload --name predeployed_allocs.json ${{ inputs.enclave }} ./predeployed_allocs.json
 
     - name: Start enclave ${{ inputs.enclave }}
       shell: bash

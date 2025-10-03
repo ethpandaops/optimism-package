@@ -39,7 +39,7 @@ def test_proxyd_input_parser_default_args(plan):
         ports={
             _net.HTTP_PORT_NAME: _net.port(number=8080),
         },
-        service_name="proxyd-1000-my-l2",
+        service_name="proxyd-my-l2",
         labels={
             "op.kind": "proxyd",
             "op.network.id": "1000",
@@ -101,7 +101,7 @@ def test_proxyd_input_parser_custom_params(plan):
             ports={
                 _net.HTTP_PORT_NAME: _net.port(number=8080),
             },
-            service_name="proxyd-1000-my-l2",
+            service_name="proxyd-my-l2",
             labels={
                 "op.kind": "proxyd",
                 "op.network.id": "1000",

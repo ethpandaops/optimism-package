@@ -32,9 +32,7 @@ def parse(proposer_args, network_params, registry):
     )
 
     # Add the service name
-    proposer_params["service_name"] = "op-proposer-{}-{}".format(
-        network_id, network_name
-    )
+    proposer_params["service_name"] = "op-proposer-{}".format(network_name)
 
     # Add ports
     proposer_params["ports"] = {

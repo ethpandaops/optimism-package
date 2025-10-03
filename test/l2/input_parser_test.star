@@ -76,7 +76,7 @@ def test_l2_input_parser_defaults(plan):
         ports={
             _net.HTTP_PORT_NAME: _net.port(number=8548),
         },
-        service_name="op-batcher-2151908-network1",
+        service_name="op-batcher-network1",
         labels={
             "op.kind": "batcher",
             "op.network.id": "2151908",
@@ -93,7 +93,7 @@ def test_l2_input_parser_defaults(plan):
             _net.HTTP_PORT_NAME: _net.port(number=8560),
         },
         proposal_interval="10m",
-        service_name="op-proposer-2151908-network1",
+        service_name="op-proposer-network1",
         labels={
             "op.kind": "proposer",
             "op.network.id": "2151908",
@@ -107,12 +107,12 @@ def test_l2_input_parser_defaults(plan):
         ports={
             _net.HTTP_PORT_NAME: _net.port(number=8080),
         },
-        service_name="proxyd-2151908-network1",
+        service_name="proxyd-network1",
         labels={
             "op.kind": "proxyd",
             "op.network.id": "2151908",
         },
-        replicas={"node0": "http://op-el-1-op-geth-op-node:8545"},
+        replicas={"node0": "http://op-el-1-op-geth-op-node-network1:8545"},
         pprof_enabled=False,
     )
 
