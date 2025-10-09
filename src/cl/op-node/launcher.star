@@ -196,7 +196,6 @@ def get_service_config(
     supervisor_params = _filter.first(supervisors_params)
 
     # configure files
-
     files = {
         _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: Directory(
             artifact_names=[
@@ -218,6 +217,32 @@ def get_service_config(
                 _constants.CL_TYPE.op_node + "_volume_size"
             ],
         )
+
+    op_node_version = params.image.split(":")
+    if len(op_node_version) != 2:
+        fail("Could not parse op-node version from image: {}".format(params.image))
+
+    if op_node_version[1] in ["v1.14.1"]:
+        l1_genesis_original = plan.get_files_artifact(name="el_cl_genesis_data")
+        result = plan.run_sh(
+            description="Standardize L1 genesis for op-node",
+            image=_util.DEPLOYMENT_UTILS_IMAGE,
+            files={
+                "/data": l1_genesis_original,
+            },
+            store=[
+                "/data/genesis.json",
+            ],
+            run="&&".join(
+                [
+                    "jq 'del(.config.terminalTotalDifficultyPassed)' /data/genesis.json > /data/genesis.json.tmp",
+                    "mv /data/genesis.json.tmp /data/genesis.json",
+                ]
+            ),
+        )
+        if len(result.files_artifacts) != 1:
+            fail("Expected the L1 genesis file to be created")
+        files["/l1"] = result.files_artifacts[0]
 
     # configure environment variables
 

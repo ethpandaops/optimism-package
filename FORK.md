@@ -16,7 +16,8 @@
 
 | # | Title | Scope | Notes |
 |---|-------|-------|-------|
-| 10 | feat: upgrade contracts and tooling, fix service naming and metric, support for fusaka hf | contracts, op-deployer, el/cl clients, op-batcher, op-proposer, proxyd, tests, ci | Upgrade op-deployer and contract versions, fix service naming (el/cl clients, op-batcher, op-proposer and proxyd), disable metrics registration, and add support and test configs for Fusaka hardfork |
+| 11 | fix: enable block finalization for fusaka env | ci, fusaka hf | Enable block finalization for fusaka environment and add additional checks in ci to ensure safe and finalized blocks are progressing |
+| 10 | feat: upgrade contracts and tooling, fix service naming and metric, support for fusaka hf | contracts, op-deployer, el/cl clients, op-batcher, op-proposer, proxyd, tests, ci, fusaka hf | Upgrade op-deployer and contract versions, fix service naming (el/cl clients, op-batcher, op-proposer and proxyd), disable metrics registration, and add support and test configs for Fusaka hardfork |
 | 09 | docs: document patches | docs | Add `FORK.md` to track fork policy and patches |
 | 08 | revert: el/cl client naming | el/cl clients | Revert client renaming to avoid updating references across [kurtosis-cdk](https://github.com/0xPolygon/kurtosis-cdk), [e2e](https://github.com/agglayer/e2e), and other repositories |
 | 07 | fix: ci jobs issues with op-deployer and `predeployed_allocs.json` | op-deployer, ci | Fix default configuration, test configs, and ci workflows related to op-deployer pre-deployed allocs | 

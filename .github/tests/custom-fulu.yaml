@@ -5,14 +5,19 @@ optimism_package:
         node1:
           el:
             type: op-geth
+            image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101603.1
           cl:
             type: op-node
+            image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.14.1
+            extra_params:
+              - "--rollup.l1-chain-config=/l1/genesis.json"
       batcher_params:
+        image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.16.0
         max_channel_duration: 10
   op_contract_deployer_params:
-    image: europe-west2-docker.pkg.dev/prj-polygonlabs-devtools-dev/public/op-deployer:v0.4.2-cdk
-    l1_artifacts_locator: tag://op-contracts/v4.0.0
-    l2_artifacts_locator: tag://op-contracts/v4.0.0
+    image: europe-west2-docker.pkg.dev/prj-polygonlabs-devtools-dev/public/op-deployer:v0.4.3-cdk
+    l1_artifacts_locator: embedded
+    l2_artifacts_locator: embedded
   observability:
     enabled: false
 
@@ -45,4 +50,4 @@ ethereum_package:
     capella_fork_epoch: 0
     deneb_fork_epoch: 0
     electra_fork_epoch: 0
-    fulu_fork_epoch: 3 # enabling the fulu hard fork before would result in the op-chain deployment tx (26193342 gas) being reverted because it exceeds the tx gas limit (16777216 gas) set by the fulu hard fork; setting it to 3 means the fulu hard fork will be activated after 3*8*2=48 seconds (3 epochs of 8 slots of 2 seconds each in the case of the minimal preset), which should be enough time for the op-chain to be deployed.
+    fulu_fork_epoch: 1 # blocks are not finalized if fulu hard fork is activated at genesis

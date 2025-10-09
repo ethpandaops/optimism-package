@@ -35,7 +35,7 @@ if [ -z "$NUM_NAPS" ]; then
     NUM_NAPS=100
 fi
 
-echo "Checking whether EL clients in enclave $ENCLAVE_NAME reach target block $TARGET_BLOCK in reasonable time ($NUM_NAPS of 5s)"
+echo "Checking whether EL clients in enclave $ENCLAVE_NAME reach target block $TARGET_BLOCK (latest, safe, and finalized) in reasonable time ($NUM_NAPS of 5s)"
 
 # Get the enclave UUID from the API
 # 
@@ -88,12 +88,15 @@ for STEP in $(seq 1 $NUM_NAPS); do
         SERVICE_RPC_PORT=${ENCLAVE_EL_SERVICE_RPC_PORTS_ARRAY[$I]}
         SERVICE_RPC_URL="http://127.0.0.1:$SERVICE_RPC_PORT"
 
-        BLOCK_NUMBER=$(cast bn --rpc-url $SERVICE_RPC_URL)
-        echo "  Got block for $SERVICE_NAME: $BLOCK_NUMBER"
+        # Get latest, safe and finalized blocks
+        LATEST_BLOCK=$(cast bn --rpc-url $SERVICE_RPC_URL)
+        SAFE_BLOCK=$(cast bn safe --rpc-url $SERVICE_RPC_URL)
+        FINALIZED_BLOCK=$(cast bn finalized --rpc-url $SERVICE_RPC_URL)
+        echo "Got blocks for $SERVICE_NAME: latest=$LATEST_BLOCK, safe=$SAFE_BLOCK, finalized=$FINALIZED_BLOCK"
 
-        # Check whether we reached the target block
-        if [ "$BLOCK_NUMBER" -gt "$TARGET_BLOCK" ]; then
-            echo "  Target block $TARGET_BLOCK reached for $SERVICE_NAME"
+        # Check whether we reached the target block for all three types
+        if [ "$LATEST_BLOCK" -gt "$TARGET_BLOCK" ] && [ "$SAFE_BLOCK" -gt "$TARGET_BLOCK" ] && [ "$FINALIZED_BLOCK" -gt "$TARGET_BLOCK" ]; then
+            echo "Target block $TARGET_BLOCK reached for all block types (latest, safe, finalized) for $SERVICE_NAME"
             
             # If so, we remove the service from the array
             unset ENCLAVE_EL_SERVICE_NAMES_ARRAY[$I]
@@ -107,16 +110,16 @@ for STEP in $(seq 1 $NUM_NAPS); do
 
     # Now we check whether the arrays are empty
     # 
-    # This means all target blocks have been reached and we can exit fine
+    # This means all target blocks have been reached for all block types and we can exit fine
     if [ ${#ENCLAVE_EL_SERVICE_NAMES_ARRAY[@]} -eq 0 ]; then
-        echo "All target blocks have been reached. Exiting."
+        echo "All target blocks have been reached for all block types (latest, safe, finalized). Exiting."
         exit 0
     fi
 
     sleep 5
 done
 
-echo "Target blocks have not been reached for the following services:"
+echo "Target blocks have not been reached for all block types (latest, safe, finalized) for the following services:"
 
 for I in "${!ENCLAVE_EL_SERVICE_NAMES_ARRAY[@]}"; do
     SERVICE_NAME=${ENCLAVE_EL_SERVICE_NAMES_ARRAY[$I]}
