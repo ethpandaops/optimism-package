@@ -129,10 +129,15 @@ def test_l2_input_parser_defaults(plan):
                 proxyd_params=_default_proxyd_params,
                 # DA is disabled by default
                 da_params=None,
+                # signer is disabled by default
+                signer_params=None,
                 # tx fuzzer is disabled by default
                 tx_fuzzer_params=None,
                 # Blockscout is disabled by default
                 blockscout_params=None,
+                # Flashblocks are disabled by default
+                flashblocks_rpc_params=None,
+                flashblocks_websocket_proxy_params=None,
             )
         ],
     )
@@ -162,10 +167,15 @@ def test_l2_input_parser_defaults(plan):
                 proxyd_params=parsed_proxyd_params,
                 # DA is disabled by default
                 da_params=None,
+                # signer is disabled by default
+                signer_params=None,
                 # tx fuzzer is disabled by default
                 tx_fuzzer_params=None,
                 # Blockscout is disabled by default
                 blockscout_params=None,
+                # Flashblocks are disabled by default
+                flashblocks_rpc_params=None,
+                flashblocks_websocket_proxy_params=None,
             )
         ],
     )
@@ -174,7 +184,7 @@ def test_l2_input_parser_defaults(plan):
 def test_l2_input_parser_da_defaults(plan):
     _default_da_params = struct(
         enabled=True,
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:v0.1.0",
         cmd=[
             "da-server",
             "--file.path=/home",

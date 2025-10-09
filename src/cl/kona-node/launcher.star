@@ -9,13 +9,14 @@
 _ethereum_package_cl_context = import_module(
     "github.com/ethpandaops/ethereum-package/src/cl/cl_context.star"
 )
-
 _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
-
 _ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
+)
+_ethereum_package_shared_utils = import_module(
+    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
 
 _filter = import_module("/src/util/filter.star")
@@ -54,6 +55,7 @@ def launch(
     node_selectors,
     el_context,
     cl_contexts,
+    signer_context,
     l1_config_env_vars,
     observability_helper,
 ):
@@ -78,7 +80,7 @@ def launch(
         node_selectors,
     )
 
-    cl_tolerations = _ethereum_package_input_parser.get_client_tolerations(
+    cl_tolerations = _ethereum_package_shared_utils.get_tolerations(
         params.tolerations, [], tolerations
     )
 
@@ -97,6 +99,7 @@ def launch(
         node_selectors=cl_node_selectors,
         el_context=el_context,
         cl_contexts=cl_contexts,
+        signer_context=signer_context,
         l1_config_env_vars=l1_config_env_vars,
         observability_helper=observability_helper,
     )
@@ -147,6 +150,7 @@ def get_service_config(
     node_selectors,
     el_context,
     cl_contexts,
+    signer_context,
     l1_config_env_vars,
     observability_helper,
 ):
@@ -226,18 +230,50 @@ def get_service_config(
     # apply customizations
 
     if is_sequencer:
-        sequencer_private_key = _util.read_network_config_value(
-            plan,
-            deployment_output,
-            "sequencer-{0}".format(network_params.network_id),
-            ".privateKey",
-        )
-
         cmd += [
             "--mode=sequencer",
-            "--p2p.sequencer.key=" + sequencer_private_key,
             "--sequencer.l1-confs=2",
         ]
+
+        # kona-node sequencer flags for remote and local signer are exclusive
+        # so we have to treat them accordingly and only supply the ones that apply to our case
+        if signer_context:
+            # In case of remote signer, we need to supply the certificates & endpoint
+            sequencer_address = _util.read_network_config_value(
+                plan,
+                deployment_output,
+                "sequencer-{}".format(network_params.network_id),
+                ".address",
+            )
+
+            cmd += [
+                "--p2p.signer.tls.ca={}".format(signer_context.credentials.ca.crt),
+                "--p2p.signer.tls.cert={}".format(
+                    signer_context.credentials.hosts[params.service_name].tls.crt
+                ),
+                "--p2p.signer.tls.key={}".format(
+                    signer_context.credentials.hosts[params.service_name].tls.key
+                ),
+                "--p2p.signer.endpoint={}".format(
+                    _net.service_url(
+                        signer_context.service.hostname,
+                        signer_context.service.ports[_net.HTTP_PORT_NAME],
+                    )
+                ),
+                "--p2p.signer.address={}".format(sequencer_address),
+            ]
+        else:
+            # In case of local signer, we need to supply the private key
+            sequencer_private_key = _util.read_network_config_value(
+                plan,
+                deployment_output,
+                "sequencer-{0}".format(network_params.network_id),
+                ".privateKey",
+            )
+
+            cmd += [
+                "--p2p.sequencer.key=" + sequencer_private_key,
+            ]
 
     if conductor_params:
         cmd += [

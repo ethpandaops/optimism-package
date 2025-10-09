@@ -15,14 +15,29 @@ runs:
       shell: bash
       run: kurtosis run . ${{ inputs.args-file && format('--args-file={0}', inputs.args-file) || '' }} --enclave=${{ inputs.enclave }} --verbosity detailed
 
-    - name: Dump kurtosis logs
+    - name: Assert that clients advance
       shell: bash
-      if: ${{ failure() }}
+      run: ./.github/scripts/kurtosis-check-block-progression.sh ${{ inputs.enclave }}
+
+    - name: Dump kurtosis logs to console
+      shell: bash
+      if: ${{ always() }}
+      run: ./.github/scripts/kurtosis-dump-logs.sh ${{ inputs.enclave }}
+
+    - name: Dump kurtosis logs to artifacts
+      shell: bash
+      if: ${{ always() }}
       run: kurtosis dump ./.kurtosis-dump
 
+    - name: Create log artifact key
+      if: ${{ always() }}
+      shell: bash
+      id: create-artifact-key
+      run: echo "artifact-key=$(echo "${{ inputs.args-file || 'no-args' }}" | tr '/.' '__')" >> $GITHUB_OUTPUT
+
     - name: Store kurtosis logs
-      if: ${{ failure() }}
+      if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
-        name: kurtosis-logs
+        name: kurtosis-dump-${{ inputs.enclave }}-${{ steps.create-artifact-key.outputs.artifact-key }}
         path: ./.kurtosis-dump/enclaves/

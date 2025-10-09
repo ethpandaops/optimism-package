@@ -54,6 +54,7 @@ def test_tx_fuzzer_launch_with_defaults(plan):
         el_context=struct(
             rpc_port_num=8888,
             ip_addr="127.0.0.1",
+            service_name="rpc-el",
         ),
         node_selectors=parsed_input_args.global_node_selectors,
     )
@@ -72,7 +73,7 @@ def test_tx_fuzzer_launch_with_defaults(plan):
         fuzzer_service_config.cmd,
         [
             "spam",
-            "--rpc={}".format("http://127.0.0.1:8888"),
+            "--rpc={}".format("http://rpc-el:8888"),
             "--sk={0}".format(constants.dev_accounts[0]["private_key"]),
         ],
     )

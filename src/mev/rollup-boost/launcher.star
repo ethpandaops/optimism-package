@@ -40,7 +40,7 @@ def launch(
             rpc_port_num=rpc_port.number,
             ws_port_num=WS_PORT_NUM,
             engine_rpc_port_num=rpc_port.number,
-            rpc_http_url=_net.service_url(service.ip_address, rpc_port),
+            rpc_http_url=_net.service_url(params.service_name, rpc_port),
             service_name=params.service_name,
         ),
     )
@@ -53,14 +53,14 @@ def get_service_config(
     sequencer_context,
     builder_context,
 ):
-    L2_EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-        sequencer_context.ip_addr,
-        sequencer_context.engine_rpc_port_num,
+    L2_EXECUTION_ENGINE_ENDPOINT = _net.service_url(
+        sequencer_context.service_name,
+        _net.port(number=sequencer_context.engine_rpc_port_num),
     )
 
-    BUILDER_EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-        builder_context.ip_addr,
-        builder_context.engine_rpc_port_num,
+    BUILDER_EXECUTION_ENGINE_ENDPOINT = _net.service_url(
+        builder_context.service_name,
+        _net.port(number=builder_context.engine_rpc_port_num),
     )
 
     ports = _net.ports_to_port_specs(params.ports)

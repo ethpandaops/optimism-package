@@ -217,11 +217,11 @@ optimism_package:
 
             # The Docker image that should be used for the EL client; leave blank to use the default for the client type
             # Defaults by client:
-            # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
+            # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1
             # - op-reth: parithoshj/op-reth:latest
-            # - op-erigon: testinprod/op-erigon:latest
+            # - op-erigon: testinprod/op-erigon:v2.61.3-0.9.5
             # - op-nethermind: nethermindeth/nethermind:op-c482d56
-            # - op-besu: ghcr.io/optimism-java/op-besu:latest
+            # - op-besu: ghcr.io/optimism-java/op-besu:v0.2.2
             image: ""
 
             # The log level string that this participant's EL client should log at
@@ -283,7 +283,7 @@ optimism_package:
             # The Docker image that should be used for the CL client; leave blank to use the default for the client type
             # Defaults by client:
             # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4
-            # - hildr: ghcr.io/optimism-java/hildr:latest
+            # - hildr: ghcr.io/optimism-java/hildr:v0.4.5
             image: ""
 
             # The log level string that this participant's CL client should log at
@@ -345,9 +345,9 @@ optimism_package:
 
             # The Docker image that should be used for the builder EL client; leave blank to use the default for the client type
             # Defaults by client:
-            # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
+            # - op-geth: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1
             # - op-reth: parithoshj/op-reth:latest
-            # - op-rbuilder: ghcr.io/flashbots/op-rbuilder:latest
+            # - op-rbuilder: ghcr.io/flashbots/op-rbuilder:0.1.2-interop
             image: ""
 
             # Builder secret key used by op-rbuilder to sign transactions
@@ -364,7 +364,7 @@ optimism_package:
             # The Docker image that should be used for the builder CL client; leave blank to use the default for the client type
             # Defaults by client:
             # - op-node: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4
-            # - hildr: ghcr.io/optimism-java/hildr:latest
+            # - hildr: ghcr.io/optimism-java/hildr:v0.4.5
             image: ""
 
       # Default configuration parameters for the network
@@ -455,7 +455,7 @@ optimism_package:
         enabled: false
 
         # The Docker image that should be used for rollup boost; leave blank to use the default rollup-boost image
-        # Defaults to "flashbots/rollup-boost:latest"
+        # Defaults to "flashbots/rollup-boost:0.7.4"
         image: ""
 
         # We currently only support rollup-boost, which is also the default value
@@ -472,7 +472,7 @@ optimism_package:
       da_params:
         # DA is disabled by default
         enabled: false
-        image: us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest
+        image: us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:v0.1.0
         # Command to pass to the container.
         # This is kept maximally generic to allow for any possible configuration, given that different
         # da layer da-servers might have completely different flags.
@@ -526,9 +526,9 @@ optimism_package:
   # Locators can be http(s) URLs, or point to an enclave artifact with
   # a pseudo URL artifact://NAME
   op_contract_deployer_params:
-    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.0.11
-    l1_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz
-    l2_artifacts_locator: https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-c193a1863182092bc6cb723e523e8313a0f4b6e9c9636513927f1db74c047c15.tar.gz
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.2
+    l1_artifacts_locator: tag://op-contracts/v4.0.0
+    l2_artifacts_locator: tag://op-contracts/v4.0.0
 
   # The global log level that all clients should log at
   # Valid values are "error", "warn", "info", "debug", and "trace"
@@ -716,7 +716,7 @@ optimism_package:
             type: op-node
       mev_params:
         enabled: true
-        image: "flashbots/rollup-boost:latest"
+        image: "flashbots/rollup-boost:0.7.4"
         builder_host: "localhost"
         builder_port: "8545"
 ```

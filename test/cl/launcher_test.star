@@ -7,6 +7,7 @@ _l2_input_parser = import_module("/src/l2/input_parser.star")
 _observability = import_module("/src/observability/observability.star")
 _registry = import_module("/src/package_io/registry.star")
 _util = import_module("/src/util.star")
+_net = import_module("/src/util/net.star")
 
 _cl_launcher = import_module("/src/cl/launcher.star")
 
@@ -72,6 +73,7 @@ def test_l2_participant_cl_launcher_hildr(plan):
         node_selectors={},
         el_context=_default_el_context,
         cl_contexts=_default_cl_contexts,
+        signer_context=None,
         observability_helper=observability_helper,
     )
 
@@ -168,6 +170,7 @@ def test_l2_participant_cl_launcher_kona_node(plan):
         node_selectors={},
         el_context=_default_el_context,
         cl_contexts=_default_cl_contexts,
+        signer_context=None,
         observability_helper=observability_helper,
     )
 
@@ -212,8 +215,148 @@ def test_l2_participant_cl_launcher_kona_node(plan):
             "8547",
             "--rpc.enable-admin",
             "--mode=sequencer",
-            "--p2p.sequencer.key={}".format(sequencer_private_key_mock),
             "--sequencer.l1-confs=2",
+            "--p2p.sequencer.key={}".format(sequencer_private_key_mock),
+            "--p2p.bootnodes",
+            "enr.001,enr.002",
+        ],
+    )
+    expect.eq(
+        service_config.labels,
+        {
+            "op.kind": "cl",
+            "op.network.id": "2151908",
+            "op.network.participant.index": "0",
+            "op.network.participant.name": "node0",
+            "op.cl.type": "kona-node",
+        },
+    )
+    expect.eq(
+        service_config.files["/network-configs"].artifact_names,
+        [_default_deployment_output],
+    )
+    expect.eq(
+        service_config.files["/jwt"].artifact_names,
+        [_default_jwt_file],
+    )
+
+
+def test_l2_participant_cl_launcher_kona_node_with_signer(plan):
+    # We'll need the observability params from the legacy parser
+    legacy_params = _input_parser.input_parser(
+        plan=plan,
+        input_args={},
+    )
+    observability_helper = _observability.make_helper(legacy_params.observability)
+
+    l2s_params = _l2_input_parser.parse(
+        {
+            "network0": {
+                "participants": {
+                    "node0": {
+                        "cl": {
+                            "type": "kona-node",
+                        }
+                    }
+                }
+            }
+        },
+        registry=_default_registry,
+    )
+
+    l2_params = l2s_params[0]
+    participant_params = l2_params.participants[0]
+    cl_params = participant_params.cl
+
+    # We create a mock context for the signer since things like its IP, the value references to the uploaded files etc cannot easily be injected
+    signer_context = struct(
+        service=struct(
+            hostname="signer-signer-signer",
+            ports={
+                _net.HTTP_PORT_NAME: PortSpec(number=8545, application_protocol="http"),
+            },
+        ),
+        credentials=struct(
+            ca=struct(crt="ca.crt"),
+            hosts={
+                cl_params.service_name: struct(tls=struct(crt="tls.crt", key="tls.key"))
+            },
+        ),
+    )
+
+    sequencer_address_mock = "sequencer_address"
+    kurtosistest.mock(_util, "read_network_config_value").mock_return_value(
+        sequencer_address_mock
+    )
+
+    result = _cl_launcher.launch(
+        plan=plan,
+        params=cl_params,
+        network_params=l2_params.network_params,
+        supervisors_params=[],
+        conductor_params=None,
+        da_params=l2_params.da_params,
+        is_sequencer=True,
+        jwt_file=_default_jwt_file,
+        deployment_output=_default_deployment_output,
+        l1_config_env_vars=_default_l1_config_env_vars,
+        log_level=_default_log_level,
+        persistent=True,
+        tolerations=[],
+        node_selectors={},
+        el_context=_default_el_context,
+        cl_contexts=_default_cl_contexts,
+        signer_context=signer_context,
+        observability_helper=observability_helper,
+    )
+
+    service = plan.get_service(cl_params.service_name)
+    service_config = kurtosistest.get_service_config(cl_params.service_name)
+
+    expect.eq(
+        service_config.cmd,
+        [
+            "--l2-chain-id",
+            "2151908",
+            "-vvv",
+            "--metrics.enabled",
+            "--metrics.addr=0.0.0.0",
+            "--metrics.port=9001",
+            "node",
+            "--l1-eth-rpc",
+            "http://l1.rpc",
+            "--l1-beacon",
+            "http://l1.cl.rpc",
+            "--l2-engine-rpc",
+            "http://0.0.0.0:8888",
+            "--l2-engine-jwt-secret",
+            "/jwt/jwtsecret",
+            "--l2-config-file",
+            "/network-configs/rollup-2151908.json",
+            "--p2p.advertise.ip",
+            "KURTOSIS_IP_ADDR_PLACEHOLDER",
+            "--p2p.advertise.tcp",
+            "9003",
+            "--p2p.advertise.udp",
+            "9003",
+            "--p2p.listen.ip",
+            "0.0.0.0",
+            "--p2p.listen.tcp",
+            "9003",
+            "--p2p.listen.udp",
+            "9003",
+            "--rpc.addr",
+            "0.0.0.0",
+            "--rpc.port",
+            "8547",
+            "--rpc.enable-admin",
+            "--mode=sequencer",
+            "--sequencer.l1-confs=2",
+            "--p2p.signer.tls.ca=ca.crt",
+            "--p2p.signer.tls.cert=tls.crt",
+            "--p2p.signer.tls.key=tls.key",
+            "--p2p.signer.endpoint=http://signer-signer-signer:8545",
+            "--p2p.signer.address={}".format(sequencer_address_mock),
             "--p2p.bootnodes",
             "enr.001,enr.002",
         ],
@@ -287,6 +430,7 @@ def test_l2_participant_cl_launcher_op_node(plan):
         node_selectors={},
         el_context=_default_el_context,
         cl_contexts=_default_cl_contexts,
+        signer_context=None,
         observability_helper=observability_helper,
     )
 
@@ -404,6 +548,7 @@ def test_l2_participant_cl_launcher_incompatible_conductor(plan):
             node_selectors={},
             el_context=_default_el_context,
             cl_contexts=_default_cl_contexts,
+            signer_context=None,
             observability_helper=observability_helper,
         ),
         "Node node0 on network kurtosis: hildr does not support conductor parameters",

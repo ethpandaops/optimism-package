@@ -3,7 +3,7 @@ _input_parser = import_module("/src/mev/input_parser.star")
 _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
-_default_network_params = struct(network_id=1000, name="my-l2")
+_default_network_params = struct(network_id=1000, name="my-l2", seconds_per_slot=2)
 _default_participant_index = 0
 _default_participant_name = "node0"
 _default_registry = _registry.Registry()
@@ -49,7 +49,7 @@ def test_mev_input_parser_invalid_builder_params(plan):
 def test_mev_input_parser_default_args(plan):
     _default_params = struct(
         enabled=True,
-        image="flashbots/rollup-boost:latest",
+        image="flashbots/rollup-boost:0.7.4",
         type="rollup-boost",
         builder_host=None,
         builder_port=None,

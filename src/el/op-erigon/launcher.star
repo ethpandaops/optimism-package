@@ -4,13 +4,14 @@ _ethereum_package_el_context = import_module(
 _ethereum_package_el_admin_node_info = import_module(
     "github.com/ethpandaops/ethereum-package/src/el/el_admin_node_info.star"
 )
-
 _ethereum_package_input_parser = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
 )
-
 _ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
+)
+_ethereum_package_shared_utils = import_module(
+    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
 )
 
 _filter = import_module("/src/util/filter.star")
@@ -60,7 +61,7 @@ def launch(
         node_selectors,
     )
 
-    el_tolerations = _ethereum_package_input_parser.get_client_tolerations(
+    el_tolerations = _ethereum_package_shared_utils.get_tolerations(
         params.tolerations, [], tolerations
     )
 

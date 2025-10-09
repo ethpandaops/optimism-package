@@ -7,7 +7,16 @@ _blockscout_input_parser = import_module("/src/blockscout/input_parser.star")
 _da_input_parser = import_module("/src/da/input_parser.star")
 _proposer_input_parser = import_module("/src/proposer/input_parser.star")
 _proxyd_input_parser = import_module("/src/proxyd/input_parser.star")
+_signer_input_parser = import_module("/src/signer/input_parser.star")
 _tx_fuzzer_input_parser = import_module("/src/tx-fuzzer/input_parser.star")
+_flashblocks_websocket_proxy_input_parser = import_module(
+    "/src/flashblocks/flashblocks-websocket-proxy/input_parser.star"
+)
+_flashblocks_rpc_input_parser = import_module(
+    "/src/flashblocks/flashblocks-rpc/input_parser.star"
+)
+_el_input_parser = import_module("/src/el/input_parser.star")
+_registry = import_module("/src/package_io/registry.star")
 
 _DEFAULT_NETWORK_PARAMS = {
     "network": "kurtosis",
@@ -29,8 +38,11 @@ _DEFAULT_ARGS = {
     "proposer_params": None,
     "batcher_params": None,
     "blockscout_params": None,
+    "signer_params": None,
     "proxyd_params": None,
     "tx_fuzzer_params": None,
+    "flashblocks_websocket_proxy_params": None,
+    "flashblocks_rpc_params": None,
 }
 
 
@@ -118,6 +130,13 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
         registry=registry,
     )
 
+    # We add the signer params
+    l2_params["signer_params"] = _signer_input_parser.parse(
+        signer_args=l2_params["signer_params"],
+        network_params=l2_params["network_params"],
+        registry=registry,
+    )
+
     # We add the tx-fuzzer params
     l2_params["tx_fuzzer_params"] = _tx_fuzzer_input_parser.parse(
         tx_fuzzer_args=l2_params["tx_fuzzer_params"],
@@ -135,6 +154,22 @@ def _parse_instance(l2_args, l2_name, l2_id_generator, registry):
     # We add the explorer params
     l2_params["blockscout_params"] = _blockscout_input_parser.parse(
         blockscout_args=l2_params["blockscout_params"],
+        network_params=l2_params["network_params"],
+        registry=registry,
+    )
+
+    # We add the flashblocks websocket proxy params
+    l2_params[
+        "flashblocks_websocket_proxy_params"
+    ] = _flashblocks_websocket_proxy_input_parser.parse(
+        websocket_proxy_args=l2_params["flashblocks_websocket_proxy_params"],
+        network_params=l2_params["network_params"],
+        registry=registry,
+    )
+
+    # We add the flashblocks RPC params
+    l2_params["flashblocks_rpc_params"] = _flashblocks_rpc_input_parser.parse(
+        el_args=l2_params["flashblocks_rpc_params"],
         network_params=l2_params["network_params"],
         registry=registry,
     )

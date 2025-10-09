@@ -28,7 +28,7 @@ def get_service_config(
         "spam",
         "--rpc={}".format(
             _net.service_url(
-                el_context.ip_addr, _net.port(number=el_context.rpc_port_num)
+                el_context.service_name, _net.port(number=el_context.rpc_port_num)
             )
         ),
         # FIXME Should not be hardcoded

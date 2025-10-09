@@ -1,0 +1,5 @@
+optimism_package:
+  op_contract_deployer_params:
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-deployer:v0.4.2
+    l1_artifacts_locator: tag://op-contracts/v4.0.0
+    l2_artifacts_locator: tag://op-contracts/v4.0.0

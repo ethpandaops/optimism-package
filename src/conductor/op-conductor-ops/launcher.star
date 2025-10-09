@@ -32,10 +32,14 @@ def launch(
         plan=plan,
         cmd="bootstrap-cluster {}".format(l2_params.network_params.name),
         config_artifact=config_artifact,
-        description="Bootstrap conductors for network {} using op-conductor-ops".format(
+        description="Bootstrap conductors for network {} using op-conductor-ops, this operation may take a while to complete. Please check the task logs for progress.".format(
             l2_params.network_params.name
         ),
         registry=registry,
+        env_vars={
+            "BOOTSTRAP_SEQUENCER_START_TIMEOUT": "900",
+            "BOOTSTRAP_SEQUENCER_HEALTHY_TIMEOUT": "900",
+        },
     )
 
     _run_op_conductor_ops_command(
@@ -55,6 +59,7 @@ def _run_op_conductor_ops_command(
     config_artifact,
     description,
     registry,
+    env_vars={},
 ):
     plan.run_sh(
         description=description,
@@ -65,7 +70,8 @@ def _run_op_conductor_ops_command(
         run="./op-conductor-ops {}".format(
             cmd,
         ),
-        env_vars={
+        env_vars=env_vars
+        | {
             "CONDUCTOR_CONFIG": "{}/{}".format(
                 _CONFIG_DIRPATH_ON_SERVICE, _CONFIG_FILENAME
             ),

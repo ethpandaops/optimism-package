@@ -20,7 +20,7 @@ def launch(
         # FIXME This can be removed, just requires a little refactoring of the da_server_context variable
         context=struct(
             http_url=_net.service_url(
-                service.ip_address, params.ports[_net.HTTP_PORT_NAME]
+                params.service_name, params.ports[_net.HTTP_PORT_NAME]
             )
         ),
     )

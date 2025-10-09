@@ -11,6 +11,14 @@ _DEFAULT_ARGS = {
     "paused": False,
     "bootstrap": False,
     "pprof_enabled": False,
+    "websocket_enabled": False,
+    # Optional overrides
+    "healthcheck_interval": None,
+    "healthcheck_min_peer_count": 1,
+    "raft_snapshot_threshold": 1024,
+    "raft_heartbeat_timeout": "900ms",
+    "raft_lease_timeout": "550ms",
+    "raft_trailing_logs": 3600,
 }
 
 
@@ -48,11 +56,25 @@ def parse(
         network_id, network_name, participant_name
     )
 
+    # Default the healthcheck interval to the recommended value
+    conductor_params["healthcheck_interval"] = (
+        int(conductor_params["healthcheck_interval"])
+        if conductor_params["healthcheck_interval"]
+        else 2 * network_params.seconds_per_slot + 1
+    )
+
     # Add ports
     conductor_params["ports"] = {
         _net.RPC_PORT_NAME: _net.port(number=8547),
         _net.CONSENSUS_PORT_NAME: _net.port(number=50050),
     }
+
+    # The WS port will only be exposed if, and only if, we have a sidecar + rbuilder
+    # Can't declare it by default or it will block all the other non-flashblocks deployments
+    if conductor_params["websocket_enabled"]:
+        conductor_params["ports"][_net.WS_PORT_NAME] = _net.port(
+            number=8546, application_protocol="ws"
+        )
 
     # Add labels
     conductor_params["labels"] = {

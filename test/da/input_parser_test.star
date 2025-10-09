@@ -3,10 +3,7 @@ _input_parser = import_module("/src/da/input_parser.star")
 _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
-_default_network_params = struct(
-    network_id=1000,
-    name="my-l2",
-)
+_default_network_params = struct(network_id=1000, name="my-l2", seconds_per_slot=2)
 _default_registry = _registry.Registry()
 
 
@@ -57,7 +54,7 @@ def test_da_input_parser_default_args(plan):
 def test_da_input_parser_enabled_default_args(plan):
     _default_params = struct(
         enabled=True,
-        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:latest",
+        image="us-docker.pkg.dev/oplabs-tools-artifacts/images/da-server:v0.1.0",
         cmd=[
             "da-server",
             "--file.path=/home",

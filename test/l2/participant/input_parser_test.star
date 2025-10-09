@@ -3,10 +3,7 @@ input_parser = import_module("/src/l2/participant/input_parser.star")
 _net = import_module("/src/util/net.star")
 _registry = import_module("/src/package_io/registry.star")
 
-_default_network_params = struct(
-    network_id=1000,
-    name="my-l2",
-)
+_default_network_params = struct(network_id=1000, name="my-l2", seconds_per_slot=2)
 _default_registry = _registry.Registry()
 
 _shared_defaults = {
@@ -113,7 +110,7 @@ def test_l2_participant_input_parser_defaults(plan):
                     name="node0",
                     type="op-geth",
                     service_name="op-el-1000-node0-op-geth",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
                     labels={
                         "op.kind": "el",
                         "op.network.id": "1000",
@@ -123,7 +120,9 @@ def test_l2_participant_input_parser_defaults(plan):
                     },
                     ports={
                         _net.RPC_PORT_NAME: _net.port(number=8545),
-                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.WS_PORT_NAME: _net.port(
+                            number=8546, application_protocol="ws"
+                        ),
                         _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
                         _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=30303, transport_protocol="UDP"
@@ -135,7 +134,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 el_builder=struct(
                     name="node0",
                     type="op-geth",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
                     service_name="op-elbuilder-1000-node0-op-geth",
                     labels={
                         "op.kind": "elbuilder",
@@ -146,14 +145,20 @@ def test_l2_participant_input_parser_defaults(plan):
                     },
                     ports={
                         _net.RPC_PORT_NAME: _net.port(number=8545),
-                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.WS_PORT_NAME: _net.port(
+                            number=8546, application_protocol="ws"
+                        ),
                         _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
                         _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=30303, transport_protocol="UDP"
                         ),
                         _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
+                        _net.FLASHBLOCKS_WS_PORT_NAME: _net.port(
+                            number=1111, application_protocol="ws"
+                        ),
                     },
                     key=None,
+                    flashblocks_ms_per_slot=250,
                     **_shared_defaults,
                 ),
                 mev_params=None,
@@ -209,7 +214,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 el=struct(
                     name="node1",
                     type="op-geth",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
                     service_name="op-el-1000-node1-op-geth",
                     labels={
                         "op.kind": "el",
@@ -220,7 +225,9 @@ def test_l2_participant_input_parser_defaults(plan):
                     },
                     ports={
                         _net.RPC_PORT_NAME: _net.port(number=8545),
-                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.WS_PORT_NAME: _net.port(
+                            number=8546, application_protocol="ws"
+                        ),
                         _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
                         _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=30303, transport_protocol="UDP"
@@ -232,7 +239,7 @@ def test_l2_participant_input_parser_defaults(plan):
                 el_builder=struct(
                     name="node1",
                     type="op-geth",
-                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
+                    image="us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1",
                     service_name="op-elbuilder-1000-node1-op-geth",
                     labels={
                         "op.kind": "elbuilder",
@@ -243,14 +250,20 @@ def test_l2_participant_input_parser_defaults(plan):
                     },
                     ports={
                         _net.RPC_PORT_NAME: _net.port(number=8545),
-                        _net.WS_PORT_NAME: _net.port(number=8546),
+                        _net.WS_PORT_NAME: _net.port(
+                            number=8546, application_protocol="ws"
+                        ),
                         _net.TCP_DISCOVERY_PORT_NAME: _net.port(number=30303),
                         _net.UDP_DISCOVERY_PORT_NAME: _net.port(
                             number=30303, transport_protocol="UDP"
                         ),
                         _net.ENGINE_RPC_PORT_NAME: _net.port(number=8551),
+                        _net.FLASHBLOCKS_WS_PORT_NAME: _net.port(
+                            number=1111, application_protocol="ws"
+                        ),
                     },
                     key=None,
+                    flashblocks_ms_per_slot=250,
                     **_shared_defaults,
                 ),
                 mev_params=None,
@@ -308,6 +321,13 @@ def test_l2_participant_input_parser_defaults_conductor_enabled(plan):
             paused=False,
             bootstrap=False,
             pprof_enabled=False,
+            websocket_enabled=False,
+            healthcheck_interval=5,
+            healthcheck_min_peer_count=1,
+            raft_heartbeat_timeout="900ms",
+            raft_lease_timeout="550ms",
+            raft_snapshot_threshold=1024,
+            raft_trailing_logs=3600,
         ),
     )
 
