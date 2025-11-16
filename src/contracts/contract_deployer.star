@@ -176,6 +176,9 @@ def _build_chain_intent(
             "sequencerFeeVaultRecipient": read_chain_cmd(
                 "sequencerFeeVaultRecipient", chain_id
             ),
+            "operatorFeeVaultRecipient": read_chain_cmd(
+                "operatorFeeVaultRecipient", chain_id
+            ),
             "roles": {
                 "batcher": read_chain_cmd("batcher", chain_id),
                 "challenger": read_chain_cmd("challenger", chain_id),
