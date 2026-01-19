@@ -50,6 +50,7 @@ def launch(
     el_context,
     cl_contexts,
     l1_config_env_vars,
+    l1_chain_config_artifact,
     observability_helper,
 ):
     beacon_node_identity_recipe = PostHttpRequestRecipe(
@@ -95,6 +96,7 @@ def launch(
         el_context=el_context,
         cl_contexts=cl_contexts,
         l1_config_env_vars=l1_config_env_vars,
+        l1_chain_config_artifact=l1_chain_config_artifact,
         observability_helper=observability_helper,
     )
 
@@ -147,6 +149,7 @@ def get_service_config(
     el_context,
     cl_contexts,
     l1_config_env_vars,
+    l1_chain_config_artifact,
     observability_helper,
 ):
     ports = _net.ports_to_port_specs(params.ports)
@@ -197,15 +200,16 @@ def get_service_config(
 
     # configure files
 
+    genesis_artifacts = [deployment_output]
+    if l1_chain_config_artifact:
+        genesis_artifacts.append(l1_chain_config_artifact)
+    if supervisor_params:
+        genesis_artifacts.append(supervisor_params.superchain.dependency_set.name)
+
     files = {
         _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: Directory(
-            artifact_names=[
-                deployment_output,
-                supervisor_params.superchain.dependency_set.name,
-            ]
-        )
-        if supervisor_params
-        else deployment_output,
+            artifact_names=genesis_artifacts
+        ),
         _ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
@@ -274,6 +278,13 @@ def get_service_config(
             ),
             "--sequencer.stopped=true",
         ]
+
+    if l1_chain_config_artifact:
+        cmd.append(
+            "--rollup.l1-chain-config={0}/l1-chain-config.json".format(
+                _ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+            )
+        )
 
     if len(cl_contexts) > 0:
         cmd.append(

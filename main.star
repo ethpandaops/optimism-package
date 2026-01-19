@@ -65,6 +65,7 @@ def run(plan, args={}):
 
     # Deploy the L1
     l1_network = ""
+    l1_chain_config_artifact = None
     if external_l1_args:
         plan.print("Using external L1")
         plan.print(external_l1_args)
@@ -100,6 +101,15 @@ def run(plan, args={}):
         )
         plan.print("Waiting for L1 to start up")
         wait_for_sync.wait_for_startup(plan, l1_config_env_vars)
+        # op-node v1.16.1+ requires a chain config file for local L1s.
+        l1_chain_config_artifact = plan.run_sh(
+            name="sanitize-l1-chain-config",
+            description="Prepare L1 chain config for op-node",
+            image=util.DEPLOYMENT_UTILS_IMAGE,
+            files={"/network-configs": "el_cl_genesis_data"},
+            store=[StoreSpec(src="/out", name="l1-chain-config")],
+            run="mkdir -p /out && jq '.config | del(.terminalTotalDifficultyPassed)' /network-configs/genesis.json > /out/l1-chain-config.json",
+        ).files_artifacts[0]
 
     deployment_output = contract_deployer.deploy_contracts(
         plan,
@@ -144,6 +154,7 @@ def run(plan, args={}):
                 jwt_file=jwt_file,
                 l1_config_env_vars=l1_config_env_vars,
                 deployment_output=deployment_output,
+                l1_chain_config_artifact=l1_chain_config_artifact,
                 node_selectors=global_node_selectors,
                 observability_helper=observability_helper,
                 l1_rpc_url=l1_rpc_url,
